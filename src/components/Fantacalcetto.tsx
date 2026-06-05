@@ -73,7 +73,7 @@ export default function Fantacalcetto({
     return [
       ...partiteAperte,
       ...partiteChiuse
-    ];
+    ].filter(m => !(m.dettagli || "").toLowerCase().includes("amichevole"));
   }, [partiteAperte, partiteChiuse]);
   const [nomePartecipante, setNomePartecipante] = useState("");
   const [nomeFantasquadra, setNomeFantasquadra] = useState("");
@@ -97,6 +97,7 @@ export default function Fantacalcetto({
   });
 
   const [showInstructionsModal, setShowInstructionsModal] = useState(false);
+  const [showSuggestionModal, setShowSuggestionModal] = useState(false);
   const [instructionsTab, setInstructionsTab] = useState<"guida" | "quotazioni">("guida");
 
   // Custom dialog state for trade summary and locking warning
@@ -1434,6 +1435,126 @@ export default function Fantacalcetto({
           </div>
         )}
 
+        {showSuggestionModal && (
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-fade-in font-sans overflow-y-auto">
+            <div className="bg-emerald-950 border-2 border-emerald-800 rounded-3xl max-w-lg w-full shadow-2xl relative my-8 overflow-hidden">
+              {/* Modal Top Bar */}
+              <div className="flex justify-between items-center bg-emerald-900/60 px-6 py-4 border-b border-emerald-800/40">
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5 text-yellow-300 animate-pulse" />
+                  <span className="text-sm font-black text-white uppercase tracking-wider">
+                    PROPONI UN MIGLIORAMENTO 💡
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowSuggestionModal(false)}
+                  className="p-1 rounded-lg hover:bg-emerald-800/50 text-emerald-300 hover:text-white transition-all cursor-pointer"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-6 space-y-4 text-left">
+                <p className="text-[11px] text-emerald-300 font-medium leading-relaxed">
+                  Hai un'idea per migliorare questa applicazione, implementare nuove statistiche o ottimizzare le regole del torneo? Invia il tuo suggerimento compilando i campi sottostanti.
+                </p>
+
+                {consiglioInviatoConSuccesso ? (
+                  <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs rounded-2xl p-5 text-center leading-relaxed">
+                    <p className="font-extrabold text-[13px] text-yellow-300 mb-1">✨ Inviato con Successo! ✨</p>
+                    Il tuo suggerimento è stato recapitato all'organizzatore del Fantacalcetto. Grazie per il tuo prezioso contributo!
+                    <button
+                      type="button"
+                      onClick={() => setConsiglioInviatoConSuccesso(false)}
+                      className="block mx-auto text-yellow-400 hover:text-yellow-350 font-black mt-3 text-[10.5px] uppercase tracking-wider cursor-pointer underline"
+                    >
+                      Invia un'altra idea →
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4 font-sans">
+                    {consiglioError && (
+                      <div className="bg-red-950/40 border border-red-900/50 text-red-300 text-[10.5px] rounded-xl p-3 font-semibold text-center leading-tight">
+                        ⚠️ {consiglioError}
+                      </div>
+                    )}
+                    <div className="space-y-1">
+                      <label className="block text-[9px] font-black uppercase tracking-wider text-emerald-400 leading-none">
+                        Tuo Nome / Fantallenatore
+                      </label>
+                      <input
+                        type="text"
+                        value={consiglioAutore}
+                        onChange={(e) => setConsiglioAutore(e.target.value)}
+                        placeholder="Es. Stefano L."
+                        className="w-full bg-emerald-900/45 border border-emerald-800 focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 rounded-xl px-3.5 py-2.5 outline-none text-xs text-white placeholder-emerald-700 font-extrabold"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[9px] font-black uppercase tracking-wider text-emerald-400 leading-none">
+                        Dettaglio del Miglioramento Proposto
+                      </label>
+                      <textarea
+                        value={consiglioTesto}
+                        rows={4}
+                        onChange={(e) => setConsiglioTesto(e.target.value)}
+                        placeholder="Cose da aggiungere? Es: Mi piacerebbe inserire grafici dei prezzi storici o voti divisi per data..."
+                        className="w-full bg-emerald-900/45 border border-emerald-800 focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 rounded-xl px-3.5 py-2.5 outline-none text-xs text-white placeholder-emerald-700 font-medium leading-relaxed"
+                      />
+                    </div>
+
+                    <div className="pt-2 flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowSuggestionModal(false)}
+                        className="flex-1 bg-emerald-900/30 hover:bg-emerald-900/40 border border-emerald-800 text-emerald-300 font-extrabold text-[10.5px] uppercase py-3 rounded-xl transition-all cursor-pointer"
+                      >
+                        Annulla
+                      </button>
+                      <button
+                        type="button"
+                        disabled={invioConsiglioInCorso}
+                        onClick={async () => {
+                          if (!consiglioAutore.trim() || !consiglioTesto.trim()) {
+                            setConsiglioError("Compila sia il tuo nome sia la proposta di miglioramento!");
+                            return;
+                          }
+                          setInvioConsiglioInCorso(true);
+                          setConsiglioError("");
+                          try {
+                            if (onCreaConsiglio) {
+                              await onCreaConsiglio(consiglioAutore, consiglioTesto);
+                            } else {
+                              const response = await fetch("/api/consigli/crea", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ autore: consiglioAutore, testo: consiglioTesto })
+                              });
+                              if (!response.ok) throw new Error("Errore nel salvataggio remoto");
+                            }
+                            setConsiglioAutore("");
+                            setConsiglioTesto("");
+                            setConsiglioInviatoConSuccesso(true);
+                          } catch (err: any) {
+                            setConsiglioError("Impossibile inviare la proposta: " + err.message);
+                          } finally {
+                            setInvioConsiglioInCorso(false);
+                          }
+                        }}
+                        className="flex-1 bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 disabled:bg-emerald-900 text-emerald-950 font-black text-[10.5px] uppercase py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      >
+                        {invioConsiglioInCorso ? "Invio in corso..." : "Invia Proposta 🚀"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {showInstructionsModal && (
           <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-fade-in font-sans overflow-y-auto">
             <div className="bg-emerald-950 border-2 border-emerald-800 rounded-3xl max-w-lg w-full shadow-2xl relative my-8 overflow-hidden">
@@ -1683,17 +1804,29 @@ export default function Fantacalcetto({
             <p className="text-xs sm:text-sm text-emerald-300 max-w-lg mx-auto font-medium leading-relaxed font-sans">
               Dedicato ai tornei del lunedì! Guarda i punteggi in tempo reale ed iscrivi la tua squadra.
             </p>
-            <div className="flex justify-center pt-2">
+            <div className="flex flex-wrap justify-center gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => {
                   setInstructionsTab("guida");
                   setShowInstructionsModal(true);
                 }}
-                className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-emerald-950 px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-md hover:scale-[1.03] duration-150"
+                className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-emerald-950 px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-md hover:scale-[1.03] duration-150"
               >
                 <BookOpen className="h-3.5 w-3.5" />
                 Regolamento & Istruzioni Gioco 📖
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setConsiglioInviatoConSuccesso(false);
+                  setConsiglioError("");
+                  setShowSuggestionModal(true);
+                }}
+                className="inline-flex items-center gap-2 bg-emerald-900/60 hover:bg-emerald-850 border border-emerald-705 text-yellow-300 hover:text-yellow-250 px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-md hover:scale-[1.03] duration-150"
+              >
+                <Lightbulb className="h-3.5 w-3.5 text-yellow-400 animate-pulse" />
+                Proponi Miglioramento 💡
               </button>
             </div>
           </div>
@@ -2165,7 +2298,7 @@ export default function Fantacalcetto({
 
                 {allPartite.length === 0 ? (
                   <div className="py-12 text-center bg-emerald-900/20 rounded-2xl border border-emerald-800/30">
-                    <p className="text-emerald-400/80 font-bold text-xs uppercase tracking-wider">Nessuna gara di campionato o amichevole registrata nel tabellone.</p>
+                    <p className="text-emerald-400/80 font-bold text-xs uppercase tracking-wider">Nessuna gara di campionato registrata nel tabellone.</p>
                   </div>
                 ) : (
                   <div className="space-y-3.5 font-sans pt-1">
