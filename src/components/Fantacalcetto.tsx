@@ -1292,61 +1292,6 @@ export default function Fantacalcetto({
 
     return (
       <div className="min-h-screen bg-gradient-to-b from-emerald-950 to-emerald-990 text-white p-4 sm:p-6 lg:p-8 flex flex-col justify-between font-sans relative">
-        {(!isGoogleSheetsSynced && isAdminMode) ? (
-          <div className="max-w-md w-full mx-auto my-auto bg-emerald-950 border-2 border-red-900/60 rounded-3xl p-8 text-center space-y-6 shadow-2xl backdrop-blur-md animate-fadeIn">
-            <div className="relative">
-              <div className="absolute inset-0 bg-red-500/10 rounded-full blur-2xl animate-pulse"></div>
-              <div className="bg-red-950/40 border border-red-900/50 p-5 rounded-full inline-block relative border-dashed">
-                <Lock className="h-12 w-12 text-red-500 animate-pulse" />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <span className="bg-red-500/15 border border-red-900 text-red-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
-                ⚠️ Connessione Drive Richiesta
-              </span>
-              <h3 className="font-extrabold text-lg text-white uppercase tracking-tight font-sans">
-                Google Drive Non Collegato
-              </h3>
-              <p className="text-[11px] text-emerald-300 font-semibold leading-relaxed font-sans px-2">
-                Il portale del Fantacalcetto richiede un accoppiamento continuo a Google Drive. Se il portale principale non è connesso, non è consentito effettuare modifiche, visualizzare formazioni o consultare le sezioni.
-              </p>
-            </div>
-
-            <div className="bg-emerald-900/20 border border-emerald-900 rounded-2xl p-4 text-left space-y-3">
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-emerald-400 font-bold">Stato Portale Principale:</span>
-                <span className="text-red-400 bg-red-950/20 px-2 py-0.5 rounded border border-red-900/30 font-extrabold uppercase text-[9px]">
-                  Disconnesso ❌
-                </span>
-              </div>
-              <div className="flex justify-between items-center text-xs border-t border-emerald-900/40 pt-2 border-dashed">
-                <span className="text-emerald-400 font-bold">Integrazione Cloud Drive:</span>
-                <span className="text-amber-400 bg-amber-950/20 px-2 py-0.5 rounded border border-amber-900/30 font-extrabold uppercase text-[9px]">
-                  Sospesa 🔒
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <button
-                type="button"
-                onClick={async () => {
-                  if (onRefreshData) {
-                    await onRefreshData();
-                  }
-                }}
-                className="w-full bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 font-black text-xs uppercase text-emerald-950 py-3 rounded-xl shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 font-sans"
-              >
-                🔄 Aggiorna & Verifica Connessione
-              </button>
-              <p className="text-[8.5px] text-emerald-500 font-bold leading-normal">
-                Nota: il portale si sbloccherà automaticamente non appena il portale principale dell'Amministratore verrà connesso a Google Sheets.
-              </p>
-            </div>
-          </div>
-        ) : (
-          <>
             {showReRegistrationPopup && (
               <div className="fixed inset-0 bg-black/85 backdrop-blur-xs flex items-center justify-center p-4 z-[9995] animate-fade-in font-sans">
                 <div className="bg-emerald-950 border-2 border-red-500/50 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-left">
@@ -3190,9 +3135,6 @@ export default function Fantacalcetto({
           </form>
           )}
         </div>
-        
-          </>
-        )}
         
         {/* Custom Transfer Confirmation Modal */}
         {showConfirmModal && proposedTransfer && (

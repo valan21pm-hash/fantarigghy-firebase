@@ -544,54 +544,7 @@ export default function App() {
           </div>
         )}
 
-        {/* Google Sync Error Educational Banner */}
-        {user && data && !data.isGoogleSheetsSynced && !dismissedSyncErrorBanner && (
-          <div className="bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl p-5 shadow-sm space-y-4 relative">
-            <button 
-              onClick={() => {
-                setDismissedSyncErrorBanner(true);
-                localStorage.setItem("dismissedSyncErrorBanner", "true");
-              }}
-              className="absolute top-4 right-4 text-amber-500 hover:text-amber-700 hover:bg-amber-100 p-1.5 rounded-full transition-colors cursor-pointer"
-              title="Nascondi questo errore permanentemente"
-            >
-              <X className="w-4 h-4" />
-            </button>
-            <div className="flex items-start gap-3">
-              <span className="text-2xl mt-0.5 shrink-0">⚠️</span>
-              <div className="flex-1">
-                <h3 className="font-extrabold text-sm text-amber-950 uppercase tracking-wide">
-                  Errore di sincronizzazione con Google Sheets
-                </h3>
-                <p className="text-xs text-amber-850 mt-1 leading-relaxed">
-                  L'utente <strong className="font-bold text-amber-950">{user.email}</strong> è connesso correttamente,
-                  ma non è stato possibile leggere o scrivere sul file Google Sheets. L'applicazione sta funzionando in 
-                  <strong className="font-bold text-amber-950"> modalità offline temporanea (salvataggio locale sul server)</strong>.
-                </p>
-                {data.syncError && (
-                  <div className="mt-3 text-xs bg-white/70 rounded-lg p-3 font-mono border border-amber-150 text-amber-900 break-all">
-                    <strong className="font-bold">Dettaglio errore tecnico:</strong> {data.syncError}
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <div className="text-xs border-t border-amber-200/60 pt-4 text-amber-950">
-              <p className="font-extrabold mb-1 bg-amber-150 px-2 py-0.5 rounded inline-block">Come risolvere questo problema in 3 passi?</p>
-              <ol className="list-decimal pl-5 space-y-2 text-amber-900 mt-2 font-medium leading-relaxed">
-                <li>
-                  <strong>Abilita i permessi di scrittura nel file Excel/Sheets:</strong> Il proprietario del foglio Google Sheets deve fare click sul pulsante <strong className="font-bold">"Condividi"</strong> in alto a destra nel file e aggiungere il tuo indirizzo email (<strong className="font-mono bg-white/80 px-1 py-0.5 rounded border border-amber-200 text-slate-900 font-bold">{user.email}</strong>) impostandoti esplicitamente come <strong className="font-bold text-slate-900">Editor</strong>.
-                </li>
-                <li>
-                  <strong>Abilita i permessi durante il login di Google:</strong> Quando clicchi su "Login", Google mostra una schermata di consenso. <strong className="font-bold text-red-700 underline">Devi assolutamente spuntare manualmente la casella</strong> che autorizza l'applicazione a "Visualizzare, modificare, creare e eliminare tutti i tuoi fogli di lavoro di Google Sheets" prima di fare clic su "Continua".
-                </li>
-                <li>
-                  <strong>Riprova:</strong> Clicca sul pulsante <strong className="font-bold">"Esci"</strong> in alto a destra nella Navbar per disconnetterti, quindi clicca nuovamente su <strong className="font-bold">"Login"</strong> seguendo scrupolosamente i punti sopra.
-                </li>
-              </ol>
-            </div>
-          </div>
-        )}
+        {/* Google Sync Error Educational Banner -> Removed since data is now 24/7 on Firestore */}
 
         {/* Quick Podiums */}
         <StatsDashboard giocatori={giocatori} partiteChiuse={partiteChiuse} />

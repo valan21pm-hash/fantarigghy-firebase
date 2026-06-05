@@ -8,6 +8,8 @@ import fs from "fs/promises";
 import path from "path";
 import { GoogleAuth } from "google-auth-library";
 import { DatabaseSchema, Giocatore, Partita, RefertoGiocatore, Fantasquadra, Consiglio, getPlayerPriceForRoster, MAX_BUDGET } from "./src/types";
+import { dbServer, doc, getDoc, setDoc } from "./src/lib/firestore-server";
+import { fetchFromFirestore, saveToFirestore } from "./src/lib/syncFirestore";
 
 // Setup DB path
 const DB_PATH = path.join(process.cwd(), "src", "db.json");
@@ -754,6 +756,9 @@ async function getDb(token?: string, bypassCache: boolean = false): Promise<Data
     return memoryCache;
   }
 
+  // 1. PRIMARY: Fetch from Firestore (24/7 availability)
+  let firestoreDb = await fetchFromFirestore();
+
   let localDb: DatabaseSchema;
   try {
     const raw = await safeReadDb();
@@ -763,6 +768,25 @@ async function getDb(token?: string, bypassCache: boolean = false): Promise<Data
   }
   if (!localDb.fantasquadre) localDb.fantasquadre = [];
   if (!localDb.consigli) localDb.consigli = [];
+
+  // Integrate Firestore data into localDb as the baseline source of truth
+  if (firestoreDb) {
+    if (firestoreDb.giocatori.length > 0) localDb.giocatori = firestoreDb.giocatori;
+    if (firestoreDb.partite.length > 0) localDb.partite = firestoreDb.partite;
+    if (firestoreDb.campi.length > 0) localDb.campi = firestoreDb.campi;
+    if (firestoreDb.logs && firestoreDb.logs.length > 0) localDb.logs = firestoreDb.logs;
+    
+    // For arrays, merge to prevent data loss
+    const fantaMap = new Map<string, Fantasquadra>();
+    for (const fs of localDb.fantasquadre) fantaMap.set(fs.id || fs.nomeFantasquadra, fs);
+    for (const fs of firestoreDb.fantasquadre || []) fantaMap.set(fs.id || fs.nomeFantasquadra, Object.assign({}, fantaMap.get(fs.id || fs.nomeFantasquadra), fs));
+    localDb.fantasquadre = Array.from(fantaMap.values());
+
+    const consigliMap = new Map<string, Consiglio>();
+    for (const c of localDb.consigli) consigliMap.set(c.id, c);
+    for (const c of firestoreDb.consigli || []) consigliMap.set(c.id, Object.assign({}, consigliMap.get(c.id), c));
+    localDb.consigli = Array.from(consigliMap.values());
+  }
 
   let activeToken = token;
   if (!activeToken || activeToken.startsWith("local-admin-")) {
@@ -934,6 +958,9 @@ async function saveDb(db: DatabaseSchema, token?: string): Promise<void> {
 
   // 2. Persist instantly to container file so we never lose database changes on restarts
   await safeWriteDb(JSON.stringify(db, null, 2));
+
+  // 3. Persist instantly to Firestore (24/7 availability)
+  saveToFirestore(db).catch(err => console.error("Firestore async save error:", err));
 
   let activeToken = token;
   if (!activeToken || activeToken.startsWith("local-admin-")) {
