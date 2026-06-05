@@ -1926,7 +1926,7 @@ async function startServer() {
         if (r.pagaQuota === true) paganti++;
       }
       
-      const totaleEuro = parseFloat(costoFinale) || 0;
+      const totaleEuro = typeof costoFinale === "string" ? parseFloat(costoFinale) : Number(costoFinale || 0);
       let baseQuota = 0;
       let remainderCents = 0;
       
@@ -2004,7 +2004,7 @@ async function startServer() {
         if (r.pagaQuota === true) paganti++;
       }
       
-      const totaleEuro = parseFloat(costoFinale) || 0;
+      const totaleEuro = typeof costoFinale === "string" ? parseFloat(costoFinale) : Number(costoFinale || 0);
       let baseQuota = 0;
       let remainderCents = 0;
       
@@ -2072,7 +2072,7 @@ async function startServer() {
       rigaPartita.stato = "Chiusa";
       rigaPartita.risultato = risultato;
       rigaPartita.referto = referto;
-      rigaPartita.costo = parseFloat(costoFinale) || 0;
+      rigaPartita.costo = typeof costoFinale === "string" ? parseFloat(costoFinale) : Number(costoFinale || 0);
       rigaPartita.note = note || "";
       rigaPartita.inviatoFanta = false;
 
@@ -2091,7 +2091,7 @@ async function startServer() {
         if (presenti.includes(r.nome) && r.pagaQuota === true) paganti++;
       }
       
-      const totaleEuro = parseFloat(costoFinale) || 0;
+      const totaleEuro = typeof costoFinale === "string" ? parseFloat(costoFinale) : Number(costoFinale || 0);
       let baseQuota = 0;
       let remainderCents = 0;
       

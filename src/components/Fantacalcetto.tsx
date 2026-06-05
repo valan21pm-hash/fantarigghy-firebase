@@ -28,7 +28,7 @@ import {
   Info,
   X
 } from "lucide-react";
-import { Giocatore, Fantasquadra, Partita, CustomBonusDef, getPlayerBonusKey, getPlayerBonusPointsForMatch, getPlayerBonusBreakdownForMatch, DEFAULT_BONUSES, getPlayerPriceForRoster, getPlayerCurrentPrice, getPlayerBasePrice, MAX_BUDGET, getLastName } from "../types";
+import { Giocatore, Fantasquadra, Partita, CustomBonusDef, getPlayerBonusKey, getPlayerBonusPointsForMatch, getPlayerBonusBreakdownForMatch, DEFAULT_BONUSES, getPlayerPriceForRoster, getPlayerCurrentPrice, getPlayerBasePrice, MAX_BUDGET, getLastName, PLAYER_CUSTOM_BONUSES, GENERIC_BONUSES } from "../types";
 
 import { generateMatchPdf, generateGeneralReportPdf } from "../lib/pdfHelper";
 import BonusManager from "./BonusManager";
@@ -927,17 +927,10 @@ export default function Fantacalcetto({
                   let foundBonus = null;
 
                   // Cerca nei bonus personali del giocatore
-                  if (bonusKey && PLAYER_CUSTOM_BONUSES[bonusKey]) {
-                    foundBonus = PLAYER_CUSTOM_BONUSES[bonusKey].find(b => b.id === bId);
-                  }
-
-                  // Se non trovato, cerca nei bonus generici globali
-                  if (!foundBonus) {
-                    foundBonus = GENERIC_BONUSES.find(b => b.id === bId);
-                  }
+                  foundBonus = bonuses.find(b => b.id === bId);
 
                   if (foundBonus) {
-                    const ptsValue = typeof foundBonus.punti === "function" ? foundBonus.punti(rGol, rAssist) : foundBonus.punti;
+                    let ptsValue = foundBonus.punti || 0; if (foundBonus.moltiplicatoreGol) ptsValue += foundBonus.moltiplicatoreGol * rGol; if (foundBonus.moltiplicatoreAssist) ptsValue += foundBonus.moltiplicatoreAssist * rAssist;
                     activeBonusDetails.push({
                       bName: foundBonus.nome,
                       bDesc: foundBonus.descrizione,
@@ -2517,7 +2510,7 @@ export default function Fantacalcetto({
               })()}
             </div>
           ) : activePublicTab === "bonus" ? (
-             <BonusManager bonuses={bonuses} giocatori={giocatori} isEditor={isEditor} onUpdateBonuses={onUpdateBonuses} />
+             <BonusManager bonuses={bonuses} giocatori={giocatori} isEditor={false} />
           ) : (
             <form onSubmit={handleRegisterSubmit} className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-12 gap-6 font-sans">
             

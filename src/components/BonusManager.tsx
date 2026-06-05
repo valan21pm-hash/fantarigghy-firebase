@@ -15,6 +15,11 @@ export default function BonusManager({ bonuses, giocatori, isEditor, onUpdateBon
   const [isSaving, setIsSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 
+  // Sync state if the bonuses prop changes from the server
+  React.useEffect(() => {
+    setLocalBonuses(bonuses);
+  }, [bonuses]);
+
   const handleAdd = () => {
     const newBonus: CustomBonusDef = {
       id: `bonus_${Date.now()}`,
