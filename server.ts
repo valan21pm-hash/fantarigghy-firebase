@@ -784,6 +784,8 @@ async function getDb(token?: string, bypassCache: boolean = false): Promise<Data
     for (const c of localDb.consigli) consigliMap.set(c.id, c);
     for (const c of firestoreDb.consigli || []) consigliMap.set(c.id, Object.assign({}, consigliMap.get(c.id), c));
     localDb.consigli = Array.from(consigliMap.values());
+  } else {
+    console.log("[Firestore] Firestore vuoto, inizializzazione da Sheets...");
   }
 
   let activeToken = token;
@@ -1045,7 +1047,35 @@ async function startServer() {
     }
   });
 
+  // Migrazione temporanea da Sheets a Firestore
+  app.post("/api/migrate-sheets-to-firestore", async (req, res) => {
+    try {
+      const token = getAuthToken(req);
+      if (!token) return res.status(401).json({ err: "Token mancante" });
+      
+      const spreadsheetId = await getOrUpdateSpreadsheetId(token);
+      console.log("[Migration] Inizio migrazione da Sheets a Firestore...");
+      
+      const sheetsDb = await fetchFromSheets(token, spreadsheetId);
+      sheetsDb.fantasquadre = await fetchFantasquadreFromSheets(token, spreadsheetId);
+      sheetsDb.consigli = await fetchConsigliFromSheets(token, spreadsheetId);
+      
+      await saveToFirestore(sheetsDb);
+      
+      // Update local cache too
+      await safeWriteDb(JSON.stringify(sheetsDb, null, 2));
+      memoryCache = sheetsDb;
+      
+      console.log("[Migration] Migrazione completata con successo!");
+      res.json({ success: true, message: "Migrazione completata" });
+    } catch (err: any) {
+      console.error("[Migration] Errore migrazione:", err);
+      res.status(500).json({ err: err.message });
+    }
+  });
+
   // Endpoints per Fantacalcetto
+
   // Iscrizione di una nuova fantasquadra (Public/One-way API)
   app.post("/api/fantasquadre/iscrivi", async (req, res) => {
     try {
