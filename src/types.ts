@@ -173,6 +173,7 @@ export interface DatabaseSchema {
     operazione: string;
     importo: string;
     dettagli: string;
+    utente: string;
   }[];
   fantasquadre?: Fantasquadra[];
   consigli?: Consiglio[];

@@ -206,6 +206,18 @@ function parseLogs(values: any[][]): any[] {
   }).filter(l => l.data !== "");
 }
 
+// Utility to manage logs
+function addLog(db: DatabaseSchema, operazione: string, dettagli: string, utente: string, importo: string = "") {
+  if (!db.logs) db.logs = [];
+  db.logs.unshift({
+    data: new Date().toISOString(),
+    operazione,
+    dettagli,
+    utente,
+    importo
+  });
+}
+
 // NOTE: Function removed. Please use the new getOrUpdateSpreadsheetId() which uses Application Default Credentials.
 
 async function ensureFantasquadreSheetExists(token: string, spreadsheetId: string): Promise<void> {
@@ -1060,6 +1072,12 @@ async function startServer() {
       sheetsDb.fantasquadre = await fetchFantasquadreFromSheets(token, spreadsheetId);
       sheetsDb.consigli = await fetchConsigliFromSheets(token, spreadsheetId);
       
+      console.log("[Migration] Dati letti da Sheets:", {
+        giocatori: sheetsDb.giocatori?.length,
+        fantasquadre: sheetsDb.fantasquadre?.length,
+        partite: sheetsDb.partite?.length
+      });
+
       await saveToFirestore(sheetsDb);
       
       // Update local cache too
@@ -1067,7 +1085,11 @@ async function startServer() {
       memoryCache = sheetsDb;
       
       console.log("[Migration] Migrazione completata con successo!");
-      res.json({ success: true, message: "Migrazione completata" });
+      res.json({ success: true, message: "Migrazione completata", stats: {
+        giocatori: sheetsDb.giocatori?.length,
+        fantasquadre: sheetsDb.fantasquadre?.length,
+        partite: sheetsDb.partite?.length
+      }});
     } catch (err: any) {
       console.error("[Migration] Errore migrazione:", err);
       res.status(500).json({ err: err.message });

@@ -198,6 +198,7 @@ export default function App() {
 
   // API Call Wrapper mapping to express endpoints
   const executePostAction = async (endpoint: string, payload: Record<string, any>) => {
+    payload.utente = user?.email || "anonimo";
     setLoading(true);
     try {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
