@@ -40,7 +40,7 @@ export default function Navbar({
           </div>
           <div>
             <h1 className="text-base sm:text-lg font-bold tracking-tight text-white">
-              ASD Amici del Calcetto
+              Easy Rigging
             </h1>
             <p className="text-xs text-slate-400 hidden sm:block">
               Gestione Campionato, Quote & Statistiche

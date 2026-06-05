@@ -472,7 +472,7 @@ export default function App() {
           </div>
 
           <p className="text-[9.5px] text-slate-500 font-semibold mt-4">
-            ASD Amici del Calcetto © {new Date().getFullYear()} • Modulo protetto da Firebase Authentication
+            Easy Rigging © {new Date().getFullYear()} • Modulo protetto da Firebase Authentication
           </p>
         </div>
       </div>

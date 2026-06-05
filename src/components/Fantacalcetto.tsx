@@ -3008,7 +3008,7 @@ export default function Fantacalcetto({
 
         {/* Foot footer info */}
         <div className="text-center text-[10px] text-emerald-600 font-bold select-none pt-6 shrink-0">
-          ASD Amici del Calcetto © {new Date().getFullYear()} • Portale protetto e criptato
+          Easy Rigging © {new Date().getFullYear()} • Portale protetto e criptato
         </div>
       </div>
     );
