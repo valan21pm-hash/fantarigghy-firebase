@@ -69,6 +69,12 @@ export default function Fantacalcetto({
 }: FantacalcettoProps) {
   // Public Portal state loaders
   const [activePublicTab, setActivePublicTab] = useState<"classifica" | "partite" | "iscrizione" | "convocazioni">("classifica");
+  const allPartite = React.useMemo(() => {
+    return [
+      ...partiteAperte,
+      ...partiteChiuse
+    ];
+  }, [partiteAperte, partiteChiuse]);
   const [nomePartecipante, setNomePartecipante] = useState("");
   const [nomeFantasquadra, setNomeFantasquadra] = useState("");
   const [pin, setPin] = useState("");
@@ -2115,62 +2121,103 @@ export default function Fantacalcetto({
             </div>
           ) : activePublicTab === "partite" ? (
             <div className="space-y-6 animate-fade-in font-sans">
-              <div className="bg-emerald-950/80 border border-emerald-800 rounded-3xl p-5 shadow-xl backdrop-blur-md space-y-4 font-sans">
-                <div className="border-b border-emerald-900 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 font-sans">
-                  <div>
-                    <h3 className="font-extrabold text-xs text-white uppercase tracking-wider font-sans">Tabellone Partite e Referti</h3>
-                    <p className="text-[9px] text-emerald-400 font-semibold uppercase tracking-wider font-sans">Consulta i match storici e scarica il libretto ufficiale con tutti i voti dei giocatori.</p>
+              {/* Highlight Banner / Link to General Report */}
+              <div className="bg-gradient-to-r from-emerald-950/90 to-emerald-900/60 border border-emerald-800/80 rounded-3xl p-5 shadow-xl backdrop-blur-md space-y-4 font-sans">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-emerald-900/60 pb-4">
+                  <div className="space-y-1">
+                    <span className="text-[9px] uppercase font-black text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-md border border-yellow-400/10 tracking-wider">
+                      Archivio Ufficiale
+                    </span>
+                    <h3 className="font-extrabold text-base text-white uppercase tracking-wider font-sans">Tabellone Partite & Referti</h3>
+                    <p className="text-[10.5px] text-emerald-300 font-medium">
+                      Consulta i risultati omologati dei match e scarica il libretto dei voti.
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2 select-none">
-                    {rankedTeams.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => generateGeneralReportPdf(rankedTeams, partiteChiuse || [], getTeamMatchBreakdownList)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1 cursor-pointer transition-transform hover:-translate-y-0.5"
-                        title="Scarica referto con tutti i voti assegnati in tutte le partite"
-                      >
-                        <span>📄 Scarica Referto Generale</span>
-                      </button>
-                    )}
-                  </div>
+                  {rankedTeams.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => generateGeneralReportPdf(rankedTeams, partiteChiuse || [], getTeamMatchBreakdownList)}
+                      className="bg-yellow-400 hover:bg-yellow-500 text-emerald-950 text-[10px] font-black uppercase px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-1.5 cursor-pointer transition-all hover:scale-105 active:scale-95 duration-200"
+                    >
+                      <span>📄 Scarica Referto Generale PDF</span>
+                    </button>
+                  )}
                 </div>
 
-                {partite.length === 0 ? (
-                  <div className="py-8 text-center bg-emerald-900/40 rounded-2xl border border-emerald-800/50">
-                    <p className="text-emerald-300 font-extrabold text-sm uppercase">Nessuna partita in bacheca.</p>
+                {/* Banner box directing to the general report */}
+                <div className="bg-emerald-950/50 border border-emerald-800/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="text-left space-y-1">
+                    <h4 className="text-xs font-bold text-emerald-250 uppercase tracking-wide">Fascicolo Completo Voti</h4>
+                    <p className="text-[10.5px] text-emerald-400/90 leading-normal">
+                      Il referto generale unisce la classifica ponderata, la composizione delle rose e i dettagli di calcolo di tutte le giornate disputate finora.
+                    </p>
+                  </div>
+                  {rankedTeams.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => generateGeneralReportPdf(rankedTeams, partiteChiuse || [], getTeamMatchBreakdownList)}
+                      className="text-yellow-400 hover:text-yellow-300 font-black text-[10.5px] uppercase underline underline-offset-4 shrink-0 transition-opacity hover:opacity-90 block"
+                    >
+                      Vedi Referto Generale →
+                    </button>
+                  )}
+                </div>
+
+                {allPartite.length === 0 ? (
+                  <div className="py-12 text-center bg-emerald-900/20 rounded-2xl border border-emerald-800/30">
+                    <p className="text-emerald-400/80 font-bold text-xs uppercase tracking-wider">Nessuna gara di campionato o amichevole registrata nel tabellone.</p>
                   </div>
                 ) : (
-                  <div className="space-y-3 font-sans">
-                    {partite.map(m => (
-                      <div key={m.id} className="bg-emerald-900/40 rounded-2xl border border-emerald-800/50 p-4 transition-all hover:bg-emerald-900/60 shadow-md">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <h4 className="font-extrabold text-white text-base tracking-wide flex items-center gap-2">
-                              {m.dettagli || "Partita"}
-                            </h4>
-                            <span className="text-[10px] text-emerald-400/80 font-mono italic mt-1 block">Ref: {m.id}</span>
+                  <div className="space-y-3.5 font-sans pt-1">
+                    {allPartite.map((m) => {
+                      const isAperta = m.stato === "Aperta";
+                      return (
+                        <div key={m.id} className="bg-emerald-900/20 rounded-2xl border border-emerald-800/40 p-4.5 transition-all hover:bg-emerald-900/30 hover:border-emerald-700/50 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="space-y-1.5 text-left md:max-w-2xl">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${isAperta ? "bg-yellow-400/10 text-yellow-400 border-yellow-400/25 animate-pulse" : "bg-gray-800/45 text-gray-400 border-gray-700/50"}`}>
+                                {isAperta ? "● In Corso / Aperta" : "✓ Conclusa"}
+                              </span>
+                              {m.dataInserimento && (
+                                <span className="text-[10px] text-emerald-400/70 font-mono">
+                                  {new Date(m.dataInserimento).toLocaleDateString("it-IT", { day: 'numeric', month: 'short' })}
+                                </span>
+                              )}
+                            </div>
+
+                            <p className="font-extrabold text-white text-[13.5px] sm:text-sm tracking-wide leading-snug">
+                              {m.dettagli || "Incontro di campionato"}
+                            </p>
+
+                            {m.risultato ? (
+                              <div className="inline-flex items-center gap-2 bg-emerald-950/75 border border-emerald-900/60 rounded-lg px-2.5 py-1 mt-1 shadow-sm">
+                                <span className="text-[9.5px] text-emerald-400 uppercase tracking-widest font-black">Risultato:</span>
+                                <span className="font-mono text-xs text-yellow-300 font-extrabold tracking-widest">{m.risultato}</span>
+                              </div>
+                            ) : (
+                              <p className="text-[10px] text-emerald-500/70 italic">Risultato ufficiale non ancora pubblicato.</p>
+                            )}
                           </div>
-                          <div>
-                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase flex items-center gap-1.5 ${m.stato === 'Aperta' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' : 'bg-gray-800/50 text-gray-400 border border-gray-700/50'}`}>
-                              {m.stato === 'Aperta' ? <><span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse"></span> Aperta</> : 'Conclusa'}
-                            </span>
+
+                          <div className="flex items-center gap-3 self-start md:self-center shrink-0">
+                            {(m.referto && m.referto.length > 0) ? (
+                              <div className="text-right hidden sm:block">
+                                <p className="text-[10.5px] text-emerald-300 font-bold">
+                                  ✓ {m.referto.length} Voti Presenti
+                                </p>
+                                <p className="text-[8.5px] text-emerald-500/80 uppercase tracking-wider font-semibold">
+                                  Dati refertati
+                                </p>
+                              </div>
+                            ) : (
+                              <p className="text-[10px] text-emerald-500/60 italic hidden sm:block">
+                                Nessun voto caricato.
+                              </p>
+                            )}
                           </div>
                         </div>
-
-                        {m.risultato && (
-                          <div className="rounded-xl px-3 py-2 bg-emerald-950/60 border border-emerald-900/40 mb-3 shadow-inner">
-                            <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block mb-1">Risultato Omologato</span>
-                            <span className="font-mono text-lg text-emerald-200 font-black">{m.risultato}</span>
-                          </div>
-                        )}
-                        
-                        {(m.referto && m.referto.length > 0) ? (
-                          <p className="text-[11px] text-emerald-300 flex items-center gap-1"><span className="text-emerald-500">✓</span> {m.referto.length} giocatori con voto referti presenti.</p>
-                        ) : (
-                          <p className="text-[11px] text-emerald-500/60 italic">Nessun referto giocatori compilato per questo match.</p>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

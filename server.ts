@@ -38,12 +38,18 @@ async function getAuthClient() {
 }
 
 // Update functions to use getAuthClient inside to get an access token
-async function getOrUpdateSpreadsheetId(): Promise<string> {
-  const client = await getAuthClient();
-  const tokenResponse = await client.getAccessToken();
-  const token = tokenResponse.token!;
+async function getOrUpdateSpreadsheetId(token?: string): Promise<string> {
+  let activeToken = token;
+  if (!activeToken) {
+    activeToken = await getStoredGoogleToken();
+  }
+  if (!activeToken) {
+    const client = await getAuthClient();
+    const tokenResponse = await client.getAccessToken();
+    activeToken = tokenResponse.token!;
+  }
   
-  const cached = spreadsheetIdCache.get(token);
+  const cached = spreadsheetIdCache.get(activeToken);
   if (cached) return cached;
 
   const targetSpreadsheetId = "1Bt6RZkR0Qmn6_8TBl4xBqLtc7qxk_NMR2uehVQe1V2o";
@@ -53,12 +59,12 @@ async function getOrUpdateSpreadsheetId(): Promise<string> {
     console.log(`[Google Sheets] Controllo diretto accesso al foglio ${targetSpreadsheetId}...`);
     const checkUrl = `https://sheets.googleapis.com/v4/spreadsheets/${targetSpreadsheetId}`;
     const checkRes = await fetch(checkUrl, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${activeToken}` }
     });
 
     if (checkRes.ok) {
       console.log(`[Google Sheets] Foglio esistente '${targetSpreadsheetId}' accessibile con successo!`);
-      spreadsheetIdCache.set(token, targetSpreadsheetId);
+      spreadsheetIdCache.set(activeToken, targetSpreadsheetId);
       return targetSpreadsheetId;
     } 
     
@@ -402,7 +408,7 @@ async function fetchFromSheets(token: string, spreadsheetId: string): Promise<Da
 }
 
 async function saveToSheets(token: string, db: DatabaseSchema): Promise<void> {
-  const spreadsheetId = await getOrUpdateSpreadsheetId();
+  const spreadsheetId = await getOrUpdateSpreadsheetId(token);
   await saveToSheetsInternal(token, spreadsheetId, db);
 }
 
@@ -766,7 +772,7 @@ async function getDb(token?: string, bypassCache: boolean = false): Promise<Data
   // Reload from sheets only if we have active auth token and NO writes are currently pending / running
   if (activeToken && !activeToken.startsWith("local-admin-") && !pendingSyncTask && !sheetsSyncInProgress) {
     try {
-      const spreadsheetId = await getOrUpdateSpreadsheetId();
+      const spreadsheetId = await getOrUpdateSpreadsheetId(activeToken);
       let sheetsDb = await fetchFromSheets(activeToken, spreadsheetId);
       
       let fetchedFantasquadre: Fantasquadra[] = [];

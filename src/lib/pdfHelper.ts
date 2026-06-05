@@ -134,7 +134,13 @@ export const generateGeneralReportPdf = (
     body: leaderboardTable,
     theme: "striped",
     headStyles: { fillColor: [4, 120, 87] },
-    styles: { fontSize: 9.5 }
+    styles: { fontSize: 9, cellPadding: 2.5, overflow: 'linebreak' },
+    columnStyles: {
+      0: { cellWidth: 15, halign: 'center' },
+      1: { cellWidth: 70, overflow: 'linebreak' },
+      2: { cellWidth: 65, overflow: 'linebreak' },
+      3: { cellWidth: 'auto', halign: 'right' }
+    }
   });
   
   currentY = (doc as any).lastAutoTable?.finalY || currentY;
@@ -168,12 +174,12 @@ export const generateGeneralReportPdf = (
     body: squadsData,
     theme: "grid",
     headStyles: { fillColor: [15, 23, 42] },
-    styles: { fontSize: 8.5, overflow: 'linebreak' },
+    styles: { fontSize: 8, cellPadding: 2.5, overflow: 'linebreak' },
     columnStyles: {
-      0: { cellWidth: 40 },
-      1: { cellWidth: 40 },
-      2: { cellWidth: 'auto' },
-      3: { cellWidth: 30 }
+      0: { cellWidth: 45, overflow: 'linebreak' },
+      1: { cellWidth: 40, overflow: 'linebreak' },
+      2: { cellWidth: 'auto', overflow: 'linebreak' },
+      3: { cellWidth: 28, halign: 'center' }
     }
   });
   
@@ -244,11 +250,11 @@ export const generateGeneralReportPdf = (
         body: matchSquadRows,
         theme: "grid",
         headStyles: { fillColor: [51, 65, 85] },
-        styles: { fontSize: 8, cellPadding: 3, overflow: 'linebreak' },
+        styles: { fontSize: 7.5, cellPadding: 2.5, overflow: 'linebreak' },
         columnStyles: {
-          0: { cellWidth: 40 },
-          1: { cellWidth: 35 },
-          2: { cellWidth: 'auto' }
+          0: { cellWidth: 45, overflow: 'linebreak' },
+          1: { cellWidth: 30, halign: 'center' },
+          2: { cellWidth: 'auto', overflow: 'linebreak' }
         }
       });
       
@@ -303,12 +309,12 @@ export const generateGeneralReportPdf = (
         body: realPlayersRows,
         theme: "striped",
         headStyles: { fillColor: [100, 116, 139] },
-        styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+        styles: { fontSize: 7.5, cellPadding: 2, overflow: 'linebreak' },
         columnStyles: {
-          0: { cellWidth: 40 },
-          1: { cellWidth: 35 },
-          2: { cellWidth: 'auto' },
-          3: { cellWidth: 30 }
+          0: { cellWidth: 45, overflow: 'linebreak' },
+          1: { cellWidth: 35, overflow: 'linebreak' },
+          2: { cellWidth: 'auto', overflow: 'linebreak' },
+          3: { cellWidth: 25, halign: 'center' }
         }
       });
       
