@@ -65,7 +65,14 @@ export const generateMatchPdf = (teamName: string, mb: any) => {
     body: tableData,
     theme: 'grid',
     headStyles: { fillColor: [4, 120, 87] },
-    styles: { fontSize: 8 }
+    styles: { fontSize: 8, overflow: 'linebreak' },
+    columnStyles: {
+      0: { cellWidth: 40 },
+      1: { cellWidth: 35 },
+      2: { cellWidth: 35 },
+      3: { cellWidth: 'auto' },
+      4: { cellWidth: 25 }
+    }
   });
 
   let finalY = (doc as any).lastAutoTable?.finalY || 70;
@@ -161,7 +168,13 @@ export const generateGeneralReportPdf = (
     body: squadsData,
     theme: "grid",
     headStyles: { fillColor: [15, 23, 42] },
-    styles: { fontSize: 8.5 }
+    styles: { fontSize: 8.5, overflow: 'linebreak' },
+    columnStyles: {
+      0: { cellWidth: 40 },
+      1: { cellWidth: 40 },
+      2: { cellWidth: 'auto' },
+      3: { cellWidth: 30 }
+    }
   });
   
   currentY = (doc as any).lastAutoTable?.finalY || currentY;
@@ -231,7 +244,12 @@ export const generateGeneralReportPdf = (
         body: matchSquadRows,
         theme: "grid",
         headStyles: { fillColor: [51, 65, 85] },
-        styles: { fontSize: 8, cellPadding: 3 }
+        styles: { fontSize: 8, cellPadding: 3, overflow: 'linebreak' },
+        columnStyles: {
+          0: { cellWidth: 40 },
+          1: { cellWidth: 35 },
+          2: { cellWidth: 'auto' }
+        }
       });
       
       currentY = (doc as any).lastAutoTable?.finalY || currentY;
@@ -285,7 +303,13 @@ export const generateGeneralReportPdf = (
         body: realPlayersRows,
         theme: "striped",
         headStyles: { fillColor: [100, 116, 139] },
-        styles: { fontSize: 8, cellPadding: 2 }
+        styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+        columnStyles: {
+          0: { cellWidth: 40 },
+          1: { cellWidth: 35 },
+          2: { cellWidth: 'auto' },
+          3: { cellWidth: 30 }
+        }
       });
       
       currentY = (doc as any).lastAutoTable?.finalY || currentY;

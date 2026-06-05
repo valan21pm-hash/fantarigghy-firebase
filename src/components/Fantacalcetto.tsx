@@ -68,7 +68,7 @@ export default function Fantacalcetto({
   isGoogleSheetsSynced
 }: FantacalcettoProps) {
   // Public Portal state loaders
-  const [activePublicTab, setActivePublicTab] = useState<"classifica" | "iscrizione" | "convocazioni">("classifica");
+  const [activePublicTab, setActivePublicTab] = useState<"classifica" | "partite" | "iscrizione" | "convocazioni">("classifica");
   const [nomePartecipante, setNomePartecipante] = useState("");
   const [nomeFantasquadra, setNomeFantasquadra] = useState("");
   const [pin, setPin] = useState("");
@@ -1707,6 +1707,17 @@ export default function Fantacalcetto({
             </button>
             <button
               type="button"
+              onClick={() => setActivePublicTab("partite")}
+              className={`flex-1 py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+                activePublicTab === "partite"
+                  ? "bg-yellow-400 text-emerald-950 shadow-md font-extrabold"
+                  : "text-emerald-300 hover:text-white hover:bg-emerald-900/30 font-bold"
+              }`}
+            >
+              ⚽ Partite
+            </button>
+            <button
+              type="button"
               onClick={() => {
                 setActivePublicTab("convocazioni");
                 setSubmitted(false);
@@ -1731,7 +1742,7 @@ export default function Fantacalcetto({
                   : "text-emerald-300 hover:text-white hover:bg-emerald-900/30 font-bold"
               }`}
             >
-              ⚽ Iscrizione
+              📝 Iscrizione
             </button>
           </div>
 
@@ -2098,6 +2109,68 @@ export default function Fantacalcetto({
                         </div>
                       );
                     })}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : activePublicTab === "partite" ? (
+            <div className="space-y-6 animate-fade-in font-sans">
+              <div className="bg-emerald-950/80 border border-emerald-800 rounded-3xl p-5 shadow-xl backdrop-blur-md space-y-4 font-sans">
+                <div className="border-b border-emerald-900 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 font-sans">
+                  <div>
+                    <h3 className="font-extrabold text-xs text-white uppercase tracking-wider font-sans">Tabellone Partite e Referti</h3>
+                    <p className="text-[9px] text-emerald-400 font-semibold uppercase tracking-wider font-sans">Consulta i match storici e scarica il libretto ufficiale con tutti i voti dei giocatori.</p>
+                  </div>
+                  <div className="flex items-center gap-2 select-none">
+                    {rankedTeams.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => generateGeneralReportPdf(rankedTeams, partiteChiuse || [], getTeamMatchBreakdownList)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1 cursor-pointer transition-transform hover:-translate-y-0.5"
+                        title="Scarica referto con tutti i voti assegnati in tutte le partite"
+                      >
+                        <span>📄 Scarica Referto Generale</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {partite.length === 0 ? (
+                  <div className="py-8 text-center bg-emerald-900/40 rounded-2xl border border-emerald-800/50">
+                    <p className="text-emerald-300 font-extrabold text-sm uppercase">Nessuna partita in bacheca.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 font-sans">
+                    {partite.map(m => (
+                      <div key={m.id} className="bg-emerald-900/40 rounded-2xl border border-emerald-800/50 p-4 transition-all hover:bg-emerald-900/60 shadow-md">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h4 className="font-extrabold text-white text-base tracking-wide flex items-center gap-2">
+                              {m.dettagli || "Partita"}
+                            </h4>
+                            <span className="text-[10px] text-emerald-400/80 font-mono italic mt-1 block">Ref: {m.id}</span>
+                          </div>
+                          <div>
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase flex items-center gap-1.5 ${m.stato === 'Aperta' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' : 'bg-gray-800/50 text-gray-400 border border-gray-700/50'}`}>
+                              {m.stato === 'Aperta' ? <><span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse"></span> Aperta</> : 'Conclusa'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {m.risultato && (
+                          <div className="rounded-xl px-3 py-2 bg-emerald-950/60 border border-emerald-900/40 mb-3 shadow-inner">
+                            <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block mb-1">Risultato Omologato</span>
+                            <span className="font-mono text-lg text-emerald-200 font-black">{m.risultato}</span>
+                          </div>
+                        )}
+                        
+                        {(m.referto && m.referto.length > 0) ? (
+                          <p className="text-[11px] text-emerald-300 flex items-center gap-1"><span className="text-emerald-500">✓</span> {m.referto.length} giocatori con voto referti presenti.</p>
+                        ) : (
+                          <p className="text-[11px] text-emerald-500/60 italic">Nessun referto giocatori compilato per questo match.</p>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
