@@ -3234,21 +3234,44 @@ export default function Fantacalcetto({
 
               return (
                 <div className="p-4 space-y-4">
-                  {/* BEAUTIFUL HORIZONTAL SCROLL FOR TEAM SELECTION */}
+                  {/* DROPDOWN & GRID SELECTION FOR TEAM */}
                   <div>
-                    <div className="flex items-center gap-1.5 text-[10px] uppercase font-black tracking-wide text-gray-500 mb-2 pl-1">
-                      <span>📋</span>
-                      <span>Squadre Iscritte ({fantasquadre.length})</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3 mb-3">
+                      <div className="flex items-center gap-1.5 text-[10px] uppercase font-black tracking-wide text-gray-500 pl-1">
+                        <span>📋</span>
+                        <span>Seleziona Squadra Menu a Tendina ({fantasquadre.length})</span>
+                      </div>
+                      <div className="relative">
+                        <select
+                          id="team-select-dropdown"
+                          value={selectedTeamToView.id}
+                          onChange={(e) => setExpandedTeamId(e.target.value)}
+                          className="w-full sm:w-64 px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-extrabold text-blue-950 shadow-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 cursor-pointer"
+                        >
+                          {sortedTeams.map(team => (
+                            <option key={team.id} value={team.id}>
+                              {team.nomeFantasquadra.toUpperCase()} — {team.nomePartecipante}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
-                    <div className="flex overflow-x-auto gap-2.5 pb-2 scrollbar-none snap-x pr-4">
+
+                    <div className="flex items-center gap-1.5 text-[10px] uppercase font-black tracking-wide text-gray-500 mb-2 pl-1">
+                      <span>🏷️</span>
+                      <span>Squadre Iscritte (Griglia da 3 colonne con a capo automatico)</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pb-2">
                       {sortedTeams.map(team => (
                         <button
+                          id={`team-btn-${team.id}`}
                           key={team.id}
                           type="button"
                           onClick={() => setExpandedTeamId(team.id)}
-                          className={`shrink-0 snap-start px-3.5 py-2.5 rounded-xl border text-left flex flex-col transition-all cursor-pointer min-w-[140px] max-w-[180px] ${
+                          className={`px-3.5 py-2.5 rounded-xl border text-left flex flex-col transition-all cursor-pointer ${
                             selectedTeamToView.id === team.id
-                              ? "bg-emerald-950 border-emerald-800 text-white shadow-xl ring-2 ring-emerald-500/30 scale-100"
+                              ? "bg-emerald-950 border-emerald-800 text-white shadow-md ring-2 ring-emerald-500/30 scale-100"
                               : "bg-white border-gray-200 text-gray-600 hover:bg-emerald-50 hover:border-emerald-200 scale-95 opacity-80"
                           }`}
                         >
