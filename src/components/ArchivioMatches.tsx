@@ -5,7 +5,7 @@
 
 import React, { useState } from "react";
 import { Calendar, Edit3, Trash2, Undo2, Award, Users, Share2, Eye, CheckCircle2, AlertTriangle } from "lucide-react";
-import { Giocatore, Partita, RefertoGiocatore, PLAYER_CUSTOM_BONUSES, getPlayerBonusKey, GENERIC_BONUSES } from "../types";
+import { Giocatore, Partita, RefertoGiocatore, getPlayerBonusKey, CustomBonusDef, DEFAULT_BONUSES } from "../types";
 
 interface ArchivioMatchesProps {
   giocatori: Giocatore[];
@@ -22,6 +22,7 @@ interface ArchivioMatchesProps {
   onEliminaChiusa: (idPartita: string) => Promise<void>;
   isEditor?: boolean;
   onInviaFanta?: (idPartita: string) => Promise<void>;
+  bonuses?: CustomBonusDef[];
 }
 
 export default function ArchivioMatches({
@@ -32,6 +33,7 @@ export default function ArchivioMatches({
   onEliminaChiusa,
   isEditor = false,
   onInviaFanta,
+  bonuses
 }: ArchivioMatchesProps) {
   // Modal states
   const [activeReviewMatch, setActiveReviewMatch] = useState<Partita | null>(null);
@@ -629,8 +631,10 @@ export default function ArchivioMatches({
 
                         {/* Custom Player-Specific and Generic/Global Bonuses for Match Editing */}
                         {(() => {
+                          const allBonuses = bonuses || DEFAULT_BONUSES;
+                          const currentGenericBonuses = allBonuses.filter(b => !b.isPersonale);
                           const bonusKey = getPlayerBonusKey(r.nome);
-                          const baseBonuses = bonusKey ? PLAYER_CUSTOM_BONUSES[bonusKey] : [];
+                          const baseBonuses = bonusKey ? allBonuses.filter(b => b.isPersonale && b.giocatoreId === bonusKey) : [];
                           const currentActive = r.bonusAttivi || [];
 
                           return (
@@ -681,7 +685,7 @@ export default function ArchivioMatches({
                                   🛡️ Bonus & Malus Generici / Globali
                                 </span>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 max-h-[140px] overflow-y-auto pr-0.5 select-none text-left">
-                                  {GENERIC_BONUSES.map(b => {
+                                  {currentGenericBonuses.map(b => {
                                     const isChecked = currentActive.includes(b.id);
                                     const isMalus = typeof b.punti === "number" && b.punti < 0;
                                     return (

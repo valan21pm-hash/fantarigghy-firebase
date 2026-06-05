@@ -30,7 +30,8 @@ import StatsDashboard from "./components/StatsDashboard";
 import Iscrizioni from "./components/Iscrizioni";
 import Fantacalcetto from "./components/Fantacalcetto";
 import ConsigliRicevuti from "./components/ConsigliRicevuti";
-import { DatabaseSchema, Formazione, Giocatore, RefertoGiocatore } from "./types";
+import BonusManager from "./components/BonusManager";
+import { DatabaseSchema, Formazione, Giocatore, RefertoGiocatore, CustomBonusDef, DEFAULT_BONUSES } from "./types";
 import { initAuth, googleSignIn, logout } from "./lib/firebase";
 
 export default function App() {
@@ -38,7 +39,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [mainSection, setMainSection] = useState<"gare" | "club">("club");
   const [activeTab, setActiveTab] = useState<
-    "rosa" | "convocazioni" | "formazione" | "referto" | "archivio" | "iscrizioni" | "fantacalcetto"
+    "rosa" | "convocazioni" | "formazione" | "referto" | "archivio" | "iscrizioni" | "fantacalcetto" | "bonus"
   >("rosa");
   const [isPublicPortal, setIsPublicPortal] = useState(() => {
     return typeof window !== "undefined" && window.location.search.includes("portal=true");
@@ -673,6 +674,18 @@ export default function App() {
                 <Sparkles className="h-4 w-4 text-amber-500" />
                 <span>Fantacalcetto</span>
               </button>
+
+              <button
+                onClick={() => setActiveTab("bonus")}
+                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  activeTab === "bonus"
+                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+              >
+                <Sparkles className="h-4 w-4 text-indigo-500" />
+                <span>Bonus & Malus</span>
+              </button>
             </>
           )}
         </div>
@@ -721,6 +734,7 @@ export default function App() {
               isEditor={isEditor}
               selectedMatchId={selectedRefertoMatchId}
               onSelectMatchId={setSelectedRefertoMatchId}
+              bonuses={data?.bonuses || DEFAULT_BONUSES}
             />
           )}
 
@@ -733,6 +747,7 @@ export default function App() {
               onEliminaChiusa={handleEliminaChiusa}
               isEditor={isEditor}
               onInviaFanta={handleInviaFanta}
+              bonuses={data?.bonuses || DEFAULT_BONUSES}
             />
           )}
 
@@ -761,6 +776,15 @@ export default function App() {
               isEditor={isEditor}
               isAdminMode={true}
               onRefreshData={() => fetchDatabase(undefined, true)}
+            />
+          )}
+
+          {activeTab === "bonus" && (
+            <BonusManager
+              bonuses={data?.bonuses || DEFAULT_BONUSES}
+              giocatori={giocatori}
+              isEditor={isEditor}
+              onUpdateBonuses={handleUpdateBonuses}
             />
           )}
         </div>

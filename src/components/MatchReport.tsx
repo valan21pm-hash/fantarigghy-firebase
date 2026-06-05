@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { CheckCircle2, Trophy, AlertTriangle } from "lucide-react";
-import { Giocatore, Partita, RefertoGiocatore, PLAYER_CUSTOM_BONUSES, getPlayerBonusKey, GENERIC_BONUSES } from "../types";
+import { Giocatore, Partita, RefertoGiocatore, getPlayerBonusKey, CustomBonusDef, DEFAULT_BONUSES } from "../types";
 
 interface MatchReportProps {
   giocatori: Giocatore[];
@@ -22,6 +22,7 @@ interface MatchReportProps {
   isEditor?: boolean;
   selectedMatchId?: string;
   onSelectMatchId?: (id: string) => void;
+  bonuses?: CustomBonusDef[];
 }
 
 export default function MatchReport({
@@ -32,6 +33,7 @@ export default function MatchReport({
   isEditor = false,
   selectedMatchId: externalSelectedMatchId,
   onSelectMatchId,
+  bonuses
 }: MatchReportProps) {
   if (!isEditor) {
     return (
@@ -689,10 +691,12 @@ export default function MatchReport({
                 ? (statoPresenza[nome] || "giocato") 
                 : (isSubstitute ? "giocato" : "assente");
               
+              const allBonuses = bonuses || DEFAULT_BONUSES;
+              const currentGenericBonuses = allBonuses.filter(b => !b.isPersonale);
               const isCurrentlyPlaying = currentStato === "giocato";
               const isPayer = payers.includes(nome);
               const bonusKey = getPlayerBonusKey(nome);
-              const baseBonuses = bonusKey ? PLAYER_CUSTOM_BONUSES[bonusKey] : [];
+              const baseBonuses = bonusKey ? allBonuses.filter(b => b.isPersonale && b.giocatoreId === bonusKey) : [];
 
               return (
                 <div 
@@ -981,7 +985,7 @@ export default function MatchReport({
                           <div className="bg-slate-50/50 p-3 rounded-xl border border-gray-150">
                             <span className="block text-[9px] font-black text-slate-800 uppercase tracking-wide mb-2">🛡️ Bonus e Malus Generici</span>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[140px] overflow-y-auto pr-1">
-                              {GENERIC_BONUSES.map(b => {
+                              {currentGenericBonuses.map(b => {
                                 const isChecked = (selectedBonuses[nome] || []).includes(b.id);
                                 const isMalus = typeof b.punti === "number" && b.punti < 0;
                                 return (

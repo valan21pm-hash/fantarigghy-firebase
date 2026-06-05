@@ -30,6 +30,9 @@ import {
 } from "lucide-react";
 import { Giocatore, Fantasquadra, Partita, CustomBonusDef, getPlayerBonusKey, getPlayerBonusPointsForMatch, getPlayerBonusBreakdownForMatch, DEFAULT_BONUSES, getPlayerPriceForRoster, getPlayerCurrentPrice, getPlayerBasePrice, MAX_BUDGET, getLastName } from "../types";
 
+// (Keep everything else mostly the same)
+// I will place the computation variables inside the component.
+
 import { generateMatchPdf, generateGeneralReportPdf } from "../lib/pdfHelper";
 import BonusManager from "./BonusManager";
 
@@ -71,7 +74,7 @@ export default function Fantacalcetto({
   onRefreshData
 }: FantacalcettoProps) {
   // Public Portal state loaders
-  const [activePublicTab, setActivePublicTab] = useState<"classifica" | "partite" | "iscrizione" | "convocazioni" | "bonus">("classifica");
+  const [activePublicTab, setActivePublicTab] = useState<"classifica" | "partite" | "iscrizione" | "convocazioni">("classifica");
   const allPartite = React.useMemo(() => {
     return [
       ...partiteAperte,
@@ -927,17 +930,10 @@ export default function Fantacalcetto({
                   let foundBonus = null;
 
                   // Cerca nei bonus personali del giocatore
-                  if (bonusKey && PLAYER_CUSTOM_BONUSES[bonusKey]) {
-                    foundBonus = PLAYER_CUSTOM_BONUSES[bonusKey].find(b => b.id === bId);
-                  }
-
-                  // Se non trovato, cerca nei bonus generici globali
-                  if (!foundBonus) {
-                    foundBonus = GENERIC_BONUSES.find(b => b.id === bId);
-                  }
+                  foundBonus = bonuses.find(b => b.id === bId);
 
                   if (foundBonus) {
-                    const ptsValue = typeof foundBonus.punti === "function" ? foundBonus.punti(rGol, rAssist) : foundBonus.punti;
+                    let ptsValue = foundBonus.punti || 0; if (foundBonus.moltiplicatoreGol) ptsValue += foundBonus.moltiplicatoreGol * rGol; if (foundBonus.moltiplicatoreAssist) ptsValue += foundBonus.moltiplicatoreAssist * rAssist;
                     activeBonusDetails.push({
                       bName: foundBonus.nome,
                       bDesc: foundBonus.descrizione,
@@ -1636,41 +1632,57 @@ export default function Fantacalcetto({
                       <div className="mt-4">
                         <h5 className="font-bold text-emerald-300 text-[11px] uppercase tracking-wider mb-2">🏅 Bonus Extra / Generici</h5>
                         <div className="grid grid-cols-1 gap-1.5 font-mono text-[10px]">
-                          {GENERIC_BONUSES.map((b) => (
-                            <div key={b.id} className="flex justify-between items-center bg-emerald-900/10 border border-emerald-800/20 rounded p-1.5 px-2">
-                              <div className="pr-2">
-                                <span className="font-bold">{b.nome}</span>
-                                <div className="text-[8.5px] text-emerald-200/70 font-sans leading-tight mt-0.5">{b.descrizione}</div>
+                          {(() => {
+                            const allB = bonuses || DEFAULT_BONUSES;
+                            const currentGenericBonuses = allB.filter(b => !b.isPersonale);
+                            return currentGenericBonuses.map((b) => (
+                              <div key={b.id} className="flex justify-between items-center bg-emerald-900/10 border border-emerald-800/20 rounded p-1.5 px-2">
+                                <div className="pr-2">
+                                  <span className="font-bold">{b.nome}</span>
+                                  <div className="text-[8.5px] text-emerald-200/70 font-sans leading-tight mt-0.5">{b.descrizione}</div>
+                                </div>
+                                <span className={`font-bold whitespace-nowrap ${typeof b.punti === 'number' && b.punti > 0 ? "text-emerald-400" : typeof b.punti === 'number' && b.punti < 0 ? "text-red-400" : "text-amber-400"}`}>
+                                  {typeof b.punti === 'number' ? (b.punti > 0 ? `+${b.punti}` : b.punti) : "Variabile"} pt
+                                </span>
                               </div>
-                              <span className={`font-bold whitespace-nowrap ${typeof b.punti === 'number' && b.punti > 0 ? "text-emerald-400" : typeof b.punti === 'number' && b.punti < 0 ? "text-red-400" : "text-amber-400"}`}>
-                                {typeof b.punti === 'number' ? (b.punti > 0 ? `+${b.punti}` : b.punti) : "Variabile"} pt
-                              </span>
-                            </div>
-                          ))}
+                            ));
+                          })()}
                         </div>
                       </div>
 
                       <div className="mt-4">
                         <h5 className="font-bold text-amber-300 text-[11px] uppercase tracking-wider mb-2">⭐ Bonus Ad Personam</h5>
                         <div className="space-y-3 font-mono text-[10px]">
-                          {Object.entries(PLAYER_CUSTOM_BONUSES).map(([playerName, bonuses]) => (
-                            <div key={playerName} className="space-y-1">
-                              <p className="font-bold text-emerald-250 border-b border-emerald-800/30 pb-0.5">{playerName}</p>
-                              <div className="grid grid-cols-1 gap-1">
-                                {bonuses.map((b) => (
-                                  <div key={b.id} className="flex justify-between items-center bg-emerald-900/10 border border-amber-500/10 rounded p-1.5 px-2">
-                                    <div className="pr-2">
-                                      <span className="font-bold">{b.nome}</span>
-                                      <div className="text-[8.5px] text-emerald-200/70 font-sans leading-tight mt-0.5">{b.descrizione}</div>
+                          {(() => {
+                            const allB = bonuses || DEFAULT_BONUSES;
+                            const currentPlayerBonuses = allB.filter(b => b.isPersonale && b.giocatoreId);
+                            const grouped = currentPlayerBonuses.reduce((acc, b) => {
+                              if (b.giocatoreId) {
+                                if (!acc[b.giocatoreId]) acc[b.giocatoreId] = [];
+                                acc[b.giocatoreId].push(b);
+                              }
+                              return acc;
+                            }, {} as Record<string, CustomBonusDef[]>);
+
+                            return Object.entries(grouped).map(([playerName, bns]) => (
+                              <div key={playerName} className="space-y-1">
+                                <p className="font-bold text-emerald-250 border-b border-emerald-800/30 pb-0.5">{playerName}</p>
+                                <div className="grid grid-cols-1 gap-1">
+                                  {bns.map((b) => (
+                                    <div key={b.id} className="flex justify-between items-center bg-emerald-900/10 border border-amber-500/10 rounded p-1.5 px-2">
+                                      <div className="pr-2">
+                                        <span className="font-bold">{b.nome}</span>
+                                        <div className="text-[8.5px] text-emerald-200/70 font-sans leading-tight mt-0.5">{b.descrizione}</div>
+                                      </div>
+                                      <span className={`font-bold whitespace-nowrap ${typeof b.punti === 'number' && b.punti > 0 ? "text-emerald-400" : typeof b.punti === 'number' && b.punti < 0 ? "text-red-400" : "text-amber-400"}`}>
+                                        {typeof b.punti === 'number' ? (b.punti > 0 ? `+${b.punti}` : b.punti) : "Variabile"} pt
+                                      </span>
                                     </div>
-                                    <span className={`font-bold whitespace-nowrap ${typeof b.punti === 'number' && b.punti > 0 ? "text-emerald-400" : typeof b.punti === 'number' && b.punti < 0 ? "text-red-400" : "text-amber-400"}`}>
-                                      {typeof b.punti === 'number' ? (b.punti > 0 ? `+${b.punti}` : b.punti) : "Variabile"} pt
-                                    </span>
-                                  </div>
-                                ))}
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            ));
+                          })()}
                         </div>
                       </div>
 
@@ -1840,20 +1852,6 @@ export default function Fantacalcetto({
               }`}
             >
               📝 Iscrizione
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActivePublicTab("bonus");
-                setSubmitted(false);
-              }}
-              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
-                activePublicTab === "bonus"
-                  ? "bg-yellow-400 text-emerald-950 shadow-md font-extrabold"
-                  : "text-emerald-300 hover:text-white hover:bg-emerald-900/30 font-bold"
-              }`}
-            >
-              ⚖️ Bonus
             </button>
           </div>
 
@@ -2516,8 +2514,6 @@ export default function Fantacalcetto({
                 );
               })()}
             </div>
-          ) : activePublicTab === "bonus" ? (
-             <BonusManager bonuses={bonuses} giocatori={giocatori} isEditor={isEditor} onUpdateBonuses={onUpdateBonuses} />
           ) : (
             <form onSubmit={handleRegisterSubmit} className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-12 gap-6 font-sans">
             
@@ -3102,7 +3098,7 @@ export default function Fantacalcetto({
                               })()}
                               {(() => {
                                 const bonusKey = getPlayerBonusKey(p.nome);
-                                const baseBonuses = bonusKey ? PLAYER_CUSTOM_BONUSES[bonusKey] : [];
+                                const baseBonuses = bonusKey ? (bonuses || DEFAULT_BONUSES).filter(b => b.isPersonale && b.giocatoreId === bonusKey) : [];
                                 if (!baseBonuses || baseBonuses.length === 0) return null;
                                 return (
                                   <div className="mt-1.5 space-y-0.5 bg-yellow-950/35 border border-yellow-900/35 p-1.5 rounded-lg text-[9px]/tight text-yellow-300">
@@ -3570,7 +3566,7 @@ export default function Fantacalcetto({
                           const stats = getPlayerStatsObj(pName);
                           const isBench = index === 3;
                           const bKey = getPlayerBonusKey(pName);
-                          const userBonuses = bKey && PLAYER_CUSTOM_BONUSES[bKey] ? PLAYER_CUSTOM_BONUSES[bKey] : [];
+                          const userBonuses = bKey ? (bonuses || DEFAULT_BONUSES).filter(b => b.isPersonale && b.giocatoreId === bKey) : [];
 
                           return (
                             <div
