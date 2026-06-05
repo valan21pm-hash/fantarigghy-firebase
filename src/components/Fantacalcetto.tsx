@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import { Giocatore, Fantasquadra, Partita, PLAYER_CUSTOM_BONUSES, getPlayerBonusKey, getPlayerBonusPointsForMatch, GENERIC_BONUSES, getPlayerPriceForRoster, getPlayerCurrentPrice, getPlayerBasePrice, MAX_BUDGET, getLastName } from "../types";
 
-import { generateMatchPdf } from "../lib/pdfHelper";
+import { generateMatchPdf, generateGeneralReportPdf } from "../lib/pdfHelper";
 
 interface FantacalcettoProps {
   giocatori: Giocatore[];
@@ -1824,14 +1824,26 @@ export default function Fantacalcetto({
 
               {/* Leaderboard Table / Cards */}
               <div className="bg-emerald-950/80 border border-emerald-800 rounded-3xl p-5 shadow-xl backdrop-blur-md space-y-4 font-sans">
-                <div className="border-b border-emerald-900 pb-3 flex justify-between items-center font-sans">
+                <div className="border-b border-emerald-900 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 font-sans">
                   <div>
                     <h3 className="font-extrabold text-xs text-white uppercase tracking-wider font-sans">Classifica Generale</h3>
                     <p className="text-[9px] text-emerald-400 font-semibold uppercase tracking-wider font-sans">Aggiornata ad ogni referto inserito dagli Amministratori</p>
                   </div>
-                  <span className="bg-emerald-900 text-emerald-200 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full font-mono">
-                    {rankedTeams.length} Team
-                  </span>
+                  <div className="flex items-center gap-2 select-none">
+                    {rankedTeams.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => generateGeneralReportPdf(rankedTeams, partiteChiuse || [], getTeamMatchBreakdownList)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1 cursor-pointer transition-transform hover:-translate-y-0.5"
+                        title="Scarica referto con tutti i voti assegnati in tutte le partite"
+                      >
+                        <span>📄 Scarica Referto Generale</span>
+                      </button>
+                    )}
+                    <span className="bg-emerald-900 text-emerald-200 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full font-mono shrink-0">
+                      {rankedTeams.length} Team
+                    </span>
+                  </div>
                 </div>
 
                 {rankedTeams.length === 0 ? (
@@ -3124,14 +3136,26 @@ export default function Fantacalcetto({
         {/* Leaderboard classifications column */}
         <div className="lg:col-span-7 space-y-4">
           <div className="bg-white border border-gray-150 rounded-2xl shadow-2xs overflow-hidden">
-            <div className="bg-gray-50 border-b border-gray-150 px-5 py-4 flex items-center justify-between">
+            <div className="bg-gray-50 border-b border-gray-150 px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 className="font-extrabold text-sm text-gray-900 uppercase tracking-wide">Classifica Fantacalcetto</h3>
                 <p className="text-[10px] text-gray-400 leading-tight">Generata in tempo reale dalle statistiche della Rosa dei giocatori</p>
               </div>
-              <span className="bg-emerald-100 text-emerald-850 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full">
-                Ufficiale
-              </span>
+              <div className="flex items-center gap-2 select-none">
+                {rankedTeams.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => generateGeneralReportPdf(rankedTeams, partiteChiuse || [], getTeamMatchBreakdownList)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase px-3.5 py-1.5 rounded-lg shadow-sm flex items-center gap-1 cursor-pointer transition-transform hover:-translate-y-0.5"
+                    title="Scarica referto con tutti i voti assegnati in tutte le partite"
+                  >
+                    <span>📄 Referto Generale (Tutti i Voti)</span>
+                  </button>
+                )}
+                <span className="bg-emerald-100 text-emerald-850 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shrink-0">
+                  Ufficiale
+                </span>
+              </div>
             </div>
 
             {rankedTeams.length === 0 ? (
