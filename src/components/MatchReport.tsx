@@ -298,6 +298,7 @@ export default function MatchReport({
         bonusAttivi: pres !== "sostituito" ? (selectedBonuses[nome] || []) : [],
         statoPresenza: pres,
         sostitutoDa: isConvocato ? (sostitutoDa[nome] || "") : "",
+        snapshotGiocatore: giocatori.find(x => x.nome === nome),
       };
     });
 

@@ -33,6 +33,7 @@ export interface RefertoGiocatore {
   bonusAttivi?: string[];
   statoPresenza?: "giocato" | "assente" | "sostituito";
   sostitutoDa?: string;
+  snapshotGiocatore?: Giocatore; // Data snapshot at match time
 }
 
 export interface Formazione {
