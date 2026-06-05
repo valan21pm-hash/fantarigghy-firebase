@@ -504,7 +504,7 @@ export default function LineupEditor({
 
                           {/* Player visual Nameplate */}
                           <div className="bg-slate-900/95 border border-slate-700 text-[10px] font-bold text-white px-2 py-0.5 rounded shadow-md truncate max-w-[76px] text-center whitespace-nowrap leading-tight mt-1">
-                            {assignedPlayerName.split(" ")[0]}
+                            {getLastName(assignedPlayerName)}
                           </div>
                         </div>
                       ) : (

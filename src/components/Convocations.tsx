@@ -183,7 +183,7 @@ export default function Convocations({
     });
 
     navigator.clipboard.writeText(msg.trim());
-    alert("Partita Amichevole creata con successo nel sistema & Formazioni pronte copiate negli appunti!");
+    alert("Partita Amichevole creata con successo nel sistema! Ricordati di impostare la formazione nella sezione lavagna. Formazioni pronte copiate negli appunti!");
 
     // Reset forms and exit step
     setData("");
@@ -254,7 +254,7 @@ export default function Convocations({
 
     // Copy to clipboard
     navigator.clipboard.writeText(msg.trim());
-    alert("Evento Convocazione creato con successo nel sistema & Testo pronto per WhatsApp salvato negli appunti!");
+    alert("Evento Convocazione creato con successo nel sistema! Ricordati di impostare la formazione nella sezione lavagna. Testo pronto per WhatsApp salvato negli appunti!");
 
     // Reset forms
     setData("");
