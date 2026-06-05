@@ -752,6 +752,9 @@ async function getDb(token?: string, bypassCache: boolean = false): Promise<Data
 
   // 1. PRIMARY: Fetch from Firestore (24/7 availability)
   let firestoreDb = await fetchFromFirestore();
+  if (!firestoreDb) {
+    console.warn("[Firestore] WARNING: Could not fetch from Firestore, attempting fallback to local storage.");
+  }
 
   let localDb: DatabaseSchema;
   try {
@@ -815,28 +818,38 @@ async function getDb(token?: string, bypassCache: boolean = false): Promise<Data
       const localFantasquadre = localDb.fantasquadre || [];
       const fantaMap = new Map<string, Fantasquadra>();
       
-      // Seed with Google Sheets' data (as it is the shared single source of truth)
-      for (const fs of fetchedFantasquadre) {
+      // Seed with LOCAL data (Firestore/Local is truth)
+      for (const fs of localFantasquadre) {
         fantaMap.set(fs.nomeFantasquadra.toLowerCase().trim(), fs);
       }
-      // Merge local ones if they are missing or have more players selected
-      for (const fs of localFantasquadre) {
+      // Merge spreadsheet ones if they are missing
+      for (const fs of fetchedFantasquadre) {
         const key = fs.nomeFantasquadra.toLowerCase().trim();
         if (!fantaMap.has(key)) {
-          console.log(`[Google Sheets Merge] Ripristinato team locale: '${fs.nomeFantasquadra}' di ${fs.nomePartecipante}`);
+          console.log(`[Google Sheets Merge] Importato team da Sheets: '${fs.nomeFantasquadra}'`);
           fantaMap.set(key, fs);
         } else {
-          // If both exist, keep the one with most players selected
-          const sheetFs = fantaMap.get(key)!;
+          // If both exist, keep the one with most players selected (for safety)
+          const localFs = fantaMap.get(key)!;
+          const sheetFs = fs; // This is the fetched one
           const sheetRoster = sheetFs.giocatoriSelezionati || [];
-          const localRoster = fs.giocatoriSelezionati || [];
-          if (localRoster.length > sheetRoster.length) {
-            console.log(`[Google Sheets Merge] Sostituito team '${fs.nomeFantasquadra}' con versione locale (più completa)`);
-            fantaMap.set(key, fs);
+          const localRoster = localFs.giocatoriSelezionati || [];
+          if (sheetRoster.length > localRoster.length) {
+            console.log(`[Google Sheets Merge] Aggiornato team '${fs.nomeFantasquadra}' con versione Sheets (più completa)`);
+            fantaMap.set(key, sheetFs);
           }
         }
       }
-      sheetsDb.fantasquadre = Array.from(fantaMap.values());
+      localDb.fantasquadre = Array.from(fantaMap.values());
+      
+      // Merge partite: same logic, prioritize local
+      const partiteMap = new Map<string, Partita>();
+      for (const p of localDb.partite) partiteMap.set(p.id, p);
+      for (const p of sheetsDb.partite) partiteMap.set(p.id, p);
+      localDb.partite = Array.from(partiteMap.values());
+      
+      // Update sheetsDb to refer to localDb as the primary source
+      sheetsDb = localDb;
 
       let fetchedConsigli: Consiglio[] = [];
       try {
@@ -950,7 +963,7 @@ async function saveDb(db: DatabaseSchema, token?: string): Promise<void> {
   await safeWriteDb(JSON.stringify(db, null, 2));
 
   // 3. Persist instantly to Firestore (24/7 availability)
-  saveToFirestore(db).catch(err => console.error("Firestore async save error:", err));
+  await saveToFirestore(db).catch(err => console.error("Firestore async save error:", err));
 
   let activeToken = token;
   if (!activeToken || activeToken.startsWith("local-admin-")) {

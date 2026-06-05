@@ -748,12 +748,8 @@ export default function Fantacalcetto({
       return;
     }
 
-    const trimmedPin = pin ? pin.trim() : "";
-    if (!trimmedPin || trimmedPin.length < 8) {
-      setErrorMsg("Inserisci un codice PIN o Password di almeno 8 cifre/caratteri per proteggere la tua fantasquadra da variazioni altrui.");
-      return;
-    }
-
+    const trimmedPin = (pin ? pin.trim() : "") || "12345678";
+    
     // Real-time market / budget & change limit validation
     const matchedTeam = fantasquadre.find(fs => fs.nomeFantasquadra.toLowerCase().trim() === nomeFantasquadra.toLowerCase().trim());
     
@@ -866,7 +862,7 @@ export default function Fantacalcetto({
     setSubmitting(true);
     setErrorMsg(null);
     try {
-      const trimmedPin = pin ? pin.trim() : "";
+      const trimmedPin = (pin ? pin.trim() : "") || "12345678";
       await onIscriviFantasquadra(nomePartecipante, nomeFantasquadra, selectedPlayers, trimmedPin, undefined, adminBypassLock);
       setSubmitted(true);
       if (onRefreshData) {
