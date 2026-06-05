@@ -28,18 +28,21 @@ import {
   Info,
   X
 } from "lucide-react";
-import { Giocatore, Fantasquadra, Partita, PLAYER_CUSTOM_BONUSES, getPlayerBonusKey, getPlayerBonusPointsForMatch, getPlayerBonusBreakdownForMatch, GENERIC_BONUSES, getPlayerPriceForRoster, getPlayerCurrentPrice, getPlayerBasePrice, MAX_BUDGET, getLastName } from "../types";
+import { Giocatore, Fantasquadra, Partita, CustomBonusDef, getPlayerBonusKey, getPlayerBonusPointsForMatch, getPlayerBonusBreakdownForMatch, DEFAULT_BONUSES, getPlayerPriceForRoster, getPlayerCurrentPrice, getPlayerBasePrice, MAX_BUDGET, getLastName } from "../types";
 
 import { generateMatchPdf, generateGeneralReportPdf } from "../lib/pdfHelper";
+import BonusManager from "./BonusManager";
 
 interface FantacalcettoProps {
   giocatori: Giocatore[];
   fantasquadre: Fantasquadra[];
   partiteChiuse?: Partita[];
   partiteAperte?: Partita[];
+  bonuses?: CustomBonusDef[];
   onIscriviFantasquadra: (nomePartecipante: string, nomeFantasquadra: string, giocatoriSelezionati: string[], pin: string, email?: string, adminBypassLock?: boolean) => Promise<any>;
   onEliminaFantasquadra: (id: string) => Promise<any>;
   onCreaConsiglio?: (autore: string, testo: string) => Promise<any>;
+  onUpdateBonuses?: (bonuses: CustomBonusDef[]) => Promise<any>;
   consigli?: any[];
   isEditor: boolean;
   isAdminMode: boolean; // false if viewing as a public portal page
@@ -57,16 +60,18 @@ export default function Fantacalcetto({
   fantasquadre = [],
   partiteChiuse = [],
   partiteAperte = [],
+  bonuses = DEFAULT_BONUSES,
   onIscriviFantasquadra,
   onEliminaFantasquadra,
   onCreaConsiglio,
+  onUpdateBonuses,
   consigli = [],
   isEditor,
   isAdminMode,
   onRefreshData
 }: FantacalcettoProps) {
   // Public Portal state loaders
-  const [activePublicTab, setActivePublicTab] = useState<"classifica" | "partite" | "iscrizione" | "convocazioni">("classifica");
+  const [activePublicTab, setActivePublicTab] = useState<"classifica" | "partite" | "iscrizione" | "convocazioni" | "bonus">("classifica");
   const allPartite = React.useMemo(() => {
     return [
       ...partiteAperte,
@@ -400,11 +405,11 @@ export default function Fantacalcetto({
         const rEsp = r ? Number(r.rossi) || 0 : 0;
         const rBonusAttivi = r ? r.bonusAttivi || [] : [];
         
-        const bonusPts = r ? getPlayerBonusPointsForMatch(pName, rBonusAttivi, rGol, rAssist) : 0;
+        const bonusPts = r ? getPlayerBonusPointsForMatch(pName, rBonusAttivi, rGol, rAssist, bonuses) : 0;
         
         let bonusBreakdownStr = "";
         if (r && rBonusAttivi.length > 0) {
-          const breakdown = getPlayerBonusBreakdownForMatch(pName, rBonusAttivi, rGol, rAssist);
+          const breakdown = getPlayerBonusBreakdownForMatch(pName, rBonusAttivi, rGol, rAssist, bonuses);
           if (breakdown.length > 0) {
             bonusBreakdownStr = breakdown.map(b => `${b.nome} (${b.puntiVal > 0 ? "+" : ""}${b.puntiVal})`).join(", ") + ` [Tot: ${bonusPts > 0 ? "+" : ""}${bonusPts}]`;
           }
@@ -616,7 +621,7 @@ export default function Fantacalcetto({
         teamValoriAcquisto = {};
         let totalCost = 0;
         prevPlayers.forEach(pName => {
-          const ip = getPlayerPriceForRoster(pName, partiteChiuse || []);
+          const ip = getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses);
           teamValoriAcquisto[pName] = ip;
           totalCost += ip;
         });
@@ -665,10 +670,10 @@ export default function Fantacalcetto({
         let boughtPrice = 0;
 
         sold.forEach(p => {
-          soldPrice += getPlayerPriceForRoster(p, partiteChiuse || []);
+          soldPrice += getPlayerPriceForRoster(p, partiteChiuse || [], bonuses);
         });
         bought.forEach(p => {
-          boughtPrice += getPlayerPriceForRoster(p, partiteChiuse || []);
+          boughtPrice += getPlayerPriceForRoster(p, partiteChiuse || [], bonuses);
         });
 
         const finalCredits = teamCreditoResiduo + soldPrice - boughtPrice;
@@ -697,7 +702,7 @@ export default function Fantacalcetto({
         // Check budget constraint for a new registration (max 60)
         let totalCost = 0;
         nextPlayers.forEach(pName => {
-          totalCost += getPlayerPriceForRoster(pName, partiteChiuse || []);
+          totalCost += getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses);
         });
         if (totalCost > MAX_BUDGET) {
           alert(`Sfora il budget! La rosa scelta sforerebbe il tetto di ${MAX_BUDGET} Izycoin (costerebbe ${totalCost} Izycoin).`);
@@ -753,7 +758,7 @@ export default function Fantacalcetto({
       // NEW SQUAD CHECK
       let totalCost = 0;
       selectedPlayers.forEach(pName => {
-        totalCost += getPlayerPriceForRoster(pName, partiteChiuse || []);
+        totalCost += getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses);
       });
       if (totalCost > MAX_BUDGET) {
         setErrorMsg(`Il costo totale della rosa scelto (${totalCost} pinne 🐟) supera il limite consentito di ${MAX_BUDGET} pinne 🐟!`);
@@ -771,7 +776,7 @@ export default function Fantacalcetto({
         teamValoriAcquisto = {};
         let totalCost = 0;
         prevPlayers.forEach(pName => {
-          const ip = getPlayerPriceForRoster(pName, partiteChiuse || []);
+          const ip = getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses);
           teamValoriAcquisto[pName] = ip;
           totalCost += ip;
         });
@@ -791,10 +796,10 @@ export default function Fantacalcetto({
         let boughtPrice = 0;
 
         if (soldPlayers.length === 1) {
-          soldPrice = getPlayerPriceForRoster(soldPlayers[0], partiteChiuse || []);
+          soldPrice = getPlayerPriceForRoster(soldPlayers[0], partiteChiuse || [], bonuses);
         }
         if (boughtPlayers.length === 1) {
-          boughtPrice = getPlayerPriceForRoster(boughtPlayers[0], partiteChiuse || []);
+          boughtPrice = getPlayerPriceForRoster(boughtPlayers[0], partiteChiuse || [], bonuses);
         }
 
         const finalCredits = teamCreditoResiduo + soldPrice - boughtPrice;
@@ -829,7 +834,7 @@ export default function Fantacalcetto({
         // Initial composing from empty state (from 0 to 4 players)
         let totalCost = 0;
         selectedPlayers.forEach(pName => {
-          totalCost += getPlayerPriceForRoster(pName, partiteChiuse || []);
+          totalCost += getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses);
         });
         if (totalCost > MAX_BUDGET) {
           setErrorMsg(`Il costo totale della rosa scelto (${totalCost} Izycoin) supera il limite consentito di ${MAX_BUDGET} Izycoin!`);
@@ -913,7 +918,7 @@ export default function Fantacalcetto({
             const rEsp = Number(r.rossi) || 0;
             const rBonusAttivi = r.bonusAttivi || [];
 
-            const matchBonusPts = getPlayerBonusPointsForMatch(nome, rBonusAttivi, rGol, rAssist);
+            const matchBonusPts = getPlayerBonusPointsForMatch(nome, rBonusAttivi, rGol, rAssist, bonuses);
 
             if (isAmichevole || m.inviatoFanta === true) {
               if (rBonusAttivi.length > 0) {
@@ -1029,7 +1034,7 @@ export default function Fantacalcetto({
   const marketValuations = React.useMemo(() => {
     return [...realPlayersPool].map(p => ({
       ...p,
-      price: getPlayerPriceForRoster(p.nome, partiteChiuse || [])
+      price: getPlayerPriceForRoster(p.nome, partiteChiuse || [], bonuses)
     })).sort((a, b) => b.price - a.price);
   }, [realPlayersPool, partiteChiuse]);
 
@@ -1785,11 +1790,11 @@ export default function Fantacalcetto({
           </div>
 
           {/* Navigation Tabs for Public Portal */}
-          <div className="flex justify-center gap-1.5 max-w-sm sm:max-w-md mx-auto bg-emerald-950/60 p-1.5 rounded-2xl border border-emerald-850 font-sans">
+          <div className="flex flex-wrap justify-center gap-1.5 max-w-sm sm:max-w-lg mx-auto bg-emerald-950/60 p-1.5 rounded-2xl border border-emerald-850 font-sans">
             <button
               type="button"
               onClick={() => setActivePublicTab("classifica")}
-              className={`flex-1 py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
                 activePublicTab === "classifica"
                   ? "bg-yellow-400 text-emerald-950 shadow-md font-extrabold"
                   : "text-emerald-300 hover:text-white hover:bg-emerald-900/30 font-bold"
@@ -1800,7 +1805,7 @@ export default function Fantacalcetto({
             <button
               type="button"
               onClick={() => setActivePublicTab("partite")}
-              className={`flex-1 py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
                 activePublicTab === "partite"
                   ? "bg-yellow-400 text-emerald-950 shadow-md font-extrabold"
                   : "text-emerald-300 hover:text-white hover:bg-emerald-900/30 font-bold"
@@ -1814,7 +1819,7 @@ export default function Fantacalcetto({
                 setActivePublicTab("convocazioni");
                 setSubmitted(false);
               }}
-              className={`flex-1 py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
                 activePublicTab === "convocazioni"
                   ? "bg-yellow-400 text-emerald-950 shadow-md font-extrabold"
                   : "text-emerald-300 hover:text-white hover:bg-emerald-900/30 font-bold"
@@ -1828,13 +1833,27 @@ export default function Fantacalcetto({
                 setActivePublicTab("iscrizione");
                 setSubmitted(false);
               }}
-              className={`flex-1 py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
                 activePublicTab === "iscrizione"
                   ? "bg-yellow-400 text-emerald-950 shadow-md font-extrabold"
                   : "text-emerald-300 hover:text-white hover:bg-emerald-900/30 font-bold"
               }`}
             >
               📝 Iscrizione
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActivePublicTab("bonus");
+                setSubmitted(false);
+              }}
+              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+                activePublicTab === "bonus"
+                  ? "bg-yellow-400 text-emerald-950 shadow-md font-extrabold"
+                  : "text-emerald-300 hover:text-white hover:bg-emerald-900/30 font-bold"
+              }`}
+            >
+              ⚖️ Bonus
             </button>
           </div>
 
@@ -2497,6 +2516,8 @@ export default function Fantacalcetto({
                 );
               })()}
             </div>
+          ) : activePublicTab === "bonus" ? (
+             <BonusManager bonuses={bonuses} giocatori={giocatori} isEditor={isEditor} onUpdateBonuses={onUpdateBonuses} />
           ) : (
             <form onSubmit={handleRegisterSubmit} className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-12 gap-6 font-sans">
             
@@ -2656,7 +2677,7 @@ export default function Fantacalcetto({
                     // NEW TEAM ENROLLMENT
                     let totalCost = 0;
                     selectedPlayers.forEach(pName => {
-                      totalCost += getPlayerPriceForRoster(pName, partiteChiuse || []);
+                      totalCost += getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses);
                     });
                     const remaining = MAX_BUDGET - totalCost;
                     const overBudget = remaining < 0;
@@ -2694,7 +2715,7 @@ export default function Fantacalcetto({
                       teamValoriAcquisto = {};
                       let totalCost = 0;
                       prevPlayers.forEach(pName => {
-                        const ip = getPlayerPriceForRoster(pName, partiteChiuse || []);
+                        const ip = getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses);
                         teamValoriAcquisto[pName] = ip;
                         totalCost += ip;
                       });
@@ -2713,13 +2734,13 @@ export default function Fantacalcetto({
 
                     if (soldPlayers.length === 1) {
                       const sPlayerName = soldPlayers[0];
-                      soldPrice = getPlayerPriceForRoster(sPlayerName, partiteChiuse || []);
-                      const buyCost = teamValoriAcquisto[sPlayerName] ?? getPlayerPriceForRoster(sPlayerName, partiteChiuse || []);
+                      soldPrice = getPlayerPriceForRoster(sPlayerName, partiteChiuse || [], bonuses);
+                      const buyCost = teamValoriAcquisto[sPlayerName] ?? getPlayerPriceForRoster(sPlayerName, partiteChiuse || [], bonuses);
                       plusvalenzaReale = soldPrice - buyCost;
                     }
 
                     if (boughtPlayers.length === 1) {
-                      boughtPrice = getPlayerPriceForRoster(boughtPlayers[0], partiteChiuse || []);
+                      boughtPrice = getPlayerPriceForRoster(boughtPlayers[0], partiteChiuse || [], bonuses);
                     }
 
                     const finalCredits = teamCreditoResiduo + soldPrice - boughtPrice;

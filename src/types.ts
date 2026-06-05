@@ -108,7 +108,7 @@ export interface PlayerChampionshipStats {
   fantaScore: number;
 }
 
-export const calculatePlayerChampionshipStats = (nome: string, partiteChiuse: Partita[]): PlayerChampionshipStats => {
+export const calculatePlayerChampionshipStats = (nome: string, partiteChiuse: Partita[], allBonuses: CustomBonusDef[] = DEFAULT_BONUSES): PlayerChampionshipStats => {
   let gol = 0;
   let assist = 0;
   let ammonizioni = 0;
@@ -128,7 +128,7 @@ export const calculatePlayerChampionshipStats = (nome: string, partiteChiuse: Pa
         const rEsp = Number(r.rossi) || 0;
         const rBonusAttivi = r.bonusAttivi || [];
 
-        const matchBonus = getPlayerBonusPointsForMatch(nome, rBonusAttivi, rGol, rAssist);
+        const matchBonus = getPlayerBonusPointsForMatch(nome, rBonusAttivi, rGol, rAssist, allBonuses);
 
         gol += rGol;
         assist += rAssist;
@@ -151,8 +151,8 @@ export const calculatePlayerChampionshipStats = (nome: string, partiteChiuse: Pa
   };
 };
 
-export const getPlayerPriceForRoster = (nome: string, partiteChiuse: Partita[]): number => {
-  const stats = calculatePlayerChampionshipStats(nome, partiteChiuse);
+export const getPlayerPriceForRoster = (nome: string, partiteChiuse: Partita[], allBonuses: CustomBonusDef[] = DEFAULT_BONUSES): number => {
+  const stats = calculatePlayerChampionshipStats(nome, partiteChiuse, allBonuses);
   return getPlayerCurrentPrice(nome, stats.fantaScore);
 };
 
@@ -176,13 +176,18 @@ export interface DatabaseSchema {
   }[];
   fantasquadre?: Fantasquadra[];
   consigli?: Consiglio[];
+  bonuses?: CustomBonusDef[];
 }
 
 export interface CustomBonusDef {
   id: string;
   nome: string;
   descrizione: string;
-  punti: number | ((gol: number, assist: number) => number);
+  punti: number;
+  moltiplicatoreGol?: number;
+  moltiplicatoreAssist?: number;
+  isPersonale?: boolean;
+  giocatoreId?: string;
 }
 
 export const getPlayerBonusKey = (nomeCompleto: string): string | null => {
@@ -217,13 +222,19 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       id: "pinna_presidenziale",
       nome: "Bonus presidenziali 👑",
       descrizione: "I Gol (+3 pt extra) e gli Assist (+1 pt extra) dei Presidenti valgono il doppio!",
-      punti: (gol: number, assist: number) => (gol * 3) + (assist * 1), // Standard is added, so adding same amount doubles it
+      punti: 0,
+      moltiplicatoreGol: 3,
+      moltiplicatoreAssist: 1,
+      isPersonale: true,
+      giocatoreId: "Pinna"
     },
     {
       id: "pinna_lazzaro",
       nome: "Bonus Lazzaro 🩹",
       descrizione: "+5 punti se gioca almeno 1’ nonostante gli infortuni",
       punti: 5,
+      isPersonale: true,
+      giocatoreId: "Pinna"
     },
   ],
   Orlandini: [
@@ -231,13 +242,18 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       id: "orlandini_leggenda",
       nome: "Bonus Leggende 🌟",
       descrizione: "Ogni Gol segnato da vere Leggende del calcetto vale il doppio (+3 pt extra)",
-      punti: (gol: number) => gol * 3, // Doubles goals by adding an extra 3 points per goal
+      punti: 0,
+      moltiplicatoreGol: 3,
+      isPersonale: true,
+      giocatoreId: "Orlandini"
     },
     {
       id: "orlandini_buon_pastore",
       nome: "Bonus buon pastore 🐑",
       descrizione: "+2 punti se ci degna della sua presenza al campo",
       punti: 2,
+      isPersonale: true,
+      giocatoreId: "Orlandini"
     },
   ],
   Pittiu: [
@@ -246,12 +262,16 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       nome: "McBonus 🍟",
       descrizione: "+2 punti se posta foto in fast food nei giorni antecedenti la partita (tag alla squadra)",
       punti: 2,
+      isPersonale: true,
+      giocatoreId: "Pittiu"
     },
     {
       id: "pittiu_survivor",
       nome: "Bonus survivor 🛡️",
       descrizione: "+1 punto se conclude partita senza infortuni",
       punti: 1,
+      isPersonale: true,
+      giocatoreId: "Pittiu"
     },
   ],
   Pippia: [
@@ -260,18 +280,24 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       nome: "Bonus papà 🍼",
       descrizione: "+2 punti se si presenta al campo in qualsiasi veste dopo la nascita del figlio",
       punti: 2,
+      isPersonale: true,
+      giocatoreId: "Pippia"
     },
     {
       id: "pippia_baby_supporter",
       nome: "Bonus baby supporter 👶",
       descrizione: "+5 punti se pubblica story del figlio e tagga la società",
       punti: 5,
+      isPersonale: true,
+      giocatoreId: "Pippia"
     },
     {
       id: "pippia_baby_supporter_jersey",
       nome: "Bonus baby supporter + Maglia/Logo 👕👕",
       descrizione: "+10 punti se compaiono maglia o logo della squadra",
       punti: 10,
+      isPersonale: true,
+      giocatoreId: "Pippia"
     },
   ],
   Scarpellini: [
@@ -280,12 +306,16 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       nome: "Bonus tutela 🦵",
       descrizione: "+1 punto se si presenta al campo con ginocchiera",
       punti: 1,
+      isPersonale: true,
+      giocatoreId: "Scarpellini"
     },
     {
       id: "scarpellini_trio",
       nome: "Bonus Tu lo conosci il trio 🎭",
       descrizione: "+1 punto se cita Aldo, Giovanni e Giacomo prima, durante o dopo la partita",
       punti: 1,
+      isPersonale: true,
+      giocatoreId: "Scarpellini"
     },
   ],
   Palmas: [
@@ -294,12 +324,16 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       nome: "Bonus contabile 📊",
       descrizione: "+3 punti se i calcoli a fine partita sono corretti e corrispondono coi saldi",
       punti: 3,
+      isPersonale: true,
+      giocatoreId: "Palmas"
     },
     {
       id: "palmas_reietto",
       nome: "Bonus reietto 🥱",
       descrizione: "+1 punto se sta in panchina senza lamentarsi del minutaggio",
       punti: 1,
+      isPersonale: true,
+      giocatoreId: "Palmas"
     },
   ],
   Mulas: [
@@ -308,12 +342,16 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       nome: "Bonus Chiquita 🍌",
       descrizione: "+2 punti se addenta una banana durante la partita",
       punti: 2,
+      isPersonale: true,
+      giocatoreId: "Mulas"
     },
     {
       id: "mulas_levissima",
       nome: "Bonus Altissima, Purissima, Levissima 💧",
       descrizione: "+1 punto se si avvicina alla panchina per bere durante il match",
       punti: 1,
+      isPersonale: true,
+      giocatoreId: "Mulas"
     },
   ],
   Alimonda: [
@@ -322,12 +360,16 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       nome: "Bonus Mediterraneo 🫂",
       descrizione: "+1 punto se abbraccia Mulas dopo il gol",
       punti: 1,
+      isPersonale: true,
+      giocatoreId: "Alimonda"
     },
     {
       id: "alimonda_fabrillazione",
       nome: "Bonus Fabrillazione 💬",
       descrizione: "+1 punto se manda almeno 3 messaggi nella chat della squadra nel match day",
       punti: 1,
+      isPersonale: true,
+      giocatoreId: "Alimonda"
     },
   ],
   Lauro: [
@@ -336,12 +378,16 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       nome: "Bonus bibitone 🪣",
       descrizione: "+1 punto se porta in panchina la sua borraccia da 10 litri",
       punti: 1,
+      isPersonale: true,
+      giocatoreId: "Lauro"
     },
     {
       id: "lauro_divo",
       nome: "Bonus divo della grigliata 😎",
       descrizione: "+1 punto se si presenta al campo con gli occhiali da sole",
       punti: 1,
+      isPersonale: true,
+      giocatoreId: "Lauro"
     },
   ],
   Addis: [
@@ -350,12 +396,16 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       nome: "Bonus coprifuoco 🌃",
       descrizione: "+3 punti se si presenta al campo dopo le ore 21:00",
       punti: 3,
+      isPersonale: true,
+      giocatoreId: "Addis"
     },
     {
       id: "addis_rischiatutto",
       nome: "Bonus rischiatutto 🎲",
       descrizione: "+5 punti se si trattiene al campo dopo il match",
       punti: 5,
+      isPersonale: true,
+      giocatoreId: "Addis"
     },
   ],
   Scattu: [
@@ -364,12 +414,16 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       nome: "Bonus È arrivato l'arrotino 📢",
       descrizione: "+1 punto se carica la squadra con un suo classico urlaccio prima, durante o dopo la partita",
       punti: 1,
+      isPersonale: true,
+      giocatoreId: "Scattu"
     },
     {
       id: "scattu_sobrieta",
       nome: "Bonus sobrietà 🥛",
       descrizione: "+3 punti se si presenta al campo sobrio sorseggiando una bottiglietta d’acqua",
       punti: 3,
+      isPersonale: true,
+      giocatoreId: "Scattu"
     },
   ],
   Bayre: [
@@ -378,12 +432,16 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       nome: "Bonus Jeff Turner 🍺",
       descrizione: "+5 punti se si presenta in panchina in qualsiasi veste con una birra in mano",
       punti: 5,
+      isPersonale: true,
+      giocatoreId: "Bayre"
     },
     {
       id: "bayre_redivivo",
       nome: "Bonus redivivo 🧟",
       descrizione: "+10 punti se gioca almeno 1’",
       punti: 10,
+      isPersonale: true,
+      giocatoreId: "Bayre"
     },
   ],
   Carrone: [
@@ -392,12 +450,16 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       nome: "Bonus PoleMichele 🤬🚫",
       descrizione: "+7 punti se chiude una partita senza lamentarsi con l’arbitro",
       punti: 7,
+      isPersonale: true,
+      giocatoreId: "Carrone"
     },
     {
       id: "carrone_atleta",
       nome: "Bonus atleta provetto 🏃‍♂️",
       descrizione: "+1 punto se nel riscaldamento, anziché tirare, fa almeno 2 giri di campo di corsa",
       punti: 1,
+      isPersonale: true,
+      giocatoreId: "Carrone"
     },
   ],
   Conti: [
@@ -406,12 +468,16 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       nome: "Bonus memoria di ferro 🧠",
       descrizione: "+1 punto se chiude una partita senza sbagliare nomi dei compagni",
       punti: 1,
+      isPersonale: true,
+      giocatoreId: "Conti"
     },
     {
       id: "conti_fedelta",
       nome: "Bonus fedeltà 🫡",
       descrizione: "+1 punto se nel match day conferma la sua presenza con messaggio in chat",
       punti: 1,
+      isPersonale: true,
+      giocatoreId: "Conti"
     },
   ],
   Mattana: [
@@ -420,12 +486,16 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       nome: "Bonus Pogačar 🚲",
       descrizione: "+1 punto se si presenta al campo in bicicletta",
       punti: 1,
+      isPersonale: true,
+      giocatoreId: "Mattana"
     },
     {
       id: "mattana_optana",
       nome: "Bonus Opta(na) 📊",
       descrizione: "+1 punto se prima o dopo il match effettua un riepilogo delle sue statistiche",
       punti: 1,
+      isPersonale: true,
+      giocatoreId: "Mattana"
     },
   ],
   Garau: [
@@ -434,12 +504,16 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       nome: "Bonus Piscina 🏊‍♂️",
       descrizione: "+5 punti se invita un compagno a non 'buttarsi' o simulare in partita",
       punti: 5,
+      isPersonale: true,
+      giocatoreId: "Garau"
     },
     {
       id: "garau_fedelta",
       nome: "Bonus Fedeltà 🤝",
       descrizione: "+3 punti se dà la disponibilità a giocare, anche se c'è già l'adesione di Mulas",
       punti: 3,
+      isPersonale: true,
+      giocatoreId: "Garau"
     },
   ],
 };
@@ -651,39 +725,34 @@ export const GENERIC_BONUSES: CustomBonusDef[] = [
   }
 ];
 
+export const DEFAULT_BONUSES: CustomBonusDef[] = [
+  ...GENERIC_BONUSES,
+  ...Object.values(PLAYER_CUSTOM_BONUSES).flat()
+];
+
 export const getPlayerBonusPointsForMatch = (
   nomeCompleto: string,
   bonusAttivi: string[],
   gol: number,
-  assist: number
+  assist: number,
+  allBonuses: CustomBonusDef[] = DEFAULT_BONUSES
 ): number => {
   let tot = 0;
   
-  // 1. Controlla bonus personali
-  const key = getPlayerBonusKey(nomeCompleto);
-  if (key && PLAYER_CUSTOM_BONUSES[key]) {
-    const list = PLAYER_CUSTOM_BONUSES[key];
-    for (const bId of bonusAttivi) {
-      const bonus = list.find(b => b.id === bId);
-      if (bonus) {
-        if (typeof bonus.punti === "function") {
-          tot += bonus.punti(gol, assist);
-        } else {
-          tot += bonus.punti;
-        }
-      }
-    }
-  }
-
-  // 2. Controlla bonus generici
+  if (!allBonuses) return 0;
+  
   for (const bId of bonusAttivi) {
-    const bonus = GENERIC_BONUSES.find(b => b.id === bId);
-    if (bonus) {
-      if (typeof bonus.punti === "function") {
-        tot += bonus.punti(gol, assist);
-      } else {
-        tot += bonus.punti;
+    const b = allBonuses.find(x => x.id === bId);
+    if (b) {
+      if (b.isPersonale && b.giocatoreId && getPlayerBonusKey(nomeCompleto) !== b.giocatoreId) {
+        continue;
       }
+      
+      let pts = b.punti || 0;
+      if (b.moltiplicatoreGol) pts += (b.moltiplicatoreGol * gol);
+      if (b.moltiplicatoreAssist) pts += (b.moltiplicatoreAssist * assist);
+      
+      tot += pts;
     }
   }
 
@@ -694,29 +763,24 @@ export const getPlayerBonusBreakdownForMatch = (
   nomeCompleto: string,
   bonusAttivi: string[],
   gol: number,
-  assist: number
+  assist: number,
+  allBonuses: CustomBonusDef[] = DEFAULT_BONUSES
 ): { nome: string, puntiVal: number }[] => {
   const breakdown: { nome: string, puntiVal: number }[] = [];
   
-  // 1. Controlla bonus personali
-  const key = getPlayerBonusKey(nomeCompleto);
-  if (key && PLAYER_CUSTOM_BONUSES[key]) {
-    const list = PLAYER_CUSTOM_BONUSES[key];
-    for (const bId of bonusAttivi) {
-      const bonus = list.find(b => b.id === bId);
-      if (bonus) {
-        const p = typeof bonus.punti === "function" ? bonus.punti(gol, assist) : bonus.punti;
-        breakdown.push({ nome: bonus.nome, puntiVal: p });
-      }
-    }
-  }
-
-  // 2. Controlla bonus generici
+  if (!allBonuses) return breakdown;
+  
   for (const bId of bonusAttivi) {
-    const bonus = GENERIC_BONUSES.find(b => b.id === bId);
-    if (bonus) {
-      const p = typeof bonus.punti === "function" ? bonus.punti(gol, assist) : bonus.punti;
-      breakdown.push({ nome: bonus.nome, puntiVal: p });
+    const b = allBonuses.find(x => x.id === bId);
+    if (b) {
+      if (b.isPersonale && b.giocatoreId && getPlayerBonusKey(nomeCompleto) !== b.giocatoreId) {
+        continue;
+      }
+      
+      let pts = b.punti || 0;
+      if (b.moltiplicatoreGol) pts += (b.moltiplicatoreGol * gol);
+      if (b.moltiplicatoreAssist) pts += (b.moltiplicatoreAssist * assist);
+      breakdown.push({ nome: b.nome, puntiVal: pts });
     }
   }
 

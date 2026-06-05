@@ -763,14 +763,15 @@ async function getDb(token?: string, bypassCache: boolean = false): Promise<Data
   if (!localDb.fantasquadre) localDb.fantasquadre = [];
   if (!localDb.consigli) localDb.consigli = [];
 
-  // Integrate Firestore data into localDb as the baseline source of truth
-  if (firestoreDb) {
-    if (firestoreDb.giocatori.length > 0) localDb.giocatori = firestoreDb.giocatori;
-    if (firestoreDb.partite.length > 0) localDb.partite = firestoreDb.partite;
-    if (firestoreDb.campi.length > 0) localDb.campi = firestoreDb.campi;
-    if (firestoreDb.logs && firestoreDb.logs.length > 0) localDb.logs = firestoreDb.logs;
-    
-    // For arrays, merge to prevent data loss
+    // Integrate Firestore data into localDb as the baseline source of truth
+    if (firestoreDb) {
+      if (firestoreDb.giocatori.length > 0) localDb.giocatori = firestoreDb.giocatori;
+      if (firestoreDb.partite.length > 0) localDb.partite = firestoreDb.partite;
+      if (firestoreDb.campi.length > 0) localDb.campi = firestoreDb.campi;
+      if (firestoreDb.logs && firestoreDb.logs.length > 0) localDb.logs = firestoreDb.logs;
+      if (firestoreDb.bonuses) localDb.bonuses = firestoreDb.bonuses;
+      
+      // For arrays, merge to prevent data loss
     const fantaMap = new Map<string, Fantasquadra>();
     for (const fs of localDb.fantasquadre) fantaMap.set(fs.id || fs.nomeFantasquadra, fs);
     for (const fs of firestoreDb.fantasquadre || []) fantaMap.set(fs.id || fs.nomeFantasquadra, Object.assign({}, fantaMap.get(fs.id || fs.nomeFantasquadra), fs));
@@ -876,6 +877,7 @@ async function getDb(token?: string, bypassCache: boolean = false): Promise<Data
         await saveToSheetsInternal(activeToken, spreadsheetId, localDb);
         sheetsDb = localDb;
       } else {
+        if (localDb.bonuses) sheetsDb.bonuses = localDb.bonuses;
         await safeWriteDb(JSON.stringify(sheetsDb, null, 2));
       }
 
@@ -1923,14 +1925,33 @@ async function startServer() {
       for (const r of referto) {
         if (r.pagaQuota === true) paganti++;
       }
-      const quotaInd = paganti > 0 ? costoFinale / paganti : 0;
+      
+      const totaleEuro = parseFloat(costoFinale) || 0;
+      let baseQuota = 0;
+      let remainderCents = 0;
+      
+      if (paganti > 0) {
+        const totaleCents = Math.round(totaleEuro * 100);
+        baseQuota = Math.floor(totaleCents / paganti) / 100;
+        remainderCents = totaleCents % paganti;
+      }
+      
+      let distributedCents = 0;
 
       // Revert player's balances and statistics
       for (const g of db.giocatori) {
         const dRef = referto.find(r => r.nome === g.nome);
         if (dRef) {
           if (dRef.pagaQuota) {
-            const qToRestore = dRef.quotaMaturata !== undefined ? dRef.quotaMaturata : quotaInd;
+            let qToRestore = baseQuota;
+            if (dRef.quotaMaturata !== undefined) {
+               qToRestore = dRef.quotaMaturata;
+            } else {
+               if (distributedCents < remainderCents) {
+                 qToRestore = parseFloat((qToRestore + 0.01).toFixed(2));
+                 distributedCents++;
+               }
+            }
             g.saldo = parseFloat((g.saldo + qToRestore).toFixed(2));
           }
           g.gol = Math.max(0, g.gol - (dRef.gol || 0));
@@ -1982,14 +2003,33 @@ async function startServer() {
       for (const r of referto) {
         if (r.pagaQuota === true) paganti++;
       }
-      const quotaInd = paganti > 0 ? costoFinale / paganti : 0;
+      
+      const totaleEuro = parseFloat(costoFinale) || 0;
+      let baseQuota = 0;
+      let remainderCents = 0;
+      
+      if (paganti > 0) {
+        const totaleCents = Math.round(totaleEuro * 100);
+        baseQuota = Math.floor(totaleCents / paganti) / 100;
+        remainderCents = totaleCents % paganti;
+      }
+      
+      let distributedCents = 0;
 
       // Revert player's balance and statistics
       for (const g of db.giocatori) {
         const dRef = referto.find(r => r.nome === g.nome);
         if (dRef) {
           if (dRef.pagaQuota) {
-            const qToRestore = dRef.quotaMaturata !== undefined ? dRef.quotaMaturata : quotaInd;
+            let qToRestore = baseQuota;
+            if (dRef.quotaMaturata !== undefined) {
+               qToRestore = dRef.quotaMaturata;
+            } else {
+               if (distributedCents < remainderCents) {
+                 qToRestore = parseFloat((qToRestore + 0.01).toFixed(2));
+                 distributedCents++;
+               }
+            }
             g.saldo = parseFloat((g.saldo + qToRestore).toFixed(2));
           }
           g.gol = Math.max(0, g.gol - (dRef.gol || 0));
@@ -2142,11 +2182,23 @@ async function startServer() {
 
       const token = getAuthToken(req);
       const db = await getDb(token);
-      const quotaInd = parseFloat(importoTotale) / giocatoriSelezionati.length;
+      const totaleEuro = parseFloat(importoTotale);
+      const totaleCents = Math.round(totaleEuro * 100);
+      const paganti = giocatoriSelezionati.length;
+      
+      const baseQuota = paganti > 0 ? Math.floor(totaleCents / paganti) / 100 : 0;
+      const remainderCents = paganti > 0 ? totaleCents % paganti : 0;
+
+      let distributedCents = 0;
 
       for (const g of db.giocatori) {
         if (giocatoriSelezionati.includes(g.nome)) {
-          g.saldo = parseFloat((g.saldo - quotaInd).toFixed(2));
+          let quotaToDeduct = baseQuota;
+          if (distributedCents < remainderCents) {
+            quotaToDeduct = parseFloat((quotaToDeduct + 0.01).toFixed(2));
+            distributedCents++;
+          }
+          g.saldo = parseFloat((g.saldo - quotaToDeduct).toFixed(2));
         }
       }
 
@@ -2154,9 +2206,31 @@ async function startServer() {
         data: new Date().toLocaleString("it-IT"),
         operazione: "Spesa Condivisa",
         importo: importoTotale.toString(),
-        dettagli: `Dividi spesa '${causale}' (${importoTotale}€), addebitati ${quotaInd.toFixed(2)}€ a ${giocatoriSelezionati.length} persone`
+        dettagli: `Dividi spesa '${causale}' (${importoTotale}€), addebitati ~${baseQuota.toFixed(2)}€ a ${giocatoriSelezionati.length} persone`
       });
 
+      await saveDb(db, token);
+      sendDbResponse(res, db);
+    } catch (error: any) {
+      res.status(500).json({ erroreCritico: error.message });
+    }
+  });
+
+  // 18. GESTIONE BONUS E MALUS
+  app.post("/api/update_bonuses", async (req, res) => {
+    try {
+      const { bonuses } = req.body;
+      const token = getAuthToken(req);
+      const db = await getDb(token);
+      db.bonuses = bonuses;
+      
+      db.logs.push({
+        data: new Date().toLocaleString("it-IT"),
+        operazione: "Gestione Bonus/Malus",
+        importo: "-",
+        dettagli: "Aggiornato il regolamento dei Bonus e Malus nel Database."
+      });
+      
       await saveDb(db, token);
       sendDbResponse(res, db);
     } catch (error: any) {

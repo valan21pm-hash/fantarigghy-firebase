@@ -365,6 +365,10 @@ export default function App() {
     return await executePostAction("/api/fantasquadre/elimina", { id });
   };
 
+  const handleUpdateBonuses = async (bonuses: CustomBonusDef[]) => {
+    return await executePostAction("/api/update_bonuses", { bonuses });
+  };
+
   // 6. Consigli/Miglioramenti callbacks
   const handleCreaConsiglio = async (autore: string, testo: string) => {
     return await executePostAction("/api/consigli/crea", { autore, testo });
@@ -403,9 +407,11 @@ export default function App() {
         fantasquadre={data?.fantasquadre || []}
         partiteChiuse={partiteChiuse}
         partiteAperte={partiteAperte}
+        bonuses={data?.bonuses}
         onIscriviFantasquadra={handleIscriviFantasquadra}
         onEliminaFantasquadra={handleEliminaFantasquadra}
         onCreaConsiglio={handleCreaConsiglio}
+        onUpdateBonuses={handleUpdateBonuses}
         consigli={data?.consigli || []}
         isEditor={isEditor}
         isAdminMode={false}
@@ -746,9 +752,11 @@ export default function App() {
               fantasquadre={data?.fantasquadre || []}
               partiteChiuse={partiteChiuse}
               partiteAperte={partiteAperte}
+              bonuses={data?.bonuses}
               onIscriviFantasquadra={handleIscriviFantasquadra}
               onEliminaFantasquadra={handleEliminaFantasquadra}
               onCreaConsiglio={handleCreaConsiglio}
+              onUpdateBonuses={handleUpdateBonuses}
               consigli={data?.consigli || []}
               isEditor={isEditor}
               isAdminMode={true}
