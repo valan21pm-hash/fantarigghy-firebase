@@ -32,6 +32,7 @@ interface PlayerListProps {
   ) => Promise<void>;
   onEditPlayer: (nomeOriginale: string, dati: Partial<Giocatore>) => Promise<void>;
   onMigrate: () => Promise<void>;
+  onEmergencyReset: () => Promise<void>;
   isEditor?: boolean;
 }
 
@@ -46,6 +47,7 @@ export default function PlayerList({
   onDividiSpesa,
   onEditPlayer,
   onMigrate,
+  onEmergencyReset,
   isEditor = false,
 }: PlayerListProps) {
   // Filter and Search States
@@ -229,6 +231,14 @@ export default function PlayerList({
                 className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 rounded-lg text-xs font-bold text-white flex items-center gap-1 cursor-pointer shadow-sm transition-colors"
               >
                 <Copy className="h-3.5 w-3.5" /> Importa Sheets
+              </button>
+              {/* Pulsante di emergenza disattivato in stand-by fino a nuova richiesta */}
+              <button
+                disabled={true}
+                className="px-3 py-1.5 bg-red-800 opacity-50 rounded-lg text-xs font-bold text-white flex items-center gap-1 cursor-not-allowed shadow-sm"
+                title="Funzione disattivata"
+              >
+                <Trash2 className="h-3.5 w-3.5" /> Emergenza Ripristino
               </button>
               <button
                 onClick={() => {

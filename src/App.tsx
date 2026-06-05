@@ -374,6 +374,11 @@ export default function App() {
     return await executePostAction("/api/migrate-sheets-to-firestore", {});
   };
 
+  const handleEmergencyReset = async () => {
+    // TBD: Placeholder for actual implementation when enabled
+    console.warn("Emergency reset requested");
+  };
+
   // 6. Consigli/Miglioramenti callbacks
   const handleCreaConsiglio = async (autore: string, testo: string) => {
     return await executePostAction("/api/consigli/crea", { autore, testo });
@@ -708,6 +713,7 @@ export default function App() {
               onDividiSpesa={handleDividiSpesa}
               onEditPlayer={handleEditPlayer}
               onMigrate={handleMigrate}
+              onEmergencyReset={handleEmergencyReset}
               isEditor={isEditor}
             />
           )}
