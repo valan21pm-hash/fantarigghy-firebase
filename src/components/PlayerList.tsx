@@ -31,6 +31,7 @@ interface PlayerListProps {
     giocatori: string[]
   ) => Promise<void>;
   onEditPlayer: (nomeOriginale: string, dati: Partial<Giocatore>) => Promise<void>;
+  onMigrate: () => Promise<void>;
   isEditor?: boolean;
 }
 
@@ -44,6 +45,7 @@ export default function PlayerList({
   onVersaQuotaMassivo,
   onDividiSpesa,
   onEditPlayer,
+  onMigrate,
   isEditor = false,
 }: PlayerListProps) {
   // Filter and Search States
@@ -217,6 +219,17 @@ export default function PlayerList({
         <div className="flex flex-wrap gap-2">
           {isEditor && (
             <>
+              <button
+                onClick={async () => {
+                  if (confirm("Sei sicuro di voler importare i dati mancanti da Sheets?")) {
+                    await onMigrate();
+                    alert("Importazione completata!");
+                  }
+                }}
+                className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 rounded-lg text-xs font-bold text-white flex items-center gap-1 cursor-pointer shadow-sm transition-colors"
+              >
+                <Copy className="h-3.5 w-3.5" /> Importa Sheets
+              </button>
               <button
                 onClick={() => {
                   setIsAdding(!isAdding);

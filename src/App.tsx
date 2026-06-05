@@ -370,6 +370,10 @@ export default function App() {
     return await executePostAction("/api/update_bonuses", { bonuses });
   };
 
+  const handleMigrate = async () => {
+    return await executePostAction("/api/migrate-sheets-to-firestore", {});
+  };
+
   // 6. Consigli/Miglioramenti callbacks
   const handleCreaConsiglio = async (autore: string, testo: string) => {
     return await executePostAction("/api/consigli/crea", { autore, testo });
@@ -703,6 +707,7 @@ export default function App() {
               onVersaQuotaMassivo={handleVersaQuotaMassivo}
               onDividiSpesa={handleDividiSpesa}
               onEditPlayer={handleEditPlayer}
+              onMigrate={handleMigrate}
               isEditor={isEditor}
             />
           )}
@@ -772,6 +777,7 @@ export default function App() {
               onEliminaFantasquadra={handleEliminaFantasquadra}
               onCreaConsiglio={handleCreaConsiglio}
               onUpdateBonuses={handleUpdateBonuses}
+              onMigrate={handleMigrate}
               consigli={data?.consigli || []}
               isEditor={isEditor}
               isAdminMode={true}
