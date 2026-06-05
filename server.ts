@@ -655,8 +655,7 @@ async function processPendingSync() {
     console.log("[Google Sheets Async Sync] Backup completato ed allineato con successo!");
     globalSyncError = null;
     if (memoryCache) {
-      memoryCache.isGoogleSheetsSynced = true;
-      memoryCache.syncError = null;
+      // Removed sync status logic
     }
   } catch (err: any) {
     const errMsg = (err.message || "").toLowerCase();
@@ -694,8 +693,7 @@ async function processPendingSync() {
         globalSyncError = "Errore di accesso dell'Account di Servizio sul foglio. Verifica che l'email del Service Account sia Editor sul file condiviso.";
       }
       if (memoryCache) {
-        memoryCache.isGoogleSheetsSynced = false;
-        memoryCache.syncError = globalSyncError;
+        // Removed sync status logic
       }
       pendingSyncTask = null;
       if (sheetsSyncTimeout) {
@@ -707,8 +705,7 @@ async function processPendingSync() {
         console.log("[Google Sheets Async Sync] Sheets API is disabled. Skipped writing directly.");
         globalSyncError = null;
         if (memoryCache) {
-          memoryCache.isGoogleSheetsSynced = false;
-          memoryCache.syncError = null;
+          // Removed sync status logic
         }
         pendingSyncTask = null;
         if (sheetsSyncTimeout) {
@@ -718,8 +715,7 @@ async function processPendingSync() {
       } else {
         globalSyncError = err.message;
         if (memoryCache) {
-          memoryCache.isGoogleSheetsSynced = true; // Sincronizzazione mai sospesa
-          memoryCache.syncError = err.message;
+          // Removed sync status logic
         }
         
         // Put task back for another retry in 10s if no newer updates came in
@@ -751,8 +747,6 @@ async function getDb(token?: string, bypassCache: boolean = false): Promise<Data
   // If memory cache exists and is fresh OR we have a newer local update pending sync,
   // serve the local write state immediately (essential to prevent data race loops)
   if (memoryCache && !bypassCache && (now - lastCacheFetchTime < CACHE_TTL_MS || pendingSyncTask !== null)) {
-    memoryCache.isGoogleSheetsSynced = !pendingSyncTask && !globalSyncError;
-    memoryCache.syncError = globalSyncError;
     return memoryCache;
   }
 
@@ -885,8 +879,6 @@ async function getDb(token?: string, bypassCache: boolean = false): Promise<Data
         await safeWriteDb(JSON.stringify(sheetsDb, null, 2));
       }
 
-      sheetsDb.isGoogleSheetsSynced = true;
-      sheetsDb.syncError = null;
       globalSyncError = null;
 
       memoryCache = sheetsDb;
@@ -932,16 +924,12 @@ async function getDb(token?: string, bypassCache: boolean = false): Promise<Data
         }
       }
       
-      localDb.isGoogleSheetsSynced = activeToken ? true : false;
-      localDb.syncError = globalSyncError;
       memoryCache = localDb;
       lastCacheFetchTime = now;
       return localDb;
     }
   }
 
-  localDb.isGoogleSheetsSynced = activeToken ? true : false;
-  localDb.syncError = globalSyncError;
   memoryCache = localDb;
   lastCacheFetchTime = now;
   return localDb;
@@ -991,8 +979,6 @@ function sendDbResponse(res: express.Response, db: DatabaseSchema) {
     logs: db.logs || [],
     fantasquadre: db.fantasquadre || [],
     consigli: db.consigli || [],
-    syncError: db.syncError || null,
-    isGoogleSheetsSynced: !!db.isGoogleSheetsSynced
   });
 }
 

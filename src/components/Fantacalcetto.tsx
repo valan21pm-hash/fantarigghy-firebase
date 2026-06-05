@@ -28,7 +28,7 @@ import {
   Info,
   X
 } from "lucide-react";
-import { Giocatore, Fantasquadra, Partita, PLAYER_CUSTOM_BONUSES, getPlayerBonusKey, getPlayerBonusPointsForMatch, GENERIC_BONUSES, getPlayerPriceForRoster, getPlayerCurrentPrice, getPlayerBasePrice, MAX_BUDGET, getLastName } from "../types";
+import { Giocatore, Fantasquadra, Partita, PLAYER_CUSTOM_BONUSES, getPlayerBonusKey, getPlayerBonusPointsForMatch, getPlayerBonusBreakdownForMatch, GENERIC_BONUSES, getPlayerPriceForRoster, getPlayerCurrentPrice, getPlayerBasePrice, MAX_BUDGET, getLastName } from "../types";
 
 import { generateMatchPdf, generateGeneralReportPdf } from "../lib/pdfHelper";
 
@@ -44,7 +44,6 @@ interface FantacalcettoProps {
   isEditor: boolean;
   isAdminMode: boolean; // false if viewing as a public portal page
   onRefreshData?: () => Promise<void>;
-  isGoogleSheetsSynced?: boolean;
 }
 
 // Fantasy Point Formula constants
@@ -64,8 +63,7 @@ export default function Fantacalcetto({
   consigli = [],
   isEditor,
   isAdminMode,
-  onRefreshData,
-  isGoogleSheetsSynced
+  onRefreshData
 }: FantacalcettoProps) {
   // Public Portal state loaders
   const [activePublicTab, setActivePublicTab] = useState<"classifica" | "partite" | "iscrizione" | "convocazioni">("classifica");
@@ -403,6 +401,15 @@ export default function Fantacalcetto({
         const rBonusAttivi = r ? r.bonusAttivi || [] : [];
         
         const bonusPts = r ? getPlayerBonusPointsForMatch(pName, rBonusAttivi, rGol, rAssist) : 0;
+        
+        let bonusBreakdownStr = "";
+        if (r && rBonusAttivi.length > 0) {
+          const breakdown = getPlayerBonusBreakdownForMatch(pName, rBonusAttivi, rGol, rAssist);
+          if (breakdown.length > 0) {
+            bonusBreakdownStr = breakdown.map(b => `${b.nome} (${b.puntiVal > 0 ? "+" : ""}${b.puntiVal})`).join(", ") + ` [Tot: ${bonusPts > 0 ? "+" : ""}${bonusPts}]`;
+          }
+        }
+        
         const fantaScore = r ? parseFloat(((rGol * GOAL_POINTS) + (rAssist * ASSIST_POINTS) + (rAmm * AMMO_POINTS) + (rEsp * ESPU_POINTS) + bonusPts).toFixed(1)) : 0;
 
         return {
@@ -412,6 +419,7 @@ export default function Fantacalcetto({
           amm: rAmm,
           rossi: rEsp,
           bonusPts,
+          bonusBreakdownStr,
           fantaScore,
           played: !!played
         };
@@ -2147,7 +2155,11 @@ export default function Fantacalcetto({
                                                 if (kpi.assist > 0) highlights.push(`🤝 ${kpi.assist} Assist (+${kpi.assist * 1})`);
                                                 if (kpi.amm > 0) highlights.push(`🟨 ${kpi.amm} Amm (-${kpi.amm * 0.5})`);
                                                 if (kpi.rossi > 0) highlights.push(`🟥 ${kpi.rossi} Esp (-${kpi.rossi * 1})`);
-                                                if (kpi.bonusPts !== 0) highlights.push(`🎒 ${kpi.bonusPts > 0 ? "+" : ""}${kpi.bonusPts} Bonus`);
+                                                if (kpi.bonusBreakdownStr) {
+                                                  highlights.push(`🎒 Bonus: ${kpi.bonusBreakdownStr}`);
+                                                } else if (kpi.bonusPts !== 0) {
+                                                  highlights.push(`🎒 ${kpi.bonusPts > 0 ? "+" : ""}${kpi.bonusPts} Bonus`);
+                                                }
 
                                                 const isSostituito = kpi.stato === "Sostituito";
                                                 const isSubentrato = kpi.stato === "Subentrato";
@@ -3648,7 +3660,11 @@ export default function Fantacalcetto({
                                       if (kpi.assist > 0) highlights.push(`🤝 ${kpi.assist} Assist (+${kpi.assist * 1})`);
                                       if (kpi.amm > 0) highlights.push(`🟨 ${kpi.amm} Amm (-${kpi.amm * 0.5})`);
                                       if (kpi.rossi > 0) highlights.push(`🟥 ${kpi.rossi} Esp (-${kpi.rossi * 1})`);
-                                      if (kpi.bonusPts !== 0) highlights.push(`🎒 ${kpi.bonusPts > 0 ? "+" : ""}${kpi.bonusPts} Bonus`);
+                                      if (kpi.bonusBreakdownStr) {
+                                        highlights.push(`🎒 Bonus: ${kpi.bonusBreakdownStr}`);
+                                      } else if (kpi.bonusPts !== 0) {
+                                        highlights.push(`🎒 ${kpi.bonusPts > 0 ? "+" : ""}${kpi.bonusPts} Bonus`);
+                                      }
 
                                       const isSostituito = kpi.stato === "Sostituito";
                                       const isSubentrato = kpi.stato === "Subentrato";

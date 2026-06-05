@@ -11,8 +11,6 @@ interface NavbarProps {
   user: any;
   onLogin: () => void;
   onLogout: () => void;
-  isGoogleSheetsSynced?: boolean;
-  syncError?: string | null;
   unreadConsigliCount: number;
   onOpenConsigli: () => void;
 }
@@ -23,8 +21,6 @@ export default function Navbar({
   user,
   onLogin,
   onLogout,
-  isGoogleSheetsSynced = false,
-  syncError = null,
   unreadConsigliCount,
   onOpenConsigli,
 }: NavbarProps) {
@@ -50,35 +46,19 @@ export default function Navbar({
 
         {/* Right side widgets: Google Sync, Fund Tracker and Logs Button */}
         <div className="flex items-center gap-3">
-          {/* OAuth Sync Indicator */}
+          {/* Firestore Sync Indicator */}
           <div className="flex items-center shrink-0">
             {user ? (
               <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 h-8">
-                {isGoogleSheetsSynced ? (
-                  <>
-                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                    <span className="text-[11px] font-bold uppercase text-green-400 tracking-wider hidden sm:inline">
-                      Sheets
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-sm leading-none" title="Errore Sync">⚠️</span>
-                    <button
-                      type="button"
-                      onClick={onLogin}
-                      className="text-[10px] uppercase font-extrabold text-amber-400 hover:text-amber-300 cursor-pointer"
-                      title="Forza Accesso per riprovare"
-                    >
-                      Login
-                    </button>
-                    <span className="text-slate-600">|</span>
-                  </>
-                )}
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span className="text-[11px] font-bold uppercase text-green-400 tracking-wider hidden sm:inline">
+                  Firestore Sync
+                </span>
+                <span className="text-slate-600 ml-1">|</span>
                 <button
                   type="button"
                   onClick={onLogout}
-                  className="text-[10px] uppercase font-extrabold text-slate-300 hover:text-white transition-colors cursor-pointer"
+                  className="text-[10px] uppercase font-extrabold text-slate-300 hover:text-white transition-colors cursor-pointer ml-1"
                   title="Disconnetti l'account Google"
                 >
                   Esci

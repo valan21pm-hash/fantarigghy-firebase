@@ -410,7 +410,6 @@ export default function App() {
         isEditor={isEditor}
         isAdminMode={false}
         onRefreshData={() => fetchDatabase(undefined, true)}
-        isGoogleSheetsSynced={data?.isGoogleSheetsSynced}
       />
     );
   }
@@ -507,8 +506,6 @@ export default function App() {
         user={user}
         onLogin={handleLogin}
         onLogout={handleLogout}
-        isGoogleSheetsSynced={data?.isGoogleSheetsSynced}
-        syncError={data?.syncError}
         unreadConsigliCount={data?.consigli?.filter(c => !c.letto).length || 0}
         onOpenConsigli={() => setShowConsigliMenu(true)}
       />
@@ -756,7 +753,6 @@ export default function App() {
               isEditor={isEditor}
               isAdminMode={true}
               onRefreshData={() => fetchDatabase(undefined, true)}
-              isGoogleSheetsSynced={data?.isGoogleSheetsSynced}
             />
           )}
         </div>

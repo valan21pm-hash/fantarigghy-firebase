@@ -175,8 +175,6 @@ export interface DatabaseSchema {
   }[];
   fantasquadre?: Fantasquadra[];
   consigli?: Consiglio[];
-  syncError?: string | null;
-  isGoogleSheetsSynced?: boolean;
 }
 
 export interface CustomBonusDef {
@@ -689,5 +687,38 @@ export const getPlayerBonusPointsForMatch = (
   }
 
   return tot;
+};
+
+export const getPlayerBonusBreakdownForMatch = (
+  nomeCompleto: string,
+  bonusAttivi: string[],
+  gol: number,
+  assist: number
+): { nome: string, puntiVal: number }[] => {
+  const breakdown: { nome: string, puntiVal: number }[] = [];
+  
+  // 1. Controlla bonus personali
+  const key = getPlayerBonusKey(nomeCompleto);
+  if (key && PLAYER_CUSTOM_BONUSES[key]) {
+    const list = PLAYER_CUSTOM_BONUSES[key];
+    for (const bId of bonusAttivi) {
+      const bonus = list.find(b => b.id === bId);
+      if (bonus) {
+        const p = typeof bonus.punti === "function" ? bonus.punti(gol, assist) : bonus.punti;
+        breakdown.push({ nome: bonus.nome, puntiVal: p });
+      }
+    }
+  }
+
+  // 2. Controlla bonus generici
+  for (const bId of bonusAttivi) {
+    const bonus = GENERIC_BONUSES.find(b => b.id === bId);
+    if (bonus) {
+      const p = typeof bonus.punti === "function" ? bonus.punti(gol, assist) : bonus.punti;
+      breakdown.push({ nome: bonus.nome, puntiVal: p });
+    }
+  }
+
+  return breakdown;
 };
 

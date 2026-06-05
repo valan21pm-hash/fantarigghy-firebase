@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { getPlayerBonusPointsForMatch } from "../types";
+import { getPlayerBonusPointsForMatch, getPlayerBonusBreakdownForMatch } from "../types";
 
 export const generateMatchPdf = (teamName: string, mb: any) => {
   const doc = new jsPDF();
@@ -290,7 +290,14 @@ export const generateGeneralReportPdf = (
         if (rEsp > 0) highlights.push(`${rEsp} Espulso (-1)`);
         
         const bonusPts = getPlayerBonusPointsForMatch(r.nome, rBonusAttivi, rGol, rAssist);
-        if (bonusPts !== 0) highlights.push(`Bonus Extra: ${bonusPts > 0 ? "+" : ""}${bonusPts}`);
+        const breakdown = getPlayerBonusBreakdownForMatch(r.nome, rBonusAttivi, rGol, rAssist);
+        if (breakdown.length > 0) {
+          const breakdownStr = breakdown.map(b => `${b.nome} (${b.puntiVal > 0 ? "+" : ""}${b.puntiVal})`).join(", ");
+          highlights.push(`Bonus Extra: ${breakdownStr} [Totale: ${bonusPts > 0 ? "+" : ""}${bonusPts}]`);
+        } else if (bonusPts !== 0) {
+          // Fallback in case some bonus wasn't parsed properly
+          highlights.push(`Bonus Extra: ${bonusPts > 0 ? "+" : ""}${bonusPts}`);
+        }
         
         const displayPtsValue = (rGol * 3) + (rAssist * 1) + (rAmm * -0.5) + (rEsp * -1) + bonusPts;
         const ptsDisplay = displayPtsValue > 0 ? `+${displayPtsValue}` : `${displayPtsValue}`;
