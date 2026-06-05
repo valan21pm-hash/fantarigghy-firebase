@@ -29,6 +29,7 @@ export interface RefertoGiocatore {
   subitiRigore: number;
   subitiPiazzato: number;
   pagaQuota: boolean;
+  quotaMaturata?: number;
   bonusAttivi?: string[];
   statoPresenza?: "giocato" | "assente" | "sostituito";
   sostitutoDa?: string;

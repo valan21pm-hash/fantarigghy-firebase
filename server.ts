@@ -1766,12 +1766,34 @@ async function startServer() {
       }
       const vecchiaQuotaInd = vecchiPaganti > 0 ? vecchioCosto / vecchiPaganti : 0;
 
-      // New quota individual
+      // Exact individual cost calculation handling remainder cents for updated referto
       let nuoviPaganti = 0;
       for (const r of referto) {
         if (r.pagaQuota) nuoviPaganti++;
       }
-      const nuovaQuotaInd = nuoviPaganti > 0 ? parseFloat(costo) / nuoviPaganti : 0;
+      const totaleEuro = parseFloat(costo) || 0;
+      let baseQuota = 0;
+      let remainderCents = 0;
+      
+      if (nuoviPaganti > 0) {
+        const totaleCents = Math.round(totaleEuro * 100);
+        baseQuota = Math.floor(totaleCents / nuoviPaganti) / 100;
+        remainderCents = totaleCents % nuoviPaganti;
+      }
+      
+      let distributedCents = 0;
+      for (const r of referto) {
+        if (r.pagaQuota) {
+          let quotaToDeduct = baseQuota;
+          if (distributedCents < remainderCents) {
+            quotaToDeduct = parseFloat((quotaToDeduct + 0.01).toFixed(2));
+            distributedCents++;
+          }
+          r.quotaMaturata = quotaToDeduct;
+        } else {
+          r.quotaMaturata = 0;
+        }
+      }
 
       // Re-apply delta to each player in db (revert old stats / money, apply new stats / money)
       for (const g of db.giocatori) {
@@ -1779,8 +1801,14 @@ async function startServer() {
         const nRef = referto.find((r: any) => r.nome === g.nome);
 
         let deltaQuota = 0;
-        if (vRef && vRef.pagaQuota) deltaQuota += vecchiaQuotaInd;
-        if (nRef && nRef.pagaQuota) deltaQuota -= nuovaQuotaInd;
+        // Old quota to add back
+        if (vRef && vRef.pagaQuota) {
+          deltaQuota += (vRef.quotaMaturata !== undefined ? vRef.quotaMaturata : vecchiaQuotaInd);
+        }
+        // New quota to subtract
+        if (nRef && nRef.pagaQuota) {
+          deltaQuota -= (nRef.quotaMaturata || 0);
+        }
 
         const deltaGol = (nRef ? (nRef.gol || 0) : 0) - (vRef ? (vRef.gol || 0) : 0);
         const deltaAmm = (nRef ? (nRef.amm || 0) : 0) - (vRef ? (vRef.amm || 0) : 0);
@@ -1901,7 +1929,10 @@ async function startServer() {
       for (const g of db.giocatori) {
         const dRef = referto.find(r => r.nome === g.nome);
         if (dRef) {
-          if (dRef.pagaQuota) g.saldo = parseFloat((g.saldo + quotaInd).toFixed(2));
+          if (dRef.pagaQuota) {
+            const qToRestore = dRef.quotaMaturata !== undefined ? dRef.quotaMaturata : quotaInd;
+            g.saldo = parseFloat((g.saldo + qToRestore).toFixed(2));
+          }
           g.gol = Math.max(0, g.gol - (dRef.gol || 0));
           g.ammonizioni = Math.max(0, g.ammonizioni - (dRef.amm || 0));
           g.assist = Math.max(0, g.assist - (dRef.assist || 0));
@@ -1957,7 +1988,10 @@ async function startServer() {
       for (const g of db.giocatori) {
         const dRef = referto.find(r => r.nome === g.nome);
         if (dRef) {
-          if (dRef.pagaQuota) g.saldo = parseFloat((g.saldo + quotaInd).toFixed(2));
+          if (dRef.pagaQuota) {
+            const qToRestore = dRef.quotaMaturata !== undefined ? dRef.quotaMaturata : quotaInd;
+            g.saldo = parseFloat((g.saldo + qToRestore).toFixed(2));
+          }
           g.gol = Math.max(0, g.gol - (dRef.gol || 0));
           g.ammonizioni = Math.max(0, g.ammonizioni - (dRef.amm || 0));
           g.assist = Math.max(0, g.assist - (dRef.assist || 0));
@@ -2011,19 +2045,43 @@ async function startServer() {
       }
       rigaPartita.rosterSnapshot = snapshot;
 
-      // Individual cost calculation
+      // Exact individual cost calculation handling remainder cents
       let paganti = 0;
       for (const r of referto) {
         if (presenti.includes(r.nome) && r.pagaQuota === true) paganti++;
       }
-      const quotaInd = paganti > 0 ? (parseFloat(costoFinale) || 0) / paganti : 0;
+      
+      const totaleEuro = parseFloat(costoFinale) || 0;
+      let baseQuota = 0;
+      let remainderCents = 0;
+      
+      if (paganti > 0) {
+        const totaleCents = Math.round(totaleEuro * 100);
+        baseQuota = Math.floor(totaleCents / paganti) / 100;
+        remainderCents = totaleCents % paganti;
+      }
+      
+      let distributedCents = 0;
+      for (const r of referto) {
+        if (presenti.includes(r.nome) && r.pagaQuota) {
+          let quotaToDeduct = baseQuota;
+          if (distributedCents < remainderCents) {
+            quotaToDeduct = parseFloat((quotaToDeduct + 0.01).toFixed(2));
+            distributedCents++;
+          }
+          r.quotaMaturata = quotaToDeduct;
+        } else {
+          r.quotaMaturata = 0;
+        }
+      }
 
       for (const g of db.giocatori) {
         if (presenti.includes(g.nome)) {
           const dRef = referto.find((r: any) => r.nome === g.nome);
           if (dRef) {
             if (dRef.pagaQuota) {
-              g.saldo = parseFloat((g.saldo - quotaInd).toFixed(2));
+              const q = dRef.quotaMaturata || 0;
+              g.saldo = parseFloat((g.saldo - q).toFixed(2));
             }
             g.gol += Number(dRef.gol) || 0;
             g.ammonizioni += Number(dRef.amm) || 0;
@@ -2040,7 +2098,7 @@ async function startServer() {
         data: new Date().toLocaleString("it-IT"),
         operazione: "Chiusura Partita",
         importo: String(costoFinale ?? 0),
-        dettagli: `Chiusa partita (${rigaPartita.dettagli}), addebitati ${quotaInd.toFixed(2)}€ a ${paganti} giocatori.`
+        dettagli: `Chiusa partita (${rigaPartita.dettagli}), addebitati ~${baseQuota.toFixed(2)}€ a ${paganti} giocatori.`
       });
 
       await saveDb(db, token);
