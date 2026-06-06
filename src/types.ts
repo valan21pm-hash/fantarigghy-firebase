@@ -121,14 +121,18 @@ export const calculatePlayerChampionshipStats = (nome: string, partiteChiuse: Pa
     const inviatoFanta = m.inviatoFanta === true;
     
     if (!isAmichevole && inviatoFanta && m.referto) {
-      const r = m.referto.find(x => x.nome.toLowerCase() === nome.toLowerCase());
+      const r = m.referto.find(x => (x.snapshotGiocatore?.nome || x.nome).toLowerCase() === nome.toLowerCase());
       if (r) {
-        const rGol = Number(r.gol) || 0;
-        const rAssist = Number(r.assist) || 0;
-        const rAmm = Number(r.amm) || 0;
-        const rEsp = Number(r.rossi) || 0;
+        // If player didn't play ("assente"), exclude game points (goals, assists, cards)
+        const isPresente = r.statoPresenza === "giocato";
+        
+        const rGol = isPresente ? (Number(r.gol) || 0) : 0;
+        const rAssist = isPresente ? (Number(r.assist) || 0) : 0;
+        const rAmm = isPresente ? (Number(r.amm) || 0) : 0;
+        const rEsp = isPresente ? (Number(r.rossi) || 0) : 0;
         const rBonusAttivi = r.bonusAttivi || [];
 
+        // Always include bonuses, but filter for game stats if not present
         const matchBonus = getPlayerBonusPointsForMatch(nome, rBonusAttivi, rGol, rAssist, allBonuses);
 
         gol += rGol;

@@ -911,10 +911,11 @@ export default function Fantacalcetto({
         if (m.referto) {
           const r = m.referto.find(x => x.nome.toLowerCase() === nome.toLowerCase());
           if (r) {
-            const rGol = Number(r.gol) || 0;
-            const rAssist = Number(r.assist) || 0;
-            const rAmm = Number(r.amm) || 0;
-            const rEsp = Number(r.rossi) || 0;
+            const isGiocato = r.statoPresenza === "giocato";
+            const rGol = isGiocato ? (Number(r.gol) || 0) : 0;
+            const rAssist = isGiocato ? (Number(r.assist) || 0) : 0;
+            const rAmm = isGiocato ? (Number(r.amm) || 0) : 0;
+            const rEsp = isGiocato ? (Number(r.rossi) || 0) : 0;
             const rBonusAttivi = r.bonusAttivi || [];
 
             const matchBonusPts = getPlayerBonusPointsForMatch(nome, rBonusAttivi, rGol, rAssist, bonuses);
@@ -2083,7 +2084,10 @@ export default function Fantacalcetto({
                                               </span>
                                             )}
                                             <span className="font-mono text-[10px] font-black bg-emerald-950 text-emerald-300 border border-emerald-900 px-1.5 py-0.5 rounded font-sans">
-                                              {stats.fantaScore > 0 ? "+" : ""}{stats.fantaScore} pt
+                                              {(() => {
+                                                const bonusMalusPoints = stats.campBonusPts + (stats.ammonizioni * AMMO_POINTS) + (stats.espulsioni * ESPU_POINTS);
+                                                return (bonusMalusPoints > 0 ? "+" : "") + bonusMalusPoints.toFixed(1) + " pt";
+                                              })()}
                                             </span>
                                           </div>
                                         </div>

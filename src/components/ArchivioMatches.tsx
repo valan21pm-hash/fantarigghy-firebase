@@ -441,7 +441,9 @@ export default function ArchivioMatches({
 
                 return (
                   <div key={r.nome} className="p-2.5 bg-gray-50 border border-gray-100 rounded-lg flex justify-between items-center text-xs">
-                    <span className="font-bold text-gray-700">{r.nome}</span>
+                    <span className="font-bold text-gray-700">
+                      {r.snapshotGiocatore?.nome || r.nome}
+                    </span>
                     <span className="font-extrabold text-blue-900 flex items-center gap-1.5">
                       {statsList.length > 0 ? statsList.join(" | ") : <span className="text-gray-300 font-normal">-</span>}
                     </span>
