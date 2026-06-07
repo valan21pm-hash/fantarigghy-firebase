@@ -179,6 +179,7 @@ export default function Fantacalcetto({
   });
   const [selectedMatchBreakdown, setSelectedMatchBreakdown] =
     useState<any>(null);
+  const [showGeneralReportModal, setShowGeneralReportModal] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(
@@ -2477,17 +2478,11 @@ export default function Fantacalcetto({
                     {rankedTeams.length > 0 && (
                       <button
                         type="button"
-                        onClick={() =>
-                          generateGeneralReportPdf(
-                            rankedTeams,
-                            partiteChiuse || [],
-                            getTeamMatchBreakdownList,
-                          )
-                        }
+                        onClick={() => setShowGeneralReportModal(true)}
                         className="bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1 cursor-pointer transition-transform hover:-translate-y-0.5"
-                        title="Scarica referto con tutti i voti assegnati in tutte le partite"
+                        title="Vedi referto con tutti i voti assegnati in tutte le partite"
                       >
-                        <span>📄 Scarica Referto Generale</span>
+                        <span>📄 Filtra & Apri Referto</span>
                       </button>
                     )}
                     <span className="bg-emerald-900 text-emerald-200 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full font-mono shrink-0">
@@ -2610,13 +2605,12 @@ export default function Fantacalcetto({
 
                               <div>
                                 <h4 className="text-[9px] uppercase font-black tracking-wider text-yellow-300 mb-2 font-sans">
-                                  ROSTER SELEZIONATO –{" "}
+                                  ROSTER ATTUALE –{" "}
                                   {team.giocatoriSelezionati.length} GIOCATORI
                                 </h4>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-sans">
                                   {team.giocatoriSelezionati.map(
                                     (pName, pIdx) => {
-                                      const stats = getPlayerStatsObj(pName);
                                       const originalPlayer = giocatori.find(
                                         (g) =>
                                           g.nome.toLowerCase() ===
@@ -2624,141 +2618,33 @@ export default function Fantacalcetto({
                                       );
                                       const isBench = pIdx === 3;
 
-                                      const currentPrice =
-                                        getPlayerCurrentPrice(
-                                          pName,
-                                          stats.fantaScore,
-                                        );
-                                      const buyPrice =
-                                        team.valoriAcquisto?.[pName] ??
-                                        getPlayerBasePrice(pName);
-                                      const deltaPrice =
-                                        currentPrice - buyPrice;
-
                                       return (
                                         <div
                                           key={pIdx}
-                                          className={`border p-2.5 rounded-xl flex flex-col gap-2 font-sans ${
+                                          className={`border p-2.5 rounded-xl flex items-center justify-between font-sans ${
                                             isBench
                                               ? "bg-amber-950/30 border-amber-500/25 text-amber-200"
                                               : "bg-emerald-900/30 border-emerald-850 text-white"
                                           }`}
                                         >
-                                          <div className="flex items-center justify-between">
-                                            <div className="min-w-0 pr-1 font-sans text-left">
-                                              <p className="font-black text-[11px] truncate text-gray-100 font-sans">
-                                                {pIdx + 1}. {getLastName(pName)}
-                                                <span
-                                                  className={`text-[8px] px-1 py-0.2 rounded ml-1.5 leading-none font-bold font-mono ${isBench ? "bg-amber-400 text-amber-950" : "bg-emerald-500 text-emerald-950"}`}
-                                                >
-                                                  {isBench
-                                                    ? "Panchina"
-                                                    : "Titolare"}
-                                                </span>
-                                              </p>
-                                              <p className="text-[8px] text-emerald-400 font-extrabold uppercase mt-0.5 font-sans">
-                                                #
-                                                {originalPlayer?.numeroMaglia ||
-                                                  "??"}{" "}
-                                                •{" "}
-                                                {originalPlayer?.ultimoRuolo ||
-                                                  "Ruolo"}
-                                              </p>
-                                            </div>
-                                            <div className="text-right shrink-0 font-sans flex items-center gap-1.5">
-                                              {stats.campBonusPts > 0 && (
-                                                <span
-                                                  className="text-[8px] font-black text-yellow-300 bg-yellow-950/40 border border-yellow-850/60 px-1.5 py-0.5 rounded"
-                                                  title="Punti da Bonus Speciali"
-                                                >
-                                                  +{stats.campBonusPts} Bonus
-                                                </span>
-                                              )}
-                                              <span className="font-mono text-[10px] font-black bg-emerald-950 text-emerald-300 border border-emerald-900 px-1.5 py-0.5 rounded font-sans">
-                                                {stats.fantaScore > 0
-                                                  ? "+"
-                                                  : ""}
-                                                {stats.fantaScore} pt
-                                              </span>
-                                            </div>
-                                          </div>
-
-                                          {/* Cost details inside each player block */}
-                                          <div className="flex items-center justify-between bg-emerald-950/40 p-1.5 rounded border border-emerald-900/40 text-[9px]">
-                                            <span className="font-semibold text-emerald-300">
-                                              Costo:{" "}
-                                              <strong className="font-black text-white">
-                                                {currentPrice} €
-                                              </strong>
-                                            </span>
-                                            <span className="font-light text-emerald-400/80">
-                                              Acquisto: {buyPrice} €
-                                            </span>
-                                            <span
-                                              className={`font-mono font-bold ${deltaPrice > 0 ? "text-emerald-400" : deltaPrice < 0 ? "text-red-400" : "text-gray-400"}`}
-                                            >
-                                              {deltaPrice > 0
-                                                ? `▲ +${deltaPrice}`
-                                                : deltaPrice < 0
-                                                  ? `▼ ${deltaPrice}`
-                                                  : "➖ st."}
-                                            </span>
-                                          </div>
-
-                                          <div
-                                            className="text-[8.5px] text-left text-xs font-sans border-t border-emerald-900/40 pt-1.5"
-                                            title="Statistiche Campionato"
-                                          >
-                                            <p className="text-emerald-400 font-black tracking-tight leading-none">
-                                              🏆 Camp. Gol:{" "}
-                                              {stats.campionato.gol} (+
-                                              {stats.campionato.gol *
-                                                GOAL_POINTS}
-                                              pt) | Assist:{" "}
-                                              {stats.campionato.assist} (+
-                                              {stats.campionato.assist *
-                                                ASSIST_POINTS}
-                                              pt) | Gialli:{" "}
-                                              {stats.campionato.ammonizioni} (
-                                              {stats.campionato.ammonizioni *
-                                                AMMO_POINTS}
-                                              pt) | Rossi:{" "}
-                                              {stats.campionato.espulsioni} (
-                                              {stats.campionato.espulsioni *
-                                                ESPU_POINTS}
-                                              pt)
+                                          <div className="min-w-0 pr-1 flex-1 text-left">
+                                            <p className="font-black text-[11px] truncate text-gray-100 font-sans">
+                                              {pIdx + 1}. {getLastName(pName)}
+                                            </p>
+                                            <p className="text-[8px] text-emerald-400/80 font-extrabold uppercase mt-0.5 font-sans">
+                                              #
+                                              {originalPlayer?.numeroMaglia ||
+                                                "??"}{" "}
+                                              •{" "}
+                                              {originalPlayer?.ultimoRuolo ||
+                                                "Ruolo"}
                                             </p>
                                           </div>
-                                          {stats.activeBonusDetails &&
-                                            stats.activeBonusDetails.length >
-                                              0 && (
-                                              <div className="mt-1 border-t border-emerald-900/50 text-[8.5px] text-yellow-300/90 text-left font-sans space-y-1 pt-1.5">
-                                                <p className="font-black text-yellow-400 uppercase text-[8px] tracking-wider mb-0.5">
-                                                  🎒 Bonus Attivati:
-                                                </p>
-                                                {stats.activeBonusDetails.map(
-                                                  (b, bIdx) => (
-                                                    <div
-                                                      key={bIdx}
-                                                      className="leading-tight bg-emerald-950/40 p-1 rounded border border-emerald-900/30 mb-0.5"
-                                                    >
-                                                      ⭐{" "}
-                                                      <span className="font-bold text-yellow-300">
-                                                        {b.bName}
-                                                      </span>{" "}
-                                                      (+{b.pts} pt)
-                                                      <span className="text-emerald-400 block text-[7.5px] font-medium leading-none mt-0.5">
-                                                        {
-                                                          b.matchDettagli.split(
-                                                            " - ",
-                                                          )[0]
-                                                        }
-                                                      </span>
-                                                    </div>
-                                                  ),
-                                                )}
-                                              </div>
-                                            )}
+                                          <span
+                                            className={`text-[8px] px-1.5 py-0.5 rounded font-bold font-mono tracking-wider shadow-sm border ${isBench ? "bg-amber-900/40 text-amber-300 border-amber-500/50" : "bg-emerald-900/40 text-emerald-300 border-emerald-500/50"}`}
+                                          >
+                                            {isBench ? "PANCHINA" : "TITOLARE"}
+                                          </span>
                                         </div>
                                       );
                                     },
@@ -2792,7 +2678,7 @@ export default function Fantacalcetto({
                                               setSelectedMatchBreakdown({
                                                 mb,
                                                 teamName: team.nomeFantasquadra,
-                                              })
+                                              });
                                             }}
                                             className="bg-emerald-950/40 hover:bg-emerald-900/60 transition-colors border border-emerald-900/50 rounded-xl p-3 flex items-center justify-between cursor-pointer group"
                                           >
@@ -2861,16 +2747,10 @@ export default function Fantacalcetto({
                   {rankedTeams.length > 0 && (
                     <button
                       type="button"
-                      onClick={() =>
-                        generateGeneralReportPdf(
-                          rankedTeams,
-                          partiteChiuse || [],
-                          getTeamMatchBreakdownList,
-                        )
-                      }
+                      onClick={() => setShowGeneralReportModal(true)}
                       className="bg-yellow-400 hover:bg-yellow-500 text-emerald-950 text-[10px] font-black uppercase px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-1.5 cursor-pointer transition-all hover:scale-105 active:scale-95 duration-200"
                     >
-                      <span>📄 Scarica Referto Generale PDF</span>
+                      <span>📄 Apri Referto Generale</span>
                     </button>
                   )}
                 </div>
@@ -2890,13 +2770,7 @@ export default function Fantacalcetto({
                   {rankedTeams.length > 0 && (
                     <button
                       type="button"
-                      onClick={() =>
-                        generateGeneralReportPdf(
-                          rankedTeams,
-                          partiteChiuse || [],
-                          getTeamMatchBreakdownList,
-                        )
-                      }
+                      onClick={() => setShowGeneralReportModal(true)}
                       className="text-yellow-400 hover:text-yellow-300 font-black text-[10.5px] uppercase underline underline-offset-4 shrink-0 transition-opacity hover:opacity-90 block"
                     >
                       Vedi Referto Generale →
@@ -3555,13 +3429,13 @@ export default function Fantacalcetto({
                               <p
                                 className={`font-black ${hasTooManyChanges ? "text-red-400 font-black animate-pulse" : "text-emerald-300"}`}
                               >
-                                {numChanges} / 1 cambio
+                                {numChangesFromOrigin} / 1 cambio
                               </p>
                             </div>
                           </div>
 
                           {/* Swap Details ledger */}
-                          {numChanges === 1 && (
+                          {numChangesFromOrigin === 1 && (
                             <div className="bg-emerald-950/60 border border-emerald-900 p-2.5 rounded-lg space-y-1 text-[9.5px]">
                               <div className="flex justify-between">
                                 <span className="text-red-400 font-extrabold">
@@ -4340,15 +4214,9 @@ export default function Fantacalcetto({
                 {rankedTeams.length > 0 && (
                   <button
                     type="button"
-                    onClick={() =>
-                      generateGeneralReportPdf(
-                        rankedTeams,
-                        partiteChiuse || [],
-                        getTeamMatchBreakdownList,
-                      )
-                    }
+                    onClick={() => setShowGeneralReportModal(true)}
                     className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase px-3.5 py-1.5 rounded-lg shadow-sm flex items-center gap-1 cursor-pointer transition-transform hover:-translate-y-0.5"
-                    title="Scarica referto con tutti i voti assegnati in tutte le partite"
+                    title="Vedi referto con tutti i voti assegnati in tutte le partite"
                   >
                     <span>📄 Referto Generale (Tutti i Voti)</span>
                   </button>
@@ -4790,7 +4658,7 @@ export default function Fantacalcetto({
                                         mb,
                                         teamName:
                                           selectedTeamToView.nomeFantasquadra,
-                                      })
+                                      });
                                     }}
                                     className="bg-white border border-emerald-100/60 rounded-xl p-3.5 flex items-center justify-between shadow-sm hover:shadow-md hover:border-emerald-300 transition-all cursor-pointer group"
                                   >
@@ -4875,6 +4743,115 @@ export default function Fantacalcetto({
           generateMatchPdf={generateMatchPdf}
         />
       )}
+
+      {showGeneralReportModal && (
+        <GeneralReportModal
+          rankedTeams={rankedTeams}
+          partiteChiuse={partiteChiuse || []}
+          getTeamMatchBreakdownList={getTeamMatchBreakdownList}
+          onClose={() => setShowGeneralReportModal(false)}
+          generateGeneralReportPdf={generateGeneralReportPdf}
+        />
+      )}
+    </div>
+  );
+}
+
+function GeneralReportModal({ rankedTeams, getTeamMatchBreakdownList, onClose, generateGeneralReportPdf, partiteChiuse }: any) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-950/80 backdrop-blur-sm px-4">
+      <div className="bg-white border-2 border-emerald-900 rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-3 right-3 text-emerald-900 hover:text-red-600 bg-emerald-100 hover:bg-emerald-200 p-1.5 rounded-full transition-colors z-10">
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="p-5 font-sans">
+          <div className="border-b border-emerald-100 pb-4 mb-4 pr-6">
+            <h3 className="text-lg font-black text-emerald-950 mb-1 leading-tight uppercase tracking-tight">
+              📄 Referto Generale
+            </h3>
+            <p className="text-xs text-emerald-700 font-extrabold flex items-center justify-between">
+              Classifica e Punteggi di tutte le squadre
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <h4 className="text-xs font-black uppercase text-emerald-900 bg-emerald-100 px-2 py-1 rounded inline-block mb-3">1. Classifica Generale</h4>
+              <div className="overflow-x-auto rounded-xl border border-emerald-200 shadow-sm">
+                <table className="w-full text-[10px] text-left border-collapse">
+                  <thead>
+                    <tr className="bg-emerald-800 text-white font-extrabold uppercase tracking-wider">
+                      <th className="p-2 border-b border-emerald-900">Pos</th>
+                      <th className="p-2 border-b border-emerald-900">Squadra</th>
+                      <th className="p-2 border-b border-emerald-900">Presidente</th>
+                      <th className="p-2 border-b border-emerald-900 text-right">Punti Fanta</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rankedTeams.map((team: any, idx: number) => (
+                      <tr key={team.id} className="border-b border-emerald-100 hover:bg-emerald-50 text-gray-800">
+                        <td className="p-2 font-black">{idx + 1}°</td>
+                        <td className="p-2 font-extrabold truncate max-w-[120px]">{team.nomeFantasquadra}</td>
+                        <td className="p-2 font-semibold truncate max-w-[100px]">{team.nomePartecipante}</td>
+                        <td className="p-2 font-mono font-black text-right text-emerald-700">{team.score} pt</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-xs font-black uppercase text-emerald-900 bg-emerald-100 px-2 py-1 rounded inline-block mb-3">2. Dettagli per Squadra</h4>
+              <div className="space-y-4">
+                {rankedTeams.map((team: any) => {
+                  const breakdowns = getTeamMatchBreakdownList(team);
+                  return (
+                    <div key={team.id} className="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                      <h5 className="font-extrabold text-[11px] text-emerald-900 uppercase border-b border-emerald-200 pb-1 mb-2">⚽ {team.nomeFantasquadra} ({team.score} pt)</h5>
+                      {breakdowns.length === 0 ? (
+                        <p className="text-[10px] italic text-emerald-600">Nessuna partita refertata</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {breakdowns.map((mb: any, mIdx: number) => (
+                           <div key={mIdx} className="bg-white border border-emerald-100 rounded-lg p-2 text-[9px] flexflex-col gap-1">
+                             <div className="flex justify-between items-center bg-gray-50 p-1 rounded font-bold mb-1 border-b border-gray-100">
+                               <span className="text-gray-800 uppercase tracking-widest">{mb.dettagli.split(" - ")[0]}</span>
+                               <span className="text-emerald-700 bg-emerald-100 px-1 rounded">+{mb.puntiTotaliMatch} pt</span>
+                             </div>
+                             <div className="flex flex-wrap gap-1.5">
+                               {mb.giocatoriKpi.map((kpi: any, kIdx: number) => {
+                                 const isOut = kpi.stato === "Sostituito" || kpi.stato === "Assente";
+                                 return (
+                                   <div key={kIdx} className={`px-1.5 py-0.5 rounded border ${isOut ? "bg-red-50 text-red-700 border-red-200 line-through opacity-70" : "bg-emerald-50 text-emerald-800 border-emerald-200 font-bold"}`}>
+                                      {kpi.nome}: {isOut ? "0" : kpi.fantaScore}pt
+                                   </div>
+                                 )
+                               })}
+                             </div>
+                           </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); generateGeneralReportPdf(rankedTeams, partiteChiuse, getTeamMatchBreakdownList); }}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-[11px] px-4 py-2 flex items-center justify-center gap-2 rounded-xl shadow w-full font-extrabold uppercase transition-transform hover:-translate-y-0.5"
+            >
+              <Download className="w-4 h-4" />
+              Scarica PDF Ufficiale
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

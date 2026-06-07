@@ -71,13 +71,14 @@ export default function Iscrizioni({
 
   const handleCopyReportConvocazioni = () => {
     let txt = `🎟️ *REPORT ISCRIZIONI SQUADRA* 🎟️\n\n`;
-    const ordinati = [...giocatori].sort((a, b) => b.quotaIscrizione - a.quotaIscrizione);
+    const ordinati = [...giocatori].sort((a, b) => (b.quotaIscrizione || 0) - (a.quotaIscrizione || 0));
     ordinati.forEach(g => {
-      const spuntato = g.quotaIscrizione > 0 ? "✅" : "❌";
+      const quota = g.quotaIscrizione || 0;
+      const spuntato = quota > 0 ? "✅" : "❌";
       const attivoBadge = g.attivo ? " (Attivo/Convocabile)" : " (Inattivo)";
-      txt += `${spuntato} *${g.nome}*: ${g.quotaIscrizione.toFixed(2)}€${attivoBadge}\n`;
+      txt += `${spuntato} *${g.nome}*: ${quota.toFixed(2)}€${attivoBadge}\n`;
     });
-    const totaleIscrizioni = giocatori.reduce((acc, curr) => acc + curr.quotaIscrizione, 0);
+    const totaleIscrizioni = giocatori.reduce((acc, curr) => acc + (curr.quotaIscrizione || 0), 0);
     txt += `\n💰 *Totale Fondi Iscrizioni Raccolti:* ${totaleIscrizioni.toFixed(2)}€`;
 
     navigator.clipboard.writeText(txt);
@@ -121,7 +122,8 @@ export default function Iscrizioni({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto pr-1">
           {giocatori.map(g => {
-            const hasPaid = g.quotaIscrizione > 0;
+            const quota = g.quotaIscrizione || 0;
+            const hasPaid = quota > 0;
             return (
               <div
                 key={g.nome}
@@ -176,7 +178,7 @@ export default function Iscrizioni({
                 <div className="bg-white/80 border border-gray-100 p-2.5 rounded-lg flex justify-between items-center text-xs">
                   <span className="text-gray-500 font-medium">Fondo iscrizione versato:</span>
                   <strong className={hasPaid ? "text-green-700 font-extrabold" : "text-gray-400 font-bold"}>
-                    {g.quotaIscrizione.toFixed(2)} €
+                    {(g.quotaIscrizione || 0).toFixed(2)} €
                   </strong>
                 </div>
 
