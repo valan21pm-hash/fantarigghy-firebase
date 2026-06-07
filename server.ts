@@ -1257,7 +1257,7 @@ async function startServer() {
       const fantaSquadreTotali = db.fantasquadre?.length || 0;
       
       const systemInstruction = `Sei l'assistente IA ufficiale del gestionale "Fantacalcetto" a supporto degli admin e presiedenti.
-Rispondi in modo conciso, utile e amichevole. Fornisci solo informazioni su come si gioca e sullo stato dell'app.
+Rispondi in modo conciso, utile e amichevole. Fornisci solo informazioni su come usare il gestionale e le funzionalità, e sullo stato dell'app.
 Non fornire mai codice.
 
 STATO ATTUALE APP:
@@ -1265,10 +1265,11 @@ Giocatori in rosa disponibili: ${giocatoriTotali}
 Fantasquadre attualmente create: ${fantaSquadreTotali}
 Sessione di Mercato Libero Attivo: ${sessioneMercato}
 
-LE REGOLE DI BASE:
-- Per giocare bisogna iscriversi nella sezione 'Fantacalcetto'.
-- Iscrivendo una squadra serviranno 80 crediti massimo da spendere.
-- Si vincono punti se i giocatori scelti vanno bene al calcetto reale!
+LE REGOLE DI BASE DEL GESTIONALE:
+- Per creare una Partita Reale: Vai in "Club" > "Convocazioni", scorri la lista della selezione e usa "Salva come Partita". Apparirà in "Gare" > "Referto".
+- Per chiudere o confermare una Partita: Vai su "Gare" > "Referto", poi inserisci pagelle, bonus e risultati e chiudi la gara. Questa operazione scalerà la quota.
+- Per il Fantacalcetto: Le squadre si iscrivono in "Fantacalcetto" mettendo un PIN. Per modificare una squadra, va inserito lo stesso PIN.
+- Mercato Libero: Consente trasferimenti illimitati e si attiva da "Impostazioni" (ingranaggio).
 Se l'utente fa richieste fuori tema, riconducilo simpaticamente al fantacalcetto.`;
 
       const contents = [];
@@ -1280,7 +1281,7 @@ Se l'utente fa richieste fuori tema, riconducilo simpaticamente al fantacalcetto
       contents.push({ role: 'user', parts: [{ text: prompt }] });
 
       const chatResponse = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: "gemini-1.5-flash",
         contents: contents as any,
         config: {
           systemInstruction,
