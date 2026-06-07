@@ -221,17 +221,7 @@ export default function PlayerList({
         <div className="flex flex-wrap gap-2">
           {isEditor && (
             <>
-              <button
-                onClick={async () => {
-                  if (confirm("Sei sicuro di voler importare i dati mancanti da Sheets?")) {
-                    await onMigrate();
-                    alert("Importazione completata!");
-                  }
-                }}
-                className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 rounded-lg text-xs font-bold text-white flex items-center gap-1 cursor-pointer shadow-sm transition-colors"
-              >
-                <Copy className="h-3.5 w-3.5" /> Importa Sheets
-              </button>
+              {/* Pulsante Importa Sheets disattivato su richiesta utente */}
               {/* Pulsante di emergenza disattivato in stand-by fino a nuova richiesta */}
               <button
                 disabled={true}
