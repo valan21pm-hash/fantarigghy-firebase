@@ -227,6 +227,8 @@ export default function Fantacalcetto({
   const [syncDone, setSyncDone] = useState(false);
   const [selectedMatchBreakdown, setSelectedMatchBreakdown] =
     useState<any>(null);
+  const [showMercatoModal, setShowMercatoModal] = useState(false);
+  const [mercatoDateString, setMercatoDateString] = useState("");
   const [showGeneralReportModal, setShowGeneralReportModal] = useState(false);
 
   // Auto-login all'avvio se già registrati in localStorage
@@ -296,19 +298,7 @@ export default function Fantacalcetto({
       { prg: 100, text: "Accesso autorizzato!" },
     ];
 
-    // Aggiorna i dati in background
-    let apiCallFinished = false;
-    (async () => {
-      try {
-        if (onRefreshData) {
-          await onRefreshData();
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        apiCallFinished = true;
-      }
-    })();
+    // L'operazione è gestita dal wrapper executePostAction che invia i dati atomici aggiornati
 
     let currentPrg = 0;
     for (const step of steps) {
@@ -394,14 +384,7 @@ export default function Fantacalcetto({
         regEmail.trim().toLowerCase(),
       );
 
-      setSyncProgress(40);
-      setSyncStatusText("Caricamento del database aggiornato...");
-
-      if (onRefreshData) {
-        await onRefreshData();
-      }
-
-      setSyncProgress(80);
+      setSyncProgress(60);
       setSyncStatusText("Finalizzazione dell'iscrizione...");
 
       // Cerca la squadra appena creata per autenticarsi automaticamente
@@ -1115,9 +1098,6 @@ export default function Fantacalcetto({
         undefined,
       );
       setSubmitted(true);
-      if (onRefreshData) {
-        await onRefreshData();
-      }
       window.location.reload();
     } catch (err: any) {
       setErrorMsg(err.message || "Errore sconosciuto di convalida server.");
@@ -1140,9 +1120,6 @@ export default function Fantacalcetto({
         undefined,
       );
       setSubmitted(true);
-      if (onRefreshData) {
-        await onRefreshData();
-      }
       alert(
         "Operazione completata con successo! La formazione è stata modificata e il mercato è bloccato fino al termine del prossimo turno.",
       );
@@ -4245,16 +4222,13 @@ export default function Fantacalcetto({
                   checked={sessioneMercatoLibero}
                   onChange={async (e) => {
                     const isEnabling = e.target.checked;
-                    if (window.confirm(isEnabling ? "Attivare la Sessione di Mercato Libero (cambi illimitati)?" : "Disattivare la Sessione di Mercato Libero (ripristina limite 1 cambio)?")) {
-                      let dateStr = null;
-                      if (isEnabling) {
-                         const val = window.prompt("Se vuoi impostare una data di scadenza, inseriscila qui (formato: YYYY-MM-DD HH:MM), altrimenti lascia vuoto per disattivazione manuale:");
-                         if (val && val.trim().length > 0) {
-                           dateStr = val.trim();
-                         }
+                    if (isEnabling) {
+                      setShowMercatoModal(true);
+                      setMercatoDateString("");
+                    } else {
+                      if (window.confirm("Disattivare la Sessione di Mercato Libero (ripristina limite 1 cambio)?")) {
+                        await onToggleMercatoLibero(false, null);
                       }
-                      await onToggleMercatoLibero(isEnabling, dateStr);
-                      if (onRefreshData) await onRefreshData();
                     }
                   }}
                   className="w-4 h-4 rounded text-blue-600 focus:ring-0 cursor-pointer"
@@ -4905,6 +4879,59 @@ export default function Fantacalcetto({
           onClose={() => setSelectedMatchBreakdown(null)}
           generateMatchPdf={generateMatchPdf}
         />
+      )}
+
+      {showMercatoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-950/80 backdrop-blur-sm px-4">
+          <div className="bg-white border-2 border-blue-900 rounded-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto shadow-2xl relative p-5 font-sans">
+            <h3 className="text-lg font-black text-blue-900 uppercase mb-2">Attiva Sessione Libera</h3>
+            <p className="text-xs text-gray-600 mb-4 font-medium leading-relaxed">
+              Il mercato libero sospenderà temporaneamente i limiti ai cambi sulle rose.
+              Puoi impostare una scadenza automatica (opzionale):
+            </p>
+            <div className="mb-4">
+              <label className="block text-xs font-bold text-gray-700 mb-1">Scadenza (Opzionale)</label>
+              <input
+                type="datetime-local"
+                value={mercatoDateString}
+                onChange={(e) => setMercatoDateString(e.target.value)}
+                className="w-full text-xs font-bold p-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-800"
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMercatoModal(false);
+                  setMercatoDateString("");
+                }}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+               >
+                Annulla
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (onToggleMercatoLibero) {
+                    let finalDate = null;
+                    if (mercatoDateString) {
+                      const d = new Date(mercatoDateString);
+                      if (!isNaN(d.getTime())) {
+                        finalDate = d.toISOString();
+                      }
+                    }
+                    await onToggleMercatoLibero(true, finalDate);
+                  }
+                  setShowMercatoModal(false);
+                  setMercatoDateString("");
+                }}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                >
+                Conferma Attivazione
+               </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showGeneralReportModal && (

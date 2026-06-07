@@ -1281,15 +1281,9 @@ async function startServer() {
       memoryCache = sheetsDb;
 
       console.log("[Migration] Migrazione completata con successo!");
-      res.json({
-        success: true,
-        message: "Migrazione completata",
-        stats: {
-          giocatori: sheetsDb.giocatori?.length,
-          fantasquadre: sheetsDb.fantasquadre?.length,
-          partite: sheetsDb.partite?.length,
-        },
-      });
+      
+      // Ritornare lo stato aggiornato del db in modo che executePostAction possa fare setData(updatedData)
+      sendDbResponse(res, sheetsDb);
     } catch (err: any) {
       console.error("[Migration] Errore migrazione:", err);
       res.status(500).json({ err: err.message });
@@ -1763,7 +1757,7 @@ async function startServer() {
         db.scadenzaMercatoLibero = scadenza || null;
       }
       await saveDb(db, token);
-      res.json({ success: true, sessioneMercatoLibero: db.sessioneMercatoLibero, scadenzaMercatoLibero: db.scadenzaMercatoLibero });
+      sendDbResponse(res, db);
     } catch (err: any) {
       res.status(500).json({ err: "Errore durante l'aggiornamento dell'impostazione" });
     }

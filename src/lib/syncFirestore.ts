@@ -31,7 +31,7 @@ export async function fetchFromFirestore(): Promise<DatabaseSchema | null> {
       logs,
       fantasquadre,
       consigli,
-      sessioneMercatoLibero: settingsData.sessioneMercatoLibero || false,
+      sessioneMercatoLibero: settingsData.sessioneMercatoLibero ?? false,
       scadenzaMercatoLibero: settingsData.scadenzaMercatoLibero || null,
       bonuses: settingsData.bonuses || undefined
     };
@@ -43,12 +43,13 @@ export async function fetchFromFirestore(): Promise<DatabaseSchema | null> {
 
 export async function saveToFirestore(db: DatabaseSchema): Promise<void> {
   try {
-    const batch = writeBatch(dbServer);
+    let batch = writeBatch(dbServer);
     let count = 0;
 
     const commitBatchIfNeeded = async () => {
       if (count >= 400) {
         await batch.commit();
+        batch = writeBatch(dbServer);
         count = 0;
       }
     };
