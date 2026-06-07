@@ -1479,6 +1479,7 @@ async function startServer() {
               totalSoldPrice += getPlayerPriceForRoster(
                 soldPlayerName,
                 db.partite || [],
+                db.bonuses
               );
               delete newValoriAcquisto[soldPlayerName];
             }
@@ -1487,6 +1488,7 @@ async function startServer() {
               const boughtPrice = getPlayerPriceForRoster(
                 boughtPlayerName,
                 db.partite || [],
+                db.bonuses
               );
               totalBoughtPrice += boughtPrice;
               newValoriAcquisto[boughtPlayerName] = boughtPrice;
@@ -1508,7 +1510,7 @@ async function startServer() {
           let totalCost = 0;
           const freshValoriAcquisto: Record<string, number> = {};
           for (const pName of targetRoster) {
-            const pPrice = getPlayerPriceForRoster(pName, db.partite || []);
+            const pPrice = getPlayerPriceForRoster(pName, db.partite || [], db.bonuses);
             freshValoriAcquisto[pName] = pPrice;
             totalCost += pPrice;
           }
@@ -1552,7 +1554,7 @@ async function startServer() {
       const initialValoriAcquisto: Record<string, number> = {};
 
       for (const pName of targetRoster) {
-        const pPrice = getPlayerPriceForRoster(pName, db.partite || []);
+        const pPrice = getPlayerPriceForRoster(pName, db.partite || [], db.bonuses);
         initialValoriAcquisto[pName] = pPrice;
         totalInitialCost += pPrice;
       }

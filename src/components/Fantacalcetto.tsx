@@ -1009,25 +1009,18 @@ export default function Fantacalcetto({
         let soldPrice = 0;
         let boughtPrice = 0;
 
-        if (soldPlayers.length > 0) {
-          soldPrice = getPlayerPriceForRoster(
-            soldPlayers[0],
-            partiteChiuse || [],
-            bonuses,
-          );
-        }
-        if (boughtPlayers.length > 0) {
-          boughtPrice = getPlayerPriceForRoster(
-            boughtPlayers[0],
-            partiteChiuse || [],
-            bonuses,
-          );
-        }
+        soldPlayers.forEach((pName) => {
+          soldPrice += getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses);
+        });
+
+        boughtPlayers.forEach((pName) => {
+          boughtPrice += getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses);
+        });
 
         const finalCredits = teamCreditoResiduo + soldPrice - boughtPrice;
         if (finalCredits < 0) {
           setErrorMsg(
-            `Credito non sufficiente per l'operazione! Hai a disposizione ${teamCreditoResiduo} Izycoin residui. Cedendo ${soldPlayers[0]} ottieni ${soldPrice} Izycoin, ma ${boughtPlayers[0]} costa ${boughtPrice} Izycoin. Ti mancano ${Math.abs(finalCredits)} Izycoin.`,
+            `Credito non sufficiente per l'operazione! Hai a disposizione ${teamCreditoResiduo} Izycoin residui. Cedendo ottenieni ${soldPrice} Izycoin, ma gli acquisti costano ${boughtPrice} Izycoin. Ti mancano ${Math.abs(finalCredits)} Izycoin.`,
           );
           return;
         }
@@ -1039,8 +1032,8 @@ export default function Fantacalcetto({
           !showConfirmModal
         ) {
           setProposedTransfer({
-            sold: soldPlayers[0],
-            bought: boughtPlayers[0],
+            sold: soldPlayers.join(", "),
+            bought: boughtPlayers.join(", "),
             soldPrice: soldPrice,
             boughtPrice: boughtPrice,
             remainingCredits: finalCredits,
@@ -3475,6 +3468,7 @@ export default function Fantacalcetto({
                       const numChangesFromOrigin =
                         rulePrevPlayers.length - keptFromOrigin.length;
                       const hasTooManyChanges =
+                        !isMercatoLiberoValido &&
                         rulePrevPlayers.length === 4 &&
                         numChangesFromOrigin > 1;
 
@@ -3482,30 +3476,16 @@ export default function Fantacalcetto({
                       let boughtPrice = 0;
                       let plusvalenzaReale = 0;
 
-                      if (soldPlayers.length === 1) {
-                        const sPlayerName = soldPlayers[0];
-                        soldPrice = getPlayerPriceForRoster(
-                          sPlayerName,
-                          partiteChiuse || [],
-                          bonuses,
-                        );
-                        const buyCost =
-                          teamValoriAcquisto[sPlayerName] ??
-                          getPlayerPriceForRoster(
-                            sPlayerName,
-                            partiteChiuse || [],
-                            bonuses,
-                          );
-                        plusvalenzaReale = soldPrice - buyCost;
-                      }
+                      soldPlayers.forEach((pName) => {
+                        const price = getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses);
+                        soldPrice += price;
+                        const buyCost = teamValoriAcquisto[pName] ?? price;
+                        plusvalenzaReale += (price - buyCost);
+                      });
 
-                      if (boughtPlayers.length === 1) {
-                        boughtPrice = getPlayerPriceForRoster(
-                          boughtPlayers[0],
-                          partiteChiuse || [],
-                          bonuses,
-                        );
-                      }
+                      boughtPlayers.forEach((pName) => {
+                        boughtPrice += getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses);
+                      });
 
                       const finalCredits =
                         teamCreditoResiduo + soldPrice - boughtPrice;
@@ -3514,7 +3494,7 @@ export default function Fantacalcetto({
                       return (
                         <div className="bg-emerald-950/45 border border-emerald-990 rounded-xl p-3.5 space-y-2.5 mt-2 leading-tight text-left">
                           <h5 className="text-[9px] font-black uppercase text-yellow-300 border-b border-emerald-900/60 pb-1">
-                            📊 BILANCIO CAMBIO ROSA (Max 1)
+                            📊 BILANCIO CAMBIO ROSA {isMercatoLiberoValido ? "(Mercato Libero)" : "(Max 1)"}
                           </h5>
 
                           <div className="grid grid-cols-2 gap-2 text-[10px]">
@@ -3533,28 +3513,28 @@ export default function Fantacalcetto({
                               <p
                                 className={`font-black ${hasTooManyChanges ? "text-red-400 font-black animate-pulse" : "text-emerald-300"}`}
                               >
-                                {numChangesFromOrigin} / 1 cambio
+                                {numChangesFromOrigin} {isMercatoLiberoValido ? "cambi" : "/ 1 cambio"}
                               </p>
                             </div>
                           </div>
 
                           {/* Swap Details ledger */}
-                          {numChangesFromOrigin === 1 && (
+                          {numChangesFromOrigin > 0 && (
                             <div className="bg-emerald-950/60 border border-emerald-900 p-2.5 rounded-lg space-y-1 text-[9.5px]">
-                              <div className="flex justify-between">
-                                <span className="text-red-400 font-extrabold">
-                                  🔴 Cessione: {soldPlayers[0]}
+                              <div className="flex justify-between items-center">
+                                <span className="text-red-400 font-extrabold truncate max-w-[65%]">
+                                  🔴 Cessione: {soldPlayers.join(", ")}
                                 </span>
                                 <span className="font-mono text-red-450 font-black">
-                                  +{soldPrice} Izycoin 🪙
+                                  +{soldPrice} 🪙
                                 </span>
                               </div>
-                              <div className="flex justify-between">
-                                <span className="text-emerald-400 font-extrabold">
-                                  🟢 Acquisto: {boughtPlayers[0]}
+                              <div className="flex justify-between items-center">
+                                <span className="text-emerald-400 font-extrabold truncate max-w-[65%]">
+                                  🟢 Acquisto: {boughtPlayers.join(", ")}
                                 </span>
                                 <span className="font-mono text-emerald-450 font-black font-black">
-                                  -{boughtPrice} Izycoin 🪙
+                                  -{boughtPrice} 🪙
                                 </span>
                               </div>
                               {plusvalenzaReale !== 0 && (
