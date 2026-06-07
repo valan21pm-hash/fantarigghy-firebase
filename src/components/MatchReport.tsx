@@ -18,6 +18,14 @@ interface MatchReportProps {
     referto: RefertoGiocatore[],
     note?: string
   ) => Promise<void>;
+  onSalvaBozza?: (
+    idPartita: string,
+    costoFinale: number,
+    presenti: string[],
+    risultato: string,
+    referto: RefertoGiocatore[],
+    note?: string
+  ) => Promise<void>;
   onAnnullaPartita: (idPartita: string) => Promise<void>;
   isEditor?: boolean;
   selectedMatchId?: string;
@@ -29,6 +37,7 @@ export default function MatchReport({
   giocatori,
   partiteAperte,
   onChiudiPartita,
+  onSalvaBozza,
   onAnnullaPartita,
   isEditor = false,
   selectedMatchId: externalSelectedMatchId,
@@ -243,6 +252,87 @@ export default function MatchReport({
     setter(prev => ({ ...prev, [nome]: val }));
   };
 
+  const buildReferto = (): RefertoGiocatore[] => {
+    if (!activeMatch) return [];
+    
+    const activeSubstitutes = activeMatch.convocati
+      .filter(nome => statoPresenza[nome] === "sostituito" && sostitutoDa[nome])
+      .map(nome => sostitutoDa[nome]);
+
+    const unconvokedPlayers = giocatori
+      .filter(g => g.attivo)
+      .filter(g => !activeMatch.convocati.includes(g.nome))
+      .filter(g => !activeSubstitutes.includes(g.nome));
+
+    const allPlayersInReport = [...activeMatch.convocati, ...activeSubstitutes, ...unconvokedPlayers.map(g => g.nome)];
+
+    return allPlayersInReport.map(nome => {
+      const isConvocato = activeMatch.convocati.includes(nome);
+      const isSubstitute = activeSubstitutes.includes(nome);
+      
+      let pres: "giocato" | "assente" | "sostituito" = "giocato";
+      if (isConvocato) {
+        pres = statoPresenza[nome] || "giocato";
+      } else if (isSubstitute) {
+        pres = "giocato";
+      } else {
+        pres = "assente";
+      }
+      
+      const isPresent = pres === "giocato";
+
+      return {
+        nome,
+        gol: isPresent ? parseInt(goals[nome] || "0") : 0,
+        assist: isPresent ? parseInt(assists[nome] || "0") : 0,
+        amm: isPresent ? parseInt(yellows[nome] || "0") : 0,
+        rossi: isPresent ? parseInt(reds[nome] || "0") : 0,
+        subitiAzione: isPresent ? parseInt(subAzione[nome] || "0") : 0,
+        subitiRigore: isPresent ? parseInt(subRigore[nome] || "0") : 0,
+        subitiPiazzato: isPresent ? parseInt(subPiazzato[nome] || "0") : 0,
+        pagaQuota: isPresent ? payers.includes(nome) : false,
+        bonusAttivi: pres !== "sostituito" ? (selectedBonuses[nome] || []) : [],
+        statoPresenza: pres,
+        sostitutoDa: isConvocato ? (sostitutoDa[nome] || "") : "",
+        snapshotGiocatore: giocatori.find(x => x.nome === nome),
+      };
+    });
+  };
+
+  const handleSalvaBozza = async () => {
+    if (!activeMatch || !onSalvaBozza) return;
+    try {
+      setValidationError(null);
+      
+      const presentsList: string[] = [];
+      activeMatch.convocati.forEach(nome => {
+        const state = statoPresenza[nome] || "giocato";
+        if (state === "giocato") {
+          presentsList.push(nome);
+        } else if (state === "sostituito" && sostitutoDa[nome]) {
+          presentsList.push(sostitutoDa[nome]);
+        }
+      });
+      
+      const costNum = parseFloat(costo) || parseFloat(activeMatch.costo?.toString() || "0");
+      const refertoCompleto = buildReferto();
+
+      await onSalvaBozza(
+        activeMatch.id,
+        costNum,
+        presentsList,
+        risultato.trim(),
+        refertoCompleto,
+        note.trim()
+      );
+      
+      setSuccessMessage("Bozza salvata con successo!");
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err: any) {
+      setValidationError(`Errore durante il salvataggio della bozza: ${err.message || err}`);
+    }
+  };
+
   const handleSubmitReport = (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError(null);
@@ -315,49 +405,7 @@ export default function MatchReport({
     // ----------------------------------------
 
     // Form accurate dynamic list of players to save in the report
-    const activeSubstitutes = activeMatch.convocati
-      .filter(nome => statoPresenza[nome] === "sostituito" && sostitutoDa[nome])
-      .map(nome => sostitutoDa[nome]);
-
-    const unconvokedPlayers = giocatori
-      .filter(g => g.attivo)
-      .filter(g => !activeMatch.convocati.includes(g.nome))
-      .filter(g => !activeSubstitutes.includes(g.nome));
-
-    const allPlayersInReport = [...activeMatch.convocati, ...activeSubstitutes, ...unconvokedPlayers.map(g => g.nome)];
-
-    // Build referto list including original convocati, active substitutes, and unconvoked/benched players with active bonuses
-    const refertoCompleto: RefertoGiocatore[] = allPlayersInReport.map(nome => {
-      const isConvocato = activeMatch.convocati.includes(nome);
-      const isSubstitute = activeSubstitutes.includes(nome);
-      
-      let pres: "giocato" | "assente" | "sostituito" = "giocato";
-      if (isConvocato) {
-        pres = statoPresenza[nome] || "giocato";
-      } else if (isSubstitute) {
-        pres = "giocato";
-      } else {
-        pres = "assente"; // Represent unconvoked as "assente" so they don't count towards presentsList but still hold bonuses
-      }
-      
-      const isPresent = pres === "giocato";
-
-      return {
-        nome,
-        gol: isPresent ? parseInt(goals[nome] || "0") : 0,
-        assist: isPresent ? parseInt(assists[nome] || "0") : 0,
-        amm: isPresent ? parseInt(yellows[nome] || "0") : 0,
-        rossi: isPresent ? parseInt(reds[nome] || "0") : 0,
-        subitiAzione: isPresent ? parseInt(subAzione[nome] || "0") : 0,
-        subitiRigore: isPresent ? parseInt(subRigore[nome] || "0") : 0,
-        subitiPiazzato: isPresent ? parseInt(subPiazzato[nome] || "0") : 0,
-        pagaQuota: isPresent ? payers.includes(nome) : false,
-        bonusAttivi: pres !== "sostituito" ? (selectedBonuses[nome] || []) : [],
-        statoPresenza: pres,
-        sostitutoDa: isConvocato ? (sostitutoDa[nome] || "") : "",
-        snapshotGiocatore: giocatori.find(x => x.nome === nome),
-      };
-    });
+    const refertoCompleto = buildReferto();
 
     const individualDebt = pagantiConteggio > 0 ? costNum / pagantiConteggio : 0;
     
@@ -1239,6 +1287,15 @@ export default function MatchReport({
               >
                 <CheckCircle2 className="h-5 w-5" /> Chiudi Partita & Addebita Quote
               </button>
+              {onSalvaBozza && (
+                <button
+                  type="button"
+                  onClick={handleSalvaBozza}
+                  className="flex-1 py-3 bg-slate-200 hover:bg-slate-300 rounded-xl text-slate-800 text-sm shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer font-bold"
+                >
+                  💾 Salva Bozza
+                </button>
+              )}
               <button
                 type="button"
                 onClick={handleAnnullaClick}

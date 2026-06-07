@@ -283,6 +283,23 @@ export default function App() {
     await executePostAction("/api/partite/formazione", { idPartita, formazione });
   };
 
+  const handleSalvaBozza = async (
+    idPartita: string,
+    costoFinale: number,
+    presenti: string[],
+    risultato: string,
+    referto: RefertoGiocatore[],
+    note?: string
+  ) => {
+    await executePostAction("/api/partite/salva-bozza", {
+      idPartita,
+      costo: costoFinale,
+      risultato,
+      referto,
+      note,
+    });
+  };
+
   const handleChiudiPartita = async (
     idPartita: string,
     costoFinale: number,
@@ -748,6 +765,7 @@ export default function App() {
               giocatori={giocatori}
               partiteAperte={partiteAperte}
               onChiudiPartita={handleChiudiPartita}
+              onSalvaBozza={handleSalvaBozza}
               onAnnullaPartita={handleAnnullaPartita}
               isEditor={isEditor}
               selectedMatchId={selectedRefertoMatchId}

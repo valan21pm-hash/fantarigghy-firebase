@@ -2115,6 +2115,35 @@ async function startServer() {
     }
   });
 
+  // 11b. SALVA BOZZA REFERTO PARTITA APERTA
+  app.post("/api/partite/salva-bozza", async (req, res) => {
+    try {
+      const { idPartita, costo, risultato, referto, note } = req.body;
+      const token = getAuthToken(req);
+      const db = await getDb(token);
+
+      const rigaPartita = db.partite.find((p) => p.id === idPartita);
+      if (!rigaPartita)
+        return res.status(404).json({ err: "Partita non trovata" });
+      if (rigaPartita.stato !== "Aperta")
+        return res.status(400).json({ err: "Solo le partite aperte possono salvare bozze." });
+
+      rigaPartita.risultato = risultato || "";
+      rigaPartita.referto = referto || [];
+      if (typeof costo !== "undefined") {
+        rigaPartita.costo = parseFloat(costo) || 0;
+      }
+      if (typeof note !== "undefined") {
+        rigaPartita.note = note || "";
+      }
+
+      await saveDb(db, token);
+      sendDbResponse(res, db);
+    } catch (error: any) {
+      res.status(500).json({ erroreCritico: error.message });
+    }
+  });
+
   // 12. SALVA MODIFICHE PARTITA CHIUSA (ROLLBACK AND APPLY)
   app.post("/api/partite/modifica-chiusa", async (req, res) => {
     try {
