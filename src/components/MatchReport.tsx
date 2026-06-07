@@ -71,9 +71,17 @@ export default function MatchReport({
     pagantiConteggio: number;
     quotaSingola: number;
     refertoCompleto: RefertoGiocatore[];
+    presentsList?: string[];
   } | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Tabs structure
+  const [activeTab, setActiveTab] = useState<"referto" | "generic" | "personal">("referto");
+  
+  // Verification tracking for Generic and Personal Bonuses
+  const [verifiedGeneric, setVerifiedGeneric] = useState<Record<string, boolean>>({});
+  const [verifiedPersonal, setVerifiedPersonal] = useState<Record<string, boolean>>({});
 
   // Stats input state
   // key of map: player name. Value: stats
@@ -97,6 +105,7 @@ export default function MatchReport({
     if (onSelectMatchId) onSelectMatchId(id);
     setValidationError(null);
     setSuccessMessage(null);
+    setActiveTab("referto");
     const m = partiteAperte.find(p => p.id === id);
     if (m) {
       const hasReferto = m.referto && m.referto.length > 0;
@@ -146,6 +155,15 @@ export default function MatchReport({
         setSelectedBonuses(bMap);
         setStatoPresenza(statoPresMap);
         setSostitutoDa(sostDaMap);
+        
+        const initialVG: Record<string, boolean> = {};
+        const initialVP: Record<string, boolean> = {};
+        giocatori.forEach(g => {
+          initialVG[g.nome] = true;
+          initialVP[g.nome] = true;
+        });
+        setVerifiedGeneric(initialVG);
+        setVerifiedPersonal(initialVP);
       } else {
         setPresents(m.convocati);
         setPayers(m.convocati);
@@ -167,6 +185,8 @@ export default function MatchReport({
         });
         setStatoPresenza(initialStatoPres);
         setSostitutoDa(initialSostDa);
+        setVerifiedGeneric({});
+        setVerifiedPersonal({});
       }
     } else {
       setPresents([]);
@@ -175,6 +195,8 @@ export default function MatchReport({
       setSelectedBonuses({});
       setStatoPresenza({});
       setSostitutoDa({});
+      setVerifiedGeneric({});
+      setVerifiedPersonal({});
     }
   };
 
@@ -256,6 +278,41 @@ export default function MatchReport({
       setValidationError("La partita ha un costo ma non ci sono paganti selezionati!");
       return;
     }
+
+    // --- Strict Bonus Verification Flow ---
+    const allBonuses = bonuses || DEFAULT_BONUSES;
+    const genericBonusIds = allBonuses.filter(b => !b.isPersonale).map(b => b.id);
+    const personalBonusIds = allBonuses.filter(b => b.isPersonale).map(b => b.id);
+
+    const activeGiocatori = giocatori.filter(g => g.attivo);
+
+    const giocatoriMancantiGenerico = activeGiocatori.filter(g => {
+      const pBonuses = selectedBonuses[g.nome] || [];
+      const hasGeneric = pBonuses.some(bId => genericBonusIds.includes(bId));
+      if (hasGeneric) return false;
+      return !verifiedGeneric[g.nome];
+    });
+
+    const giocatoriMancantiPersonali = activeGiocatori.filter(g => {
+      const pBonuses = selectedBonuses[g.nome] || [];
+      const hasPersonal = pBonuses.some(bId => personalBonusIds.includes(bId));
+      if (hasPersonal) return false;
+      return !verifiedPersonal[g.nome];
+    });
+
+    if (giocatoriMancantiGenerico.length > 0 || giocatoriMancantiPersonali.length > 0) {
+      let errorMsg = `Azione bloccata: è obbligatorio verificare tutti i giocatori per i bonus generici e personali.\n\nRiassunto giocatori mancanti:`;
+      if (giocatoriMancantiGenerico.length > 0) {
+        errorMsg += `\n• Per i Bonus Generici mancano ${giocatoriMancantiGenerico.length} giocatori all'appello.`;
+      }
+      if (giocatoriMancantiPersonali.length > 0) {
+        errorMsg += `\n• Per i Bonus Personali mancano ${giocatoriMancantiPersonali.length} giocatori all'appello.`;
+      }
+      errorMsg += `\n\nAttenzione: usa il tasto 'Assegna Nessun Bonus/Malus a tutti i rimanenti' in fondo alla tab corrispondente per velocizzare la procedura.`;
+      setValidationError(errorMsg);
+      return;
+    }
+    // ----------------------------------------
 
     // Form accurate dynamic list of players to save in the report
     const activeSubstitutes = activeMatch.convocati
@@ -482,7 +539,50 @@ export default function MatchReport({
               </div>
             </div>
 
+            {/* TABS NAVIGATION */}
+            <div className="flex border-b border-gray-200 mt-6 mb-4">
+              <button
+                type="button"
+                className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider text-center border-b-2 transition-all cursor-pointer ${
+                  activeTab === "referto" 
+                    ? "border-slate-800 text-slate-900 bg-slate-50/50" 
+                    : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+                }`}
+                onClick={() => setActiveTab("referto")}
+              >
+                1. Referto Gara
+              </button>
+              {!isAmichevole && (
+                <button
+                  type="button"
+                  className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider text-center border-b-2 transition-all cursor-pointer ${
+                    activeTab === "generic" 
+                      ? "border-slate-800 text-slate-900 bg-slate-50/50" 
+                      : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setActiveTab("generic")}
+                >
+                  2. Bonus Generici
+                </button>
+              )}
+              {!isAmichevole && (
+                <button
+                  type="button"
+                  className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider text-center border-b-2 transition-all cursor-pointer ${
+                    activeTab === "personal" 
+                      ? "border-slate-800 text-slate-900 bg-slate-50/50" 
+                      : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setActiveTab("personal")}
+                >
+                  3. Bonus Personali
+                </button>
+              )}
+            </div>
+
             {/* Attendance & stats input list */}
+            {activeTab === "referto" && (
+            <>
             <div>
               <div className="flex justify-between items-center mb-3">
                 <h3 className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
@@ -946,81 +1046,6 @@ export default function MatchReport({
                         </>
                       )}
 
-                      {/* BONUS E MALUS (MOSTRATI A TUTTI I GIOCATORI TRANNE A CHI E' STATO SOSTITUITO ALL'ULTIMO MOMENTO) */}
-                      {currentStato !== "sostituito" && !isAmichevole && (
-                        <div className="space-y-4">
-                          {/* PERSONAL BONUSES */}
-                          {baseBonuses.length > 0 && (
-                            <div className="bg-yellow-50/15 p-3 rounded-xl border border-yellow-150">
-                              <span className="block text-[9px] font-black text-yellow-850 uppercase tracking-wide mb-2">🎒 Bonus Personali Fantacalcetto</span>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                                {baseBonuses.map(b => {
-                                  const isChecked = (selectedBonuses[nome] || []).includes(b.id);
-                                  return (
-                                    <label
-                                      key={b.id}
-                                      className={`flex items-start gap-2 p-2 rounded-lg border text-[10.5px] font-bold cursor-pointer transition-all ${
-                                        isChecked
-                                          ? "bg-yellow-105 border-yellow-350 text-yellow-950 shadow-xs"
-                                          : "bg-white border-gray-150 hover:bg-gray-50 text-gray-700"
-                                      }`}
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        checked={isChecked}
-                                        onChange={() => handleToggleBonus(nome, b.id)}
-                                        className="w-4 h-4 mt-0.5 text-yellow-600 rounded cursor-pointer"
-                                      />
-                                      <div className="leading-snug">
-                                        <span className="block font-black text-[11px] text-gray-900">{b.nome}</span>
-                                        <span className="text-[8.5px] text-gray-400 font-medium block mt-0.5 leading-snug">{b.descrizione}</span>
-                                      </div>
-                                    </label>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* GLOBAL BONUSES */}
-                          <div className="bg-slate-50/50 p-3 rounded-xl border border-gray-150">
-                            <span className="block text-[9px] font-black text-slate-800 uppercase tracking-wide mb-2">🛡️ Bonus e Malus Generici</span>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[140px] overflow-y-auto pr-1">
-                              {currentGenericBonuses.map(b => {
-                                const isChecked = (selectedBonuses[nome] || []).includes(b.id);
-                                const isMalus = typeof b.punti === "number" && b.punti < 0;
-                                return (
-                                  <label
-                                    key={b.id}
-                                    className={`flex items-start gap-1.5 p-1.5 rounded-lg border text-[10px]/tight font-bold cursor-pointer transition-all ${
-                                      isChecked
-                                        ? isMalus
-                                          ? "bg-red-50 border-red-250 text-red-950"
-                                          : "bg-slate-50 border-slate-300 text-slate-950"
-                                        : "bg-white border-gray-150 hover:bg-gray-50 text-gray-700"
-                                    }`}
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={isChecked}
-                                      onChange={() => handleToggleBonus(nome, b.id)}
-                                      className={`w-3.5 h-3.5 mt-0.5 rounded cursor-pointer ${
-                                        isMalus ? "text-red-650" : "text-slate-700 focus:ring-slate-500"
-                                      }`}
-                                    />
-                                    <div className="leading-none min-w-0">
-                                      <span className="block font-black truncate">{b.nome}</span>
-                                      <span className={`text-[8.5px] font-extrabold block mt-0.5 ${isMalus ? "text-red-650" : "text-slate-600"}`}>
-                                        ({typeof b.punti === "number" && b.punti > 0 ? `+${b.punti}` : b.punti}pt)
-                                      </span>
-                                    </div>
-                                  </label>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     </div>
 
                     <div className="border-t pt-3.5 mt-4">
@@ -1036,6 +1061,175 @@ export default function MatchReport({
                 </div>
               );
             })()}
+            </>
+            )}
+
+            {/* TABS CONTENT: BONUS GENERICI */}
+            {activeTab === "generic" && (
+              <div className="space-y-6">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-4">
+                  <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-widest border-b border-slate-200 pb-2">
+                    🛡️ Assegnazione Bonus Generici
+                  </h3>
+                  <div className="space-y-2">
+                    {(bonuses || DEFAULT_BONUSES).filter(b => !b.isPersonale).map(b => (
+                      <details key={b.id} className="bg-white border text-sm border-gray-200 rounded-lg group">
+                        <summary className="p-3 cursor-pointer font-bold text-slate-800 group-open:border-b border-gray-100 flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <span>{b.nome} {typeof b.punti === 'number' ? (b.punti > 0 ? `(+${b.punti}pt)` : `(${b.punti}pt)`) : ''}</span>
+                            <span className="text-[10px] text-gray-500 font-medium">{b.descrizione}</span>
+                          </div>
+                          <span className="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <div className="p-3 bg-gray-50 max-h-[300px] overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                          {giocatori.filter(g => g.attivo).map(g => {
+                             const isChecked = (selectedBonuses[g.nome] || []).includes(b.id);
+                             return (
+                               <label key={`${b.id}-${g.nome}`} className="flex items-center gap-2 p-2 bg-white border border-gray-150 rounded cursor-pointer hover:bg-gray-50">
+                                 <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={() => handleToggleBonus(g.nome, b.id)}
+                                    className="w-4 h-4 text-emerald-600 rounded cursor-pointer"
+                                 />
+                                 <span className="text-xs font-bold text-gray-800 truncate">{g.nome}</span>
+                               </label>
+                             )
+                          })}
+                        </div>
+                      </details>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50/50 border border-yellow-200/50 rounded-xl p-4">
+                   <h3 className="text-xs font-extrabold text-yellow-800 uppercase tracking-widest border-b border-yellow-200/50 pb-2 mb-3">
+                     ⚠️ Giocatori Senza Bonus Generici
+                   </h3>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-4 max-h-[160px] overflow-y-auto">
+                     {giocatori.filter(g => g.attivo).map(g => {
+                       const pBonuses = selectedBonuses[g.nome] || [];
+                       const hasGeneric = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && !b.isPersonale));
+                       if (hasGeneric) return null;
+                       
+                       return (
+                         <label key={`ver-gen-${g.nome}`} className="flex items-center gap-2 p-2 bg-white border border-yellow-200/50 rounded cursor-pointer">
+                           <input
+                              type="checkbox"
+                              checked={!!verifiedGeneric[g.nome]}
+                              onChange={(e) => setVerifiedGeneric(prev => ({ ...prev, [g.nome]: e.target.checked }))}
+                              className="w-4 h-4 text-yellow-600 rounded cursor-pointer"
+                           />
+                           <span className="text-xs font-bold text-gray-700 truncate">{g.nome} - Nessuno</span>
+                         </label>
+                       )
+                     })}
+                   </div>
+                   
+                   <button
+                     type="button"
+                     onClick={() => {
+                       const newVer = { ...verifiedGeneric };
+                       giocatori.filter(g => g.attivo).forEach(g => {
+                         const pBonuses = selectedBonuses[g.nome] || [];
+                         const hasGeneric = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && !b.isPersonale));
+                         if (!hasGeneric) newVer[g.nome] = true;
+                       });
+                       setVerifiedGeneric(newVer);
+                     }}
+                     className="w-full py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-black text-xs uppercase tracking-wider rounded-lg shadow-sm cursor-pointer"
+                   >
+                     ✨ Assegna "Nessun Bonus/Malus" a tutti i rimanenti
+                   </button>
+                </div>
+              </div>
+            )}
+
+            {/* TABS CONTENT: BONUS PERSONALI */}
+            {activeTab === "personal" && (
+              <div className="space-y-6">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-4">
+                  <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-widest border-b border-slate-200 pb-2">
+                    🎒 Bonus Personali
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[600px] overflow-y-auto pr-1">
+                    {giocatori.filter(g => g.attivo).map(g => {
+                      const bonusKey = getPlayerBonusKey(g.nome);
+                      const baseBonuses = bonusKey ? (bonuses || DEFAULT_BONUSES).filter(b => b.isPersonale && b.giocatoreId === bonusKey) : [];
+                      
+                      return (
+                        <div key={`bp-${g.nome}`} className="bg-white border border-gray-200 rounded-lg p-3">
+                           <h4 className="text-xs font-black text-gray-800 pb-1.5 border-b border-gray-100 mb-2 truncate">{g.nome}</h4>
+                           {baseBonuses.length === 0 ? (
+                             <p className="text-[10px] text-gray-400 font-medium italic">Nessun bonus personale configurato.</p>
+                           ) : (
+                             <div className="space-y-1.5 mb-2">
+                               {baseBonuses.map(b => {
+                                  const isChecked = (selectedBonuses[g.nome] || []).includes(b.id);
+                                  return (
+                                    <label key={b.id} className="flex flex-start gap-2 p-1.5 bg-gray-50 border border-gray-150 rounded cursor-pointer hover:bg-white transition-colors">
+                                      <input
+                                         type="checkbox"
+                                         checked={isChecked}
+                                         onChange={() => handleToggleBonus(g.nome, b.id)}
+                                         className="w-3.5 h-3.5 mt-0.5 text-emerald-600 rounded cursor-pointer"
+                                      />
+                                      <div className="leading-tight min-w-0">
+                                        <span className="text-xs font-bold text-slate-800 block truncate">{b.nome}</span>
+                                      </div>
+                                    </label>
+                                  )
+                               })}
+                             </div>
+                           )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50/50 border border-yellow-200/50 rounded-xl p-4">
+                   <h3 className="text-xs font-extrabold text-yellow-800 uppercase tracking-widest border-b border-yellow-200/50 pb-2 mb-3">
+                     ⚠️ Giocatori Senza Bonus Personali
+                   </h3>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-4 max-h-[160px] overflow-y-auto">
+                     {giocatori.filter(g => g.attivo).map(g => {
+                       const pBonuses = selectedBonuses[g.nome] || [];
+                       const hasPersonal = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && b.isPersonale));
+                       if (hasPersonal) return null;
+                       
+                       return (
+                         <label key={`ver-pers-${g.nome}`} className="flex items-center gap-2 p-2 bg-white border border-yellow-200/50 rounded cursor-pointer">
+                           <input
+                              type="checkbox"
+                              checked={!!verifiedPersonal[g.nome]}
+                              onChange={(e) => setVerifiedPersonal(prev => ({ ...prev, [g.nome]: e.target.checked }))}
+                              className="w-4 h-4 text-yellow-600 rounded cursor-pointer"
+                           />
+                           <span className="text-xs font-bold text-gray-700 truncate">{g.nome} - Nessuno</span>
+                         </label>
+                       )
+                     })}
+                   </div>
+                   
+                   <button
+                     type="button"
+                     onClick={() => {
+                       const newVer = { ...verifiedPersonal };
+                       giocatori.filter(g => g.attivo).forEach(g => {
+                         const pBonuses = selectedBonuses[g.nome] || [];
+                         const hasPersonal = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && b.isPersonale));
+                         if (!hasPersonal) newVer[g.nome] = true;
+                       });
+                       setVerifiedPersonal(newVer);
+                     }}
+                     className="w-full py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-black text-xs uppercase tracking-wider rounded-lg shadow-sm cursor-pointer"
+                   >
+                     ✨ Assegna "Nessun Bonus/Malus" a tutti i rimanenti
+                   </button>
+                </div>
+              </div>
+            )}
 
             {/* Actions Bar */}
             <div className="flex flex-col sm:flex-row gap-3 pt-3 border-t">
