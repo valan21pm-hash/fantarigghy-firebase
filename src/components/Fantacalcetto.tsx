@@ -311,10 +311,8 @@ export default function Fantacalcetto({
         currentPrg += 1;
         setSyncProgress(currentPrg);
       }
-      if (step.prg === 70) {
-        while (!apiCallFinished) {
-          await new Promise((resolve) => setTimeout(resolve, 50));
-        }
+      if (step.prg === 70 && onRefreshData) {
+        await onRefreshData();
       }
     }
 
@@ -811,17 +809,7 @@ export default function Fantacalcetto({
           nextPlayers.includes(p),
         );
 
-        // Check if removing this player would lead to more than 1 change compared to the original roster
-        if (
-          !isMercatoLiberoValido &&
-          rulePrevPlayers.length === 4 &&
-          keptFromOrigin.length < 3
-        ) {
-          alert(
-            "Operazione non consentita: Rimuovere questo giocatore implicherebbe più di 1 cambio rispetto alla tua rosa post-partita!",
-          );
-          return;
-        }
+        // Allow temporary 1+ deselections for exploration, will validate on Save.
         setSelectedPlayers(nextPlayers);
       } else {
         // If selecting a new player:
@@ -837,16 +825,7 @@ export default function Fantacalcetto({
           nextPlayers.includes(p),
         );
 
-        if (
-          !isMercatoLiberoValido &&
-          rulePrevPlayers.length === 4 &&
-          keptFromOrigin.length < 3
-        ) {
-          alert(
-            "Operazione non consentita: Aggiungere questo giocatore implicherebbe più di 1 cambio rispetto alla tua rosa post-partita!",
-          );
-          return;
-        }
+        // Allow temporary 1+ selections for exploration, will validate on Save.
 
         // Budget check with the new player added
         let soldPrice = 0;
