@@ -2467,10 +2467,22 @@ export default function Fantacalcetto({
               <div className="bg-emerald-950/80 border border-emerald-800 rounded-3xl p-5 shadow-xl backdrop-blur-md space-y-4 font-sans">
                 <div className="border-b border-emerald-900 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 font-sans">
                   <div>
-                    <h3 className="font-extrabold text-xs text-white uppercase tracking-wider font-sans">
+                    <h3 className="font-extrabold text-xs text-white uppercase tracking-wider font-sans flex items-center gap-2">
                       Classifica Generale
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setInstructionsTab("guida");
+                          setShowInstructionsModal(true);
+                        }}
+                        className="text-emerald-400 hover:text-yellow-400 transition-colors"
+                        title="Vedi info su come funziona il torneo"
+                      >
+                        <BookOpen className="h-4 w-4" />
+                      </button>
                     </h3>
-                    <p className="text-[9px] text-emerald-400 font-semibold uppercase tracking-wider font-sans">
+                    <p className="text-[9px] text-emerald-400 font-semibold uppercase tracking-wider font-sans mt-0.5">
                       Aggiornata ad ogni referto inserito dagli Amministratori
                     </p>
                   </div>
@@ -2736,8 +2748,20 @@ export default function Fantacalcetto({
                     <span className="text-[9px] uppercase font-black text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-md border border-yellow-400/10 tracking-wider">
                       Archivio Ufficiale
                     </span>
-                    <h3 className="font-extrabold text-base text-white uppercase tracking-wider font-sans">
+                    <h3 className="font-extrabold text-base text-white uppercase tracking-wider font-sans flex items-center gap-2">
                       Tabellone Partite & Referti
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setInstructionsTab("guida");
+                          setShowInstructionsModal(true);
+                        }}
+                        className="text-emerald-400 hover:text-yellow-400 transition-colors"
+                        title="Vedi info sui calcoli dei punti"
+                      >
+                        <BookOpen className="h-5 w-5" />
+                      </button>
                     </h3>
                     <p className="text-[10.5px] text-emerald-300 font-medium">
                       Consulta i risultati omologati dei match e scarica il
@@ -2901,8 +2925,20 @@ export default function Fantacalcetto({
                           <Calendar className="h-6 w-6 text-yellow-400" />
                         </div>
                         <div className="min-w-0 flex-1 text-left">
-                          <span className="text-[9px] uppercase font-black text-emerald-400 tracking-wider">
+                          <span className="text-[9px] uppercase font-black text-emerald-400 tracking-wider flex items-center gap-2">
                             Turno di Gioco Attivo
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setInstructionsTab("guida");
+                                setShowInstructionsModal(true);
+                              }}
+                              className="text-emerald-400 hover:text-yellow-400 transition-colors"
+                              title="Vedi info su blocchi formazioni"
+                            >
+                              <BookOpen className="h-3.5 w-3.5" />
+                            </button>
                           </span>
                           {activeMatch ? (
                             <>
@@ -3099,9 +3135,23 @@ export default function Fantacalcetto({
               {/* Left controls column */}
               <div className="lg:col-span-4 xl:col-span-3 space-y-4">
                 <div className="bg-emerald-950/80 border border-emerald-800 rounded-2xl p-5 space-y-4 shadow-xl backdrop-blur-md">
-                  <h3 className="font-extrabold text-[11px] uppercase tracking-wider text-yellow-300 flex items-center gap-1.5">
-                    <User className="h-4.5 w-4.5 text-yellow-400" />{" "}
-                    Informazioni Generali
+                  <h3 className="font-extrabold text-[11px] uppercase tracking-wider text-yellow-300 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <User className="h-4.5 w-4.5 text-yellow-400" />{" "}
+                      Informazioni Generali
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setInstructionsTab("guida");
+                        setShowInstructionsModal(true);
+                      }}
+                      className="text-emerald-400 hover:text-yellow-400 transition-colors bg-emerald-900/40 p-1.5 rounded-lg border border-emerald-800"
+                      title="Vedi info su crediti e mercato"
+                    >
+                      <BookOpen className="h-4 w-4" />
+                    </button>
                   </h3>
 
                   {errorMsg && (
