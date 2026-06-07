@@ -352,14 +352,13 @@ export default function App() {
   };
 
   // 5. Fantacalcetto callbacks
-  const handleIscriviFantasquadra = async (nomePartecipante: string, nomeFantasquadra: string, giocatoriSelezionati: string[], pin: string, email?: string, adminBypassLock?: boolean) => {
+  const handleIscriviFantasquadra = async (nomePartecipante: string, nomeFantasquadra: string, giocatoriSelezionati: string[], pin: string, email?: string) => {
     return await executePostAction("/api/fantasquadre/iscrivi", {
       nomePartecipante,
       nomeFantasquadra,
       giocatoriSelezionati,
       pin,
-      email,
-      adminBypassLock
+      email
     });
   };
 
@@ -378,6 +377,10 @@ export default function App() {
   const handleEmergencyReset = async () => {
     // TBD: Placeholder for actual implementation when enabled
     console.warn("Emergency reset requested");
+  };
+
+  const handleToggleMercatoLibero = async (attivo: boolean) => {
+    return await executePostAction("/api/settings/mercato-libero", { attivo });
   };
 
   // 6. Consigli/Miglioramenti callbacks
@@ -419,10 +422,12 @@ export default function App() {
         partiteChiuse={partiteChiuse}
         partiteAperte={partiteAperte}
         bonuses={data?.bonuses}
+        sessioneMercatoLibero={data?.sessioneMercatoLibero}
         onIscriviFantasquadra={handleIscriviFantasquadra}
         onEliminaFantasquadra={handleEliminaFantasquadra}
         onCreaConsiglio={handleCreaConsiglio}
         onUpdateBonuses={handleUpdateBonuses}
+        onToggleMercatoLibero={handleToggleMercatoLibero}
         consigli={data?.consigli || []}
         isEditor={isEditor}
         isAdminMode={false}
@@ -780,10 +785,12 @@ export default function App() {
               partiteChiuse={partiteChiuse}
               partiteAperte={partiteAperte}
               bonuses={data?.bonuses}
+              sessioneMercatoLibero={data?.sessioneMercatoLibero}
               onIscriviFantasquadra={handleIscriviFantasquadra}
               onEliminaFantasquadra={handleEliminaFantasquadra}
               onCreaConsiglio={handleCreaConsiglio}
               onUpdateBonuses={handleUpdateBonuses}
+              onToggleMercatoLibero={handleToggleMercatoLibero}
               onMigrate={handleMigrate}
               consigli={data?.consigli || []}
               isEditor={isEditor}

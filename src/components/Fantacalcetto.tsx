@@ -57,17 +57,19 @@ interface FantacalcettoProps {
   partiteChiuse?: Partita[];
   partiteAperte?: Partita[];
   bonuses?: CustomBonusDef[];
+  sessioneMercatoLibero?: boolean;
   onIscriviFantasquadra: (
     nomePartecipante: string,
     nomeFantasquadra: string,
     giocatoriSelezionati: string[],
     pin: string,
     email?: string,
-    adminBypassLock?: boolean,
   ) => Promise<any>;
   onEliminaFantasquadra: (id: string) => Promise<any>;
   onCreaConsiglio?: (autore: string, testo: string) => Promise<any>;
   onUpdateBonuses?: (bonuses: CustomBonusDef[]) => Promise<any>;
+  onToggleMercatoLibero?: (attivo: boolean) => Promise<any>;
+  onMigrate?: () => void;
   consigli?: any[];
   isEditor: boolean;
   isAdminMode: boolean; // false if viewing as a public portal page
@@ -86,10 +88,12 @@ export default function Fantacalcetto({
   partiteChiuse = [],
   partiteAperte = [],
   bonuses = DEFAULT_BONUSES,
+  sessioneMercatoLibero = false,
   onIscriviFantasquadra,
   onEliminaFantasquadra,
   onCreaConsiglio,
   onUpdateBonuses,
+  onToggleMercatoLibero,
   consigli = [],
   isEditor,
   isAdminMode,
@@ -174,19 +178,9 @@ export default function Fantacalcetto({
   const [syncProgress, setSyncProgress] = useState(0);
   const [syncStatusText, setSyncStatusText] = useState("");
   const [syncDone, setSyncDone] = useState(false);
-  const [adminBypassLock, setAdminBypassLock] = useState(() => {
-    return localStorage.getItem("fantacalcetto_admin_bypass_lock") === "true";
-  });
   const [selectedMatchBreakdown, setSelectedMatchBreakdown] =
     useState<any>(null);
   const [showGeneralReportModal, setShowGeneralReportModal] = useState(false);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "fantacalcetto_admin_bypass_lock",
-      String(adminBypassLock),
-    );
-  }, [adminBypassLock]);
 
   // Auto-login all'avvio se già registrati in localStorage
   useEffect(() => {
@@ -700,7 +694,6 @@ export default function Fantacalcetto({
   const _actualLockStatus = checkChampionshipLockStatus();
   const lockStatus = {
     ..._actualLockStatus,
-    isLocked: adminBypassLock ? false : _actualLockStatus.isLocked,
   };
 
   // Handle verification and login of an existing team
@@ -790,7 +783,7 @@ export default function Fantacalcetto({
 
         // Check if removing this player would lead to more than 1 change compared to the original roster
         if (
-          !adminBypassLock &&
+          !sessioneMercatoLibero &&
           rulePrevPlayers.length === 4 &&
           keptFromOrigin.length < 3
         ) {
@@ -815,7 +808,7 @@ export default function Fantacalcetto({
         );
 
         if (
-          !adminBypassLock &&
+          !sessioneMercatoLibero &&
           rulePrevPlayers.length === 4 &&
           keptFromOrigin.length < 3
         ) {
@@ -990,9 +983,9 @@ export default function Fantacalcetto({
         const numChangesFromOrigin =
           rulePrevPlayers.length - keptFromOrigin.length;
 
-        if (!adminBypassLock && numChangesFromOrigin > 1) {
+        if (!sessioneMercatoLibero && numChangesFromOrigin > 1) {
           setErrorMsg(
-            `Errore di mercato: puoi effettuare al massimo 1 cambio rispetto alla tua rosa originaria post-partita!`,
+            `Errore di mercato: puoi effettuare al massimo 1 cambio rispetto alla tua rosa originaria post-partita! (A meno di Sessione Speciale)`,
           );
           return;
         }
@@ -1073,7 +1066,6 @@ export default function Fantacalcetto({
         selectedPlayers,
         trimmedPin,
         undefined,
-        adminBypassLock,
       );
       setSubmitted(true);
       if (onRefreshData) {
@@ -1099,7 +1091,6 @@ export default function Fantacalcetto({
         selectedPlayers,
         trimmedPin,
         undefined,
-        adminBypassLock,
       );
       setSubmitted(true);
       if (onRefreshData) {
@@ -2330,6 +2321,24 @@ export default function Fantacalcetto({
             </button>
           </div>
 
+          {sessioneMercatoLibero && (
+            <div className="rounded-xl p-4 border flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-sans shadow-lg bg-blue-900/40 border-blue-500 text-blue-100 animate-pulse-slow mb-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-xl shrink-0 mt-0.5 bg-blue-800 text-blue-200">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-white">
+                    ⭐ SESSIONE DI MERCATO SPECIALE ATTIVA
+                  </h4>
+                  <p className="text-[11px] mt-0.5 leading-relaxed">
+                    Il limite di <span className="font-extrabold text-white">1 solo cambio</span> è momentaneamente sospeso! Puoi modificare interamente la rosa per questo mercato.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Lock Status Banner */}
           {lockStatus.match ? (
             <div
@@ -2413,6 +2422,11 @@ export default function Fantacalcetto({
 
           {activePublicTab === "classifica" ? (
             <div className="space-y-6 animate-fade-in font-sans">
+              <div className="bg-emerald-900/30 border-l-4 border-emerald-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm">
+                <p className="text-xs text-emerald-200 leading-relaxed font-medium">
+                  <strong className="text-emerald-400">ℹ️ Punto Informativo:</strong> Qui puoi monitorare l'andamento del campionato. Clicca su ciascun team per vedere nel dettaglio il valore attuale della rosa, il tesoretto residuo e le scelte dei giocatori fatte dagli altri partecipanti!
+                </p>
+              </div>
               {/* Podium View if any */}
               {rankedTeams.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
@@ -2741,6 +2755,11 @@ export default function Fantacalcetto({
             </div>
           ) : activePublicTab === "partite" ? (
             <div className="space-y-6 animate-fade-in font-sans">
+              <div className="bg-emerald-900/30 border-l-4 border-emerald-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm">
+                <p className="text-xs text-emerald-200 leading-relaxed font-medium">
+                  <strong className="text-emerald-400">ℹ️ Punto Informativo:</strong> Archivio delle prestazioni. Controlla qui i voti o i referti caricati dall'amministratore che hanno decretato il FantaScore dei tesserati, incluse pagelle, gol e bonus/malus generali.
+                </p>
+              </div>
               {/* Highlight Banner / Link to General Report */}
               <div className="bg-gradient-to-r from-emerald-950/90 to-emerald-900/60 border border-emerald-800/80 rounded-3xl p-5 shadow-xl backdrop-blur-md space-y-4 font-sans">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-emerald-900/60 pb-4">
@@ -2883,6 +2902,11 @@ export default function Fantacalcetto({
             </div>
           ) : activePublicTab === "convocazioni" ? (
             <div className="space-y-6 animate-fade-in font-sans">
+              <div className="bg-emerald-900/30 border-l-4 border-amber-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm">
+                <p className="text-xs text-emerald-200 leading-relaxed font-medium">
+                  <strong className="text-amber-400">ℹ️ Come Schierare la Formazione:</strong> Assicurati di schierare i 4 giocatori ogni settimana (prima che scada il tempo indicato)! Se un tuo titolare non giocherà la partita prenderà s.v. e verrà sostituito in automatico dal voto del tuo giocatore in panchina.
+                </p>
+              </div>
               {(() => {
                 const activeMatch =
                   lockStatus.match ||
@@ -3132,6 +3156,13 @@ export default function Fantacalcetto({
               onSubmit={handleRegisterSubmit}
               className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-12 gap-6 font-sans"
             >
+              <div className="lg:col-span-12 xl:col-span-12">
+                <div className="bg-emerald-900/30 border-l-4 border-yellow-500 p-4 rounded-r-xl font-sans shadow-sm mb-4">
+                  <p className="text-xs text-emerald-200 leading-relaxed font-medium">
+                    <strong className="text-yellow-400">ℹ️ Creazione Squadra / Mercato:</strong> Scegli un Nome per il Team, un indirizzo email ed un <strong>PIN segreto</strong> per proteggere la tua rosa. <br/>Il budget massimo al primo accesso è <strong>60 Izycoin</strong> per 4 giocatori. Successivamente potrai effettuare solo <strong>1 cambio a settimana</strong> per massimizzare le plusvalenze!
+                  </p>
+                </div>
+              </div>
               {/* Left controls column */}
               <div className="lg:col-span-4 xl:col-span-3 space-y-4">
                 <div className="bg-emerald-950/80 border border-emerald-800 rounded-2xl p-5 space-y-4 shadow-xl backdrop-blur-md">
@@ -4131,22 +4162,29 @@ export default function Fantacalcetto({
       {/* Visual Header card */}
       <div className="bg-emerald-900/10 border border-emerald-800/15 rounded-3xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xs">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="p-1.5 bg-yellow-450/15 text-yellow-500 rounded-lg shrink-0">
-              <Sparkles className="h-5 w-5 animate-pulse" />
-            </span>
-            <h2 className="text-lg sm:text-xl font-black text-gray-900 uppercase tracking-tight">
-              Pannello di Controllo Fantacalcetto
-            </h2>
-            {isEditor && (
-              <label className="ml-2 flex items-center gap-1.5 cursor-pointer bg-yellow-100/50 border border-yellow-500/30 text-yellow-700 hover:text-yellow-600 px-2 py-1 rounded-lg text-[10px] font-bold tracking-wider transition-colors shadow-sm">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 bg-yellow-450/15 text-yellow-500 rounded-lg shrink-0">
+                <Sparkles className="h-5 w-5 animate-pulse" />
+              </span>
+              <h2 className="text-lg sm:text-xl font-black text-gray-900 uppercase tracking-tight">
+                Pannello di Controllo Fantacalcetto
+              </h2>
+            </div>
+            {isEditor && onToggleMercatoLibero && (
+              <label className="flex items-center gap-2 cursor-pointer bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 px-3 py-1.5 rounded-lg text-xs font-bold tracking-wider transition-colors shadow-sm ml-4">
                 <input
                   type="checkbox"
-                  checked={adminBypassLock}
-                  onChange={(e) => setAdminBypassLock(e.target.checked)}
-                  className="w-3 h-3 rounded-sm bg-white border-yellow-500/50 text-yellow-600 focus:ring-0 cursor-pointer"
+                  checked={sessioneMercatoLibero}
+                  onChange={async (e) => {
+                    if (window.confirm(e.target.checked ? "Attivare la Sessione di Mercato Libero (cambi illimitati)?" : "Disattivare la Sessione di Mercato Libero (ripristina limite 1 cambio)?")) {
+                      await onToggleMercatoLibero(e.target.checked);
+                      if (onRefreshData) await onRefreshData();
+                    }
+                  }}
+                  className="w-4 h-4 rounded text-blue-600 focus:ring-0 cursor-pointer"
                 />
-                🛠️ Test Bypass Mercato
+                Mercato Libero: {sessioneMercatoLibero ? "ATTIVO" : "OFF"}
               </label>
             )}
           </div>

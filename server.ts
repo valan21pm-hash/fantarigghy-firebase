@@ -1302,7 +1302,6 @@ async function startServer() {
         giocatoriSelezionati,
         pin,
         email,
-        adminBypassLock,
       } = req.body;
       if (!nomeFantasquadra || !nomeFantasquadra.trim()) {
         return res
@@ -1448,14 +1447,14 @@ async function startServer() {
           );
 
           if (
-            !adminBypassLock &&
+            !db.sessioneMercatoLibero &&
             rulePrevPlayers.length === 4 &&
             keptFromOrigin.length < 3
           ) {
             return res
               .status(400)
               .json({
-                err: `Puoi effettuare al massimo 1 cambio rispetto alla tua rosa originaria (post ultima partita)! Hai provato a sostituire troppi giocatori.`,
+                err: `Puoi effettuare al massimo 1 cambio rispetto alla tua rosa originaria (post ultima partita)! Hai provato a sostituire troppi giocatori. (A meno che non sia attiva una Sessione di Mercato Libero)`,
               });
           }
 
@@ -1739,6 +1738,19 @@ async function startServer() {
       res.json({ serviceAccountEmail: credentials.client_email });
     } catch (err: any) {
       res.json({ serviceAccountEmail: null });
+    }
+  });
+
+  app.post("/api/settings/mercato-libero", async (req, res) => {
+    try {
+      const { attivo } = req.body;
+      const token = getAuthToken(req);
+      const db = await getDb(token);
+      db.sessioneMercatoLibero = !!attivo;
+      await saveDb(db, token);
+      res.json({ success: true, sessioneMercatoLibero: db.sessioneMercatoLibero });
+    } catch (err: any) {
+      res.status(500).json({ err: "Errore durante l'aggiornamento dell'impostazione" });
     }
   });
 

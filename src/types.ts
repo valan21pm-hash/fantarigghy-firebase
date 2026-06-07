@@ -67,6 +67,7 @@ export interface Fantasquadra {
   creditoResiduo?: number;
   valoriAcquisto?: Record<string, number>;
   ultimoCambioMatchId?: string;
+  rosaOriginaria?: string[];
 }
 
 // Fanta point formula coefficients
@@ -178,11 +179,12 @@ export interface DatabaseSchema {
     operazione: string;
     importo: string;
     dettagli: string;
-    utente: string;
+    utente?: string;
   }[];
   fantasquadre?: Fantasquadra[];
   consigli?: Consiglio[];
   bonuses?: CustomBonusDef[];
+  sessioneMercatoLibero?: boolean;
 }
 
 export interface CustomBonusDef {
