@@ -41,7 +41,6 @@ export async function saveToFirestore(db: DatabaseSchema): Promise<void> {
     const batch = writeBatch(dbServer);
     let count = 0;
 
-    // A batch can hold up to 500 writes. To be safe, we'll execute it in chunks if necessary.
     const commitBatchIfNeeded = async () => {
       if (count >= 400) {
         await batch.commit();
@@ -49,55 +48,92 @@ export async function saveToFirestore(db: DatabaseSchema): Promise<void> {
       }
     };
 
-    // Replace the collection content by writing documents named by their primary identifier
-    // For giocatori, let's use nome encoded as ID or simple strings
+    // Helper to get all current ids in a collection
+    const getExistingIds = async (collectionName: string) => {
+      const snap = await getDocs(collection(dbServer, collectionName));
+      return snap.docs.map(d => d.id);
+    };
+
+    // 1. Giocatori
+    const existingGiocatori = await getExistingIds("giocatori");
+    const newGiocatori = db.giocatori.map(g => encodeURIComponent(g.nome));
+    for (const id of existingGiocatori.filter(id => !newGiocatori.includes(id))) {
+      batch.delete(doc(dbServer, "giocatori", id));
+      count++; await commitBatchIfNeeded();
+    }
     for (const g of db.giocatori) {
       const gRef = doc(dbServer, "giocatori", encodeURIComponent(g.nome));
       batch.set(gRef, g);
-      count++;
-      await commitBatchIfNeeded();
+      count++; await commitBatchIfNeeded();
     }
 
-    // campi
+    // 2. Campi
+    const existingCampi = await getExistingIds("campi");
+    const newCampi = db.campi.map(c => encodeURIComponent(c));
+    for (const id of existingCampi.filter(id => !newCampi.includes(id))) {
+      batch.delete(doc(dbServer, "campi", id));
+      count++; await commitBatchIfNeeded();
+    }
     for (const c of db.campi) {
       const cRef = doc(dbServer, "campi", encodeURIComponent(c));
       batch.set(cRef, { nome: c });
-      count++;
-      await commitBatchIfNeeded();
+      count++; await commitBatchIfNeeded();
     }
 
-    // partite
+    // 3. Partite
+    const existingPartite = await getExistingIds("partite");
+    const newPartite = db.partite.map(p => p.id);
+    for (const id of existingPartite.filter(id => !newPartite.includes(id))) {
+      batch.delete(doc(dbServer, "partite", id));
+      count++; await commitBatchIfNeeded();
+    }
     for (const p of db.partite) {
       const pRef = doc(dbServer, "partite", p.id);
       batch.set(pRef, p);
-      count++;
-      await commitBatchIfNeeded();
+      count++; await commitBatchIfNeeded();
     }
 
-    // logs - Use data + operazione as ID
+    // 4. Logs
+    const existingLogs = await getExistingIds("logs");
+    const newLogs = db.logs.map(l => encodeURIComponent(`${l.data}_${l.operazione}_${l.dettagli}`).slice(0, 100));
+    for (const id of existingLogs.filter(id => !newLogs.includes(id))) {
+      batch.delete(doc(dbServer, "logs", id));
+      count++; await commitBatchIfNeeded();
+    }
     for (const l of db.logs) {
       const key = encodeURIComponent(`${l.data}_${l.operazione}_${l.dettagli}`).slice(0, 100);
       const lRef = doc(dbServer, "logs", key);
       batch.set(lRef, l);
-      count++;
-      await commitBatchIfNeeded();
+      count++; await commitBatchIfNeeded();
     }
 
+    // 5. Fantasquadre
+    const existingFanta = await getExistingIds("fantasquadre");
+    const newFanta = (db.fantasquadre || []).map(fs => fs.id || fs.nomeFantasquadra);
+    for (const id of existingFanta.filter(id => !newFanta.includes(id))) {
+      batch.delete(doc(dbServer, "fantasquadre", id));
+      count++; await commitBatchIfNeeded();
+    }
     if (db.fantasquadre) {
       for (const fs of db.fantasquadre) {
         const fsRef = doc(dbServer, "fantasquadre", fs.id || fs.nomeFantasquadra);
         batch.set(fsRef, fs);
-        count++;
-        await commitBatchIfNeeded();
+        count++; await commitBatchIfNeeded();
       }
     }
 
+    // 6. Consigli
+    const existingConsigli = await getExistingIds("consigli");
+    const newConsigli = (db.consigli || []).map(c => c.id);
+    for (const id of existingConsigli.filter(id => !newConsigli.includes(id))) {
+      batch.delete(doc(dbServer, "consigli", id));
+      count++; await commitBatchIfNeeded();
+    }
     if (db.consigli) {
       for (const c of db.consigli) {
         const cRef = doc(dbServer, "consigli", c.id);
         batch.set(cRef, c);
-        count++;
-        await commitBatchIfNeeded();
+        count++; await commitBatchIfNeeded();
       }
     }
 

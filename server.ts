@@ -778,24 +778,25 @@ async function getDb(token?: string, bypassCache: boolean = false): Promise<Data
   if (!localDb.fantasquadre) localDb.fantasquadre = [];
   if (!localDb.consigli) localDb.consigli = [];
 
-    // Integrate Firestore data into localDb as the baseline source of truth
-    if (firestoreDb) {
-      if (firestoreDb.giocatori.length > 0) localDb.giocatori = firestoreDb.giocatori;
-      if (firestoreDb.partite.length > 0) localDb.partite = firestoreDb.partite;
-      if (firestoreDb.campi.length > 0) localDb.campi = firestoreDb.campi;
-      if (firestoreDb.logs && firestoreDb.logs.length > 0) localDb.logs = firestoreDb.logs;
-      if (firestoreDb.bonuses) localDb.bonuses = firestoreDb.bonuses;
-      
-      // For arrays, merge to prevent data loss
-    const fantaMap = new Map<string, Fantasquadra>();
-    for (const fs of localDb.fantasquadre) fantaMap.set(fs.id || fs.nomeFantasquadra, fs);
-    for (const fs of firestoreDb.fantasquadre || []) fantaMap.set(fs.id || fs.nomeFantasquadra, Object.assign({}, fantaMap.get(fs.id || fs.nomeFantasquadra), fs));
-    localDb.fantasquadre = Array.from(fantaMap.values());
+  const firestoreHasData = firestoreDb && (
+    (firestoreDb.giocatori && firestoreDb.giocatori.length > 0) || 
+    (firestoreDb.partite && firestoreDb.partite.length > 0) || 
+    (firestoreDb.fantasquadre && firestoreDb.fantasquadre.length > 0)
+  );
 
-    const consigliMap = new Map<string, Consiglio>();
-    for (const c of localDb.consigli) consigliMap.set(c.id, c);
-    for (const c of firestoreDb.consigli || []) consigliMap.set(c.id, Object.assign({}, consigliMap.get(c.id), c));
-    localDb.consigli = Array.from(consigliMap.values());
+  // Integrate Firestore data into localDb as the baseline source of truth
+  if (firestoreDb) {
+    if (firestoreDb.giocatori.length > 0) localDb.giocatori = firestoreDb.giocatori;
+    if (firestoreDb.partite.length > 0) localDb.partite = firestoreDb.partite;
+    if (firestoreDb.campi.length > 0) localDb.campi = firestoreDb.campi;
+    if (firestoreDb.logs && firestoreDb.logs.length > 0) localDb.logs = firestoreDb.logs;
+    if (firestoreDb.bonuses) localDb.bonuses = firestoreDb.bonuses;
+    
+    // For arrays, merge to prevent data loss or completely replace them since Firestore is SSOT
+    // Since Firestore is the authoritative source, we replace the local arrays with Firestore's,
+    // avoiding merging so deleted items don't return.
+    localDb.fantasquadre = firestoreDb.fantasquadre || [];
+    localDb.consigli = firestoreDb.consigli || [];
   } else {
     console.log("[Firestore] Firestore vuoto, inizializzazione da Sheets...");
   }
@@ -805,8 +806,9 @@ async function getDb(token?: string, bypassCache: boolean = false): Promise<Data
     activeToken = await getStoredGoogleToken();
   }
 
-  // Reload from sheets only if we have active auth token and NO writes are currently pending / running
-  if (activeToken && !activeToken.startsWith("local-admin-") && !pendingSyncTask && !sheetsSyncInProgress) {
+  // If Firestore already has data, we DO NOT need to pull from Sheets back into the DB.
+  // Sheets is only used as a fallback/migration source when Firestore is empty.
+  if (!firestoreHasData && activeToken && !activeToken.startsWith("local-admin-") && !pendingSyncTask && !sheetsSyncInProgress) {
     try {
       const spreadsheetId = await getOrUpdateSpreadsheetId(activeToken);
       let sheetsDb = await fetchFromSheets(activeToken, spreadsheetId);
