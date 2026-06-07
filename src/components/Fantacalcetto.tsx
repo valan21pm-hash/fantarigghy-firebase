@@ -26,7 +26,8 @@ import {
   BookOpen,
   HelpCircle,
   Info,
-  X
+  X,
+  Download
 } from "lucide-react";
 import { Giocatore, Fantasquadra, Partita, CustomBonusDef, getPlayerBonusKey, getPlayerBonusPointsForMatch, getPlayerBonusBreakdownForMatch, DEFAULT_BONUSES, getPlayerPriceForRoster, getPlayerCurrentPrice, getPlayerBasePrice, MAX_BUDGET, getLastName } from "../types";
 
@@ -149,6 +150,7 @@ export default function Fantacalcetto({
   const [adminBypassLock, setAdminBypassLock] = useState(() => {
     return localStorage.getItem("fantacalcetto_admin_bypass_lock") === "true";
   });
+  const [selectedMatchBreakdown, setSelectedMatchBreakdown] = useState<any>(null);
 
   useEffect(() => {
     localStorage.setItem("fantacalcetto_admin_bypass_lock", String(adminBypassLock));
@@ -2132,79 +2134,26 @@ export default function Fantacalcetto({
                                     ) : (
                                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                                         {matchBreakdown.map((mb, mbIdx) => (
-                                          <div key={mbIdx} className="bg-emerald-950/40 border border-emerald-900/50 rounded-xl p-3 space-y-2">
-                                            <div className="flex items-center justify-between border-b border-emerald-900/40 pb-1.5">
-                                              <div className="min-w-0">
-                                                <p className="text-[11px] font-extrabold text-white truncate" title={mb.dettagli}>
-                                                  ⚔️ {mb.dettagli.split(' - ')[0] || mb.dettagli}
+                                          <div 
+                                            key={mbIdx} 
+                                            onClick={() => setSelectedMatchBreakdown({ mb, teamName: team.nomeFantasquadra })}
+                                            className="bg-emerald-950/40 hover:bg-emerald-900/60 transition-colors border border-emerald-900/50 rounded-xl p-3 flex items-center justify-between cursor-pointer group"
+                                          >
+                                            <div className="min-w-0 pr-2">
+                                              <p className="text-[11px] font-extrabold text-white truncate group-hover:text-yellow-300 transition-colors" title={mb.dettagli}>
+                                                ⚔️ {mb.dettagli.split(' - ')[0] || mb.dettagli}
+                                              </p>
+                                              {mb.dettagli.includes(' - ') && (
+                                                <p className="text-[8px] text-emerald-400 font-medium truncate mt-0.5">
+                                                  {mb.dettagli.split(' - ').slice(1).join(' - ')}
                                                 </p>
-                                                {mb.dettagli.includes(' - ') && (
-                                                  <p className="text-[8px] text-emerald-400 font-medium truncate">
-                                                    {mb.dettagli.split(' - ').slice(1).join(' - ')}
-                                                  </p>
-                                                )}
-                                                <p className="text-[9px] text-emerald-400 font-bold mt-0.5">
-                                                  Punti Gara: <span className="text-yellow-300 font-black">{mb.risultato}</span>
-                                                </p>
-                                              </div>
-                                              <div className="text-right shrink-0 flex flex-col items-end gap-1">
-                                                <span className="font-mono text-[10px] font-black bg-emerald-900 text-yellow-300 border border-emerald-800 px-1.5 py-0.5 rounded-lg">
-                                                  {mb.puntiTotaliMatch > 0 ? "+" : ""}{mb.puntiTotaliMatch} pt
-                                                </span>
-                                                <button
-                                                  type="button"
-                                                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); generateMatchPdf(team.nomeFantasquadra, mb); }}
-                                                  className="bg-yellow-400 hover:bg-yellow-300 text-emerald-950 text-[8px] px-1.5 py-1 rounded shadow-md mt-1 font-bold uppercase transition-transform hover:-translate-y-0.5 active:translate-y-0"
-                                                >
-                                                  Scarica Referto PDF
-                                                </button>
-                                              </div>
+                                              )}
                                             </div>
-
-                                            <div className="grid grid-cols-1 gap-1 text-[9px] max-h-32 overflow-y-auto">
-                                              {mb.giocatoriKpi.map((kpi: any, kIdx) => {
-                                                const highlights: string[] = [];
-                                                if (kpi.gol > 0) highlights.push(`⚽ ${kpi.gol} Gol (+${kpi.gol * 3})`);
-                                                if (kpi.assist > 0) highlights.push(`🤝 ${kpi.assist} Assist (+${kpi.assist * 1})`);
-                                                if (kpi.amm > 0) highlights.push(`🟨 ${kpi.amm} Amm (-${kpi.amm * 0.5})`);
-                                                if (kpi.rossi > 0) highlights.push(`🟥 ${kpi.rossi} Esp (-${kpi.rossi * 1})`);
-                                                if (kpi.bonusBreakdownStr) {
-                                                  highlights.push(`🎒 Bonus: ${kpi.bonusBreakdownStr}`);
-                                                } else if (kpi.bonusPts !== 0) {
-                                                  highlights.push(`🎒 ${kpi.bonusPts > 0 ? "+" : ""}${kpi.bonusPts} Bonus`);
-                                                }
-
-                                                const isSostituito = kpi.stato === "Sostituito";
-                                                const isSubentrato = kpi.stato === "Subentrato";
-                                                const isPanchina = kpi.stato === "Panchina" || kpi.ruolo === "Panchina";
-                                                const isAssente = kpi.stato === "Assente";
-
-                                                let statusBadge = "";
-                                                if (isSostituito) statusBadge = " 🚫 Sost.";
-                                                else if (isSubentrato) statusBadge = " 🔄 Sub.";
-                                                else if (isPanchina && !isSubentrato) statusBadge = " 🎽 Pan.";
-                                                else if (isAssente) statusBadge = " 🚫 Ass.";
-
-                                                const displayPoints = (kpi.puntiConteggiati > 0 ? `+${kpi.puntiConteggiati}` : kpi.puntiConteggiati);
-
-                                                return (
-                                                  <div key={kIdx} className={`flex justify-between items-center px-1.5 py-0.5 rounded ${isSostituito || isAssente ? "bg-red-950/20 opacity-50" : isSubentrato ? "bg-amber-500/10 border border-amber-500/30" : "bg-emerald-900/20"}`}>
-                                                    <span className={`font-bold truncate max-w-[100px] sm:max-w-xs text-left ${isSostituito || isAssente ? "text-gray-500 line-through font-normal" : isSubentrato ? "text-yellow-300 font-extrabold" : "text-gray-300"}`}>
-                                                      {kpi.nome}{statusBadge}
-                                                    </span>
-                                                    <div className="flex items-center gap-1.5">
-                                                      {highlights.length > 0 && (
-                                                        <span className="text-emerald-400/95 font-medium text-[8px]">
-                                                          {highlights.join(", ")}
-                                                        </span>
-                                                      )}
-                                                      <span className={`font-mono font-black text-[8px] ${isSubentrato ? "text-amber-400" : isSostituito || isAssente ? "text-red-400" : "text-gray-200"}`}>
-                                                        {displayPoints} pt
-                                                      </span>
-                                                    </div>
-                                                  </div>
-                                                );
-                                              })}
+                                            <div className="text-right shrink-0 flex items-center gap-2">
+                                              <span className="font-mono text-[10px] font-black bg-emerald-900 text-yellow-300 border border-emerald-800 px-1.5 py-0.5 rounded-lg shadow-xs group-hover:bg-yellow-400 group-hover:text-emerald-950 transition-colors">
+                                                {mb.puntiTotaliMatch > 0 ? "+" : ""}{mb.puntiTotaliMatch} pt
+                                              </span>
+                                              <span className="text-[10px] text-emerald-600 group-hover:text-yellow-400 font-bold transition-colors">➔</span>
                                             </div>
                                           </div>
                                         ))}
@@ -3637,79 +3586,26 @@ export default function Fantacalcetto({
                           ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3">
                               {matchBreakdown.map((mb, mbIdx) => (
-                                <div key={mbIdx} className="bg-white border border-emerald-100/60 rounded-xl p-3.5 space-y-2.5 shadow-sm hover:shadow-md transition-shadow">
-                                  <div className="flex items-center justify-between border-b border-gray-100 pb-2">
-                                    <div className="min-w-0 pr-2">
-                                      <p className="text-[11px] font-black text-emerald-950 truncate" title={mb.dettagli}>
-                                        ⚔️ {mb.dettagli.split(' - ')[0] || mb.dettagli}
+                                <div 
+                                  key={mbIdx} 
+                                  onClick={() => setSelectedMatchBreakdown({ mb, teamName: selectedTeamToView.nomeFantasquadra })}
+                                  className="bg-white border border-emerald-100/60 rounded-xl p-3.5 flex items-center justify-between shadow-sm hover:shadow-md hover:border-emerald-300 transition-all cursor-pointer group"
+                                >
+                                  <div className="min-w-0 pr-2">
+                                    <p className="text-[11px] font-black text-emerald-950 truncate group-hover:text-emerald-700 transition-colors" title={mb.dettagli}>
+                                      ⚔️ {mb.dettagli.split(' - ')[0] || mb.dettagli}
+                                    </p>
+                                    {mb.dettagli.includes(' - ') && (
+                                      <p className="text-[8.5px] text-gray-400 font-extrabold truncate mt-0.5 text-left uppercase tracking-wide">
+                                        {mb.dettagli.split(' - ').slice(1).join(' - ')}
                                       </p>
-                                      {mb.dettagli.includes(' - ') && (
-                                        <p className="text-[8.5px] text-gray-400 font-extrabold truncate mt-0.5 text-left uppercase tracking-wide">
-                                          {mb.dettagli.split(' - ').slice(1).join(' - ')}
-                                        </p>
-                                      )}
-                                      <p className="text-[9px] text-emerald-700 font-extrabold mt-1 text-left">
-                                        Punti Gara: <span className="text-emerald-900 bg-emerald-100 px-1.5 py-0.5 rounded font-black border border-emerald-200/50">{mb.risultato}</span>
-                                      </p>
-                                    </div>
-                                    <div className="text-right shrink-0 flex flex-col items-end gap-1.5">
-                                      <span className="font-mono text-[11px] font-black bg-emerald-950 text-yellow-300 border border-emerald-800 px-2 py-1 rounded-lg shadow-xs">
-                                        {mb.puntiTotaliMatch > 0 ? "+" : ""}{mb.puntiTotaliMatch} pt
-                                      </span>
-                                      <button
-                                        type="button"
-                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); generateMatchPdf(selectedTeamToView.nomeFantasquadra, mb); }}
-                                        className="bg-blue-600 hover:bg-blue-700 text-white text-[8px] px-2 py-1.5 rounded-md shadow mt-1 font-bold uppercase transition-transform hover:-translate-y-0.5 flex items-center gap-1 cursor-pointer"
-                                      >
-                                        <span>PDF</span>
-                                      </button>
-                                    </div>
+                                    )}
                                   </div>
-
-                                  <div className="grid grid-cols-1 gap-1 text-[9px] max-h-36 overflow-y-auto pr-1">
-                                    {mb.giocatoriKpi.map((kpi: any, kIdx) => {
-                                      const highlights: string[] = [];
-                                      if (kpi.gol > 0) highlights.push(`⚽ ${kpi.gol} Gol (+${kpi.gol * 3})`);
-                                      if (kpi.assist > 0) highlights.push(`🤝 ${kpi.assist} Assist (+${kpi.assist * 1})`);
-                                      if (kpi.amm > 0) highlights.push(`🟨 ${kpi.amm} Amm (-${kpi.amm * 0.5})`);
-                                      if (kpi.rossi > 0) highlights.push(`🟥 ${kpi.rossi} Esp (-${kpi.rossi * 1})`);
-                                      if (kpi.bonusBreakdownStr) {
-                                        highlights.push(`🎒 Bonus: ${kpi.bonusBreakdownStr}`);
-                                      } else if (kpi.bonusPts !== 0) {
-                                        highlights.push(`🎒 ${kpi.bonusPts > 0 ? "+" : ""}${kpi.bonusPts} Bonus`);
-                                      }
-
-                                      const isSostituito = kpi.stato === "Sostituito";
-                                      const isSubentrato = kpi.stato === "Subentrato";
-                                      const isPanchina = kpi.stato === "Panchina" || kpi.ruolo === "Panchina";
-                                      const isAssente = kpi.stato === "Assente";
-
-                                      let statusBadge = "";
-                                      if (isSostituito) statusBadge = " 🚫 Sost.";
-                                      else if (isSubentrato) statusBadge = " 🔄 Sub.";
-                                      else if (isPanchina && !isSubentrato) statusBadge = " 🎽 Pan.";
-                                      else if (isAssente) statusBadge = " 🚫 Ass.";
-
-                                      const displayPoints = (kpi.puntiConteggiati > 0 ? `+${kpi.puntiConteggiati}` : kpi.puntiConteggiati);
-
-                                      return (
-                                        <div key={kIdx} className={`flex justify-between items-center px-1.5 py-1 rounded border ${isSostituito || isAssente ? "bg-red-50/40 text-gray-400 border-red-100 opacity-60" : isSubentrato ? "bg-amber-50/80 border-amber-250 text-amber-950" : "bg-gray-50 border-gray-150 text-gray-800"}`}>
-                                          <span className={`font-extrabold truncate max-w-[100px] sm:max-w-[140px] text-left ${isSostituito || isAssente ? "line-through" : ""}`}>
-                                            {kpi.nome}{statusBadge}
-                                          </span>
-                                          <div className="flex items-center gap-1.5 shrink-0">
-                                            {highlights.length > 0 && (
-                                              <span className="text-emerald-700 font-extrabold text-[8px] hidden sm:block">
-                                                {highlights.join(", ")}
-                                              </span>
-                                            )}
-                                            <span className={`font-mono font-black text-[8.5px] ${isSubentrato ? "text-amber-800" : isSostituito || isAssente ? "text-red-800" : "text-emerald-800"}`}>
-                                              {displayPoints} pt
-                                            </span>
-                                          </div>
-                                        </div>
-                                      );
-                                    })}
+                                  <div className="text-right shrink-0 flex items-center gap-2.5">
+                                    <span className="font-mono text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded-lg group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                      {mb.puntiTotaliMatch > 0 ? "+" : ""}{mb.puntiTotaliMatch} pt
+                                    </span>
+                                    <span className="text-[10px] text-gray-300 group-hover:text-emerald-500 font-bold transition-colors">➔</span>
                                   </div>
                                 </div>
                               ))}
@@ -3749,6 +3645,119 @@ export default function Fantacalcetto({
           </div>
         </div>
 
+      </div>
+
+      {selectedMatchBreakdown && (
+        <MatchBreakdownModal 
+          mb={selectedMatchBreakdown.mb}
+          teamName={selectedMatchBreakdown.teamName}
+          onClose={() => setSelectedMatchBreakdown(null)}
+          generateMatchPdf={generateMatchPdf}
+        />
+      )}
+    </div>
+  );
+}
+
+function MatchBreakdownModal({ mb, onClose, generateMatchPdf, teamName }: { mb: any, onClose: () => void, generateMatchPdf: any, teamName: string }) {
+  if (!mb) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-950/80 backdrop-blur-sm px-4">
+      <div 
+        className="bg-white border-2 border-emerald-900 rounded-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto shadow-2xl relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-emerald-900 hover:text-red-600 bg-emerald-100 hover:bg-emerald-200 p-1.5 rounded-full transition-colors z-10"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="p-5 font-sans">
+          <div className="border-b border-emerald-100 pb-3 mb-4 pr-6">
+            <h3 className="text-sm font-black text-emerald-950 mb-1 leading-tight uppercase tracking-tight">
+              ⚔️ {mb.dettagli}
+            </h3>
+            <p className="text-xs text-emerald-700 font-extrabold flex items-center justify-between">
+              <span>Risultato: <span className="text-emerald-900 bg-emerald-100 px-1.5 py-0.5 rounded ml-1">{mb.risultato}</span></span>
+              <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-lg border border-yellow-300 font-black">+ {mb.puntiTotaliMatch} pt</span>
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            {mb.giocatoriKpi.map((kpi: any, kIdx: number) => {
+              const highlights: string[] = [];
+              if (kpi.gol > 0) highlights.push(`⚽ ${kpi.gol} Gol (+${kpi.gol * 3})`);
+              if (kpi.assist > 0) highlights.push(`🤝 ${kpi.assist} Assist (+${kpi.assist * 1})`);
+              if (kpi.amm > 0) highlights.push(`🟨 ${kpi.amm} Amm (-${kpi.amm * 0.5})`);
+              if (kpi.rossi > 0) highlights.push(`🟥 ${kpi.rossi} Esp (-${kpi.rossi * 1})`);
+              if (kpi.bonusBreakdownStr) {
+                highlights.push(`🎒 Bonus: ${kpi.bonusBreakdownStr}`);
+              } else if (kpi.bonusPts !== 0) {
+                highlights.push(`🎒 ${kpi.bonusPts > 0 ? "+" : ""}${kpi.bonusPts} Bonus`);
+              }
+
+              const isSostituito = kpi.stato === "Sostituito";
+              const isSubentrato = kpi.stato === "Subentrato";
+              const isAssente = kpi.stato === "Assente";
+              const displayPoints = isSostituito || isAssente ? "0.0" : kpi.fantaScore;
+
+              let statusBadge = "";
+              const isPanchina = kpi.stato === "Panchina" || kpi.ruolo === "Panchina";
+              if (isSostituito) statusBadge = " 🔄 Uscito";
+              else if (isSubentrato) statusBadge = " ➡️ Entrato";
+              else if (isAssente) statusBadge = " ❌ Assente";
+              else if (isPanchina && !isSubentrato) statusBadge = " 🎽 Pan.";
+
+              return (
+                <div key={kIdx} className={`p-3 rounded-xl border ${isSubentrato ? "bg-amber-50 border-amber-200" : isSostituito || isAssente ? "bg-red-50 border-red-200 opacity-60" : "bg-emerald-50 border-emerald-100"}`}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-extrabold text-xs text-gray-900 truncate pr-2">
+                      {kpi.nome} {statusBadge && <span className="font-bold text-[9px] text-gray-500 uppercase ml-1 tracking-wider">{statusBadge}</span>}
+                    </span>
+                    <span className={`font-mono font-black text-sm ${isSubentrato ? "text-amber-700" : isSostituito || isAssente ? "text-red-700" : "text-emerald-700"}`}>
+                      {displayPoints} pt
+                    </span>
+                  </div>
+                  
+                  {highlights.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5 mt-2 transition-all">
+                      {highlights.map((h, hIdx) => {
+                        let colorClass = "bg-gray-100 text-gray-700 border-gray-200";
+                        if (h.includes("⚽")) colorClass = "bg-emerald-100 text-emerald-800 border-emerald-300 shadow-[0_0_6px_rgba(52,211,153,0.3)]";
+                        if (h.includes("🤝")) colorClass = "bg-blue-100 text-blue-800 border-blue-300";
+                        if (h.includes("🟨")) colorClass = "bg-yellow-100 text-yellow-800 border-yellow-300";
+                        if (h.includes("🟥")) colorClass = "bg-red-100 text-red-800 border-red-300";
+                        if (h.includes("🎒")) colorClass = "bg-purple-100 text-purple-800 border-purple-300";
+
+                        return (
+                          <span key={hIdx} className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${colorClass}`}>
+                            {h}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    (!isSostituito && !isAssente) && <div className="text-[10px] text-gray-400 italic">Nessun bonus/malus</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-5 flex justify-center">
+             <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); generateMatchPdf(teamName, mb); }}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-[11px] px-4 py-2 rounded-xl shadow mt-1 font-extrabold uppercase transition-transform hover:-translate-y-0.5 flex items-center justify-center gap-2 w-full cursor-pointer"
+             >
+                <Download className="w-4 h-4" />
+                Scarica Referto Completo PDF
+             </button>
+          </div>
+        </div>
       </div>
     </div>
   );
