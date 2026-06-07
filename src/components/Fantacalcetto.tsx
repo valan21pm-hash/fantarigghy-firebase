@@ -2786,12 +2786,14 @@ export default function Fantacalcetto({
                                         {matchBreakdown.map((mb, mbIdx) => (
                                           <div
                                             key={mbIdx}
-                                            onClick={() =>
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              e.stopPropagation();
                                               setSelectedMatchBreakdown({
                                                 mb,
                                                 teamName: team.nomeFantasquadra,
                                               })
-                                            }
+                                            }}
                                             className="bg-emerald-950/40 hover:bg-emerald-900/60 transition-colors border border-emerald-900/50 rounded-xl p-3 flex items-center justify-between cursor-pointer group"
                                           >
                                             <div className="min-w-0 pr-2">
@@ -4184,6 +4186,15 @@ export default function Fantacalcetto({
           Easy Rigging © {new Date().getFullYear()} • Portale protetto e
           criptato
         </div>
+
+        {selectedMatchBreakdown && (
+          <MatchBreakdownModal
+            mb={selectedMatchBreakdown.mb}
+            teamName={selectedMatchBreakdown.teamName}
+            onClose={() => setSelectedMatchBreakdown(null)}
+            generateMatchPdf={generateMatchPdf}
+          />
+        )}
       </div>
     );
   }
@@ -4772,13 +4783,15 @@ export default function Fantacalcetto({
                                 {matchBreakdown.map((mb, mbIdx) => (
                                   <div
                                     key={mbIdx}
-                                    onClick={() =>
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
                                       setSelectedMatchBreakdown({
                                         mb,
                                         teamName:
                                           selectedTeamToView.nomeFantasquadra,
                                       })
-                                    }
+                                    }}
                                     className="bg-white border border-emerald-100/60 rounded-xl p-3.5 flex items-center justify-between shadow-sm hover:shadow-md hover:border-emerald-300 transition-all cursor-pointer group"
                                   >
                                     <div className="min-w-0 pr-2">
