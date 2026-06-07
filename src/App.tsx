@@ -31,7 +31,6 @@ import Iscrizioni from "./components/Iscrizioni";
 import Fantacalcetto from "./components/Fantacalcetto";
 import ConsigliRicevuti from "./components/ConsigliRicevuti";
 import BonusManager from "./components/BonusManager";
-import AIAssistant from "./components/AIAssistant";
 import { DatabaseSchema, Formazione, Giocatore, RefertoGiocatore, CustomBonusDef, DEFAULT_BONUSES } from "./types";
 import { initAuth, googleSignIn, logout } from "./lib/firebase";
 
@@ -825,9 +824,6 @@ export default function App() {
           onClose={() => setShowConsigliMenu(false)}
         />
       )}
-
-      {/* Floating Chat Assistant for Admins */}
-      {isAdminAuthenticated && <AIAssistant token={token} />}
     </div>
   );
 }

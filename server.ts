@@ -20,17 +20,6 @@ import {
 import { dbServer, doc, getDoc, setDoc } from "./src/lib/firestore-server";
 import { fetchFromFirestore, saveToFirestore } from "./src/lib/syncFirestore";
 
-import { GoogleGenAI } from "@google/genai";
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
-    }
-  }
-});
-
 // Setup DB path
 const DB_PATH = path.join(process.cwd(), "src", "db.json");
 
@@ -1245,56 +1234,6 @@ async function startServer() {
   });
 
   // API ROUTES
-
-  app.post("/api/chat", async (req, res) => {
-    try {
-      const { prompt, history } = req.body;
-      const token = getAuthToken(req);
-      const db = await getDb(token);
-      
-      const sessioneMercato = db.sessioneMercatoLibero ? "Sì (Senza Limiti)" : "No (1 cambio limitato)";
-      const giocatoriTotali = db.giocatori?.length || 0;
-      const fantaSquadreTotali = db.fantasquadre?.length || 0;
-      
-      const systemInstruction = `Sei l'assistente IA ufficiale del gestionale "Fantacalcetto" a supporto degli admin e presiedenti.
-Rispondi in modo conciso, utile e amichevole. Fornisci solo informazioni su come usare il gestionale e le funzionalità, e sullo stato dell'app.
-Non fornire mai codice.
-
-STATO ATTUALE APP:
-Giocatori in rosa disponibili: ${giocatoriTotali}
-Fantasquadre attualmente create: ${fantaSquadreTotali}
-Sessione di Mercato Libero Attivo: ${sessioneMercato}
-
-LE REGOLE DI BASE DEL GESTIONALE:
-- Per creare una Partita Reale: Vai in "Club" > "Convocazioni", scorri la lista della selezione e usa "Salva come Partita". Apparirà in "Gare" > "Referto".
-- Per chiudere o confermare una Partita: Vai su "Gare" > "Referto", poi inserisci pagelle, bonus e risultati e chiudi la gara. Questa operazione scalerà la quota.
-- Per il Fantacalcetto: Le squadre si iscrivono in "Fantacalcetto" mettendo un PIN. Per modificare una squadra, va inserito lo stesso PIN.
-- Mercato Libero: Consente trasferimenti illimitati e si attiva da "Impostazioni" (ingranaggio).
-Se l'utente fa richieste fuori tema, riconducilo simpaticamente al fantacalcetto.`;
-
-      const contents = [];
-      if (history && Array.isArray(history)) {
-        for(const msg of history) {
-            contents.push({ role: msg.role === 'model' ? 'model' : 'user', parts: [{ text: msg.text }] });
-        }
-      }
-      contents.push({ role: 'user', parts: [{ text: prompt }] });
-
-      const chatResponse = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
-        contents: contents as any,
-        config: {
-          systemInstruction,
-          temperature: 0.7,
-        }
-      });
-      
-      res.json({ text: chatResponse.text });
-    } catch(err: any) {
-        console.error("Chat error:", err);
-        res.status(500).json({ error: "Errore chat" });
-    }
-  });
 
   // Salvataggio token Google Drive globale sul server
   app.post("/api/save-token", async (req, res) => {
