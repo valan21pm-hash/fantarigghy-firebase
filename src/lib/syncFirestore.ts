@@ -1,5 +1,5 @@
 import { DatabaseSchema, Giocatore, Partita, Fantasquadra, Consiglio } from "../types";
-import { dbServer, collection, getDocs, doc, setDoc, writeBatch } from "./firestore-server";
+import { dbServer, collection, getDocs, doc, setDoc, writeBatch, getDoc } from "./firestore-server";
 
 export async function fetchFromFirestore(): Promise<DatabaseSchema | null> {
   try {
@@ -9,6 +9,7 @@ export async function fetchFromFirestore(): Promise<DatabaseSchema | null> {
     const logsSnap = await getDocs(collection(dbServer, "logs"));
     const fantasquadreSnap = await getDocs(collection(dbServer, "fantasquadre"));
     const consigliSnap = await getDocs(collection(dbServer, "consigli"));
+    const settingsSnap = await getDoc(doc(dbServer, "system", "settings"));
 
     // If completely empty, we assume no data is there yet
     if (giocatoriSnap.empty && partiteSnap.empty && fantasquadreSnap.empty) {
@@ -21,6 +22,7 @@ export async function fetchFromFirestore(): Promise<DatabaseSchema | null> {
     const logs = logsSnap.docs.map(d => d.data() as any);
     const fantasquadre = fantasquadreSnap.docs.map(d => d.data() as Fantasquadra);
     const consigli = consigliSnap.docs.map(d => d.data() as Consiglio);
+    const settingsData = settingsSnap.exists() ? settingsSnap.data() : {};
 
     return {
       giocatori,
@@ -28,7 +30,10 @@ export async function fetchFromFirestore(): Promise<DatabaseSchema | null> {
       partite,
       logs,
       fantasquadre,
-      consigli
+      consigli,
+      sessioneMercatoLibero: settingsData.sessioneMercatoLibero || false,
+      scadenzaMercatoLibero: settingsData.scadenzaMercatoLibero || null,
+      bonuses: settingsData.bonuses || undefined
     };
   } catch (err) {
     console.error("[Firestore] Error fetching from Firestore:", err);
@@ -136,6 +141,15 @@ export async function saveToFirestore(db: DatabaseSchema): Promise<void> {
         count++; await commitBatchIfNeeded();
       }
     }
+
+    // 7. System Settings
+    const settingsRef = doc(dbServer, "system", "settings");
+    batch.set(settingsRef, {
+      sessioneMercatoLibero: db.sessioneMercatoLibero ?? false,
+      scadenzaMercatoLibero: db.scadenzaMercatoLibero || null,
+      bonuses: db.bonuses || null
+    }, { merge: true });
+    count++; await commitBatchIfNeeded();
 
     if (count > 0) {
       await batch.commit();

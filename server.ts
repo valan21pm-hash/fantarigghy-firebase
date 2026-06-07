@@ -919,6 +919,8 @@ async function getDb(
     if (firestoreDb.logs && firestoreDb.logs.length > 0)
       localDb.logs = firestoreDb.logs;
     if (firestoreDb.bonuses) localDb.bonuses = firestoreDb.bonuses;
+    if (firestoreDb.sessioneMercatoLibero !== undefined) localDb.sessioneMercatoLibero = firestoreDb.sessioneMercatoLibero;
+    if (firestoreDb.scadenzaMercatoLibero !== undefined) localDb.scadenzaMercatoLibero = firestoreDb.scadenzaMercatoLibero;
 
     // For arrays, merge to prevent data loss or completely replace them since Firestore is SSOT
     // Since Firestore is the authoritative source, we replace the local arrays with Firestore's,
@@ -1192,6 +1194,9 @@ function sendDbResponse(res: express.Response, db: DatabaseSchema) {
     logs: db.logs || [],
     fantasquadre: db.fantasquadre || [],
     consigli: db.consigli || [],
+    bonuses: db.bonuses,
+    sessioneMercatoLibero: db.sessioneMercatoLibero,
+    scadenzaMercatoLibero: db.scadenzaMercatoLibero,
   });
 }
 
@@ -1446,8 +1451,15 @@ async function startServer() {
             targetRoster.includes(p),
           );
 
+          let isMercatoLiberoValido = db.sessioneMercatoLibero;
+          if (isMercatoLiberoValido && db.scadenzaMercatoLibero) {
+            if (new Date(db.scadenzaMercatoLibero).getTime() < new Date().getTime()) {
+              isMercatoLiberoValido = false;
+            }
+          }
+
           if (
-            !db.sessioneMercatoLibero &&
+            !isMercatoLiberoValido &&
             rulePrevPlayers.length === 4 &&
             keptFromOrigin.length < 3
           ) {
@@ -1743,12 +1755,15 @@ async function startServer() {
 
   app.post("/api/settings/mercato-libero", async (req, res) => {
     try {
-      const { attivo } = req.body;
+      const { attivo, scadenza } = req.body;
       const token = getAuthToken(req);
       const db = await getDb(token);
       db.sessioneMercatoLibero = !!attivo;
+      if (typeof scadenza !== 'undefined') {
+        db.scadenzaMercatoLibero = scadenza || null;
+      }
       await saveDb(db, token);
-      res.json({ success: true, sessioneMercatoLibero: db.sessioneMercatoLibero });
+      res.json({ success: true, sessioneMercatoLibero: db.sessioneMercatoLibero, scadenzaMercatoLibero: db.scadenzaMercatoLibero });
     } catch (err: any) {
       res.status(500).json({ err: "Errore durante l'aggiornamento dell'impostazione" });
     }

@@ -379,8 +379,8 @@ export default function App() {
     console.warn("Emergency reset requested");
   };
 
-  const handleToggleMercatoLibero = async (attivo: boolean) => {
-    return await executePostAction("/api/settings/mercato-libero", { attivo });
+  const handleToggleMercatoLibero = async (attivo: boolean, scadenza?: string | null) => {
+    return await executePostAction("/api/settings/mercato-libero", { attivo, scadenza });
   };
 
   // 6. Consigli/Miglioramenti callbacks
@@ -423,6 +423,7 @@ export default function App() {
         partiteAperte={partiteAperte}
         bonuses={data?.bonuses}
         sessioneMercatoLibero={data?.sessioneMercatoLibero}
+        scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
         onIscriviFantasquadra={handleIscriviFantasquadra}
         onEliminaFantasquadra={handleEliminaFantasquadra}
         onCreaConsiglio={handleCreaConsiglio}
@@ -786,6 +787,7 @@ export default function App() {
               partiteAperte={partiteAperte}
               bonuses={data?.bonuses}
               sessioneMercatoLibero={data?.sessioneMercatoLibero}
+              scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
               onIscriviFantasquadra={handleIscriviFantasquadra}
               onEliminaFantasquadra={handleEliminaFantasquadra}
               onCreaConsiglio={handleCreaConsiglio}

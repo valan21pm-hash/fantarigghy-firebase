@@ -51,6 +51,41 @@ import {
 import { generateMatchPdf, generateGeneralReportPdf } from "../lib/pdfHelper";
 import BonusManager from "./BonusManager";
 
+const MercatoCountdown = ({ targetDate }: { targetDate: string }) => {
+  const [timeLeft, setTimeLeft] = useState("");
+
+  useEffect(() => {
+    const updateCountdown = () => {
+      const end = new Date(targetDate).getTime();
+      const now = new Date().getTime();
+      const diff = end - now;
+
+      if (diff <= 0) {
+        setTimeLeft("SCADUTA");
+        return;
+      }
+
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((diff / 1000 / 60) % 60);
+      const s = Math.floor((diff / 1000) % 60);
+
+      const parts = [];
+      if (d > 0) parts.push(`${d}g`);
+      if (d > 0 || h > 0) parts.push(`${h}h`);
+      parts.push(`${m}m`);
+      parts.push(`${s}s`);
+      setTimeLeft(parts.join(" "));
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [targetDate]);
+
+  return <span className="font-mono bg-blue-950 px-1.5 py-0.5 rounded text-blue-300 ml-2">{timeLeft}</span>;
+};
+
 interface FantacalcettoProps {
   giocatori: Giocatore[];
   fantasquadre: Fantasquadra[];
@@ -58,6 +93,7 @@ interface FantacalcettoProps {
   partiteAperte?: Partita[];
   bonuses?: CustomBonusDef[];
   sessioneMercatoLibero?: boolean;
+  scadenzaMercatoLibero?: string | null;
   onIscriviFantasquadra: (
     nomePartecipante: string,
     nomeFantasquadra: string,
@@ -68,7 +104,7 @@ interface FantacalcettoProps {
   onEliminaFantasquadra: (id: string) => Promise<any>;
   onCreaConsiglio?: (autore: string, testo: string) => Promise<any>;
   onUpdateBonuses?: (bonuses: CustomBonusDef[]) => Promise<any>;
-  onToggleMercatoLibero?: (attivo: boolean) => Promise<any>;
+  onToggleMercatoLibero?: (attivo: boolean, scadenza?: string | null) => Promise<any>;
   onMigrate?: () => void;
   consigli?: any[];
   isEditor: boolean;
@@ -89,6 +125,7 @@ export default function Fantacalcetto({
   partiteAperte = [],
   bonuses = DEFAULT_BONUSES,
   sessioneMercatoLibero = false,
+  scadenzaMercatoLibero = null,
   onIscriviFantasquadra,
   onEliminaFantasquadra,
   onCreaConsiglio,
@@ -100,6 +137,16 @@ export default function Fantacalcetto({
   onRefreshData,
 }: FantacalcettoProps) {
   // Public Portal state loaders
+  const isMercatoLiberoValido = React.useMemo(() => {
+    if (!sessioneMercatoLibero) return false;
+    if (scadenzaMercatoLibero) {
+      if (new Date(scadenzaMercatoLibero).getTime() < new Date().getTime()) {
+        return false;
+      }
+    }
+    return true;
+  }, [sessioneMercatoLibero, scadenzaMercatoLibero]);
+
   const [activePublicTab, setActivePublicTab] = useState<
     "classifica" | "partite" | "iscrizione" | "convocazioni"
   >("classifica");
@@ -783,7 +830,7 @@ export default function Fantacalcetto({
 
         // Check if removing this player would lead to more than 1 change compared to the original roster
         if (
-          !sessioneMercatoLibero &&
+          !isMercatoLiberoValido &&
           rulePrevPlayers.length === 4 &&
           keptFromOrigin.length < 3
         ) {
@@ -808,7 +855,7 @@ export default function Fantacalcetto({
         );
 
         if (
-          !sessioneMercatoLibero &&
+          !isMercatoLiberoValido &&
           rulePrevPlayers.length === 4 &&
           keptFromOrigin.length < 3
         ) {
@@ -983,7 +1030,7 @@ export default function Fantacalcetto({
         const numChangesFromOrigin =
           rulePrevPlayers.length - keptFromOrigin.length;
 
-        if (!sessioneMercatoLibero && numChangesFromOrigin > 1) {
+        if (!isMercatoLiberoValido && numChangesFromOrigin > 1) {
           setErrorMsg(
             `Errore di mercato: puoi effettuare al massimo 1 cambio rispetto alla tua rosa originaria post-partita! (A meno di Sessione Speciale)`,
           );
@@ -2321,7 +2368,7 @@ export default function Fantacalcetto({
             </button>
           </div>
 
-          {sessioneMercatoLibero && (
+          {isMercatoLiberoValido && (
             <div className="rounded-xl p-4 border flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-sans shadow-lg bg-blue-900/40 border-blue-500 text-blue-100 animate-pulse-slow mb-4">
               <div className="flex items-start gap-3">
                 <div className="p-2 rounded-xl shrink-0 mt-0.5 bg-blue-800 text-blue-200">
@@ -2330,12 +2377,32 @@ export default function Fantacalcetto({
                 <div>
                   <h4 className="text-xs font-black uppercase tracking-wider text-white">
                     ⭐ SESSIONE DI MERCATO SPECIALE ATTIVA
+                    {scadenzaMercatoLibero && <MercatoCountdown targetDate={scadenzaMercatoLibero} />}
                   </h4>
                   <p className="text-[11px] mt-0.5 leading-relaxed">
                     Il limite di <span className="font-extrabold text-white">1 solo cambio</span> è momentaneamente sospeso! Puoi modificare interamente la rosa per questo mercato.
                   </p>
                 </div>
               </div>
+              {isEditor && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    let datePart = "";
+                    if (scadenzaMercatoLibero) {
+                      const d = new Date(scadenzaMercatoLibero);
+                      datePart = ` fino al ${d.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute:"2-digit" })}`;
+                    }
+                    const text = `🚨 *FANTACALCETTO FLASH* 🚨\n\nAttenzione Presidenti! È stata appena attivata una *Sessione di Mercato Speciale*! ⭐\n\nIl limite rigido di 1 solo cambio a settimana è stato temporaneamente SOSPESO${datePart}. Potete stravolgere interamente le vostre rose senza penalità!\n\nCorrete subito sul portale per approfittarne: https://Fantacalcetto...`;
+                    navigator.clipboard.writeText(text);
+                    alert("Messaggio copiato negli appunti! Ora puoi incollarlo su WhatsApp.");
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold text-[10px] uppercase tracking-wide cursor-pointer ml-auto"
+                >
+                  <Copy className="h-3 w-3" />
+                  Copia Avviso Wa
+                </button>
+              )}
             </div>
           )}
 
@@ -4177,14 +4244,22 @@ export default function Fantacalcetto({
                   type="checkbox"
                   checked={sessioneMercatoLibero}
                   onChange={async (e) => {
-                    if (window.confirm(e.target.checked ? "Attivare la Sessione di Mercato Libero (cambi illimitati)?" : "Disattivare la Sessione di Mercato Libero (ripristina limite 1 cambio)?")) {
-                      await onToggleMercatoLibero(e.target.checked);
+                    const isEnabling = e.target.checked;
+                    if (window.confirm(isEnabling ? "Attivare la Sessione di Mercato Libero (cambi illimitati)?" : "Disattivare la Sessione di Mercato Libero (ripristina limite 1 cambio)?")) {
+                      let dateStr = null;
+                      if (isEnabling) {
+                         const val = window.prompt("Se vuoi impostare una data di scadenza, inseriscila qui (formato: YYYY-MM-DD HH:MM), altrimenti lascia vuoto per disattivazione manuale:");
+                         if (val && val.trim().length > 0) {
+                           dateStr = val.trim();
+                         }
+                      }
+                      await onToggleMercatoLibero(isEnabling, dateStr);
                       if (onRefreshData) await onRefreshData();
                     }
                   }}
                   className="w-4 h-4 rounded text-blue-600 focus:ring-0 cursor-pointer"
                 />
-                Mercato Libero: {sessioneMercatoLibero ? "ATTIVO" : "OFF"}
+                Mercato Libero: {sessioneMercatoLibero ? (isMercatoLiberoValido ? "ATTIVO" : "SCADUTO") : "OFF"}
               </label>
             )}
           </div>

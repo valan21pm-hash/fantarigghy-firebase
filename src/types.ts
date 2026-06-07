@@ -185,6 +185,7 @@ export interface DatabaseSchema {
   consigli?: Consiglio[];
   bonuses?: CustomBonusDef[];
   sessioneMercatoLibero?: boolean;
+  scadenzaMercatoLibero?: string | null;
 }
 
 export interface CustomBonusDef {
