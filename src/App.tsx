@@ -827,7 +827,7 @@ export default function App() {
       )}
 
       {/* Floating Chat Assistant for Admins */}
-      {isAdminAuthenticated && <AIAssistant />}
+      {isAdminAuthenticated && <AIAssistant token={token} />}
     </div>
   );
 }

@@ -6,7 +6,11 @@ interface Message {
   text: string;
 }
 
-export default function AIAssistant() {
+interface AIAssistantProps {
+  token: string | null;
+}
+
+export default function AIAssistant({ token }: AIAssistantProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: "model", text: "Ciao! Sono il tuo assistente IA. Sono qui per aiutarti coi crediti, il mercato, e per rispondere ad informazioni base del Fantacalcetto. Chiedimi pure!" }
@@ -32,9 +36,12 @@ export default function AIAssistant() {
     setIsLoading(true);
 
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ 
           prompt: userMsg,
           history: messages.filter(m => !(m.role === "model" && m.text.includes("Ciao! Sono il tuo assistente")))
