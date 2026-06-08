@@ -159,7 +159,7 @@ export default function FantacalcettoV2({
   }, [sessioneMercatoLibero, scadenzaMercatoLibero]);
 
   const [activePublicTab, setActivePublicTab] = useState<
-    "classifica" | "partite" | "iscrizione" | "convocazioni"
+    "home" | "rosa" | "mercato" | "classifica" | "regolamento"
   >("classifica");
   const allPartite = React.useMemo(() => {
     return [...partiteAperte, ...partiteChiuse].filter(
@@ -2364,56 +2364,64 @@ export default function FantacalcettoV2({
           </div>
 
           {/* Navigation Tabs for Public Portal */}
-          <div className="flex flex-wrap justify-center gap-1.5 max-w-sm sm:max-w-lg mx-auto bg-indigo-950/60 p-1.5 rounded-2xl border border-indigo-850 font-sans">
+          <div className="flex flex-wrap justify-center gap-1.5 max-w-sm sm:max-w-xl mx-auto bg-indigo-950/60 p-1.5 rounded-2xl border border-indigo-850 font-sans">
+            <button
+              type="button"
+              onClick={() => setActivePublicTab("home")}
+              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+                activePublicTab === "home"
+                  ? "bg-yellow-400 text-indigo-950 shadow-md"
+                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30"
+              }`}
+            >
+              🏠 Home
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActivePublicTab("rosa");
+                setSubmitted(false);
+              }}
+              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+                activePublicTab === "rosa"
+                  ? "bg-yellow-400 text-indigo-950 shadow-md"
+                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30"
+              }`}
+            >
+              👕 Rosa/Formazione
+            </button>
+            <button
+              type="button"
+              onClick={() => setActivePublicTab("mercato")}
+              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+                activePublicTab === "mercato"
+                  ? "bg-yellow-400 text-indigo-950 shadow-md"
+                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30"
+              }`}
+            >
+              💸 Mercato
+            </button>
             <button
               type="button"
               onClick={() => setActivePublicTab("classifica")}
               className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
                 activePublicTab === "classifica"
-                  ? "bg-yellow-400 text-indigo-950 shadow-md font-extrabold"
-                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30 font-bold"
+                  ? "bg-yellow-400 text-indigo-950 shadow-md"
+                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30"
               }`}
             >
-              🏆 Classifica
+              🏆 Classifica & Calendario
             </button>
             <button
               type="button"
-              onClick={() => setActivePublicTab("partite")}
+              onClick={() => setActivePublicTab("regolamento")}
               className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
-                activePublicTab === "partite"
-                  ? "bg-yellow-400 text-indigo-950 shadow-md font-extrabold"
-                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30 font-bold"
+                activePublicTab === "regolamento"
+                  ? "bg-yellow-400 text-indigo-950 shadow-md"
+                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30"
               }`}
             >
-              ⚽ Partite
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActivePublicTab("convocazioni");
-                setSubmitted(false);
-              }}
-              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
-                activePublicTab === "convocazioni"
-                  ? "bg-yellow-400 text-indigo-950 shadow-md font-extrabold"
-                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30 font-bold"
-              }`}
-            >
-              📋 Convocazioni
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActivePublicTab("iscrizione");
-                setSubmitted(false);
-              }}
-              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
-                activePublicTab === "iscrizione"
-                  ? "bg-yellow-400 text-indigo-950 shadow-md font-extrabold"
-                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30 font-bold"
-              }`}
-            >
-              📝 Iscrizione
+              📋 Regolamento
             </button>
           </div>
 
@@ -2869,7 +2877,7 @@ export default function FantacalcettoV2({
                 )}
               </div>
             </div>
-          ) : activePublicTab === "partite" ? (
+          ) : activePublicTab === "home" ? (
             <div className="space-y-6 animate-fade-in font-sans">
               <div className="bg-indigo-900/30 border-l-4 border-indigo-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm">
                 <p className="text-xs text-indigo-200 leading-relaxed font-medium">
@@ -3016,7 +3024,7 @@ export default function FantacalcettoV2({
                 )}
               </div>
             </div>
-          ) : activePublicTab === "convocazioni" ? (
+          ) : activePublicTab === "rosa" ? (
             <div className="space-y-6 animate-fade-in font-sans">
               <div className="bg-indigo-900/30 border-l-4 border-sky-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm">
                 <p className="text-xs text-indigo-200 leading-relaxed font-medium">
@@ -3267,7 +3275,7 @@ export default function FantacalcettoV2({
                 );
               })()}
             </div>
-          ) : (
+          ) : activePublicTab === "mercato" ? (
             <form
               onSubmit={handleRegisterSubmit}
               className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-12 gap-6 font-sans"
@@ -4155,7 +4163,12 @@ export default function FantacalcettoV2({
                 </div>
               </div>
             </form>
-          )}
+          ) : activePublicTab === "regolamento" ? (
+            <div className="space-y-6 animate-fade-in font-sans p-6 text-center border-2 border-dashed border-indigo-800 rounded-3xl mt-6">
+              <h2 className="text-xl font-black text-yellow-300 uppercase tracking-widest">Regolamento & Modificatori</h2>
+              <p className="text-indigo-300 text-sm font-medium">Qui troverai presto il riepilogo della gestione bonus/malus personalizzati e il calcolo dei modificatori della fanta-lega.</p>
+            </div>
+          ) : null}
         </div>
 
         {/* Custom Transfer Confirmation Modal */}
