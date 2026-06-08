@@ -30,6 +30,7 @@ import {
   Download,
   Instagram,
   Share2,
+  Pencil,
 } from "lucide-react";
 import {
   Giocatore,
@@ -104,6 +105,7 @@ interface FantacalcettoProps {
     email?: string,
   ) => Promise<any>;
   onEliminaFantasquadra: (id: string) => Promise<any>;
+  onRinominaFantasquadra: (id: string, nuovoNome: string) => Promise<any>;
   onCreaConsiglio?: (autore: string, testo: string) => Promise<any>;
   onUpdateBonuses?: (bonuses: CustomBonusDef[]) => Promise<any>;
   onToggleMercatoLibero?: (attivo: boolean, scadenza?: string | null) => Promise<any>;
@@ -130,6 +132,7 @@ export default function Fantacalcetto({
   scadenzaMercatoLibero = null,
   onIscriviFantasquadra,
   onEliminaFantasquadra,
+  onRinominaFantasquadra,
   onCreaConsiglio,
   onUpdateBonuses,
   onToggleMercatoLibero,
@@ -239,6 +242,8 @@ export default function Fantacalcetto({
   const [selectedMatchBreakdown, setSelectedMatchBreakdown] =
     useState<any>(null);
   const [showMercatoModal, setShowMercatoModal] = useState(false);
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [nuovoNomeSquadra, setNuovoNomeSquadra] = useState("");
   const [mercatoDateString, setMercatoDateString] = useState("");
   const [showGeneralReportModal, setShowGeneralReportModal] = useState(false);
 
@@ -3314,9 +3319,22 @@ export default function Fantacalcetto({
                       <label className="block text-[9px] font-black uppercase tracking-widest text-emerald-400">
                         La tua Fantasquadra
                       </label>
-                      <p className="text-sm font-black text-white py-0.5">
-                        ⚽ {nomeFantasquadra || "Senza Nome"}
-                      </p>
+                      <div className="flex items-center justify-between py-0.5">
+                        <p className="text-sm font-black text-white">
+                          ⚽ {nomeFantasquadra || "Senza Nome"}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNuovoNomeSquadra(nomeFantasquadra);
+                            setShowRenameModal(true);
+                          }}
+                          className="bg-emerald-800/60 hover:bg-emerald-700/80 text-emerald-300 p-1.5 rounded-lg transition-colors"
+                          title="Rinomina squadra"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Nome Presidente Display */}
@@ -4933,6 +4951,58 @@ export default function Fantacalcetto({
           onClose={() => setSelectedMatchBreakdown(null)}
           generateMatchPdf={generateMatchPdf}
         />
+      )}
+
+      {showRenameModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm px-4">
+          <div className="bg-emerald-950 border border-emerald-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4 font-sans text-center">
+            <h3 className="text-lg font-black text-white uppercase tracking-wider">
+              Rinomina Squadra
+            </h3>
+            <p className="text-xs text-emerald-200">
+              Inserisci il nuovo nome da assegnare alla tua squadra. L'azione sarà immediata.
+            </p>
+            <input
+              type="text"
+              className="w-full bg-emerald-900 border border-emerald-700 rounded-xl px-4 py-3 text-white text-sm font-bold uppercase focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              placeholder="Es. Atletico Fanta"
+              value={nuovoNomeSquadra}
+              onChange={(e) => setNuovoNomeSquadra(e.target.value)}
+            />
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowRenameModal(false)}
+                className="flex-1 bg-emerald-900/60 hover:bg-emerald-800/80 text-emerald-200 py-3 rounded-xl font-bold uppercase text-xs transition-colors"
+                disabled={submitting}
+              >
+                Annulla
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!nuovoNomeSquadra.trim() || !authenticatedTeamId) return;
+                  setSubmitting(true);
+                  try {
+                    await onRinominaFantasquadra(authenticatedTeamId, nuovoNomeSquadra);
+                    // L'aggiornamento avverrà tramite stream o reload dati
+                    setShowRenameModal(false);
+                    // Sync the local state
+                    setNomeFantasquadra(nuovoNomeSquadra);
+                  } catch (e: any) {
+                    alert(e.message || "Errore durante la rinominazione");
+                  } finally {
+                    setSubmitting(false);
+                  }
+                }}
+                disabled={submitting || !nuovoNomeSquadra.trim() || nuovoNomeSquadra.trim() === nomeFantasquadra}
+                className="flex-1 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-emerald-950 py-3 rounded-xl font-black uppercase text-xs transition-colors"
+              >
+                {submitting ? "Salvataggio..." : "Salva Nuove Info"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showMercatoModal && (

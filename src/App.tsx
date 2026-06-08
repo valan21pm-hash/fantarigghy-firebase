@@ -383,6 +383,10 @@ export default function App() {
     return await executePostAction("/api/fantasquadre/elimina", { id });
   };
 
+  const handleRinominaFantasquadra = async (id: string, nuovoNome: string) => {
+    return await executePostAction("/api/fantasquadre/rinomina", { id, nuovoNome });
+  };
+
   const handleUpdateBonuses = async (bonuses: CustomBonusDef[]) => {
     return await executePostAction("/api/update_bonuses", { bonuses });
   };
@@ -442,6 +446,7 @@ export default function App() {
         sessioneMercatoLibero={data?.sessioneMercatoLibero}
         scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
         onIscriviFantasquadra={handleIscriviFantasquadra}
+        onRinominaFantasquadra={handleRinominaFantasquadra}
         onEliminaFantasquadra={handleEliminaFantasquadra}
         onCreaConsiglio={handleCreaConsiglio}
         onUpdateBonuses={handleUpdateBonuses}
@@ -808,6 +813,7 @@ export default function App() {
               sessioneMercatoLibero={data?.sessioneMercatoLibero}
               scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
               onIscriviFantasquadra={handleIscriviFantasquadra}
+              onRinominaFantasquadra={handleRinominaFantasquadra}
               onEliminaFantasquadra={handleEliminaFantasquadra}
               onCreaConsiglio={handleCreaConsiglio}
               onUpdateBonuses={handleUpdateBonuses}

@@ -1595,6 +1595,56 @@ async function startServer() {
     }
   });
 
+  // Rinominare una fantasquadra (User API)
+  app.post("/api/fantasquadre/rinomina", async (req, res) => {
+    try {
+      const { id, nuovoNome } = req.body;
+      if (!id || !nuovoNome || nuovoNome.trim().length === 0) {
+        return res.status(400).json({ err: "Dati mancanti per rinominare" });
+      }
+
+      const token = getAuthToken(req);
+      const db = await getDb(token);
+
+      if (!db.fantasquadre) {
+        db.fantasquadre = [];
+      }
+
+      const targetTeam = db.fantasquadre.find((fs) => fs.id === id);
+      if (!targetTeam) {
+        return res.status(404).json({ err: "Fantasquadra non trovata" });
+      }
+
+      // Check if new name already exists
+      const nomeEsiste = db.fantasquadre.some(
+        (fs) => fs.id !== id && fs.nomeFantasquadra.toLowerCase().trim() === nuovoNome.toLowerCase().trim()
+      );
+      if (nomeEsiste) {
+        return res.status(400).json({ err: "Nome già in uso da un'altra squadra" });
+      }
+
+      const oldName = targetTeam.nomeFantasquadra;
+      targetTeam.nomeFantasquadra = nuovoNome.trim();
+
+      db.logs.push({
+        data: new Date().toLocaleString("it-IT"),
+        operazione: "Fantacalcetto",
+        importo: "-",
+        dettagli: `Fantasquadra rinominata: da '${oldName}' a '${targetTeam.nomeFantasquadra}'`,
+      });
+
+      await saveDb(db, token);
+
+      res.json({
+        msg: "Nome modificato con successo",
+        fantasquadre: db.fantasquadre,
+      });
+    } catch (e: any) {
+      console.error(e);
+      res.status(500).json({ err: e.message });
+    }
+  });
+
   // Eliminazione di una fantasquadra (Admin API)
   app.post("/api/fantasquadre/elimina", async (req, res) => {
     try {
