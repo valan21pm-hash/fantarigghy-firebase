@@ -127,6 +127,26 @@ const ASSIST_POINTS = 1;
 const AMMO_POINTS = -0.5;
 const ESPU_POINTS = -1;
 
+const getRoleColor = (ruolo: string) => {
+  const r = (ruolo || "").toLowerCase();
+  switch (r) {
+    case "portiere":
+      return "bg-yellow-500 text-yellow-950 border-yellow-400";
+    case "difensore":
+    case "centrale":
+      return "bg-green-600 text-white border-green-500";
+    case "centrocampista":
+    case "laterale":
+      return "bg-blue-600 text-white border-blue-500";
+    case "attaccante":
+    case "pivot":
+    case "universale":
+      return "bg-red-600 text-white border-red-500";
+    default:
+      return "bg-gray-600 text-white border-gray-500";
+  }
+};
+
 export default function FantacalcettoV2({
   giocatori,
   fantasquadre = [],
@@ -210,6 +230,14 @@ export default function FantacalcettoV2({
     boughtPrice: number;
     remainingCredits: number;
   } | null>(null);
+
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
 
   // Security Authentication states for modifying existing rosters
   const [authenticatedTeamId, setAuthenticatedTeamId] = useState<string | null>(
@@ -1113,10 +1141,10 @@ export default function FantacalcettoV2({
         undefined,
       );
       setSubmitted(true);
-      alert(
-        "Operazione completata con successo! La formazione è stata modificata e il mercato è bloccato fino al termine del prossimo turno.",
+      showToast(
+        "Operazione completata con successo! Formazione modificata."
       );
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 1500);
     } catch (err: any) {
       setErrorMsg(err.message || "Errore sconosciuto di convalida server.");
     } finally {
@@ -1603,6 +1631,16 @@ export default function FantacalcettoV2({
 
     return (
       <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-indigo-990 text-white p-4 sm:p-6 lg:p-8 flex flex-col justify-between font-sans relative pb-28 md:pb-8">
+        {/* Toast Notification */}
+        {toastMessage && (
+          <div className="fixed bottom-24 sm:bottom-12 left-1/2 -translate-x-1/2 z-[9999] animate-fade-in pointer-events-none">
+            <div className="bg-emerald-500 text-white px-4 py-2.5 rounded-full shadow-2xl font-sans font-bold text-xs sm:text-sm tracking-wide flex items-center gap-2 border border-emerald-400">
+              <CheckCircle className="w-5 h-5 flex-shrink-0" />
+              <span>{toastMessage}</span>
+            </div>
+          </div>
+        )}
+        
         {showReRegistrationPopup && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-xs flex items-center justify-center p-4 z-[9995] animate-fade-in font-sans">
             <div className="bg-indigo-950 border-2 border-red-500/50 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-left">
@@ -3421,11 +3459,11 @@ export default function FantacalcettoV2({
                     </button>
                   </div>
 
-                  {/* Selected Players list */}
+                  {/* Selected Players list (PITCH VIEW) */}
                   <div className="pt-2 border-t border-indigo-900 space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] font-black uppercase tracking-wider text-indigo-400">
-                        Roster Selezionato
+                        Visuale in Campo
                       </span>
                       <span
                         className={`text-[11px] px-2.5 py-0.5 rounded-full font-black font-mono transition-all ${
@@ -3438,67 +3476,113 @@ export default function FantacalcettoV2({
                       </span>
                     </div>
 
-                    <div className="bg-indigo-900/30 border border-indigo-900 rounded-xl p-3 min-h-[160px] max-h-[220px] overflow-y-auto space-y-1">
+                    <div className="bg-green-900 border-2 border-green-700/50 rounded-2xl p-4 min-h-[240px] relative overflow-hidden flex flex-col justify-between shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
+                      {/* Field lines simulation */}
+                      <div className="absolute inset-0 opacity-20 pointer-events-none">
+                        <div className="absolute top-1/2 left-0 right-0 border-t-2 border-white"></div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 border-2 border-white rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-16 border-2 border-t-0 border-white"></div>
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-16 border-2 border-b-0 border-white"></div>
+                      </div>
+
                       {selectedPlayers.length === 0 ? (
-                        <div className="text-[10px] text-indigo-500 text-center py-10 font-medium leading-relaxed">
-                          Seleziona esattamente 4 giocatori dalla lista sulla
-                          destra toccando i pulsanti "+".
-                          <br />
-                          <span className="text-[9px] text-indigo-600 mt-1.5 block">
-                            (3 Titolari + 1 Panchinaro)
+                        <div className="text-[10px] text-green-200 text-center py-10 font-bold leading-relaxed relative z-10 flex h-full items-center justify-center flex-col">
+                          <span>Seleziona esattamente 4 giocatori dalla lista.</span>
+                          <span className="text-[9px] text-green-300/70 mt-1 block uppercase tracking-widest font-black bg-green-950/40 px-2 py-1 rounded">
+                            (3 Titolari + 1 Subentro)
                           </span>
                         </div>
                       ) : (
-                        selectedPlayers.map((name, idx) => {
-                          const isPanchinaro = idx === 3;
-                          return (
-                            <div
-                              key={idx}
-                              className={`flex items-center justify-between px-2 py-1.5 rounded-lg border transition-all text-[11px] font-bold group ${
-                                isPanchinaro
-                                  ? "bg-sky-500/10 border-sky-500/30 text-sky-300 animate-pulse-slow"
-                                  : "bg-indigo-900/40 hover:bg-indigo-900 border-indigo-805/40 text-gray-300"
-                              }`}
-                            >
-                              <span className="truncate pr-1 flex items-center gap-1.5 min-w-0">
-                                <span
-                                  className={`text-[9px] px-1 rounded font-black ${isPanchinaro ? "bg-sky-400 text-sky-950 font-mono" : "bg-indigo-900 text-indigo-300 font-mono"}`}
-                                >
-                                  {isPanchinaro ? "PAN" : `TIT`}
-                                </span>
-                                <span className="truncate">
-                                  {getLastName(name)}
-                                </span>
-                              </span>
-                              <div className="flex items-center gap-1.5 shrink-0">
-                                {selectedPlayers.length === 4 &&
-                                  !isPanchinaro && (
+                        <div className="h-full flex flex-col justify-between relative z-10 gap-2">
+                          {/* Titolari (Top line) */}
+                          <div className="flex justify-center items-end gap-2 sm:gap-4 h-24">
+                            {selectedPlayers.slice(0, 3).map((name, idx) => {
+                              const g = giocatori.find((p) => p.nome === name);
+                              const roleColorClass = getRoleColor(g?.ultimoRuolo || "");
+                              return (
+                                <div key={`tit-${idx}`} className="flex flex-col items-center justify-center gap-1 group relative w-1/3">
+                                  <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-full border-2 flex items-center justify-center text-sm font-black font-mono shadow-xl relative z-10 ${roleColorClass}`}>
+                                    {g?.numeroMaglia || "-"}
+                                  </div>
+                                  <div className="bg-indigo-950 text-white text-[9px] font-bold px-1.5 py-0.5 rounded border border-indigo-700 truncate w-full max-w-[80px] text-center shadow-lg relative z-20">
+                                    {getLastName(name)}
+                                  </div>
+                                  
+                                  {/* Hover Actions */}
+                                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                                    {selectedPlayers.length === 4 && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const others = selectedPlayers.filter((p) => p !== name);
+                                          setSelectedPlayers([...others, name]);
+                                        }}
+                                        className="bg-indigo-600 text-white w-5 h-5 rounded-md flex items-center justify-center cursor-pointer shadow-lg border border-indigo-400"
+                                        title="Sposta in panchina"
+                                      >
+                                        <ChevronDown className="w-3.5 h-3.5" />
+                                      </button>
+                                    )}
                                     <button
                                       type="button"
-                                      onClick={() => {
-                                        // Move this player to index 3 so they become panchinaro
-                                        const others = selectedPlayers.filter(
-                                          (p) => p !== name,
-                                        );
-                                        setSelectedPlayers([...others, name]);
-                                      }}
-                                      className="text-[8.5px] bg-indigo-950 hover:bg-indigo-800 hover:text-white border border-indigo-800 px-1.5 py-0.5 rounded-md text-indigo-400 transition-all font-bold cursor-pointer"
-                                      title="Metti in panchina"
+                                      onClick={() => handleTogglePlayer(name)}
+                                      className="bg-red-600 text-white w-5 h-5 rounded-md flex items-center justify-center font-black cursor-pointer shadow-lg border border-red-400 text-xs"
                                     >
-                                      Metti in Panchina
+                                      ×
                                     </button>
-                                  )}
-                                <button
-                                  type="button"
-                                  onClick={() => handleTogglePlayer(name)}
-                                  className="bg-red-950/60 hover:bg-red-900/80 text-red-300 w-5 h-5 rounded-md flex items-center justify-center text-[10px] transition-colors font-black cursor-pointer"
-                                >
-                                  ×
-                                </button>
-                              </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {/* Panchina (Bottom line) */}
+                          {selectedPlayers.length > 3 && (
+                            <div className="mt-6 pt-3 border-t-2 border-dashed border-green-400/40 flex flex-col items-center relative">
+                              <span className="text-[9px] bg-sky-600 text-white font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full absolute -top-2.5 left-1/2 -translate-x-1/2 shadow-md">
+                                Subentro
+                              </span>
+                              {selectedPlayers.slice(3, 4).map((name) => {
+                                const g = giocatori.find((p) => p.nome === name);
+                                const roleColorClass = getRoleColor(g?.ultimoRuolo || "");
+                                return (
+                                  <div key="pan" className="flex flex-col items-center justify-center gap-1 group relative w-1/3 opacity-90 transition-opacity hover:opacity-100">
+                                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center text-xs font-black font-mono shadow-xl relative z-10 ${roleColorClass}`}>
+                                      {g?.numeroMaglia || "-"}
+                                    </div>
+                                    <div className="bg-sky-950 text-sky-200 text-[9px] font-bold px-1.5 py-0.5 rounded border border-sky-800 truncate w-full max-w-[80px] text-center shadow-lg relative z-20">
+                                      {getLastName(name)}
+                                    </div>
+                                    
+                                    {/* Hover Actions */}
+                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const others = selectedPlayers.filter((p) => p !== name);
+                                          setSelectedPlayers([name, ...others]);
+                                        }}
+                                        className="bg-sky-600 text-white w-5 h-5 rounded-md flex items-center justify-center cursor-pointer shadow-lg border border-sky-400"
+                                        title="Sposta titolare"
+                                      >
+                                        <ChevronUp className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleTogglePlayer(name)}
+                                        className="bg-red-600 text-white w-5 h-5 rounded-md flex items-center justify-center font-black cursor-pointer shadow-lg border border-red-400 text-xs"
+                                      >
+                                        ×
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
-                          );
-                        })
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
@@ -3658,18 +3742,18 @@ export default function FantacalcettoV2({
                           {numChangesFromOrigin > 0 && (
                             <div className="bg-indigo-950/60 border border-indigo-900 p-2.5 rounded-lg space-y-1 text-[9.5px]">
                               <div className="flex justify-between items-center">
-                                <span className="text-red-400 font-extrabold truncate max-w-[65%]">
-                                  🔴 Cessione: {soldPlayers.join(", ")}
+                                <span className="text-emerald-400 font-extrabold truncate max-w-[65%]">
+                                  🟢 Cessione: {soldPlayers.join(", ")}
                                 </span>
-                                <span className="font-mono text-red-450 font-black">
+                                <span className="font-mono text-emerald-450 font-black transition-all">
                                   +{soldPrice} 🪙
                                 </span>
                               </div>
                               <div className="flex justify-between items-center">
-                                <span className="text-indigo-400 font-extrabold truncate max-w-[65%]">
-                                  🟢 Acquisto: {boughtPlayers.join(", ")}
+                                <span className="text-red-400 font-extrabold truncate max-w-[65%]">
+                                  🔴 Acquisto: {boughtPlayers.join(", ")}
                                 </span>
-                                <span className="font-mono text-indigo-450 font-black font-black">
+                                <span className="font-mono text-red-450 font-black transition-all">
                                   -{boughtPrice} 🪙
                                 </span>
                               </div>
@@ -3679,7 +3763,7 @@ export default function FantacalcettoV2({
                                     📈 Plusvalenza Finanziaria:
                                   </span>
                                   <span
-                                    className={`font-mono font-black ${plusvalenzaReale > 0 ? "text-indigo-450" : "text-red-450"}`}
+                                    className={`font-mono font-black border px-1.5 py-0.5 rounded transition-all ${plusvalenzaReale > 0 ? "text-emerald-400 border-emerald-900 bg-emerald-950/30" : "text-red-400 border-red-900 bg-red-950/30"}`}
                                   >
                                     {plusvalenzaReale > 0
                                       ? `+${plusvalenzaReale}`
@@ -4010,112 +4094,64 @@ export default function FantacalcettoV2({
                                 name.toLowerCase().trim() ===
                                 p.nome.toLowerCase().trim(),
                             );
+                            
+                            const roleColorClass = getRoleColor(p.ultimoRuolo || "");
+
                             return (
                               <div
                                 key={p.nome}
                                 onClick={() => handleTogglePlayer(p.nome)}
-                                className={`border rounded-2xl p-3 flex items-center justify-between cursor-pointer select-none transition-all ${
+                                className={`border rounded-2xl p-3 flex flex-col xl:flex-row items-stretch xl:items-center justify-between cursor-pointer select-none transition-all gap-3 ${
                                   isSelected
                                     ? "bg-yellow-450/15 border-yellow-400 text-white shadow-md ring-1 ring-yellow-400/50"
                                     : "bg-indigo-900/20 border-indigo-850 text-indigo-100 hover:bg-indigo-900/40"
                                 }`}
                               >
-                                <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="flex items-center gap-3 min-w-0 flex-1">
                                   {/* Maglia Jersey indicator */}
                                   <div
-                                    className={`w-8 h-8 rounded-lg flex items-center justify-center font-mono font-black text-xs shrink-0 ${
-                                      isSelected
-                                        ? "bg-yellow-400 text-indigo-950"
-                                        : "bg-indigo-800 text-indigo-300"
-                                    }`}
+                                    className={`w-10 h-10 rounded-lg flex items-center justify-center font-mono font-black text-sm shrink-0 shadow border border-opacity-50 ${roleColorClass}`}
                                   >
                                     #{p.numeroMaglia || "??"}
                                   </div>
-                                  <div className="min-w-0">
-                                    <p className="text-xs font-black truncate text-left">
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-black text-left flex items-center gap-2 truncate">
                                       {getLastName(p.nome)}
                                     </p>
                                     <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
-                                      <span className="inline-block bg-indigo-950/60 text-[8px] uppercase font-bold tracking-widest text-indigo-450 px-1.5 py-0.5 rounded">
+                                      <span className="inline-block bg-indigo-950/80 border border-indigo-800/50 text-[9px] uppercase font-bold tracking-widest text-indigo-300 px-1.5 py-0.5 rounded">
                                         {p.ultimoRuolo || "N/D"}
                                       </span>
                                       {lockStatus.match && (
                                         <span
                                           className={`inline-block text-[8px] uppercase font-black tracking-widest px-1.5 py-0.5 rounded ${
                                             isConvocato
-                                              ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
-                                              : "bg-sky-550/15 text-sky-300 border border-sky-800/25 animate-pulse"
+                                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                              : "bg-red-500/15 text-red-300 border border-red-800/25 opacity-70"
                                           }`}
                                         >
-                                          {isConvocato
-                                            ? "🟢 Convocato"
-                                            : "🚫 Fuori Lista (Selezionabile)"}
+                                          {isConvocato ? "🟢 Convocato" : "🚫 Fuori Lista"}
                                         </span>
                                       )}
                                     </div>
+                                    
+                                    {/* Bonus personali */}
                                     {(() => {
-                                      const playerStats = getPlayerStatsObj(
-                                        p.nome,
-                                      );
-                                      const pPrice = getPlayerCurrentPrice(
-                                        p.nome,
-                                        playerStats.fantaScore,
-                                      );
-                                      const basePrice = getPlayerBasePrice(
-                                        p.nome,
-                                      );
-                                      const diff = pPrice - basePrice;
-                                      return (
-                                        <div className="flex items-center gap-1.5 mt-1.5">
-                                          <span className="inline-flex items-center gap-0.5 bg-yellow-450/10 border border-yellow-400/20 text-[9.5px] font-black text-yellow-300 px-2 py-0.5 rounded-lg font-mono">
-                                            🪙 {pPrice} Izycoin
-                                          </span>
-                                          <span
-                                            className={`text-[8px] font-black font-semibold leading-none ${diff > 0 ? "text-indigo-400 font-mono" : diff < 0 ? "text-red-400 font-mono" : "text-gray-400/80 font-mono"}`}
-                                          >
-                                            {diff > 0
-                                              ? `▲ +${diff}`
-                                              : diff < 0
-                                                ? `▼ ${diff}`
-                                                : "➖ st."}
-                                          </span>
-                                        </div>
-                                      );
-                                    })()}
-                                    {(() => {
-                                      const bonusKey = getPlayerBonusKey(
-                                        p.nome,
-                                      );
+                                      const bonusKey = getPlayerBonusKey(p.nome);
                                       const baseBonuses = bonusKey
                                         ? (bonuses || DEFAULT_BONUSES).filter(
-                                            (b) =>
-                                              b.isPersonale &&
-                                              b.giocatoreId === bonusKey,
+                                            (b) => b.isPersonale && b.giocatoreId === bonusKey,
                                           )
                                         : [];
-                                      if (
-                                        !baseBonuses ||
-                                        baseBonuses.length === 0
-                                      )
-                                        return null;
+                                      if (!baseBonuses || baseBonuses.length === 0) return null;
                                       return (
                                         <div className="mt-1.5 space-y-0.5 bg-yellow-950/35 border border-yellow-900/35 p-1.5 rounded-lg text-[9px]/tight text-yellow-300">
                                           <span className="font-extrabold text-[8px] uppercase tracking-wider block text-yellow-400 text-left">
                                             🎒 Bonus Personali:
                                           </span>
                                           {baseBonuses.map((b) => (
-                                            <div
-                                              key={b.id}
-                                              className="leading-tight text-left"
-                                            >
-                                              ⭐{" "}
-                                              <span className="font-bold text-yellow-250">
-                                                {b.nome}
-                                              </span>
-                                              :{" "}
-                                              <span className="text-indigo-200/90">
-                                                {b.descrizione}
-                                              </span>
+                                            <div key={b.id} className="leading-tight text-left">
+                                              ⭐ <span className="font-bold text-yellow-250">{b.nome}</span>: <span className="text-indigo-200/90">{b.descrizione}</span>
                                             </div>
                                           ))}
                                         </div>
@@ -4123,17 +4159,44 @@ export default function FantacalcettoV2({
                                     })()}
                                   </div>
                                 </div>
-
-                                <div className="shrink-0 pl-1.5">
-                                  {isSelected ? (
-                                    <span className="w-6 h-6 rounded-full bg-yellow-400 text-indigo-950 flex items-center justify-center font-black text-xs shadow-sm">
-                                      ✓
-                                    </span>
-                                  ) : (
-                                    <span className="w-6 h-6 rounded-full bg-indigo-850 hover:bg-indigo-700 text-indigo-300 flex items-center justify-center font-black text-xs">
-                                      +
-                                    </span>
-                                  )}
+                                
+                                {/* Right side: Fanta-Borsa Quotes + Action Button */}
+                                <div className="flex items-center xl:items-end justify-between xl:justify-center border-t xl:border-t-0 border-indigo-900/50 pt-3 xl:pt-0 mt-1 xl:mt-0 gap-3">
+                                  {(() => {
+                                    const playerStats = getPlayerStatsObj(p.nome);
+                                    const pPrice = getPlayerCurrentPrice(p.nome, playerStats.fantaScore);
+                                    const basePrice = getPlayerBasePrice(p.nome);
+                                    const diff = pPrice - basePrice;
+                                    return (
+                                      <div className="flex flex-col items-start xl:items-end gap-1.5 flex-shrink-0">
+                                        <span className={`inline-flex items-center bg-indigo-950 border border-indigo-800/80 text-[11px] font-black px-2.5 py-1 rounded-lg font-mono shadow-sm ${isSelected ? 'text-yellow-300' : 'text-indigo-200'}`}>
+                                          🪙 {pPrice} cr.
+                                        </span>
+                                        <span
+                                          className={`text-[9.5px] px-1.5 py-0.5 rounded font-black leading-none font-mono flex items-center border ${
+                                            diff > 0 
+                                              ? "text-emerald-400 bg-emerald-950/30 border-emerald-900/50" 
+                                            : diff < 0 
+                                              ? "text-red-400 bg-red-950/30 border-red-900/50" 
+                                            : "text-gray-400 bg-gray-900/40 border-gray-800"}`}
+                                        >
+                                          {diff > 0 ? `▲ +${diff}` : diff < 0 ? `▼ ${diff}` : "➖ st."}
+                                        </span>
+                                      </div>
+                                    );
+                                  })()}
+                                  
+                                  <div className="shrink-0 flex items-center justify-center">
+                                    {isSelected ? (
+                                      <span className="w-8 h-8 rounded-full bg-yellow-400 text-indigo-950 flex items-center justify-center font-black shadow-sm ring-2 ring-yellow-400/30">
+                                        <CheckCircle className="w-4 h-4" />
+                                      </span>
+                                    ) : (
+                                      <span className="w-8 h-8 rounded-full bg-indigo-800 hover:bg-indigo-700 text-indigo-300 flex items-center justify-center font-black text-lg transition-colors">
+                                        +
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             );
@@ -4206,28 +4269,28 @@ export default function FantacalcettoV2({
               {/* Dettaglio Movimento */}
               <div className="bg-indigo-900/40 border border-indigo-800/50 rounded-2xl p-4 space-y-3">
                 <div className="flex items-center justify-between gap-2.5">
-                  <div className="bg-red-950/40 border border-red-900/30 rounded-xl p-3 shrink-1 flex-1 text-center">
-                    <span className="block text-[8px] font-black uppercase text-red-400 tracking-wider">
+                  <div className="bg-emerald-950/40 border border-emerald-900/30 rounded-xl p-3 shrink-1 flex-1 text-center">
+                    <span className="block text-[8px] font-black uppercase text-emerald-400 tracking-wider">
                       Cessione
                     </span>
                     <span className="block text-xs font-bold text-white truncate">
                       {proposedTransfer.sold}
                     </span>
-                    <span className="block text-[10px] text-red-300 font-mono mt-0.5">
+                    <span className="block text-[10px] text-emerald-300 font-mono mt-0.5 font-black">
                       +{proposedTransfer.soldPrice} Izycoin 🪙
                     </span>
                   </div>
 
                   <div className="font-black text-yellow-400 text-lg">➔</div>
 
-                  <div className="bg-green-950/40 border border-green-900/30 rounded-xl p-3 shrink-1 flex-1 text-center">
-                    <span className="block text-[8px] font-black uppercase text-green-400 tracking-wider">
+                  <div className="bg-red-950/40 border border-red-900/30 rounded-xl p-3 shrink-1 flex-1 text-center">
+                    <span className="block text-[8px] font-black uppercase text-red-400 tracking-wider">
                       Acquisto
                     </span>
                     <span className="block text-xs font-bold text-white truncate">
                       {proposedTransfer.bought}
                     </span>
-                    <span className="block text-[10px] text-green-300 font-mono mt-0.5">
+                    <span className="block text-[10px] text-red-300 font-mono mt-0.5 font-black">
                       -{proposedTransfer.boughtPrice} Izycoin 🪙
                     </span>
                   </div>
@@ -4293,6 +4356,16 @@ export default function FantacalcettoV2({
             onClose={() => setSelectedMatchBreakdown(null)}
             generateMatchPdf={generateMatchPdf}
           />
+        )}
+        
+        {/* Success Toast Notification */}
+        {toastMessage && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <div className="bg-emerald-500 text-white font-bold text-[11px] px-5 py-3 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.4)] flex items-center gap-2.5 border border-emerald-400">
+              <CheckCircle className="w-4 h-4 text-emerald-100" />
+              <span>{toastMessage}</span>
+            </div>
+          </div>
         )}
       </div>
     );

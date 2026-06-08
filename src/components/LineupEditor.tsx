@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ClipboardCheck, Copy, Share2, Users, AlertCircle, RefreshCw, Star, Info } from "lucide-react";
+import { ClipboardCheck, Copy, Share2, Users, AlertCircle, RefreshCw, Star, Info, CheckCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Formazione, Giocatore, Partita, getLastName } from "../types";
 
@@ -35,6 +35,14 @@ export default function LineupEditor({
   // Lineup states (5 starters padded with empty strings for coordinates mapping)
   const [titolari, setTitolari] = useState<string[]>(Array(5).fill(""));
   const [panchina, setPanchina] = useState<string[]>([]);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
 
   const activeMatch = partiteAperte.find(p => p.id === selectedMatchId);
   const isAmichevole = activeMatch ? activeMatch.dettagli.includes("[Amichevole]") : false;
@@ -183,7 +191,7 @@ export default function LineupEditor({
       }
     }
     await onSalvaFormazione(selectedMatchId, { titolari: cleanTitolari, panchina });
-    alert("Formazione salvata con successo!");
+    showToast("Formazione salvata con successo!");
   };
 
   const handleCopyWhatsApp = () => {
@@ -375,7 +383,16 @@ export default function LineupEditor({
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-fade-in" id="sezione-formazione">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-fade-in relative" id="sezione-formazione">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-24 sm:bottom-12 left-1/2 -translate-x-1/2 z-[9999] animate-fade-in pointer-events-none">
+          <div className="bg-emerald-500 text-white px-4 py-2.5 rounded-full shadow-2xl font-sans font-bold text-xs sm:text-sm tracking-wide flex items-center gap-2 border border-emerald-400">
+            <CheckCircle className="w-5 h-5 flex-shrink-0" />
+            <span>{toastMessage}</span>
+          </div>
+        </div>
+      )}
       <div className="bg-slate-900 px-6 py-4">
         <h2 className="text-lg font-bold text-white flex items-center gap-2">
           <span>📋</span> Componi Formazione Gara
