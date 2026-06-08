@@ -3394,7 +3394,7 @@ export default function FantacalcettoV2({
           ) : activePublicTab === "mercato" ? (
             <form
               onSubmit={handleRegisterSubmit}
-              className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-12 gap-6 font-sans"
+              className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-12 gap-6 font-sans pb-32 md:pb-6"
             >
               <div className="lg:col-span-12 xl:col-span-12">
                 <div className="bg-indigo-900/30 border-l-4 border-yellow-500 p-4 rounded-r-xl font-sans shadow-sm mb-4">
@@ -4246,7 +4246,7 @@ export default function FantacalcettoV2({
               </div>
 
               {/* STICKY BOTTOM BAR FOR MOBILE LAYOUT */}
-              <div className="fixed bottom-0 left-0 right-0 z-50 bg-indigo-950/95 backdrop-blur-xl border-t border-indigo-500/30 p-4 pb-6 sm:hidden flex items-center justify-between shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transform translate-y-0 transition-transform">
+              <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 bg-indigo-950/95 backdrop-blur-xl border-t border-b-2 border-indigo-800 p-3 px-4 sm:hidden flex items-center justify-between shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transform translate-y-0 transition-transform">
                 <div className="flex flex-col">
                   {(() => {
                     let totalCost = 0;
@@ -4264,7 +4264,7 @@ export default function FantacalcettoV2({
                         <span className="text-[10px] uppercase font-black tracking-widest text-indigo-400">
                           Scelti: <span className={selectedPlayers.length === 4 ? "text-emerald-400" : "text-yellow-400"}>{selectedPlayers.length}/4</span>
                         </span>
-                        <span className={`text-base font-black font-mono ${overBudget ? 'text-red-400' : 'text-indigo-100'}`}>
+                        <span className={`text-base font-black font-mono leading-none mt-0.5 ${overBudget ? 'text-red-400' : 'text-indigo-100'}`}>
                           🪙 {remaining} cr.
                         </span>
                       </div>
@@ -4275,7 +4275,7 @@ export default function FantacalcettoV2({
                 <button
                   type="submit"
                   disabled={submitting || lockStatus.isLocked}
-                  className="bg-yellow-400 hover:bg-yellow-350 disabled:bg-indigo-800 disabled:text-indigo-400 text-indigo-950 font-black uppercase tracking-wider text-sm px-6 py-3 rounded-xl shadow-lg active:scale-95 transition-transform shrink-0 disabled:border disabled:border-indigo-700"
+                  className="bg-yellow-400 hover:bg-yellow-350 disabled:bg-indigo-800 disabled:text-indigo-400 text-indigo-950 font-black uppercase tracking-wider text-xs px-5 py-2.5 rounded-xl shadow-lg active:scale-95 transition-transform shrink-0 disabled:border disabled:border-indigo-700"
                 >
                   {submitting ? "Invio..." : "Salva Rosa"}
                 </button>
