@@ -140,6 +140,12 @@ export default function Fantacalcetto({
 }: FantacalcettoProps) {
   // Public Portal state loaders
   const isMercatoLiberoValido = React.useMemo(() => {
+    // Override manuale speciale mercato libero fino a 08.06.2026 23:59
+    const manualMercatoLiberoEnd = new Date("2026-06-08T23:59:00+02:00");
+    if (new Date() <= manualMercatoLiberoEnd) {
+      return true;
+    }
+
     if (!sessioneMercatoLibero) return false;
     if (scadenzaMercatoLibero) {
       if (new Date(scadenzaMercatoLibero).getTime() < new Date().getTime()) {
@@ -166,6 +172,13 @@ export default function Fantacalcetto({
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showSocialTimingPopup, setShowSocialTimingPopup] = useState(() => {
+    const now = new Date();
+    const end = new Date("2026-06-09T00:59:00Z"); // 02:59 in Italy is 00:59 UTC
+    const isPeriod = now <= end;
+    if (!isPeriod) return false;
+    return localStorage.getItem("fantaSocialTiming_v1") !== "true";
+  });
   const [showInstagramPopup, setShowInstagramPopup] = useState(() => {
     return localStorage.getItem("fantaInstagramFollowed_v1") !== "true";
   });
@@ -1662,6 +1675,41 @@ export default function Fantacalcetto({
             </div>
           </div>
         )}
+        {showSocialTimingPopup && (
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-[9990] animate-fade-in">
+            <div className="bg-emerald-950 border border-amber-500/50 rounded-3xl p-6 max-w-md w-full shadow-2xl relative text-center space-y-4">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/30 mb-2 shadow-inner">
+                <AlertCircle className="h-8 w-8 animate-pulse" />
+              </div>
+              <h3 className="text-xl font-black text-amber-400 uppercase tracking-widest leading-snug font-sans">
+                ⚠️ NUOVO ORARIO DI SCADENZA!
+              </h3>
+              <div className="space-y-3 font-sans text-sm text-emerald-100 font-medium">
+                <p>
+                  Per <strong>questioni legate alle tempistiche social e organizzative</strong>, l'orario di chiusura per effettuare modifiche al mercato, nuove iscrizioni e modifiche alla formazione è stato <strong>modificato</strong>.
+                </p>
+                <div className="bg-emerald-900/50 border border-emerald-800/60 rounded-xl p-4 shadow-sm text-amber-200 font-bold uppercase tracking-wider text-[13px] leading-relaxed">
+                  Le operazioni non si bloccheranno più 60 minuti prima, ma verranno chiuse{" "}
+                  <strong className="text-white">rigorosamente alle 23:59 del giorno prima</strong>{" "}
+                  della partita in programma.
+                </div>
+                <p className="text-xs text-emerald-300">
+                  Prepara le tue mosse in anticipo e non farti cogliere impreparato dalle nuove scadenze!
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSocialTimingPopup(false);
+                  localStorage.setItem("fantaSocialTiming_v1", "true");
+                }}
+                className="w-full bg-amber-500 hover:bg-amber-450 text-emerald-950 font-black text-[13px] uppercase tracking-wider py-3.5 rounded-xl transition-all cursor-pointer shadow-md mt-4"
+              >
+                Ho Capito, Grazie! 👍
+              </button>
+            </div>
+          </div>
+        )}
         {showInstagramPopup && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-[9990] animate-fade-in">
             <div className="bg-gradient-to-b from-purple-950 via-emerald-950/95 to-emerald-990 border border-pink-500/30 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-center">
@@ -2025,10 +2073,9 @@ export default function Fantacalcetto({
                         🔔 <strong>PRO-TIP:</strong> Le operazioni di mercato,
                         nuove iscrizioni e modifiche della formazione si{" "}
                         <strong>
-                          bloccano rigorosamente 1 ora prima (60 minuti)
+                          bloccano rigorosamente alle 23:59 del giorno prima
                         </strong>{" "}
-                        del fischio d'inizio programmato del primo match di
-                        giornata controllato dall'Amministratore. Prepara la tua
+                        della partita controllata dall'Amministratore. Prepara la tua
                         mossa in tempo!
                       </p>
                     </div>
