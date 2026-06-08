@@ -107,6 +107,7 @@ export default function MatchReport({
   const [statoPresenza, setStatoPresenza] = useState<Record<string, "giocato" | "assente" | "sostituito">>({});
   const [sostitutoDa, setSostitutoDa] = useState<Record<string, string>>({});
   const [editingPlayerName, setEditingPlayerName] = useState<string | null>(null);
+  const [noEventsPlayers, setNoEventsPlayers] = useState<Record<string, boolean>>({});
 
   // Initialize form state when match changes
   const handleSelectMatch = (id: string) => {
@@ -138,6 +139,7 @@ export default function MatchReport({
         const bMap: Record<string, string[]> = {};
         const statoPresMap: Record<string, "giocato" | "assente" | "sostituito"> = {};
         const sostDaMap: Record<string, string> = {};
+        const noEventsMap: Record<string, boolean> = {};
 
         m.referto.forEach(r => {
           if (r.gol > 0) gMap[r.nome] = r.gol.toString();
@@ -152,6 +154,13 @@ export default function MatchReport({
           }
           statoPresMap[r.nome] = r.statoPresenza || (presentsList.includes(r.nome) ? "giocato" : "assente");
           sostDaMap[r.nome] = r.sostitutoDa || "";
+
+          // Auto-mark Nessun Evento if they played but have zero stats
+          const isPresent = statoPresMap[r.nome] === "giocato";
+          const hasStats = r.gol > 0 || r.assist > 0 || r.amm > 0 || r.rossi > 0 || (r.subitiAzione || 0) > 0 || (r.subitiRigore || 0) > 0 || (r.subitiPiazzato || 0) > 0;
+          if (isPresent && !hasStats) {
+            noEventsMap[r.nome] = true;
+          }
         });
 
         setGoals(gMap);
@@ -164,15 +173,10 @@ export default function MatchReport({
         setSelectedBonuses(bMap);
         setStatoPresenza(statoPresMap);
         setSostitutoDa(sostDaMap);
+        setNoEventsPlayers(noEventsMap);
         
-        const initialVG: Record<string, boolean> = {};
-        const initialVP: Record<string, boolean> = {};
-        giocatori.forEach(g => {
-          initialVG[g.nome] = true;
-          initialVP[g.nome] = true;
-        });
-        setVerifiedGeneric(initialVG);
-        setVerifiedPersonal(initialVP);
+        setVerifiedGeneric({});
+        setVerifiedPersonal({});
       } else {
         setPresents(m.convocati);
         setPayers(m.convocati);
@@ -196,6 +200,7 @@ export default function MatchReport({
         setSostitutoDa(initialSostDa);
         setVerifiedGeneric({});
         setVerifiedPersonal({});
+        setNoEventsPlayers({});
       }
     } else {
       setPresents([]);
@@ -250,6 +255,10 @@ export default function MatchReport({
     setter: React.Dispatch<React.SetStateAction<Record<string, string>>>
   ) => {
     setter(prev => ({ ...prev, [nome]: val }));
+    const parsed = parseInt(val) || 0;
+    if (parsed > 0) {
+      setNoEventsPlayers(prev => ({ ...prev, [nome]: false }));
+    }
   };
 
   const buildReferto = (): RefertoGiocatore[] => {
@@ -369,6 +378,34 @@ export default function MatchReport({
       return;
     }
 
+    // --- Referto Validation Check (At least one stat or Nessun Evento) ---
+    const invalidPlayersInReferto: string[] = [];
+    presentsList.forEach(nome => {
+      const g = giocatori.find(x => x.nome === nome);
+      const isPortiere = g?.ultimoRuolo === "Portiere";
+      const pGoals = Number(goals[nome]) || 0;
+      const pAssists = Number(assists[nome]) || 0;
+      const pYellows = Number(yellows[nome]) || 0;
+      const pReds = Number(reds[nome]) || 0;
+      const pSubAzione = Number(subAzione[nome]) || 0;
+      const pSubRigore = Number(subRigore[nome]) || 0;
+      const pSubPiazzato = Number(subPiazzato[nome]) || 0;
+      
+      const hasStatsEvent = pGoals > 0 || pAssists > 0 || pYellows > 0 || pReds > 0 || (isPortiere && (pSubAzione > 0 || pSubRigore > 0 || pSubPiazzato > 0));
+      const hasNessunEvento = !!noEventsPlayers[nome];
+
+      if (!hasStatsEvent && !hasNessunEvento) {
+        invalidPlayersInReferto.push(nome);
+      }
+    });
+
+    if (invalidPlayersInReferto.length > 0) {
+      setValidationError(
+        `Azione bloccata per verifica dettagli: è obbligatorio che ogni singolo giocatore presente a referto abbia registrato almeno un evento/statistica (Gol, Assist, Cartellini) OPPURE sia stata spuntata la casella "Nessun evento".\n\nI seguenti giocatori non hanno alcuno stato definito:\n${invalidPlayersInReferto.map(n => `• ${n}`).join("\n")}\n\nClicca sul nome del giocatore e metti la spunta su "Nessun Evento" se non ha fatto gol/assist o preso cartellini.`
+      );
+      return;
+    }
+
     // --- Strict Bonus Verification Flow ---
     const allBonuses = bonuses || DEFAULT_BONUSES;
     const genericBonusIds = allBonuses.filter(b => !b.isPersonale).map(b => b.id);
@@ -391,13 +428,20 @@ export default function MatchReport({
     });
 
     if (giocatoriMancantiGenerico.length > 0 || giocatoriMancantiPersonali.length > 0) {
-      let errorMsg = `Azione bloccata: è obbligatorio verificare tutti i giocatori per i bonus generici e personali.\n\nRiassunto giocatori mancanti:`;
+      let errorMsg = "Attenzione / Errore Azione bloccata: è obbligatorio verificare tutti i giocatori per i bonus generici e personali.\n";
+      
       if (giocatoriMancantiGenerico.length > 0) {
-        errorMsg += `\n• Per i Bonus Generici mancano ${giocatoriMancantiGenerico.length} giocatori all'appello.`;
+        const nomiGenerico = giocatoriMancantiGenerico.map(g => g.nome).join(", ");
+        errorMsg += `\nRiassunto giocatori mancanti nella sezione Bonus Generici:
+• Mancano all'appello i seguenti giocatori: ${nomiGenerico}.`;
       }
+      
       if (giocatoriMancantiPersonali.length > 0) {
-        errorMsg += `\n• Per i Bonus Personali mancano ${giocatoriMancantiPersonali.length} giocatori all'appello.`;
+        const nomiPersonali = giocatoriMancantiPersonali.map(g => g.nome).join(", ");
+        errorMsg += `\nRiassunto giocatori mancanti nella sezione Bonus Personali:
+• Mancano all'appello i seguenti giocatori: ${nomiPersonali}.`;
       }
+      
       errorMsg += `\n\nAttenzione: usa il tasto 'Assegna Nessun Bonus/Malus a tutti i rimanenti' in fondo alla tab corrispondente per velocizzare la procedura.`;
       setValidationError(errorMsg);
       return;
@@ -743,6 +787,16 @@ export default function MatchReport({
                                 </div>
 
                                 <div className="flex flex-wrap gap-1 items-center justify-end max-w-[50%] shrink-0">
+                                  {isPresent && !noEventsPlayers[nome] && pills.length === 0 && (
+                                    <span className="bg-amber-100 text-amber-900 border border-amber-300 font-black text-[9px] px-1.5 py-0.5 rounded animate-pulse tracking-wide uppercase">
+                                      ⚠️ Da Definire
+                                    </span>
+                                  )}
+                                  {isPresent && noEventsPlayers[nome] && (
+                                    <span className="bg-emerald-100 text-emerald-900 border border-emerald-300 font-black text-[9px] px-1.5 py-0.5 rounded tracking-wide uppercase">
+                                      ✔️ Nessun Evento
+                                    </span>
+                                  )}
                                   {pills.length > 0 ? (
                                     pills.map((p, pIdx) => (
                                       <span key={pIdx} className="bg-gray-150 text-gray-800 font-bold text-[9px] px-1.5 py-0.5 rounded border border-gray-200">
@@ -750,9 +804,11 @@ export default function MatchReport({
                                       </span>
                                     ))
                                   ) : (
-                                    <span className="text-[10px] text-gray-400 group-hover:text-slate-700 transition-colors flex items-center gap-1 font-semibold uppercase">
-                                      {isPresent ? "Dettagli ➔" : state === "assente" ? "Dettagli Extra" : "Reclutato"}
-                                    </span>
+                                    (!isPresent || !noEventsPlayers[nome]) && (
+                                      <span className="text-[10px] text-gray-405 group-hover:text-slate-700 transition-colors flex items-center gap-1 font-semibold uppercase">
+                                        {isPresent ? "Dettagli ➔" : state === "assente" ? "Dettagli Extra" : "Reclutato"}
+                                      </span>
+                                    )
                                   )}
                                 </div>
                               </button>
@@ -999,6 +1055,34 @@ export default function MatchReport({
 
                       {isCurrentlyPlaying && (
                         <>
+                          {/* "Nessun Evento" Checkbox Option */}
+                          <div className="bg-amber-50/50 p-3 rounded-xl border border-amber-100 mb-2">
+                            <label className="flex items-center gap-2.5 cursor-pointer font-bold text-xs text-amber-950 select-none">
+                              <input
+                                type="checkbox"
+                                checked={!!noEventsPlayers[nome]}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setNoEventsPlayers(prev => ({ ...prev, [nome]: checked }));
+                                  if (checked) {
+                                    setGoals(prev => ({ ...prev, [nome]: "" }));
+                                    setAssists(prev => ({ ...prev, [nome]: "" }));
+                                    setYellows(prev => ({ ...prev, [nome]: "" }));
+                                    setReds(prev => ({ ...prev, [nome]: "" }));
+                                    setSubAzione(prev => ({ ...prev, [nome]: "" }));
+                                    setSubRigore(prev => ({ ...prev, [nome]: "" }));
+                                    setSubPiazzato(prev => ({ ...prev, [nome]: "" }));
+                                  }
+                                }}
+                                className="w-5 h-5 text-amber-700 focus:ring-amber-500 rounded border-amber-300 cursor-pointer"
+                              />
+                              <div className="flex flex-col">
+                                <span className="font-extrabold text-amber-950 text-sm">Nessun Evento / Statistica</span>
+                                <span className="text-[10px] text-amber-800/80 font-medium">Spunta questa casella se il giocatore ha giocato senza registrare gol, assist o cartellini.</span>
+                              </div>
+                            </label>
+                          </div>
+
                           {/* STATS BASE GRID */}
                           <div>
                             <span className="block text-[10px] uppercase font-black tracking-wider text-gray-400 mb-2">Statistiche Principali</span>

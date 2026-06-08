@@ -21,6 +21,7 @@ interface PlayerListProps {
   giocatori: Giocatore[];
   partiteAperte?: any[];
   partiteChiuse?: Partita[];
+  logs?: any[];
   onAddPlayer: (nome: string) => Promise<void>;
   onDeletePlayer: (nome: string) => Promise<void>;
   onVersaQuota: (nome: string, importo: number) => Promise<void>;
@@ -40,6 +41,7 @@ export default function PlayerList({
   giocatori,
   partiteAperte = [],
   partiteChiuse = [],
+  logs = [],
   onAddPlayer,
   onDeletePlayer,
   onVersaQuota,
@@ -60,13 +62,10 @@ export default function PlayerList({
   const [isAdding, setIsAdding] = useState(false);
 
   // Quick Recharge state
-  const [rechargePlayer, setRechargePlayer] = useState("");
-  const [rechargeAmt, setRechargeAmt] = useState("");
   const [isRecharging, setIsRecharging] = useState(false);
-  const [rechargeMode, setRechargeMode] = useState<"singolo" | "massivo">("massivo");
-  const [bulkRecharges, setBulkRecharges] = useState<{ nome: string; importo: number }[]>([]);
-  const [bulkAddPlayerName, setBulkAddPlayerName] = useState("");
-  const [globalFlatQuota, setGlobalFlatQuota] = useState("");
+  const [selectedRechargePlayers, setSelectedRechargePlayers] = useState<string[]>([]);
+  const [rechargeAmounts, setRechargeAmounts] = useState<Record<string, string>>({});
+  const [rechargeSearch, setRechargeSearch] = useState("");
 
   // Split Expense state
   const [expenseAmt, setExpenseAmt] = useState("");
@@ -76,6 +75,129 @@ export default function PlayerList({
 
   // Edit Player State
   const [editingPlayer, setEditingPlayer] = useState<Giocatore | null>(null);
+  const [modalTab, setModalTab] = useState<"profilo" | "finanze">("profilo");
+
+  const getPlayerTransactions = (playerName: string) => {
+    const list: { date: string; type: string; amount: number; details: string; rawDate: string }[] = [];
+
+    // 1. Parse from logs
+    if (logs && Array.isArray(logs)) {
+      logs.forEach((log) => {
+        const detailsLower = (log.dettagli || "").toLowerCase();
+        const playerLower = playerName.toLowerCase();
+
+        if (log.operazione === "Ricarica" && detailsLower.includes(playerLower)) {
+          const amt = parseFloat(log.importo) || 0;
+          list.push({
+            date: log.data,
+            rawDate: log.data,
+            type: "Ricarica Saldo",
+            amount: amt,
+            details: log.dettagli,
+          });
+        } else if (log.operazione === "Quota Iscrizione" && detailsLower.includes(playerLower)) {
+          const amt = parseFloat(log.importo) || 0;
+          list.push({
+            date: log.data,
+            rawDate: log.data,
+            type: "Quota Iscrizione",
+            amount: amt,
+            details: log.dettagli,
+          });
+        } else if (log.operazione === "Ricarica Massiva" && detailsLower.includes(playerLower)) {
+          let foundAmount = 0;
+          try {
+            const escapedName = playerName.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            const regexStr = escapedName + "\\s*\\(\\s*([0-9.,]+)\\s*(?:€|euro)\\s*\\)";
+            const rx = new RegExp(regexStr, "i");
+            const match = (log.dettagli || "").match(rx);
+            if (match && match[1]) {
+              foundAmount = parseFloat(match[1].replace(",", "."));
+            }
+          } catch (e) {
+            console.error("Error matching name in bulk recharge", e);
+          }
+
+          if (foundAmount === 0 && log.importo) {
+            if (!log.dettagli.includes(",")) {
+              foundAmount = parseFloat(log.importo) || 0;
+            }
+          }
+
+          list.push({
+            date: log.data,
+            rawDate: log.data,
+            type: "Ricarica Massiva",
+            amount: foundAmount || 0,
+            details: `Ricarica di gruppo al campo: ${playerName}`,
+          });
+        } else if (log.operazione === "Spesa Condivisa" && detailsLower.includes(playerLower)) {
+          let foundAmount = 0;
+          try {
+            const match = (log.dettagli || "").match(/addebitati ~?([0-9.,]+)\s*€/i);
+            if (match && match[1]) {
+              foundAmount = parseFloat(match[1].replace(",", "."));
+            }
+          } catch(e) {}
+          
+          list.push({
+            date: log.data,
+            rawDate: log.data,
+            type: "Spesa Condivisa",
+            amount: -foundAmount,
+            details: log.dettagli,
+          });
+        }
+      });
+    }
+
+    // 2. Parse from partiteChiuse
+    if (partiteChiuse && Array.isArray(partiteChiuse)) {
+      partiteChiuse.forEach(match => {
+        const rGioc = match.referto?.find(r => r.nome.toLowerCase() === playerName.toLowerCase());
+        if (rGioc && rGioc.pagaQuota) {
+          const amt = rGioc.quotaMaturata !== undefined ? rGioc.quotaMaturata : (match.costo / (match.referto.filter(x => x.pagaQuota).length || 1));
+          const matchDate = match.dataInserimento || (match.dettagli ? match.dettagli.split(",")[0] : "") || "Gara Chiusa";
+          list.push({
+            date: matchDate,
+            rawDate: match.dataInserimento || "",
+            type: "Addebito Quota Gara",
+            amount: -amt,
+            details: `Presenza in gara: ${match.dettagli}`,
+          });
+        }
+      });
+    }
+
+    const parseDate = (dStr: string) => {
+      try {
+        const parts = dStr.split(", ");
+        if (parts.length >= 1) {
+          const dateParts = parts[0].split("/");
+          if (dateParts.length === 3) {
+            const day = parseInt(dateParts[0]);
+            const month = parseInt(dateParts[1]) - 1;
+            const year = parseInt(dateParts[2]);
+            if (parts[1]) {
+              const timeParts = parts[1].split(":");
+              if (timeParts.length === 3) {
+                return new Date(year, month, day, parseInt(timeParts[0]), parseInt(timeParts[1]), parseInt(timeParts[2])).getTime();
+              }
+            }
+            return new Date(year, month, day).getTime();
+          }
+        }
+      } catch(e) {}
+      const t = Date.parse(dStr);
+      return isNaN(t) ? 0 : t;
+    };
+
+    return list.sort((a, b) => {
+      const timeA = parseDate(a.rawDate || a.date);
+      const timeB = parseDate(b.rawDate || b.date);
+      return timeB - timeA;
+    });
+  };
 
   // Sort & Filter
   const filtered = giocatori
@@ -101,58 +223,57 @@ export default function PlayerList({
     setIsAdding(false);
   };
 
-  const handleRecharge = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!rechargePlayer || !rechargeAmt || parseFloat(rechargeAmt) <= 0) return;
-    await onVersaQuota(rechargePlayer, parseFloat(rechargeAmt));
-    setRechargeAmt("");
-    setRechargePlayer("");
-    setIsRecharging(false);
+  const handleUpdateRechargeAmount = (nome: string, val: string) => {
+    setRechargeAmounts(prev => ({ ...prev, [nome]: val }));
   };
 
-  const handleAddPlayerToBulk = (nome: string) => {
-    if (!nome) return;
-    if (bulkRecharges.some(r => r.nome === nome)) return;
-    setBulkRecharges([...bulkRecharges, { nome, importo: 0 }]);
-    setBulkAddPlayerName("");
+  const handleFastAmount = (nome: string, val: number) => {
+    setRechargeAmounts(prev => ({ ...prev, [nome]: val.toString() }));
   };
 
-  const handleRemovePlayerFromBulk = (nome: string) => {
-    setBulkRecharges(bulkRecharges.filter(r => r.nome !== nome));
+  const handleToggleRechargePlayer = (nome: string) => {
+    if (selectedRechargePlayers.includes(nome)) {
+      setSelectedRechargePlayers(prev => prev.filter(n => n !== nome));
+    } else {
+      setSelectedRechargePlayers(prev => [...prev, nome]);
+    }
   };
 
-  const handleUpdateBulkAmount = (nome: string, importo: number) => {
-    setBulkRecharges(
-      bulkRecharges.map(r => (r.nome === nome ? { ...r, importo: isNaN(importo) ? 0 : Math.max(0, importo) } : r))
-    );
+  const handleSelectAllActiveRecharge = () => {
+    const list = giocatori.filter(g => g.attivo).map(g => g.nome);
+    setSelectedRechargePlayers(list);
   };
 
-  const handleApplyGlobalFlatQuota = () => {
-    const parsed = parseFloat(globalFlatQuota);
-    if (isNaN(parsed) || parsed < 0) return;
-    setBulkRecharges(bulkRecharges.map(r => ({ ...r, importo: parsed })));
+  const handleSelectConvocatiRecharge = (convocatiList: string[]) => {
+    setSelectedRechargePlayers(convocatiList);
   };
 
-  const handlePrepopulateActive = () => {
-    const activePlayers = giocatori.filter(g => g.attivo).map(g => ({ nome: g.nome, importo: 0 }));
-    setBulkRecharges(activePlayers);
+  const handleSelectNoneRecharge = () => {
+    setSelectedRechargePlayers([]);
+    setRechargeAmounts({});
+    setRechargeSearch("");
   };
 
-  const handlePrepopulateConvocati = (matchConvocati: string[]) => {
-    const mapped = matchConvocati.map(nome => ({ nome, importo: 0 }));
-    setBulkRecharges(mapped);
-  };
+  const handleSaveRecharges = async () => {
+    const ricaricheDaSalvare = selectedRechargePlayers
+      .map(nome => {
+        const val = rechargeAmounts[nome] || "0";
+        const amt = parseFloat(val);
+        return { nome, importo: isNaN(amt) ? 0 : amt };
+      })
+      .filter(r => r.importo > 0);
 
-  const handleSaveBulkRecharges = async () => {
-    const ricaricheDaSalvare = bulkRecharges.filter(r => r.importo > 0);
     if (ricaricheDaSalvare.length === 0) {
-      alert("Nessun importo valido (> 0€) è stato inserito.");
+      alert("Nessun importo valido (> 0€) inserito per i giocatori selezionati.");
       return;
     }
+
     await onVersaQuotaMassivo(ricaricheDaSalvare);
-    setBulkRecharges([]);
+    setSelectedRechargePlayers([]);
+    setRechargeAmounts({});
+    setRechargeSearch("");
     setIsRecharging(false);
-    alert("Tutte le ricariche di gruppo sono state salvate e i saldi aggiornati!");
+    alert("I versamenti dei giocatori selezionati sono stati salvati e i saldi aggiornati!");
   };
 
   const handleSplitExpense = async (e: React.FormEvent) => {
@@ -310,291 +431,236 @@ export default function PlayerList({
       {/* Expandable Panel: Quick Recharge */}
       {isRecharging && (
         <div className="p-5 bg-green-50/70 border-b border-green-100 space-y-4 shadow-inner">
-          <div className="flex items-center justify-between border-b border-green-150 pb-3 flex-wrap gap-2">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-green-150 pb-3 gap-3">
             <div>
               <h3 className="font-extrabold text-sm text-green-950 flex items-center gap-1.5">
                 <span>💰</span> Gestione Versamenti & Ricariche Saldi
               </h3>
               <p className="text-[11px] text-green-850">
-                Registra le quote che ricevi al campo per rimpinguare i saldi dei giocatori in tempo reale.
+                Seleziona i giocatori, inserisci le quote versate al campo e salva in un'unica soluzione.
               </p>
             </div>
-            
-            {/* Segment switch */}
-            <div className="flex bg-green-150/40 p-1 rounded-xl shrink-0 select-none">
+
+            {/* Quick action controls for selection */}
+            <div className="flex flex-wrap gap-1.5">
               <button
                 type="button"
-                onClick={() => setRechargeMode("singolo")}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
-                  rechargeMode === "singolo"
-                    ? "bg-white text-green-950 shadow-xs"
-                    : "text-green-800 hover:text-green-950"
-                }`}
+                onClick={handleSelectAllActiveRecharge}
+                className="px-2.5 py-1.5 bg-green-150 hover:bg-green-200 text-green-950 font-extrabold text-[10px] uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
               >
-                👤 Singolo Giocatore
+                👥 Spunta Tutti Attivi
               </button>
+
+              {(() => {
+                const firstOpenMatch = partiteAperte?.find(p => p.stato === "Aperta");
+                if (!firstOpenMatch || !firstOpenMatch.convocati || firstOpenMatch.convocati.length === 0) return null;
+                return (
+                  <button
+                    type="button"
+                    onClick={() => handleSelectConvocatiRecharge(firstOpenMatch.convocati)}
+                    className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-[10px] uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
+                    title={firstOpenMatch.dettagli}
+                  >
+                    ⚽ Spunta Convocati Gara ({firstOpenMatch.convocati.length})
+                  </button>
+                );
+              })()}
+
               <button
                 type="button"
-                onClick={() => {
-                  setRechargeMode("massivo");
-                  if (bulkRecharges.length === 0) {
-                    handlePrepopulateActive();
-                  }
-                }}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
-                  rechargeMode === "massivo"
-                    ? "bg-white text-green-950 shadow-xs"
-                    : "text-green-800 hover:text-green-950"
-                }`}
+                onClick={handleSelectNoneRecharge}
+                className="px-2.5 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-extrabold text-[10px] uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
               >
-                ⚡ Di Gruppo al Campo (Massivo)
+                🧹 Deseleziona Tutti
               </button>
             </div>
           </div>
 
-          {rechargeMode === "singolo" ? (
-            <form onSubmit={handleRecharge} className="flex flex-col sm:flex-row gap-3 items-end">
-              <div className="flex-1 w-full">
-                <label className="block text-[10px] font-bold uppercase text-green-800 mb-1">Seleziona Giocatore</label>
-                <select
-                  required
-                  value={rechargePlayer}
-                  onChange={e => setRechargePlayer(e.target.value)}
-                  className="w-full p-2.5 bg-white border border-green-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500 outline-none"
-                >
-                  <option value="">-- Chi versa? --</option>
-                  {giocatori.map(g => (
-                    <option key={g.nome} value={g.nome}>
-                      {g.numeroMaglia} - {g.nome} ({g.saldo.toFixed(2)}€)
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="w-full sm:w-32">
-                <label className="block text-[10px] font-bold uppercase text-green-800 mb-1">Importo (€)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  required
-                  min="0.01"
-                  placeholder="0.00"
-                  value={rechargeAmt}
-                  onChange={e => setRechargeAmt(e.target.value)}
-                  className="w-full p-2.5 bg-white border border-green-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500 outline-none"
-                />
-              </div>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <button
-                  type="submit"
-                  className="flex-1 sm:flex-none px-4 py-2.5 bg-green-700 hover:bg-green-650 text-white font-bold text-xs rounded-lg shadow-sm transition-all cursor-pointer font-black"
-                >
-                  Registra Ricarica
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsRecharging(false)}
-                  className="px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs rounded-lg cursor-pointer"
-                >
-                  Chiudi
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className="space-y-4">
-              {/* Intelligent Prepopulate & Flat quota row */}
-              <div className="flex flex-wrap gap-3 items-center justify-between bg-white border border-green-100 p-3 rounded-xl">
-                <div className="flex flex-wrap gap-2">
-                  <span className="text-xs text-green-900 font-extrabold self-center">Pre-popola:</span>
-                  <button
-                    type="button"
-                    onClick={handlePrepopulateActive}
-                    className="px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-950 font-extrabold text-[10px] uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
-                  >
-                    👥 Carica Tutti Attivi
-                  </button>
+          {/* Search box within recharge panel */}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-green-600" />
+            </div>
+            <input
+              type="text"
+              placeholder="Cerca un giocatore da ricaricare..."
+              value={rechargeSearch}
+              onChange={e => setRechargeSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-2.5 bg-white border border-green-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500 outline-none text-green-950 placeholder-green-700/50"
+            />
+          </div>
 
-                  {/* Open match convocati check */}
-                  {(() => {
-                    const firstOpenMatch = partiteAperte?.find(p => p.stato === "Aperta");
-                    if (!firstOpenMatch || !firstOpenMatch.convocati || firstOpenMatch.convocati.length === 0) return null;
-                    return (
-                      <button
-                        type="button"
-                        onClick={() => handlePrepopulateConvocati(firstOpenMatch.convocati)}
-                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-[10px] uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
-                        title={firstOpenMatch.dettagli}
-                      >
-                        ⚽ Carica Convocati Gara ({firstOpenMatch.convocati.length})
-                      </button>
-                    );
-                  })()}
-                </div>
+          {/* Scrollable list/grid of players */}
+          <div className="max-h-80 overflow-y-auto border border-green-150 bg-white rounded-xl p-3.5 space-y-2">
+            {(() => {
+              const listToRender = giocatori.filter(g => {
+                if (!rechargeSearch.trim()) return true;
+                return g.nome.toLowerCase().includes(rechargeSearch.toLowerCase());
+              });
 
-                {/* Flat standard amount setter */}
-                <div className="flex gap-1.5 items-center w-full sm:w-auto mt-2 sm:mt-0">
-                  <span className="text-xs text-green-900 font-bold hidden sm:inline">Quota Comune:</span>
-                  <input
-                    type="number"
-                    placeholder="Quota fissa"
-                    value={globalFlatQuota}
-                    onChange={e => setGlobalFlatQuota(e.target.value)}
-                    className="w-20 p-2 text-xs bg-white border border-green-200 rounded-lg outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleApplyGlobalFlatQuota}
-                    className="px-3 py-2 bg-green-700 hover:bg-green-650 text-white font-black text-xs rounded-lg cursor-pointer transition-colors"
-                  >
-                    Applica a tutti
-                  </button>
-                </div>
-              </div>
-
-              {/* Grid of players being recharged */}
-              <div className="max-h-72 overflow-y-auto border border-green-150 bg-white rounded-xl p-3 space-y-2">
-                {bulkRecharges.length === 0 ? (
+              if (listToRender.length === 0) {
+                return (
                   <div className="text-center py-6 text-xs text-gray-400 italic font-semibold">
-                    La lista ricariche è vuota. Seleziona i giocatori sotto o usa i bottoni Pre-popola.
+                    Nessun giocatore corrisponde alla ricerca.
                   </div>
-                ) : (
-                  bulkRecharges.map(item => {
-                    const matchedGioc = giocatori.find(g => g.nome === item.nome);
-                    return (
-                      <div
-                        key={item.nome}
-                        className="flex flex-wrap items-center justify-between gap-3 p-2 bg-green-50/20 hover:bg-green-50/70 border border-green-100/50 rounded-lg"
-                      >
-                        <div className="flex items-center gap-2.5 truncate flex-1 min-w-[150px]">
-                          <span className="text-[10px] font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-150/50 px-1.5 py-0.5 rounded shrink-0">
-                            {matchedGioc?.numeroMaglia ?? 99}
+                );
+              }
+
+              return listToRender.map(g => {
+                const isSelected = selectedRechargePlayers.includes(g.nome);
+                const currentVal = rechargeAmounts[g.nome] || "";
+
+                return (
+                  <div
+                    key={g.nome}
+                    className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border transition-all rounded-xl ${
+                      isSelected
+                        ? "bg-green-50/45 border-green-300"
+                        : "bg-slate-50/30 border-slate-200/60 hover:bg-slate-50/70 hover:border-slate-300"
+                    }`}
+                  >
+                    {/* Left: Checkbox + Name & Current Balance */}
+                    <label className="flex items-center gap-3 cursor-pointer min-w-0 select-none flex-1">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleToggleRechargePlayer(g.nome)}
+                        className="w-5 h-5 text-green-700 focus:ring-green-500 rounded-lg border-green-300 cursor-pointer transition-all shrink-0 scale-105"
+                      />
+                      <div className="truncate flex flex-col">
+                        <span className="font-extrabold text-sm text-slate-900 truncate flex items-center gap-1.5">
+                          <span className="text-[10px] font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-150/40 px-1.5 py-0.5 rounded">
+                            {g.numeroMaglia ?? 99}
                           </span>
-                          <div className="truncate flex flex-col">
-                            <span className="font-extrabold text-sm text-green-950 truncate">{item.nome}</span>
-                            <span className="text-[10px] text-gray-400 font-medium">
-                              Saldo attuale: <b className={`font-bold ${matchedGioc && matchedGioc.saldo < 0 ? "text-red-650" : "text-gray-500"}`}>{matchedGioc?.saldo.toFixed(2)}€</b>
-                            </span>
-                          </div>
-                        </div>
+                          {g.nome}
+                        </span>
+                        <span className="text-[10px] text-gray-400 font-bold block mt-0.5">
+                          Saldo Corrente: <b className={`font-black ${g.saldo < 0 ? "text-red-650" : "text-green-800"}`}>{g.saldo.toFixed(2)}€</b>
+                        </span>
+                      </div>
+                    </label>
 
-                        {/* Money input and fast shortcut buttons */}
-                        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                          {/* Fast Shortcuts */}
-                          <div className="flex p-0.5 bg-white border border-green-100 rounded-lg text-[10px] label-neutral font-extrabold">
-                            <button
-                              type="button"
-                              onClick={() => handleUpdateBulkAmount(item.nome, 5)}
-                              className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${item.importo === 5 ? "bg-green-600 text-white font-black" : "hover:bg-green-50 text-green-900"}`}
-                            >
-                              5€
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleUpdateBulkAmount(item.nome, 10)}
-                              className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${item.importo === 10 ? "bg-green-600 text-white font-black" : "hover:bg-green-50 text-green-900"}`}
-                            >
-                              10€
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleUpdateBulkAmount(item.nome, 12)}
-                              className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${item.importo === 12 ? "bg-green-600 text-white font-black" : "hover:bg-green-50 text-green-900"}`}
-                            >
-                              12€
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleUpdateBulkAmount(item.nome, item.importo + 5)}
-                              className="px-2 py-1 rounded-md hover:bg-green-100 text-green-900 cursor-pointer text-[9px]"
-                              title="Aggiungi 5€"
-                            >
-                              +5€
-                            </button>
-                          </div>
-
-                          {/* Numeric input */}
-                          <div className="relative">
-                            <input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              placeholder="0"
-                              value={item.importo === 0 ? "" : item.importo}
-                              onChange={e => handleUpdateBulkAmount(item.nome, parseFloat(e.target.value))}
-                              className="w-16 p-1.5 text-xs text-right font-black bg-white border border-green-200 rounded-lg outline-none text-green-950"
-                            />
-                          </div>
-
-                          {/* Delete from queue */}
+                    {/* Right: Dynamic Recharge inputs (Only displayed when selected/checked) */}
+                    {isSelected ? (
+                      <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0 justify-end animate-fade-in animate-duration-200">
+                        {/* Quick Flat Quote Shortcuts (5, 10, 15) */}
+                        <div className="flex p-0.5 bg-white border border-green-200 rounded-lg text-[10px] font-extrabold select-none shadow-2xs">
                           <button
                             type="button"
-                            onClick={() => handleRemovePlayerFromBulk(item.nome)}
-                            className="p-1 px-1.5 text-red-500 hover:text-white hover:bg-red-500 rounded-md transition-all font-black text-sm cursor-pointer"
-                            title="Rimuovi"
+                            onClick={() => handleFastAmount(g.nome, 5)}
+                            className={`px-2 py-1 rounded-md transition-all cursor-pointer font-black ${
+                              parseFloat(currentVal) === 5 ? "bg-green-600 text-white font-black" : "hover:bg-green-50 text-green-900"
+                            }`}
                           >
-                            ×
+                            5€
                           </button>
+                          <button
+                            type="button"
+                            onClick={() => handleFastAmount(g.nome, 10)}
+                            className={`px-2 py-1 rounded-md transition-all cursor-pointer font-black ${
+                              parseFloat(currentVal) === 10 ? "bg-green-600 text-white font-black" : "hover:bg-green-50 text-green-900"
+                            }`}
+                          >
+                            10€
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleFastAmount(g.nome, 15)}
+                            className={`px-2 py-1 rounded-md transition-all cursor-pointer font-black ${
+                              parseFloat(currentVal) === 15 ? "bg-green-600 text-white font-black" : "hover:bg-green-50 text-green-900"
+                            }`}
+                          >
+                            15€
+                          </button>
+                          {g.saldo < 0 && (
+                            <button
+                              type="button"
+                              onClick={() => handleFastAmount(g.nome, Math.abs(g.saldo))}
+                              className={`px-2 py-1 rounded-md transition-all cursor-pointer font-extrabold text-[9px] uppercase tracking-tight ${
+                                parseFloat(currentVal) === Math.abs(g.saldo) ? "bg-red-600 text-white font-black animate-pulse" : "hover:bg-red-550 text-red-650 font-black font-sans"
+                              }`}
+                              title="Inserisci l'importo necessario per saldare il debito corrente"
+                            >
+                              Salda
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Numeric input field */}
+                        <div className="relative">
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="0.00"
+                            value={currentVal}
+                            onChange={e => handleUpdateRechargeAmount(g.nome, e.target.value)}
+                            className="w-20 p-2 text-xs text-right font-black bg-white border border-green-250 rounded-lg outline-none text-green-950 focus:ring-2 focus:ring-green-500 shadow-2xs"
+                          />
                         </div>
                       </div>
-                    );
-                  })
-                )}
-              </div>
-
-              {/* Add and submit section */}
-              <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-green-100">
-                {/* Add one-off player to the queue */}
-                <div className="flex items-center gap-1 w-full sm:w-auto">
-                  <select
-                    value={bulkAddPlayerName}
-                    onChange={e => handleAddPlayerToBulk(e.target.value)}
-                    className="p-2 text-xs bg-white border border-green-200 rounded-lg outline-none max-w-xs"
-                  >
-                    <option value="">➕ Seleziona altro da inserire...</option>
-                    {giocatori
-                      .filter(g => !bulkRecharges.some(r => r.nome === g.nome))
-                      .map(g => (
-                        <option key={g.nome} value={g.nome}>
-                          {g.numeroMaglia} - {g.nome}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-
-                {/* Subtotals & Submit actions */}
-                <div className="flex items-center gap-4 flex-wrap justify-end ml-auto">
-                  <div className="text-right">
-                    <span className="block text-[10px] uppercase font-bold text-green-800">Totale Contanti Ricevuti</span>
-                    <strong className="text-lg text-green-950 font-black">
-                      {bulkRecharges.reduce((acc, curr) => acc + (curr.importo || 0), 0).toFixed(2)}€
-                    </strong>
-                    <span className="text-[10px] text-green-800 font-medium block">
-                      ({bulkRecharges.filter(r => r.importo > 0).length} quote compilate)
-                    </span>
+                    ) : (
+                      <div className="text-[11px] text-gray-400 italic pr-3 font-semibold self-center">
+                        Non versante
+                      </div>
+                    )}
                   </div>
+                );
+              });
+            })()}
+          </div>
 
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setBulkRecharges([]);
-                        setIsRecharging(false);
-                      }}
-                      className="px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-xs rounded-xl cursor-pointer"
-                    >
-                      Annulla
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleSaveBulkRecharges}
-                      className="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl shadow-md transition-colors cursor-pointer"
-                    >
-                      Registra Quote e Aggiorna Saldi 💾
-                    </button>
-                  </div>
-                </div>
-              </div>
+          {/* Subtotals & Main Submit actions */}
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-3.5 border-t border-green-150">
+            <div className="text-left">
+              <span className="block text-[10px] uppercase font-bold text-green-800">Totale Versamenti Ricevuti</span>
+              <strong className="text-lg text-green-950 font-black">
+                {(() => {
+                  const tot = selectedRechargePlayers.reduce((acc, curr) => {
+                    const val = rechargeAmounts[curr] || "0";
+                    const amt = parseFloat(val);
+                    return acc + (isNaN(amt) ? 0 : amt);
+                  }, 0);
+                  return tot.toFixed(2);
+                })()}€
+              </strong>
+              <span className="text-[10px] text-green-800 font-bold block mt-0.5">
+                ({selectedRechargePlayers.filter(nome => {
+                  const val = rechargeAmounts[nome] || "0";
+                  return parseFloat(val) > 0;
+                }).length} ricariche compilate)
+              </span>
             </div>
-          )}
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleSelectNoneRecharge}
+                className="px-4 py-2.5 bg-gray-250 hover:bg-gray-300 text-gray-700 font-bold text-xs rounded-xl cursor-pointer"
+              >
+                Reset
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedRechargePlayers([]);
+                  setRechargeAmounts({});
+                  setRechargeSearch("");
+                  setIsRecharging(false);
+                }}
+                className="px-4 py-2.5 bg-gray-200 hover:bg-gray-250 text-gray-700 font-bold text-xs rounded-xl cursor-pointer"
+              >
+                Annulla
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveRecharges}
+                className="px-5 py-2.5 bg-green-700 hover:bg-green-650 text-white font-black text-xs rounded-xl shadow-md transition-colors cursor-pointer flex items-center gap-1.5"
+              >
+                Salva Ricariche Selezionate 💾
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -859,7 +925,10 @@ export default function PlayerList({
                 {isEditor && (
                   <div className="flex gap-1">
                     <button
-                      onClick={() => setEditingPlayer(g)}
+                      onClick={() => {
+                        setEditingPlayer(g);
+                        setModalTab("profilo");
+                      }}
                       className="p-1 text-gray-500 hover:text-slate-800 bg-gray-100 hover:bg-slate-200/60 rounded transition-colors cursor-pointer"
                       title="Modifica Giocatore"
                     >
@@ -896,213 +965,334 @@ export default function PlayerList({
       {/* Dialog Edit Profile Profile */}
       {editingPlayer && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs transition-opacity overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 w-full max-w-md my-8">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 w-full max-w-lg my-8">
             <h3 className="text-lg font-bold text-gray-900 border-b pb-2 mb-4">
-              Modifica Profilo: {editingPlayer.nome}
+              Dettagli Giocatore: {editingPlayer.nome}
             </h3>
 
-            <form onSubmit={handleSaveEditProfile} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nome e Cognome</label>
-                  <input
-                    type="text"
-                    required
-                    value={editingPlayer.nome}
-                    onChange={e => setEditingPlayer({ ...editingPlayer, nome: e.target.value })}
-                    className="w-full text-sm p-2 border rounded-lg focus:ring-2 focus:ring-slate-500"
-                  />
+            {/* Modal Tab Headers */}
+            <div className="flex border-b border-gray-100 mb-5 text-xs font-bold uppercase tracking-wider">
+              <button
+                type="button"
+                onClick={() => setModalTab("profilo")}
+                className={`flex-1 pb-2.5 border-b-2 text-center transition-all cursor-pointer ${
+                  modalTab === "profilo"
+                    ? "border-slate-800 text-slate-800 font-extrabold"
+                    : "border-transparent text-gray-400 hover:text-gray-600"
+                }`}
+              >
+                👤 Dati Profilo & Statistiche
+              </button>
+              <button
+                type="button"
+                onClick={() => setModalTab("finanze")}
+                className={`flex-1 pb-2.5 border-b-2 text-center transition-all cursor-pointer ${
+                  modalTab === "finanze"
+                    ? "border-slate-800 text-slate-800 font-extrabold"
+                    : "border-transparent text-gray-400 hover:text-gray-600"
+                }`}
+              >
+                💸 Storico Transazioni
+              </button>
+            </div>
+
+            {modalTab === "profilo" ? (
+              <form onSubmit={handleSaveEditProfile} className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2">
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nome e Cognome</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingPlayer.nome}
+                      onChange={e => setEditingPlayer({ ...editingPlayer, nome: e.target.value })}
+                      className="w-full text-sm p-2 border rounded-lg focus:ring-2 focus:ring-slate-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Numero Maglia</label>
+                    <input
+                      type="number"
+                      required
+                      value={editingPlayer.numeroMaglia}
+                      onChange={e =>
+                        setEditingPlayer({ ...editingPlayer, numeroMaglia: parseInt(e.target.value) || 99 })
+                      }
+                      className="w-full text-sm p-2 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Saldo (€)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      value={editingPlayer.saldo}
+                      onChange={e =>
+                        setEditingPlayer({ ...editingPlayer, saldo: parseFloat(e.target.value) || 0 })
+                      }
+                      className="w-full text-sm p-2 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Quota Iscrizione (€)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      value={editingPlayer.quotaIscrizione}
+                      onChange={e =>
+                        setEditingPlayer({
+                          ...editingPlayer,
+                          quotaIscrizione: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      className="w-full text-sm p-2 border rounded-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Ruolo Preferito</label>
+                    <select
+                      value={editingPlayer.ultimoRuolo}
+                      onChange={e => setEditingPlayer({ ...editingPlayer, ultimoRuolo: e.target.value })}
+                      className="w-full text-sm p-2 border bg-white rounded-lg focus:ring-2 focus:ring-slate-500"
+                    >
+                      <option value="">Nessuno</option>
+                      <option value="Portiere">Portiere</option>
+                      <option value="Centrale">Centrale</option>
+                      <option value="Laterale">Laterale</option>
+                      <option value="Pivot">Pivot</option>
+                      <option value="Allenatore">Allenatore</option>
+                      <option value="Tifoso">Tifoso</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-4">
+                    <input
+                      type="checkbox"
+                      id="edit-attivo"
+                      className="w-4 h-4 rounded text-slate-800 focus:ring-slate-500"
+                      checked={editingPlayer.attivo}
+                      onChange={e => setEditingPlayer({ ...editingPlayer, attivo: e.target.checked })}
+                    />
+                    <label htmlFor="edit-attivo" className="text-xs font-bold text-gray-700 uppercase cursor-pointer">
+                      Giocatore Attivo
+                    </label>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Numero Maglia</label>
-                  <input
-                    type="number"
-                    required
-                    value={editingPlayer.numeroMaglia}
-                    onChange={e =>
-                      setEditingPlayer({ ...editingPlayer, numeroMaglia: parseInt(e.target.value) || 99 })
-                    }
-                    className="w-full text-sm p-2 border rounded-lg"
-                  />
+                {/* Statistics Panel in Edit */}
+                <div className="bg-gray-50 p-4 rounded-xl space-y-3">
+                  <h4 className="text-xs font-extrabold text-gray-600 uppercase border-b pb-1">Statistiche Carriera</h4>
+
+                  <div className="grid grid-cols-4 gap-2">
+                    <div>
+                      <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">GOL</label>
+                      <input
+                        type="number"
+                        value={editingPlayer.gol}
+                        onChange={e =>
+                          setEditingPlayer({ ...editingPlayer, gol: parseInt(e.target.value) || 0 })
+                        }
+                        className="w-full text-xs p-1 text-center border bg-white rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">ASSIST</label>
+                      <input
+                        type="number"
+                        value={editingPlayer.assist}
+                        onChange={e =>
+                          setEditingPlayer({ ...editingPlayer, assist: parseInt(e.target.value) || 0 })
+                        }
+                        className="w-full text-xs p-1 text-center border bg-white rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">AMM (🟨)</label>
+                      <input
+                        type="number"
+                        value={editingPlayer.ammonizioni}
+                        onChange={e =>
+                          setEditingPlayer({ ...editingPlayer, ammonizioni: parseInt(e.target.value) || 0 })
+                        }
+                        className="w-full text-xs p-1 text-center border bg-white rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">ESP (🟥)</label>
+                      <input
+                        type="number"
+                        value={editingPlayer.espulsioni}
+                        onChange={e =>
+                          setEditingPlayer({ ...editingPlayer, espulsioni: parseInt(e.target.value) || 0 })
+                        }
+                        className="w-full text-xs p-1 text-center border bg-white rounded"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Conceded details */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">SUB (Az)</label>
+                      <input
+                        type="number"
+                        value={editingPlayer.golSubitiAzione}
+                        onChange={e =>
+                          setEditingPlayer({
+                            ...editingPlayer,
+                            golSubitiAzione: parseInt(e.target.value) || 0,
+                          })
+                        }
+                        className="w-full text-xs p-1 text-center border bg-white rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">SUB (Rig)</label>
+                      <input
+                        type="number"
+                        value={editingPlayer.golSubitiRigore}
+                        onChange={e =>
+                          setEditingPlayer({
+                            ...editingPlayer,
+                            golSubitiRigore: parseInt(e.target.value) || 0,
+                          })
+                        }
+                        className="w-full text-xs p-1 text-center border bg-white rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">SUB (Pia)</label>
+                      <input
+                        type="number"
+                        value={editingPlayer.golSubitiPiazzato}
+                        onChange={e =>
+                          setEditingPlayer({
+                            ...editingPlayer,
+                            golSubitiPiazzato: parseInt(e.target.value) || 0,
+                          })
+                        }
+                        className="w-full text-xs p-1 text-center border bg-white rounded"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Saldo (€)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    value={editingPlayer.saldo}
-                    onChange={e =>
-                      setEditingPlayer({ ...editingPlayer, saldo: parseFloat(e.target.value) || 0 })
-                    }
-                    className="w-full text-sm p-2 border rounded-lg"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Quota Iscrizione (€)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    value={editingPlayer.quotaIscrizione}
-                    onChange={e =>
-                      setEditingPlayer({
-                        ...editingPlayer,
-                        quotaIscrizione: parseFloat(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full text-sm p-2 border rounded-lg"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Ruolo Preferito</label>
-                  <select
-                    value={editingPlayer.ultimoRuolo}
-                    onChange={e => setEditingPlayer({ ...editingPlayer, ultimoRuolo: e.target.value })}
-                    className="w-full text-sm p-2 border bg-white rounded-lg focus:ring-2 focus:ring-slate-500"
+                <div className="flex justify-end gap-2 pt-2 border-t font-semibold">
+                  <button
+                    type="button"
+                    onClick={() => setEditingPlayer(null)}
+                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg cursor-pointer font-bold"
                   >
-                    <option value="">Nessuno</option>
-                    <option value="Portiere">Portiere</option>
-                    <option value="Centrale">Centrale</option>
-                    <option value="Laterale">Laterale</option>
-                    <option value="Pivot">Pivot</option>
-                    <option value="Allenatore">Allenatore</option>
-                    <option value="Tifoso">Tifoso</option>
-                  </select>
+                    Annulla
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-lg cursor-pointer font-bold"
+                  >
+                    Salva Modifiche
+                  </button>
                 </div>
-
-                <div className="flex items-center gap-2 mt-4">
-                  <input
-                    type="checkbox"
-                    id="edit-attivo"
-                    className="w-4 h-4 rounded text-slate-800 focus:ring-slate-500"
-                    checked={editingPlayer.attivo}
-                    onChange={e => setEditingPlayer({ ...editingPlayer, attivo: e.target.checked })}
-                  />
-                  <label htmlFor="edit-attivo" className="text-xs font-bold text-gray-700 uppercase cursor-pointer">
-                    Giocatore Attivo
-                  </label>
-                </div>
-              </div>
-
-              {/* Statistics Panel in Edit */}
-              <div className="bg-gray-50 p-4 rounded-xl space-y-3">
-                <h4 className="text-xs font-extrabold text-gray-600 uppercase border-b pb-1">Statistiche Carriera</h4>
-
-                <div className="grid grid-cols-4 gap-2">
-                  <div>
-                    <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">GOL</label>
-                    <input
-                      type="number"
-                      value={editingPlayer.gol}
-                      onChange={e =>
-                        setEditingPlayer({ ...editingPlayer, gol: parseInt(e.target.value) || 0 })
-                      }
-                      className="w-full text-xs p-1 text-center border bg-white rounded"
-                    />
+              </form>
+            ) : (
+              <div className="space-y-4">
+                {/* Financial history content & Summary */}
+                <div className="grid grid-cols-2 gap-3 mb-2">
+                  <div className="bg-slate-50 p-3 rounded-xl border border-gray-100 text-center">
+                    <span className="block text-[10px] uppercase font-black tracking-wider text-gray-400 mb-0.5">
+                      Saldo Corrente
+                    </span>
+                    <span className={`text-lg font-black font-mono ${editingPlayer.saldo >= 0 ? "text-emerald-700" : "text-amber-600"}`}>
+                      {editingPlayer.saldo >= 0 ? "+" : ""}{editingPlayer.saldo.toFixed(2)}€
+                    </span>
                   </div>
-                  <div>
-                    <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">ASSIST</label>
-                    <input
-                      type="number"
-                      value={editingPlayer.assist}
-                      onChange={e =>
-                        setEditingPlayer({ ...editingPlayer, assist: parseInt(e.target.value) || 0 })
-                      }
-                      className="w-full text-xs p-1 text-center border bg-white rounded"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">AMM (🟨)</label>
-                    <input
-                      type="number"
-                      value={editingPlayer.ammonizioni}
-                      onChange={e =>
-                        setEditingPlayer({ ...editingPlayer, ammonizioni: parseInt(e.target.value) || 0 })
-                      }
-                      className="w-full text-xs p-1 text-center border bg-white rounded"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">ESP (🟥)</label>
-                    <input
-                      type="number"
-                      value={editingPlayer.espulsioni}
-                      onChange={e =>
-                        setEditingPlayer({ ...editingPlayer, espulsioni: parseInt(e.target.value) || 0 })
-                      }
-                      className="w-full text-xs p-1 text-center border bg-white rounded"
-                    />
+                  <div className="bg-slate-50 p-3 rounded-xl border border-gray-100 text-center">
+                    <span className="block text-[10px] uppercase font-black tracking-wider text-gray-400 mb-0.5">
+                      Sponsor / Quota Iscr.
+                    </span>
+                    <span className="text-lg font-black text-slate-800 font-mono">
+                      {editingPlayer.quotaIscrizione.toFixed(2)}€
+                    </span>
                   </div>
                 </div>
 
-                {/* Conceded details */}
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">SUB (Az)</label>
-                    <input
-                      type="number"
-                      value={editingPlayer.golSubitiAzione}
-                      onChange={e =>
-                        setEditingPlayer({
-                          ...editingPlayer,
-                          golSubitiAzione: parseInt(e.target.value) || 0,
-                        })
-                      }
-                      className="w-full text-xs p-1 text-center border bg-white rounded"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">SUB (Rig)</label>
-                    <input
-                      type="number"
-                      value={editingPlayer.golSubitiRigore}
-                      onChange={e =>
-                        setEditingPlayer({
-                          ...editingPlayer,
-                          golSubitiRigore: parseInt(e.target.value) || 0,
-                        })
-                      }
-                      className="w-full text-xs p-1 text-center border bg-white rounded"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">SUB (Pia)</label>
-                    <input
-                      type="number"
-                      value={editingPlayer.golSubitiPiazzato}
-                      onChange={e =>
-                        setEditingPlayer({
-                          ...editingPlayer,
-                          golSubitiPiazzato: parseInt(e.target.value) || 0,
-                        })
-                      }
-                      className="w-full text-xs p-1 text-center border bg-white rounded"
-                    />
-                  </div>
+                <h4 className="text-xs font-black text-gray-400 uppercase tracking-wider border-b pb-1 flex items-center justify-between">
+                  <span>Movimenti & Storico Pagamenti</span>
+                  <span className="font-mono text-[10px] text-gray-500 font-medium">
+                    {getPlayerTransactions(editingPlayer.nome).length} operazioni
+                  </span>
+                </h4>
+
+                <div className="max-h-[350px] overflow-y-auto pr-1 space-y-2">
+                  {getPlayerTransactions(editingPlayer.nome).length === 0 ? (
+                    <div className="py-12 text-center text-gray-400 font-medium italic text-xs">
+                      Nessun movimento finanziario registrato per questo giocatore.
+                    </div>
+                  ) : (
+                    getPlayerTransactions(editingPlayer.nome).map((tx, idx) => {
+                      const isPositive = tx.amount > 0;
+                      const isNegative = tx.amount < 0;
+                      return (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-white hover:bg-gray-50/55 transition-colors"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className={`p-2 rounded-lg shrink-0 ${
+                              isPositive 
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-100" 
+                                : isNegative 
+                                  ? "bg-amber-50 text-amber-700 border border-amber-100" 
+                                  : "bg-gray-50 text-gray-500 border border-gray-100"
+                            }`}>
+                              {tx.type.includes("Ricarica") ? (
+                                <Coins className="h-4 w-4" />
+                              ) : (
+                                <Receipt className="h-4 w-4" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <span className="font-extrabold text-xs text-gray-950 truncate max-w-[130px] sm:max-w-none">
+                                  {tx.type}
+                                </span>
+                                <span className="text-[9px] font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded font-mono shrink-0">
+                                  {tx.date}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-gray-500 font-medium tracking-tight line-clamp-1" title={tx.details}>
+                                {tx.details}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className={`font-mono text-xs font-black shrink-0 pl-2 ${
+                            isPositive ? "text-emerald-700" : isNegative ? "text-amber-600" : "text-gray-500"
+                          }`}>
+                            {isPositive ? "+" : ""}{tx.amount === 0 ? "-" : `${tx.amount.toFixed(2)}€`}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                <div className="flex justify-end pt-2 border-t font-semibold">
+                  <button
+                    type="button"
+                    onClick={() => setEditingPlayer(null)}
+                    className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-lg cursor-pointer font-bold transition-colors"
+                  >
+                    Chiudi Dettagli
+                  </button>
                 </div>
               </div>
-
-              <div className="flex justify-end gap-2 pt-2 border-t font-semibold">
-                <button
-                  type="button"
-                  onClick={() => setEditingPlayer(null)}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg cursor-pointer"
-                >
-                  Annulla
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-lg cursor-pointer font-bold"
-                >
-                  Salva Modifiche
-                </button>
-              </div>
-            </form>
+            )}
           </div>
         </div>
       )}

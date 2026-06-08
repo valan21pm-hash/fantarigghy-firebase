@@ -730,6 +730,7 @@ export default function App() {
               giocatori={giocatori}
               partiteAperte={partiteAperte}
               partiteChiuse={partiteChiuse}
+              logs={logs}
               onAddPlayer={handleAddPlayer}
               onDeletePlayer={handleDeletePlayer}
               onVersaQuota={handleVersaQuota}
