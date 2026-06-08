@@ -31,6 +31,11 @@ import {
   Instagram,
   Share2,
   Pencil,
+  Home,
+  Shirt,
+  Banknote,
+  ClipboardList,
+  Clock,
 } from "lucide-react";
 import {
   Giocatore,
@@ -1597,7 +1602,7 @@ export default function FantacalcettoV2({
     }
 
     return (
-      <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-indigo-990 text-white p-4 sm:p-6 lg:p-8 flex flex-col justify-between font-sans relative">
+      <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-indigo-990 text-white p-4 sm:p-6 lg:p-8 flex flex-col justify-between font-sans relative pb-28 md:pb-8">
         {showReRegistrationPopup && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-xs flex items-center justify-center p-4 z-[9995] animate-fade-in font-sans">
             <div className="bg-indigo-950 border-2 border-red-500/50 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-left">
@@ -2363,18 +2368,20 @@ export default function FantacalcettoV2({
             </div>
           </div>
 
-          {/* Navigation Tabs for Public Portal */}
-          <div className="flex flex-wrap justify-center gap-1.5 max-w-sm sm:max-w-xl mx-auto bg-indigo-950/60 p-1.5 rounded-2xl border border-indigo-850 font-sans">
+          {/* Navigation Tabs for Public Portal - MOBILE OPTIMIZED */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 md:sticky md:bottom-4 px-2 py-3 md:py-1.5 bg-indigo-950/95 md:bg-indigo-950/60 backdrop-blur-xl md:rounded-2xl border-t md:border border-indigo-800/80 font-sans flex items-center justify-around md:justify-center gap-1 md:gap-1.5 mx-auto w-full max-w-none md:max-w-xl shadow-[0_-10px_40px_-5px_rgba(0,0,0,0.5)] md:shadow-none pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-1.5">
             <button
               type="button"
               onClick={() => setActivePublicTab("home")}
-              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+              className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-1.5 rounded-xl text-[9px] md:text-[10.5px] font-bold md:font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
                 activePublicTab === "home"
-                  ? "bg-yellow-400 text-indigo-950 shadow-md"
-                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30"
+                  ? "text-yellow-400 md:bg-yellow-400 md:text-indigo-950 shadow-none md:shadow-md"
+                  : "text-indigo-400 hover:text-white hover:bg-indigo-900/30"
               }`}
             >
-              🏠 Home
+              <Home className={`w-5 h-5 md:w-3.5 md:h-3.5 ${activePublicTab === "home" ? "fill-yellow-400 md:fill-none" : ""}`} />
+              <span className="hidden md:inline">Home</span>
+              <span className="md:hidden mt-0.5 tracking-tight">Home</span>
             </button>
             <button
               type="button"
@@ -2382,46 +2389,54 @@ export default function FantacalcettoV2({
                 setActivePublicTab("rosa");
                 setSubmitted(false);
               }}
-              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+              className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-1.5 rounded-xl text-[9px] md:text-[10.5px] font-bold md:font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
                 activePublicTab === "rosa"
-                  ? "bg-yellow-400 text-indigo-950 shadow-md"
-                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30"
+                  ? "text-yellow-400 md:bg-yellow-400 md:text-indigo-950 shadow-none md:shadow-md"
+                  : "text-indigo-400 hover:text-white hover:bg-indigo-900/30"
               }`}
             >
-              👕 Rosa/Formazione
+              <Shirt className={`w-5 h-5 md:w-3.5 md:h-3.5 ${activePublicTab === "rosa" ? "fill-yellow-400 md:fill-none" : ""}`} />
+              <span className="hidden md:inline">Rosa/Formaz.</span>
+              <span className="md:hidden mt-0.5 tracking-tight">Rosa</span>
             </button>
             <button
               type="button"
               onClick={() => setActivePublicTab("mercato")}
-              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+              className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-1.5 rounded-xl text-[9px] md:text-[10.5px] font-bold md:font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
                 activePublicTab === "mercato"
-                  ? "bg-yellow-400 text-indigo-950 shadow-md"
-                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30"
+                  ? "text-yellow-400 md:bg-yellow-400 md:text-indigo-950 shadow-none md:shadow-md"
+                  : "text-indigo-400 hover:text-white hover:bg-indigo-900/30"
               }`}
             >
-              💸 Mercato
+              <Banknote className={`w-5 h-5 md:w-3.5 md:h-3.5 ${activePublicTab === "mercato" ? "fill-yellow-400 md:fill-none" : ""}`} />
+              <span className="hidden md:inline">Mercato</span>
+              <span className="md:hidden mt-0.5 tracking-tight">Mercato</span>
             </button>
             <button
               type="button"
               onClick={() => setActivePublicTab("classifica")}
-              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+              className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-1.5 rounded-xl text-[9px] md:text-[10.5px] font-bold md:font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
                 activePublicTab === "classifica"
-                  ? "bg-yellow-400 text-indigo-950 shadow-md"
-                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30"
+                  ? "text-yellow-400 md:bg-yellow-400 md:text-indigo-950 shadow-none md:shadow-md"
+                  : "text-indigo-400 hover:text-white hover:bg-indigo-900/30"
               }`}
             >
-              🏆 Classifica & Calendario
+              <Trophy className={`w-5 h-5 md:w-3.5 md:h-3.5 ${activePublicTab === "classifica" ? "fill-yellow-400 md:fill-none" : ""}`} />
+              <span className="hidden md:inline">Class & Calen</span>
+              <span className="md:hidden mt-0.5 tracking-tight">Classifica</span>
             </button>
             <button
               type="button"
               onClick={() => setActivePublicTab("regolamento")}
-              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+              className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-1.5 rounded-xl text-[9px] md:text-[10.5px] font-bold md:font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
                 activePublicTab === "regolamento"
-                  ? "bg-yellow-400 text-indigo-950 shadow-md"
-                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30"
+                  ? "text-yellow-400 md:bg-yellow-400 md:text-indigo-950 shadow-none md:shadow-md"
+                  : "text-indigo-400 hover:text-white hover:bg-indigo-900/30"
               }`}
             >
-              📋 Regolamento
+              <ClipboardList className={`w-5 h-5 md:w-3.5 md:h-3.5 ${activePublicTab === "regolamento" ? "fill-yellow-400 md:fill-none" : ""}`} />
+              <span className="hidden md:inline">Regolamento</span>
+              <span className="md:hidden mt-0.5 tracking-tight">Regole</span>
             </button>
           </div>
 
@@ -2879,149 +2894,149 @@ export default function FantacalcettoV2({
             </div>
           ) : activePublicTab === "home" ? (
             <div className="space-y-6 animate-fade-in font-sans">
-              <div className="bg-indigo-900/30 border-l-4 border-indigo-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm">
-                <p className="text-xs text-indigo-200 leading-relaxed font-medium">
-                  <strong className="text-indigo-400">ℹ️ Punto Informativo:</strong> Archivio delle prestazioni. Controlla qui i voti o i referti caricati dall'amministratore che hanno decretato il FantaScore dei tesserati, incluse pagelle, gol e bonus/malus generali.
-                </p>
-              </div>
-              {/* Highlight Banner / Link to General Report */}
-              <div className="bg-gradient-to-r from-indigo-950/90 to-indigo-900/60 border border-indigo-800/80 rounded-3xl p-5 shadow-xl backdrop-blur-md space-y-4 font-sans">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-indigo-900/60 pb-4">
-                  <div className="space-y-1">
-                    <span className="text-[9px] uppercase font-black text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-md border border-yellow-400/10 tracking-wider">
-                      Archivio Ufficiale
-                    </span>
-                    <h3 className="font-extrabold text-base text-white uppercase tracking-wider font-sans flex items-center gap-2">
-                      Tabellone Partite & Referti
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setInstructionsTab("guida");
-                          setShowInstructionsModal(true);
-                        }}
-                        className="text-indigo-400 hover:text-yellow-400 transition-colors"
-                        title="Vedi info sui calcoli dei punti"
-                      >
-                        <BookOpen className="h-5 w-5" />
-                      </button>
-                    </h3>
-                    <p className="text-[10.5px] text-indigo-300 font-medium">
-                      Consulta i risultati omologati dei match e scarica il
-                      libretto dei voti.
-                    </p>
-                  </div>
-                  {rankedTeams.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => setShowGeneralReportModal(true)}
-                      className="bg-yellow-400 hover:bg-yellow-500 text-indigo-950 text-[10px] font-black uppercase px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-1.5 cursor-pointer transition-all hover:scale-105 active:scale-95 duration-200"
-                    >
-                      <span>📄 Apri Referto Generale</span>
-                    </button>
-                  )}
-                </div>
+              
+              {/* Dashboard Layout - Grid System Mobile-First */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+                
+                {/* Left Column: Turno Attuale & News */}
+                <div className="lg:col-span-8 flex flex-col gap-4 sm:gap-6">
+                   {/* News Flash / Punto Informativo (Compact) */}
+                   <div className="bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border-l-4 border-indigo-500 p-4 rounded-r-2xl shadow-sm flex items-start gap-3">
+                     <AlertCircle className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+                     <div>
+                       <strong className="text-indigo-400 text-[10px] font-black uppercase tracking-widest block mb-1">Flash News</strong>
+                       <p className="text-xs text-indigo-200 leading-relaxed font-medium">Bacheca degli avvisi. Da qui puoi navigare la classifica, gestire la rosa settimanale e analizzare le quotazioni di mercato.</p>
+                     </div>
+                   </div>
 
-                {/* Banner box directing to the general report */}
-                <div className="bg-indigo-950/50 border border-indigo-800/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="text-left space-y-1">
-                    <h4 className="text-xs font-bold text-indigo-250 uppercase tracking-wide">
-                      Fascicolo Completo Voti
-                    </h4>
-                    <p className="text-[10.5px] text-indigo-400/90 leading-normal">
-                      Il referto generale unisce la classifica ponderata, la
-                      composizione delle rose e i dettagli di calcolo di tutte
-                      le giornate disputate finora.
-                    </p>
-                  </div>
-                  {rankedTeams.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => setShowGeneralReportModal(true)}
-                      className="text-yellow-400 hover:text-yellow-300 font-black text-[10.5px] uppercase underline underline-offset-4 shrink-0 transition-opacity hover:opacity-90 block"
-                    >
-                      Vedi Referto Generale →
-                    </button>
-                  )}
-                </div>
+                   {/* Panoramica Turno Attuale & Countdown */}
+                   {(() => {
+                     const matchAttuale = lockStatus.match || (partiteAperte && partiteAperte[0]) || null;
+                     if (matchAttuale) {
+                       return (
+                         <div className="bg-indigo-950/80 border border-indigo-800/80 rounded-3xl p-5 shadow-xl backdrop-blur-md space-y-4">
+                           <div className="flex justify-between items-center border-b border-indigo-800/50 pb-3">
+                             <div className="flex items-center gap-2">
+                               <Clock className="w-4 h-4 text-yellow-400 animate-pulse" />
+                               <h3 className="font-extrabold text-white uppercase tracking-wider text-sm">Prossimo Turno</h3>
+                             </div>
+                             <span className="bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                               🟢 In Corso
+                             </span>
+                           </div>
+                           <div className="text-center py-4">
+                             <p className="text-indigo-200 text-xs font-medium mb-1.5uppercase tracking-wider">Termine Consegna Formazione</p>
+                             <div className="font-mono text-xl sm:text-2xl font-black text-yellow-400 tracking-widest bg-indigo-900/40 inline-flex items-center justify-center min-w-[200px] py-2.5 rounded-xl border border-indigo-800/80 shadow-md">
+                               {timeLeft || "SCADUTO"}
+                             </div>
+                             <p className="text-white font-black text-sm sm:text-base mt-4 px-2 uppercase tracking-wide">{matchAttuale.dettagli}</p>
+                           </div>
+                         </div>
+                       );
+                     }
+                     return null;
+                   })()}
 
-                {allPartite.length === 0 ? (
-                  <div className="py-12 text-center bg-indigo-900/20 rounded-2xl border border-indigo-800/30">
-                    <p className="text-indigo-400/80 font-bold text-xs uppercase tracking-wider">
-                      Nessuna gara di campionato registrata nel tabellone.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3.5 font-sans pt-1">
-                    {allPartite.map((m) => {
-                      const isAperta = m.stato === "Aperta";
-                      return (
-                        <div
-                          key={m.id}
-                          className="bg-indigo-900/20 rounded-2xl border border-indigo-800/40 p-4.5 transition-all hover:bg-indigo-900/30 hover:border-indigo-700/50 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4"
-                        >
-                          <div className="space-y-1.5 text-left md:max-w-2xl">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span
-                                className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${isAperta ? "bg-yellow-400/10 text-yellow-400 border-yellow-400/25 animate-pulse" : "bg-gray-800/45 text-gray-400 border-gray-700/50"}`}
-                              >
-                                {isAperta
-                                  ? "● In Corso / Aperta"
-                                  : "✓ Conclusa"}
-                              </span>
-                              {m.dataInserimento && (
-                                <span className="text-[10px] text-indigo-400/70 font-mono">
-                                  {new Date(
-                                    m.dataInserimento,
-                                  ).toLocaleDateString("it-IT", {
-                                    day: "numeric",
-                                    month: "short",
-                                  })}
-                                </span>
-                              )}
-                            </div>
+                   {/* Ultimi Risultati Grid */}
+                   <div className="bg-indigo-950/80 border border-indigo-800/80 rounded-3xl p-4 sm:p-5 shadow-xl backdrop-blur-md">
+                     <div className="flex justify-between items-center mb-4">
+                       <h3 className="font-extrabold text-white uppercase tracking-wider text-sm flex items-center gap-2">
+                         <Calendar className="w-4 h-4 text-indigo-400" />
+                         Archivio Partite
+                       </h3>
+                     </div>
 
-                            <p className="font-extrabold text-white text-[13.5px] sm:text-sm tracking-wide leading-snug">
-                              {m.dettagli || "Incontro di campionato"}
-                            </p>
-
-                            {m.risultato ? (
-                              <div className="inline-flex items-center gap-2 bg-indigo-950/75 border border-indigo-900/60 rounded-lg px-2.5 py-1 mt-1 shadow-sm">
-                                <span className="text-[9.5px] text-indigo-400 uppercase tracking-widest font-black">
-                                  Risultato:
-                                </span>
-                                <span className="font-mono text-xs text-yellow-300 font-extrabold tracking-widest">
-                                  {m.risultato}
-                                </span>
-                              </div>
-                            ) : (
-                              <p className="text-[10px] text-indigo-500/70 italic">
-                                Risultato ufficiale non ancora pubblicato.
-                              </p>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-3 self-start md:self-center shrink-0">
-                            {m.referto && m.referto.length > 0 ? (
-                              <div className="text-right hidden sm:block">
-                                <p className="text-[10.5px] text-indigo-300 font-bold">
-                                  ✓ {m.referto.length} Voti Presenti
-                                </p>
-                                <p className="text-[8.5px] text-indigo-500/80 uppercase tracking-wider font-semibold">
-                                  Dati refertati
-                                </p>
-                              </div>
-                            ) : (
-                              <p className="text-[10px] text-indigo-500/60 italic hidden sm:block">
-                                Nessun voto caricato.
-                              </p>
-                            )}
-                          </div>
+                     {allPartite.length === 0 ? (
+                        <div className="py-8 text-center bg-indigo-900/20 rounded-2xl border border-indigo-800/30">
+                          <p className="text-indigo-400/80 font-bold text-xs uppercase tracking-wider">
+                            Nessun referto disponibile
+                          </p>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
+                     ) : (
+                       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3">
+                         {allPartite.map((m) => {
+                           const isAperta = m.stato === "Aperta";
+                           return (
+                             <div key={m.id} className="bg-indigo-900/30 border border-indigo-800/50 rounded-2xl p-3 flex flex-col justify-between gap-3 hover:bg-indigo-800/40 transition-colors">
+                               <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-1.5 sm:gap-0">
+                                 <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider border self-start ${isAperta ? 'bg-yellow-400/10 text-yellow-400 border-yellow-400/30' : 'bg-gray-800/60 text-gray-400 border-gray-700/60'}`}>
+                                   {isAperta ? 'Aperta' : 'Conclusa'}
+                                 </span>
+                                 {m.dataInserimento && (
+                                    <span className="text-[9px] text-indigo-400 font-mono self-start sm:self-auto">
+                                      {new Date(m.dataInserimento).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })}
+                                    </span>
+                                 )}
+                               </div>
+                               <p className="font-bold text-white text-[11px] sm:text-xs leading-tight line-clamp-2">
+                                 {m.dettagli || "Incontro calcistico"}
+                               </p>
+                               <div className="flex items-center justify-between mt-auto pt-2 border-t border-indigo-800/40">
+                                 {m.risultato ? (
+                                   <div className="font-mono text-[9px] sm:text-[10px] text-yellow-300 font-extrabold tracking-widest bg-indigo-950/80 px-2 py-1 rounded">
+                                     {m.risultato}
+                                   </div>
+                                 ) : (
+                                   <span className="text-[9px] text-indigo-500 italic">No score</span>
+                                 )}
+                                 <span className="text-[9px] text-indigo-300 font-bold flex items-center gap-1">
+                                   <Users className="w-3 h-3" /> {m.referto?.length || 0}
+                                 </span>
+                               </div>
+                             </div>
+                           )
+                         })}
+                       </div>
+                     )}
+                   </div>
+                </div>
+
+                {/* Right Column: Azioni Rapide & Tools */}
+                <div className="lg:col-span-4 flex flex-col gap-4 sm:gap-6">
+                   <div className="bg-gradient-to-br from-indigo-950 to-indigo-900/80 border border-indigo-800/80 rounded-3xl p-5 shadow-xl backdrop-blur-md">
+                     <h3 className="font-extrabold text-white uppercase tracking-wider text-sm flex items-center gap-2 mb-4">
+                       <Lightbulb className="w-4 h-4 text-yellow-400" />
+                       Tool Rapidi
+                     </h3>
+                     <div className="grid grid-cols-2 gap-2.5">
+                        {rankedTeams.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setShowGeneralReportModal(true)}
+                            className="bg-indigo-900/50 hover:bg-yellow-400 hover:text-indigo-950 text-indigo-200 border border-indigo-800/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 transition-all group col-span-2 shadow-sm"
+                          >
+                            <ClipboardList className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            <span className="text-[10px] font-black uppercase tracking-wider">Apri Referto Generale</span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setInstructionsTab("guida");
+                            setShowInstructionsModal(true);
+                          }}
+                          className="bg-indigo-900/50 hover:bg-indigo-800 text-indigo-300 border border-indigo-800/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 transition-colors shadow-sm"
+                        >
+                          <BookOpen className="w-5 h-5" />
+                          <span className="text-[9px] font-bold uppercase tracking-wider">Manuale</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setInstructionsTab("quote");
+                            setShowInstructionsModal(true);
+                          }}
+                          className="bg-indigo-900/50 hover:bg-indigo-800 text-indigo-300 border border-indigo-800/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 transition-colors shadow-sm"
+                        >
+                          <Award className="w-5 h-5" />
+                          <span className="text-[9px] font-bold uppercase tracking-wider">Le Quote</span>
+                        </button>
+                     </div>
+                   </div>
+                </div>
+
               </div>
             </div>
           ) : activePublicTab === "rosa" ? (
