@@ -29,6 +29,7 @@ import {
   X,
   Download,
   Instagram,
+  Share2,
 } from "lucide-react";
 import {
   Giocatore,
@@ -165,7 +166,10 @@ export default function Fantacalcetto({
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [showFourthPlayerPopup, setShowFourthPlayerPopup] = useState(true);
+  const [showInstagramPopup, setShowInstagramPopup] = useState(() => {
+    return localStorage.getItem("fantaInstagramFollowed_v1") !== "true";
+  });
+  const [instagramLinkCopied, setInstagramLinkCopied] = useState(false);
 
   const [showReRegistrationPopup, setShowReRegistrationPopup] = useState(() => {
     const now = new Date();
@@ -1658,49 +1662,102 @@ export default function Fantacalcetto({
             </div>
           </div>
         )}
-        {showFourthPlayerPopup && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 z-[9990] animate-fade-in">
-            <div className="bg-emerald-950 border border-emerald-800 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-left">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/30">
-                <AlertCircle className="h-6 w-6 animate-pulse" />
-              </div>
-              <div className="space-y-1.5 font-sans">
-                <h3 className="text-base font-black text-yellow-300 uppercase tracking-widest leading-snug">
-                  ⚠️ AGGIORNAMENTO: 4° Giocatore Obbligatorio!
-                </h3>
-                <p className="text-[11.5px] text-emerald-100 font-semibold leading-relaxed">
-                  Gentile Presidente, per rendere il gioco ancora più tattico e
-                  avvincente, la rosa di ogni fantasquadra{" "}
-                  <strong>
-                    deve essere d'ora in poi composta da esattamente 4 giocatori
-                  </strong>{" "}
-                  (anziché 3!).
-                </p>
-                <div className="bg-emerald-900/30 border border-emerald-805/40 rounded-2xl p-4.5 space-y-2 text-[11px] text-emerald-200">
-                  <p>
-                    • <strong>Formazione Tipo:</strong> Sceglierai{" "}
-                    <strong>3 Titolari</strong> e <strong>1 Panchinaro</strong>.
-                  </p>
-                  <p>
-                    • <strong>Regola di Sostituzione:</strong> Se uno dei tuoi
-                    giocatori titolari non dovesse scendere in campo o non
-                    ricevesse un voto nella partita ufficiale,{" "}
-                    <strong>subentrerà automaticamente il panchinaro</strong>{" "}
-                    portando in dote i suoi voti e bonus a favore del punteggio
-                    di squadra!
-                  </p>
-                </div>
-                <p className="text-[10px] text-amber-300/90 font-extrabold uppercase tracking-wide pt-1">
-                  💡 Seleziona 4 tesserati e decidi chi sarà il tuo panchinaro!
-                </p>
-              </div>
+        {showInstagramPopup && (
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-[9990] animate-fade-in">
+            <div className="bg-gradient-to-b from-purple-950 via-emerald-950/95 to-emerald-990 border border-pink-500/30 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-center">
               <button
                 type="button"
-                onClick={() => setShowFourthPlayerPopup(false)}
-                className="w-full bg-yellow-400 hover:bg-yellow-350 text-emerald-950 font-black text-xs uppercase py-3 rounded-xl transition-all cursor-pointer shadow-md"
+                onClick={() => setShowInstagramPopup(false)}
+                className="absolute top-4 right-4 text-white/50 hover:text-white bg-white/10 hover:bg-white/20 p-1.5 rounded-full transition-colors cursor-pointer"
+                title="Chiudi"
               >
-                Ho Capito, Procedo! ⚽
+                <X className="h-4 w-4" />
               </button>
+
+              <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-pink-600 via-red-500 to-yellow-500 text-white flex items-center justify-center border border-white/20 shadow-lg animate-bounce">
+                <Instagram className="h-7 w-7" />
+              </div>
+
+              <div className="space-y-1.5 font-sans">
+                <h3 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-rose-300 to-yellow-300 uppercase tracking-widest leading-snug">
+                  Unisciti alla Community! 🚀
+                </h3>
+                <p className="text-[12px] text-emerald-100 font-semibold leading-relaxed">
+                  Per non perderti gli <strong>highlight</strong> delle partite, le foto sul campo più belle, notizie calde, le pagelle interattive dei nostri tesserati e i meme più esilaranti, segui la pagina ufficiale di <strong>EasyRigging C5</strong>!
+                </p>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <a
+                  href="https://www.instagram.com/easyrigging_c5?igsh=MWJkbW40NWJnemFmOQ=="
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-pink-600 via-red-500 to-yellow-500 hover:from-pink-500 hover:to-yellow-400 active:from-pink-700 active:to-yellow-600 text-white font-extrabold uppercase text-xs py-3 rounded-xl transition-all shadow-md hover:scale-[1.02] duration-150 cursor-pointer"
+                >
+                  <Instagram className="h-4.5 w-4.5 animate-pulse" />
+                  Segui @easyrigging_c5 su Instagram 📸
+                </a>
+
+                <div className="bg-emerald-900/30 border border-emerald-800/40 rounded-2xl p-4 space-y-3 text-left">
+                  <p className="text-[10px] text-emerald-200/90 font-bold uppercase tracking-wider text-center">
+                    📢 AIUTACI A FARE CRESCERE IL TORNEO!
+                  </p>
+                  
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <a
+                      href={`https://api.whatsapp.com/send?text=${encodeURIComponent("Segui EasyRigging C5 su Instagram per gli highlights, le foto ed i meme del torneo più caldo dell'anno! 🚀📷 https://www.instagram.com/easyrigging_c5?igsh=MWJkbW40NWJnemFmOQ==")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-550 active:bg-emerald-650 text-white font-extrabold text-[10.5px] uppercase py-2.5 px-3 rounded-lg transition-all cursor-pointer shadow-sm text-center"
+                    >
+                      <Share2 className="h-3.5 w-3.5" />
+                      Stato WhatsApp 💬
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText("https://www.instagram.com/easyrigging_c5?igsh=MWJkbW40NWJnemFmOQ==");
+                        setInstagramLinkCopied(true);
+                        setTimeout(() => setInstagramLinkCopied(false), 2500);
+                      }}
+                      className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-900/50 hover:bg-emerald-800/60 text-emerald-300 border border-emerald-800/50 hover:border-emerald-700/60 font-extrabold text-[10.5px] uppercase py-2.5 px-3 rounded-lg transition-all cursor-pointer shadow-sm text-center"
+                    >
+                      {instagramLinkCopied ? (
+                        <>
+                          <CheckCircle className="h-3.5 w-3.5 text-yellow-400 animate-pulse" />
+                          Copiato! ✔
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3.5 w-3.5" />
+                          Copia Link 🔗
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowInstagramPopup(false);
+                      localStorage.setItem("fantaInstagramFollowed_v1", "true");
+                    }}
+                    className="w-full bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-emerald-950 font-black text-xs uppercase py-3 rounded-xl transition-all cursor-pointer shadow-md text-center"
+                  >
+                    Ho già seguito / Non mostrare più 👍
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowInstagramPopup(false)}
+                    className="w-full text-emerald-300 hover:text-white text-[10.5px] font-bold uppercase transition-colors cursor-pointer py-1"
+                  >
+                    Ricordamelo più tardi ➔
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
