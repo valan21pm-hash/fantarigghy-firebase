@@ -28,6 +28,7 @@ import {
   Info,
   X,
   Download,
+  Instagram,
 } from "lucide-react";
 import {
   Giocatore,
@@ -2260,6 +2261,38 @@ export default function Fantacalcetto({
                 <Lightbulb className="h-3.5 w-3.5 text-yellow-400 animate-pulse" />
                 Proponi Miglioramento 💡
               </button>
+              <a
+                href="https://www.instagram.com/easyrigging_c5?igsh=MWJkbW40NWJnemFmOQ=="
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-600 via-red-500 to-yellow-500 hover:from-pink-500 hover:to-yellow-400 active:from-pink-700 active:to-yellow-600 text-white px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-md hover:scale-[1.03] duration-150"
+              >
+                <Instagram className="h-4 w-4 text-white" />
+                Instagram @easyrigging_c5 📸
+              </a>
+            </div>
+          </div>
+
+          {/* Instagram Follower Engagement Banner */}
+          <div className="bg-gradient-to-r from-purple-950/60 via-pink-950/50 to-amber-950/40 border border-pink-500/20 rounded-2xl p-4 text-center space-y-2.5 max-w-lg mx-auto shadow-lg backdrop-blur-xs">
+            <div className="flex items-center justify-center gap-1.5">
+              <Instagram className="h-4.5 w-4.5 text-pink-400 animate-pulse" />
+              <span className="text-[10.5px] font-extrabold uppercase tracking-widest text-pink-300 font-sans">
+                Segui @easyrigging_c5 su Instagram
+              </span>
+            </div>
+            <p className="text-xs text-emerald-100 leading-relaxed max-w-sm mx-auto font-sans font-medium">
+              Highlights esclusivi, meme del torneo, foto dal campo e pagelle interattive! Aiutaci a far crescere la community di <strong>EasyRigging C5</strong>. 🚀
+            </p>
+            <div>
+              <a
+                href="https://www.instagram.com/easyrigging_c5?igsh=MWJkbW40NWJnemFmOQ=="
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-550 active:bg-pink-650 text-white font-extrabold uppercase text-[10.5px] px-5 py-2 rounded-xl transition-all shadow-md cursor-pointer hover:shadow-pink-500/25 tracking-wider font-sans"
+              >
+                Diventa un Follower! ➔
+              </a>
             </div>
           </div>
 
