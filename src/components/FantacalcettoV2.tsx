@@ -116,8 +116,8 @@ interface FantacalcettoProps {
   onToggleMercatoLibero?: (attivo: boolean, scadenza?: string | null) => Promise<any>;
   onMigrate?: () => void;
   consigli?: any[];
-  isEditor: boolean;
-  isAdminMode: boolean; // false if viewing as a public portal page
+  isEditor?: boolean;
+  isAdminMode?: boolean; // false if viewing as a public portal page
   onRefreshData?: () => Promise<void>;
 }
 
@@ -225,8 +225,8 @@ export default function FantacalcettoV2({
   onUpdateBonuses,
   onToggleMercatoLibero,
   consigli = [],
-  isEditor,
-  isAdminMode,
+  isEditor = false,
+  isAdminMode = false,
   onRefreshData,
 }: FantacalcettoProps) {
   // Public Portal state loaders
@@ -248,7 +248,7 @@ export default function FantacalcettoV2({
 
   const [activePublicTab, setActivePublicTab] = useState<
     "home" | "rosa" | "mercato" | "classifica" | "regolamento"
-  >("classifica");
+  >("mercato");
   const allPartite = React.useMemo(() => {
     return [...partiteAperte, ...partiteChiuse].filter(
       (m) => !(m.dettagli || "").toLowerCase().includes("amichevole"),
@@ -2503,15 +2503,15 @@ export default function FantacalcettoV2({
             <button
               type="button"
               onClick={() => setActivePublicTab("mercato")}
-              className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-1.5 rounded-xl text-[9px] md:text-[10.5px] font-bold md:font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+              className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-1.5 rounded-xl text-[8px] md:text-[10px] sm:text-[10.5px] font-bold md:font-extrabold uppercase transition-all tracking-tight sm:tracking-wider cursor-pointer text-center font-sans ${
                 activePublicTab === "mercato"
                   ? "text-yellow-400 md:bg-yellow-400 md:text-indigo-950 shadow-none md:shadow-md"
                   : "text-indigo-400 hover:text-white hover:bg-indigo-900/30"
               }`}
             >
               <Banknote className={`w-5 h-5 md:w-3.5 md:h-3.5 ${activePublicTab === "mercato" ? "fill-yellow-400 md:fill-none" : ""}`} />
-              <span className="hidden md:inline">Mercato</span>
-              <span className="md:hidden mt-0.5 tracking-tight">Mercato</span>
+              <span className="hidden md:inline">Formazione/Mercato</span>
+              <span className="md:hidden mt-0.5 tracking-tighter">Formaz/Mercato</span>
             </button>
             <button
               type="button"
@@ -4013,37 +4013,37 @@ export default function FantacalcettoV2({
                   ) : (
                     <>
                       {/* Search / filter bar */}
-                      <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between pb-4 border-b border-indigo-900">
-                        <div className="space-y-0.5">
-                          <h4 className="font-extrabold text-xs text-white uppercase tracking-wider">
-                            Scegli i tuoi Campioni (max 3)
+                      <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between pb-4 border-b border-indigo-900">
+                        <div className="space-y-1">
+                          <h4 className="font-extrabold text-sm sm:text-base text-white uppercase tracking-wider">
+                            Scegli i tuoi Campioni (max 4)
                           </h4>
-                          <p className="text-[10px] text-indigo-400 font-medium">
+                          <p className="text-xs text-indigo-400 font-medium">
                             Pool dei giocatori reali attivi tesserati
                           </p>
                         </div>
-                        <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                           {lockStatus.match && currentConvocati.length > 0 && (
-                            <label className="flex items-center gap-1.5 cursor-pointer select-none text-[9px] font-black uppercase text-indigo-400 bg-indigo-900/40 border border-indigo-850 px-2.5 py-1.5 rounded-xl transition-all hover:bg-indigo-900/60">
+                            <label className="flex items-center justify-center sm:justify-start gap-2 cursor-pointer select-none text-xs font-black uppercase text-indigo-300 bg-indigo-900/40 border border-indigo-800 px-4 py-3 sm:py-2.5 rounded-xl transition-all hover:bg-indigo-900/60 active:scale-95 shadow-sm">
                               <input
                                 type="checkbox"
                                 checked={filterConvocati}
                                 onChange={(e) =>
                                   setFilterConvocati(e.target.checked)
                                 }
-                                className="rounded text-yellow-400 focus:ring-0 cursor-pointer accent-yellow-400 h-3 w-3"
+                                className="rounded text-yellow-500 focus:ring-0 cursor-pointer accent-yellow-400 h-4 w-4"
                               />
                               <span>Solo Convocati</span>
                             </label>
                           )}
-                          <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-indigo-500" />
+                          <div className="relative flex-grow">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-indigo-400" />
                             <input
                               type="text"
                               value={searchQuery}
                               onChange={(e) => setSearchQuery(e.target.value)}
                               placeholder="Cerca giocatore..."
-                              className="pl-8.5 pr-4 py-1.5 bg-indigo-900/60 border border-indigo-850 rounded-xl text-xs font-semibold focus:border-yellow-400 outline-none w-full sm:w-40 text-white placeholder-indigo-500"
+                              className="pl-11 pr-4 py-3 sm:py-2.5 bg-indigo-900/60 border-2 border-indigo-800 rounded-xl text-sm font-bold focus:border-yellow-400 outline-none w-full sm:w-56 text-white placeholder-indigo-400 shadow-inner"
                             />
                           </div>
                         </div>
@@ -4051,13 +4051,12 @@ export default function FantacalcettoV2({
 
                       {/* Convocati Quick Ref panel */}
                       {lockStatus.match && currentConvocati.length > 0 && (
-                        <div className="mt-4 bg-indigo-900/15 border border-indigo-850/70 rounded-2xl p-3.5 space-y-2">
+                        <div className="mt-5 bg-indigo-900/15 border border-indigo-850/70 rounded-2xl p-4 space-y-2">
                           <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-black uppercase tracking-wider text-yellow-300 flex items-center gap-1">
-                              🏃 CONVOCATI DELLA SETTIMANA (
-                              {currentConvocati.length})
+                            <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-yellow-300 flex items-center gap-1.5">
+                              🏃 CONVOCATI DELLA SETTIMANA ({currentConvocati.length})
                             </span>
-                            <span className="text-[9px] text-indigo-400/80 font-bold hidden sm:inline">
+                            <span className="text-xs text-indigo-400/80 font-bold hidden sm:inline">
                               Tocca i giocatori sotto per selezionarli
                             </span>
                           </div>
@@ -4106,33 +4105,33 @@ export default function FantacalcettoV2({
                               <div
                                 key={p.nome}
                                 onClick={() => handleTogglePlayer(p.nome)}
-                                className={`border rounded-2xl p-3 flex flex-col xl:flex-row items-stretch xl:items-center justify-between cursor-pointer select-none transition-all gap-3 ${
+                                className={`border rounded-2xl p-4 sm:p-5 flex flex-col xl:flex-row items-stretch xl:items-center justify-between cursor-pointer select-none transition-all gap-4 ${
                                   isSelected
-                                    ? "bg-yellow-450/15 border-yellow-400 text-white shadow-md ring-1 ring-yellow-400/50"
-                                    : "bg-indigo-900/20 border-indigo-850 text-indigo-100 hover:bg-indigo-900/40"
+                                    ? "bg-yellow-450/15 border-yellow-400 text-white shadow-lg ring-2 ring-yellow-400/50 scale-[1.01]"
+                                    : "bg-indigo-900/20 border-indigo-850 text-indigo-100 hover:bg-indigo-900/40 active:scale-[0.98]"
                                 }`}
                               >
-                                <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <div className="flex items-center gap-4 min-w-0 flex-1">
                                   {/* Maglia Jersey indicator */}
                                   <div
-                                    className={`w-10 h-10 rounded-lg flex items-center justify-center font-mono font-black text-sm shrink-0 shadow border border-opacity-50 ${roleColorClass}`}
+                                    className={`w-12 h-12 rounded-xl flex items-center justify-center font-mono font-black text-base shrink-0 shadow-lg border-2 border-opacity-50 ${roleColorClass}`}
                                   >
                                     #{p.numeroMaglia || "??"}
                                   </div>
                                   <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-black text-left flex items-center gap-2 truncate">
+                                    <p className="text-base font-black text-left flex items-center gap-2 truncate">
                                       {getLastName(p.nome)}
                                     </p>
-                                    <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
-                                      <span className="inline-block bg-indigo-950/80 border border-indigo-800/50 text-[9px] uppercase font-bold tracking-widest text-indigo-300 px-1.5 py-0.5 rounded">
+                                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                                      <span className="inline-block bg-indigo-950/80 border-2 border-indigo-800/50 text-[10px] sm:text-xs uppercase font-black tracking-widest text-indigo-300 px-2 py-0.5 rounded-md">
                                         {p.ultimoRuolo || "N/D"}
                                       </span>
                                       {lockStatus.match && (
                                         <span
-                                          className={`inline-block text-[8px] uppercase font-black tracking-widest px-1.5 py-0.5 rounded ${
+                                          className={`inline-block text-[9px] sm:text-[10px] uppercase font-black tracking-widest px-2 py-0.5 rounded-md ${
                                             isConvocato
-                                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                                              : "bg-red-500/15 text-red-300 border border-red-800/25 opacity-70"
+                                              ? "bg-emerald-500/20 text-emerald-300 border-2 border-emerald-500/30"
+                                              : "bg-red-500/15 text-red-300 border-2 border-red-800/25 opacity-70"
                                           }`}
                                         >
                                           {isConvocato ? "🟢 Convocato" : "🚫 Fuori Lista"}
@@ -4150,8 +4149,8 @@ export default function FantacalcettoV2({
                                         : [];
                                       if (!baseBonuses || baseBonuses.length === 0) return null;
                                       return (
-                                        <div className="mt-1.5 space-y-0.5 bg-yellow-950/35 border border-yellow-900/35 p-1.5 rounded-lg text-[9px]/tight text-yellow-300">
-                                          <span className="font-extrabold text-[8px] uppercase tracking-wider block text-yellow-400 text-left">
+                                        <div className="mt-2 space-y-1 bg-yellow-950/35 border border-yellow-900/35 p-2 rounded-lg text-[10px] sm:text-xs leading-tight text-yellow-300">
+                                          <span className="font-extrabold text-[9px] sm:text-[10px] uppercase tracking-wider block text-yellow-400 text-left">
                                             🎒 Bonus Personali:
                                           </span>
                                           {baseBonuses.map((b) => (
@@ -4166,7 +4165,7 @@ export default function FantacalcettoV2({
                                 </div>
                                 
                                 {/* Right side: Fanta-Borsa Quotes + Action Button */}
-                                <div className="flex items-center xl:items-end justify-between xl:justify-center border-t xl:border-t-0 border-indigo-900/50 pt-3 xl:pt-0 mt-1 xl:mt-0 gap-3">
+                                <div className="flex items-center xl:items-end justify-between xl:justify-center border-t xl:border-t-0 border-indigo-900/50 pt-3 xl:pt-0 mt-3 xl:mt-0 gap-4">
                                   {(() => {
                                     const playerStats = getPlayerStatsObj(p.nome);
                                     const pPrice = getPlayerCurrentPrice(p.nome, playerStats.fantaScore);
@@ -4174,11 +4173,11 @@ export default function FantacalcettoV2({
                                     const diff = pPrice - basePrice;
                                     return (
                                       <div className="flex flex-col items-start xl:items-end gap-1.5 flex-shrink-0">
-                                        <span className={`inline-flex items-center bg-indigo-950 border border-indigo-800/80 text-[11px] font-black px-2.5 py-1 rounded-lg font-mono shadow-sm ${isSelected ? 'text-yellow-300' : 'text-indigo-200'}`}>
+                                        <span className={`inline-flex items-center bg-indigo-950 border-2 border-indigo-800/80 text-sm font-black px-3 py-1.5 rounded-lg font-mono shadow-sm tracking-wider ${isSelected ? 'text-yellow-300' : 'text-indigo-200'}`}>
                                           🪙 {pPrice} cr.
                                         </span>
                                         <span
-                                          className={`text-[9.5px] px-1.5 py-0.5 rounded font-black leading-none font-mono flex items-center border ${
+                                          className={`text-[10px] sm:text-xs px-2 py-0.5 rounded font-black flex items-center border shadow-sm ${
                                             diff > 0 
                                               ? "text-emerald-400 bg-emerald-950/30 border-emerald-900/50" 
                                             : diff < 0 
@@ -4191,13 +4190,13 @@ export default function FantacalcettoV2({
                                     );
                                   })()}
                                   
-                                  <div className="shrink-0 flex items-center justify-center">
+                                  <div className="shrink-0 flex items-center justify-center pl-2 border-l border-indigo-800/50 xl:border-none xl:pl-0">
                                     {isSelected ? (
-                                      <span className="w-8 h-8 rounded-full bg-yellow-400 text-indigo-950 flex items-center justify-center font-black shadow-sm ring-2 ring-yellow-400/30">
-                                        <CheckCircle className="w-4 h-4" />
+                                      <span className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-yellow-400 text-indigo-950 flex items-center justify-center font-black shadow-lg ring-4 ring-yellow-400/30 transition-transform">
+                                        <CheckCircle className="w-5 h-5 sm:w-7 sm:h-7" />
                                       </span>
                                     ) : (
-                                      <span className="w-8 h-8 rounded-full bg-indigo-800 hover:bg-indigo-700 text-indigo-300 flex items-center justify-center font-black text-lg transition-colors">
+                                      <span className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-indigo-700 hover:bg-indigo-600 border-2 border-indigo-500/50 text-white flex items-center justify-center font-black text-2xl transition-colors shadow-lg active:scale-90">
                                         +
                                       </span>
                                     )}
@@ -4244,6 +4243,42 @@ export default function FantacalcettoV2({
                     ))}
                   </div>
                 </div>
+              </div>
+
+              {/* STICKY BOTTOM BAR FOR MOBILE LAYOUT */}
+              <div className="fixed bottom-0 left-0 right-0 z-50 bg-indigo-950/95 backdrop-blur-xl border-t border-indigo-500/30 p-4 pb-6 sm:hidden flex items-center justify-between shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transform translate-y-0 transition-transform">
+                <div className="flex flex-col">
+                  {(() => {
+                    let totalCost = 0;
+                    selectedPlayers.forEach((pName) => {
+                      totalCost += getPlayerPriceForRoster(
+                        pName,
+                        partiteChiuse || [],
+                        bonuses,
+                      );
+                    });
+                    const remaining = MAX_BUDGET - totalCost;
+                    const overBudget = remaining < 0;
+                    return (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[10px] uppercase font-black tracking-widest text-indigo-400">
+                          Scelti: <span className={selectedPlayers.length === 4 ? "text-emerald-400" : "text-yellow-400"}>{selectedPlayers.length}/4</span>
+                        </span>
+                        <span className={`text-base font-black font-mono ${overBudget ? 'text-red-400' : 'text-indigo-100'}`}>
+                          🪙 {remaining} cr.
+                        </span>
+                      </div>
+                    )
+                  })()}
+                </div>
+                
+                <button
+                  type="submit"
+                  disabled={submitting || lockStatus.isLocked}
+                  className="bg-yellow-400 hover:bg-yellow-350 disabled:bg-indigo-800 disabled:text-indigo-400 text-indigo-950 font-black uppercase tracking-wider text-sm px-6 py-3 rounded-xl shadow-lg active:scale-95 transition-transform shrink-0 disabled:border disabled:border-indigo-700"
+                >
+                  {submitting ? "Invio..." : "Salva Rosa"}
+                </button>
               </div>
             </form>
           ) : activePublicTab === "regolamento" ? (
