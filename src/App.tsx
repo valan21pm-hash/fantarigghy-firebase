@@ -29,6 +29,7 @@ import PlayerList from "./components/PlayerList";
 import StatsDashboard from "./components/StatsDashboard";
 import Iscrizioni from "./components/Iscrizioni";
 import Fantacalcetto from "./components/Fantacalcetto";
+import FantacalcettoV2 from "./components/FantacalcettoV2";
 import ConsigliRicevuti from "./components/ConsigliRicevuti";
 import BonusManager from "./components/BonusManager";
 import { DatabaseSchema, Formazione, Giocatore, RefertoGiocatore, CustomBonusDef, DEFAULT_BONUSES } from "./types";
@@ -43,6 +44,9 @@ export default function App() {
   >("rosa");
   const [isPublicPortal, setIsPublicPortal] = useState(() => {
     return typeof window !== "undefined" && window.location.search.includes("portal=true");
+  });
+  const [isPublicPortalV2, setIsPublicPortalV2] = useState(() => {
+    return typeof window !== "undefined" && window.location.search.includes("portal=v2");
   });
   const [showLogsMenu, setShowLogsMenu] = useState(false);
   const [showConsigliMenu, setShowConsigliMenu] = useState(false);
@@ -431,6 +435,30 @@ export default function App() {
   const authorizedEmails = ["valan21pm@gmail.com", "10roby1985@gmail.com"];
   const userEmail = (user?.email || "").toLowerCase().trim();
   const isAdminAuthenticated = user && authorizedEmails.includes(userEmail);
+
+  if (isPublicPortalV2) {
+    const giocatori = data?.giocatori || [];
+    const partiteChiuse = data?.partiteChiuse || [];
+    const partiteAperte = data?.partiteAperte || [];
+    return (
+      <FantacalcettoV2
+        giocatori={giocatori}
+        fantasquadre={data?.fantasquadre || []}
+        partiteChiuse={partiteChiuse}
+        partiteAperte={partiteAperte}
+        bonuses={data?.bonuses}
+        sessioneMercatoLibero={data?.sessioneMercatoLibero}
+        scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
+        onIscriviFantasquadra={handleIscriviFantasquadra}
+        onRinominaFantasquadra={handleRinominaFantasquadra}
+        onEliminaFantasquadra={handleEliminaFantasquadra}
+        onCreaConsiglio={handleCreaConsiglio}
+        onUpdateBonuses={handleUpdateBonuses}
+        onToggleMercatoLibero={handleToggleMercatoLibero}
+        consigli={data?.consigli || []}
+      />
+    );
+  }
 
   if (isPublicPortal) {
     const giocatori = data?.giocatori || [];

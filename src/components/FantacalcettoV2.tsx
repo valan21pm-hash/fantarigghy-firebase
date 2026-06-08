@@ -122,7 +122,7 @@ const ASSIST_POINTS = 1;
 const AMMO_POINTS = -0.5;
 const ESPU_POINTS = -1;
 
-export default function Fantacalcetto({
+export default function FantacalcettoV2({
   giocatori,
   fantasquadre = [],
   partiteChiuse = [],
@@ -1325,9 +1325,9 @@ export default function Fantacalcetto({
   if (!isAdminMode) {
     if (submitted) {
       return (
-        <div className="min-h-screen bg-emerald-990 text-white flex items-center justify-center p-4">
-          <div className="max-w-md w-full bg-emerald-950 border border-emerald-800 rounded-3xl p-8 text-center space-y-6 shadow-2xl animate-fade-in font-sans">
-            <div className="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto border border-emerald-500/30 font-sans">
+        <div className="min-h-screen bg-indigo-990 text-white flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-indigo-950 border border-indigo-800 rounded-3xl p-8 text-center space-y-6 shadow-2xl animate-fade-in font-sans">
+            <div className="w-20 h-20 bg-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto border border-indigo-500/30 font-sans">
               <CheckCircle className="h-10 w-10 animate-bounce" />
             </div>
 
@@ -1335,7 +1335,7 @@ export default function Fantacalcetto({
               <h2 className="text-2xl font-black text-yellow-300 uppercase tracking-widest font-sans">
                 SQUADRA REGISTRATA!
               </h2>
-              <p className="text-sm text-emerald-300 font-sans">
+              <p className="text-sm text-indigo-300 font-sans">
                 La tua fantasquadra per{" "}
                 <strong className="font-extrabold text-white font-sans">
                   {nomeFantasquadra}
@@ -1344,15 +1344,15 @@ export default function Fantacalcetto({
               </p>
             </div>
 
-            <div className="bg-emerald-900/50 border border-emerald-800/60 rounded-2xl p-4 text-left max-h-56 overflow-y-auto space-y-2">
-              <p className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 font-sans font-sans">
+            <div className="bg-indigo-900/50 border border-indigo-800/60 rounded-2xl p-4 text-left max-h-56 overflow-y-auto space-y-2">
+              <p className="text-[10px] uppercase font-bold tracking-wider text-indigo-400 font-sans font-sans">
                 La tua rosa selezionata:
               </p>
               <ol className="list-decimal list-inside text-xs font-semibold text-gray-200 space-y-1 font-sans">
                 {selectedPlayers.map((player, idx) => (
                   <li
                     key={idx}
-                    className="truncate border-b border-emerald-950/40 pb-1"
+                    className="truncate border-b border-indigo-950/40 pb-1"
                   >
                     {player}
                   </li>
@@ -1360,7 +1360,7 @@ export default function Fantacalcetto({
               </ol>
             </div>
 
-            <p className="text-xs text-emerald-400/80 leading-relaxed bg-emerald-900/20 py-2.5 px-4 rounded-xl font-sans">
+            <p className="text-xs text-indigo-400/80 leading-relaxed bg-indigo-900/20 py-2.5 px-4 rounded-xl font-sans">
               I tuoi dati sono stati trasmessi agli amministratori. In bocca al
               lupo! ⚽🚀
             </p>
@@ -1374,7 +1374,7 @@ export default function Fantacalcetto({
                 setPin("");
                 setActivePublicTab("classifica");
               }}
-              className="w-full bg-yellow-400 hover:bg-yellow-350 text-emerald-950 font-extrabold text-xs uppercase py-3 rounded-xl shadow-md transition-all cursor-pointer font-sans"
+              className="w-full bg-yellow-400 hover:bg-yellow-350 text-indigo-950 font-extrabold text-xs uppercase py-3 rounded-xl shadow-md transition-all cursor-pointer font-sans"
             >
               Vedi la Classifica Generale
             </button>
@@ -1385,14 +1385,14 @@ export default function Fantacalcetto({
 
     if (!syncDone) {
       return (
-        <div className="min-h-screen bg-gradient-to-b from-emerald-950 to-emerald-990 text-white flex flex-col justify-center items-center p-4 sm:p-6 font-sans relative overflow-hidden">
+        <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-indigo-990 text-white flex flex-col justify-center items-center p-4 sm:p-6 font-sans relative overflow-hidden">
           {/* Sfondo decorativo minimale */}
           <div className="absolute inset-0 select-none pointer-events-none overflow-hidden opacity-20">
-            <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl"></div>
-            <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-emerald-400/10 blur-3xl"></div>
+            <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-indigo-500/10 blur-3xl"></div>
+            <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-indigo-400/10 blur-3xl"></div>
           </div>
 
-          <div className="max-w-md w-full relative z-10 bg-emerald-950/90 border border-emerald-850 rounded-3xl p-8 text-center space-y-6 shadow-2xl backdrop-blur-xl">
+          <div className="max-w-md w-full relative z-10 bg-indigo-950/90 border border-indigo-850 rounded-3xl p-8 text-center space-y-6 shadow-2xl backdrop-blur-xl">
             <div className="space-y-1.5">
               <h2 className="font-extrabold text-2xl text-white uppercase tracking-tight font-sans leading-tight pointer-events-none">
                 Vai a Fantacalcetto
@@ -1402,7 +1402,7 @@ export default function Fantacalcetto({
             {!hasInteracted ? (
               <div className="space-y-4">
                 {/* Selettore Tab Login / Registrazione */}
-                <div className="grid grid-cols-2 p-1 bg-emerald-900/60 rounded-xl border border-emerald-800/40">
+                <div className="grid grid-cols-2 p-1 bg-indigo-900/60 rounded-xl border border-indigo-800/40">
                   <button
                     type="button"
                     onClick={() => {
@@ -1411,8 +1411,8 @@ export default function Fantacalcetto({
                     }}
                     className={`py-2 px-3 text-xs font-black uppercase rounded-lg transition-all cursor-pointer ${
                       entryMode === "login"
-                        ? "bg-yellow-400 text-emerald-950 shadow-sm"
-                        : "text-emerald-300 hover:text-white"
+                        ? "bg-yellow-400 text-indigo-950 shadow-sm"
+                        : "text-indigo-300 hover:text-white"
                     }`}
                   >
                     Entra
@@ -1425,8 +1425,8 @@ export default function Fantacalcetto({
                     }}
                     className={`py-2 px-3 text-xs font-black uppercase rounded-lg transition-all cursor-pointer ${
                       entryMode === "register"
-                        ? "bg-yellow-400 text-emerald-950 shadow-sm"
-                        : "text-emerald-300 hover:text-white"
+                        ? "bg-yellow-400 text-indigo-950 shadow-sm"
+                        : "text-indigo-300 hover:text-white"
                     }`}
                   >
                     Registrati
@@ -1436,7 +1436,7 @@ export default function Fantacalcetto({
                 {entryMode === "login" ? (
                   <div className="space-y-3.5 text-left animate-fadeIn">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-350 block">
+                      <label className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-350 block">
                         Indirizzo Email:
                       </label>
                       <input
@@ -1448,12 +1448,12 @@ export default function Fantacalcetto({
                           setLoginEmail(e.target.value);
                           setLocalLoginError(null);
                         }}
-                        className="w-full bg-emerald-900 border border-emerald-800/70 rounded-xl px-4 py-3 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400"
+                        className="w-full bg-indigo-900 border border-indigo-800/70 rounded-xl px-4 py-3 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-350 block">
+                      <label className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-350 block">
                         Password:
                       </label>
                       <input
@@ -1465,7 +1465,7 @@ export default function Fantacalcetto({
                           setLoginPassword(e.target.value);
                           setLocalLoginError(null);
                         }}
-                        className="w-full bg-emerald-900 border border-emerald-800/70 rounded-xl px-4 py-3 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400"
+                        className="w-full bg-indigo-900 border border-indigo-800/70 rounded-xl px-4 py-3 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400"
                       />
                     </div>
 
@@ -1478,7 +1478,7 @@ export default function Fantacalcetto({
                     <button
                       type="button"
                       onClick={handleCustomLogin}
-                      className="w-full bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-emerald-950 font-black text-xs uppercase py-3.5 rounded-xl shadow-lg transition-all cursor-pointer font-sans tracking-wide mt-2"
+                      className="w-full bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-indigo-950 font-black text-xs uppercase py-3.5 rounded-xl shadow-lg transition-all cursor-pointer font-sans tracking-wide mt-2"
                     >
                       Entra
                     </button>
@@ -1486,7 +1486,7 @@ export default function Fantacalcetto({
                 ) : (
                   <div className="space-y-3 text-left animate-fadeIn">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-350 block">
+                      <label className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-350 block">
                         Nome Fantasquadra:
                       </label>
                       <input
@@ -1497,13 +1497,13 @@ export default function Fantacalcetto({
                           setRegNomeSquadra(e.target.value);
                           setLocalLoginError(null);
                         }}
-                        className="w-full bg-emerald-900 border border-emerald-800/70 rounded-xl px-4 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400"
+                        className="w-full bg-indigo-900 border border-indigo-800/70 rounded-xl px-4 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-3.5">
                       <div className="space-y-1">
-                        <label className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-350 block">
+                        <label className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-350 block">
                           Presidente:
                         </label>
                         <input
@@ -1514,12 +1514,12 @@ export default function Fantacalcetto({
                             setRegNomePresidente(e.target.value);
                             setLocalLoginError(null);
                           }}
-                          className="w-full bg-emerald-900 border border-emerald-800/70 rounded-xl px-4 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400"
+                          className="w-full bg-indigo-900 border border-indigo-800/70 rounded-xl px-4 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-350 block">
+                        <label className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-350 block">
                           Password (min. 8):
                         </label>
                         <input
@@ -1530,13 +1530,13 @@ export default function Fantacalcetto({
                             setRegPassword(e.target.value);
                             setLocalLoginError(null);
                           }}
-                          className="w-full bg-emerald-900 border border-emerald-800/70 rounded-xl px-4 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400"
+                          className="w-full bg-indigo-900 border border-indigo-800/70 rounded-xl px-4 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-350 block">
+                      <label className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-350 block">
                         Indirizzo Email:
                       </label>
                       <input
@@ -1547,7 +1547,7 @@ export default function Fantacalcetto({
                           setRegEmail(e.target.value);
                           setLocalLoginError(null);
                         }}
-                        className="w-full bg-emerald-900 border border-emerald-800/70 rounded-xl px-4 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400"
+                        className="w-full bg-indigo-900 border border-indigo-800/70 rounded-xl px-4 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400"
                       />
                     </div>
 
@@ -1560,7 +1560,7 @@ export default function Fantacalcetto({
                     <button
                       type="button"
                       onClick={handleCustomRegister}
-                      className="w-full bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-emerald-950 font-black text-xs uppercase py-3.5 rounded-xl shadow-lg transition-all cursor-pointer font-sans tracking-wide mt-2"
+                      className="w-full bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-indigo-950 font-black text-xs uppercase py-3.5 rounded-xl shadow-lg transition-all cursor-pointer font-sans tracking-wide mt-2"
                     >
                       Registrati ed Entra
                     </button>
@@ -1570,13 +1570,13 @@ export default function Fantacalcetto({
             ) : (
               <div className="pt-2 space-y-4 animate-fadeIn">
                 {/* Barra di avanzamento */}
-                <div className="w-full bg-emerald-950 border border-emerald-900/55 rounded-full h-4 overflow-hidden relative shadow-inner">
+                <div className="w-full bg-indigo-950 border border-indigo-900/55 rounded-full h-4 overflow-hidden relative shadow-inner">
                   <div
-                    className="bg-gradient-to-r from-yellow-400 to-amber-400 h-full rounded-full transition-all duration-150 ease-out flex items-center justify-end px-1.5 animate-pulse"
+                    className="bg-gradient-to-r from-yellow-400 to-sky-400 h-full rounded-full transition-all duration-150 ease-out flex items-center justify-end px-1.5 animate-pulse"
                     style={{ width: `${syncProgress}%` }}
                   >
                     {syncProgress > 15 && (
-                      <span className="text-[8px] font-black text-emerald-950 select-none">
+                      <span className="text-[8px] font-black text-indigo-950 select-none">
                         {syncProgress}%
                       </span>
                     )}
@@ -1585,7 +1585,7 @@ export default function Fantacalcetto({
 
                 {/* Testo stato sincronizzazione */}
                 <div className="space-y-1">
-                  <p className="text-[11px] text-emerald-100 font-bold italic font-sans min-h-[32px] flex items-center justify-center leading-relaxed">
+                  <p className="text-[11px] text-indigo-100 font-bold italic font-sans min-h-[32px] flex items-center justify-center leading-relaxed">
                     ⚙️ {syncStatusText}
                   </p>
                 </div>
@@ -1597,10 +1597,10 @@ export default function Fantacalcetto({
     }
 
     return (
-      <div className="min-h-screen bg-gradient-to-b from-emerald-950 to-emerald-990 text-white p-4 sm:p-6 lg:p-8 flex flex-col justify-between font-sans relative">
+      <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-indigo-990 text-white p-4 sm:p-6 lg:p-8 flex flex-col justify-between font-sans relative">
         {showReRegistrationPopup && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-xs flex items-center justify-center p-4 z-[9995] animate-fade-in font-sans">
-            <div className="bg-emerald-950 border-2 border-red-500/50 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-left">
+            <div className="bg-indigo-950 border-2 border-red-500/50 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-left">
               <div className="w-12 h-12 rounded-2xl bg-red-500/10 text-red-400 flex items-center justify-center border border-red-500/30">
                 <Sparkles className="h-6 w-6 animate-pulse" />
               </div>
@@ -1608,7 +1608,7 @@ export default function Fantacalcetto({
                 <h3 className="text-base font-black text-rose-400 uppercase tracking-widest leading-snug">
                   📢 RESET DATABASE SQUADRE!
                 </h3>
-                <p className="text-[12px] text-emerald-100 font-semibold leading-relaxed">
+                <p className="text-[12px] text-indigo-100 font-semibold leading-relaxed">
                   Ciao Presidente! A causa del nuovo importante aggiornamento
                   della piattaforma (che introduce il{" "}
                   <strong>4° giocatore obbligatorio</strong>, il nuovo calcolo
@@ -1620,7 +1620,7 @@ export default function Fantacalcetto({
                   </strong>{" "}
                   dal database.
                 </p>
-                <div className="bg-emerald-900/30 border border-emerald-800/40 rounded-2xl p-4.5 space-y-1.5 text-[11px] text-emerald-250 leading-relaxed font-sans">
+                <div className="bg-indigo-900/30 border border-indigo-800/40 rounded-2xl p-4.5 space-y-1.5 text-[11px] text-indigo-250 leading-relaxed font-sans">
                   <p>
                     • <strong>Nessun Import:</strong> Le vecchie squadre non
                     sono più compatibili. Per partecipare al torneo, ogni
@@ -1634,7 +1634,7 @@ export default function Fantacalcetto({
                     budget massimo di 60 Izycoin!
                   </p>
                 </div>
-                <p className="text-[10px] text-amber-300 border-t border-emerald-800/30 pt-2 font-semibold leading-normal">
+                <p className="text-[10px] text-sky-300 border-t border-indigo-800/30 pt-2 font-semibold leading-normal">
                   Se hai già provveduto a registrare la tua nuova fanta-squadra
                   a 4 giocatori dopo questo aggiornamento, ignora pure questo
                   avviso.
@@ -1652,7 +1652,7 @@ export default function Fantacalcetto({
                     setActivePublicTab("iscrizione");
                     setSubmitted(false);
                   }}
-                  className="w-full bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-emerald-950 font-black text-xs uppercase py-3 rounded-xl transition-all cursor-pointer shadow-md text-center"
+                  className="w-full bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-indigo-950 font-black text-xs uppercase py-3 rounded-xl transition-all cursor-pointer shadow-md text-center"
                 >
                   Vai all'Iscrizione/Registrazione ⚽
                 </button>
@@ -1665,7 +1665,7 @@ export default function Fantacalcetto({
                       "true",
                     );
                   }}
-                  className="w-full bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-300 font-bold text-xs uppercase py-2.5 rounded-xl transition-all cursor-pointer border border-emerald-800/40 text-center"
+                  className="w-full bg-indigo-900/40 hover:bg-indigo-800/60 text-indigo-300 font-bold text-xs uppercase py-2.5 rounded-xl transition-all cursor-pointer border border-indigo-800/40 text-center"
                 >
                   Salta, ho già provveduto / Nuova iscrizione 👍
                 </button>
@@ -1675,7 +1675,7 @@ export default function Fantacalcetto({
         )}
         {showInstagramPopup && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-[9990] animate-fade-in">
-            <div className="bg-gradient-to-b from-purple-950 via-emerald-950/95 to-emerald-990 border border-pink-500/30 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-center">
+            <div className="bg-gradient-to-b from-purple-950 via-indigo-950/95 to-indigo-990 border border-pink-500/30 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-center">
               <button
                 type="button"
                 onClick={() => setShowInstagramPopup(false)}
@@ -1693,7 +1693,7 @@ export default function Fantacalcetto({
                 <h3 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-rose-300 to-yellow-300 uppercase tracking-widest leading-snug">
                   Unisciti alla Community! 🚀
                 </h3>
-                <p className="text-[12px] text-emerald-100 font-semibold leading-relaxed">
+                <p className="text-[12px] text-indigo-100 font-semibold leading-relaxed">
                   Per non perderti gli <strong>highlight</strong> delle partite, le foto sul campo più belle, notizie calde, le pagelle interattive dei nostri tesserati e i meme più esilaranti, segui la pagina ufficiale di <strong>EasyRigging C5</strong>!
                 </p>
               </div>
@@ -1709,8 +1709,8 @@ export default function Fantacalcetto({
                   Segui @easyrigging_c5 su Instagram 📸
                 </a>
 
-                <div className="bg-emerald-900/30 border border-emerald-800/40 rounded-2xl p-4 space-y-3 text-left">
-                  <p className="text-[10px] text-emerald-200/90 font-bold uppercase tracking-wider text-center">
+                <div className="bg-indigo-900/30 border border-indigo-800/40 rounded-2xl p-4 space-y-3 text-left">
+                  <p className="text-[10px] text-indigo-200/90 font-bold uppercase tracking-wider text-center">
                     📢 AIUTACI A FARE CRESCERE IL TORNEO!
                   </p>
                   
@@ -1719,7 +1719,7 @@ export default function Fantacalcetto({
                       href={`https://api.whatsapp.com/send?text=${encodeURIComponent("Segui EasyRigging C5 su Instagram per gli highlights, le foto ed i meme del torneo più caldo dell'anno! 🚀📷 https://www.instagram.com/easyrigging_c5?igsh=MWJkbW40NWJnemFmOQ==")}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-550 active:bg-emerald-650 text-white font-extrabold text-[10.5px] uppercase py-2.5 px-3 rounded-lg transition-all cursor-pointer shadow-sm text-center"
+                      className="flex-1 flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-550 active:bg-indigo-650 text-white font-extrabold text-[10.5px] uppercase py-2.5 px-3 rounded-lg transition-all cursor-pointer shadow-sm text-center"
                     >
                       <Share2 className="h-3.5 w-3.5" />
                       Stato WhatsApp 💬
@@ -1732,7 +1732,7 @@ export default function Fantacalcetto({
                         setInstagramLinkCopied(true);
                         setTimeout(() => setInstagramLinkCopied(false), 2500);
                       }}
-                      className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-900/50 hover:bg-emerald-800/60 text-emerald-300 border border-emerald-800/50 hover:border-emerald-700/60 font-extrabold text-[10.5px] uppercase py-2.5 px-3 rounded-lg transition-all cursor-pointer shadow-sm text-center"
+                      className="flex-1 flex items-center justify-center gap-1.5 bg-indigo-900/50 hover:bg-indigo-800/60 text-indigo-300 border border-indigo-800/50 hover:border-indigo-700/60 font-extrabold text-[10.5px] uppercase py-2.5 px-3 rounded-lg transition-all cursor-pointer shadow-sm text-center"
                     >
                       {instagramLinkCopied ? (
                         <>
@@ -1756,14 +1756,14 @@ export default function Fantacalcetto({
                       setShowInstagramPopup(false);
                       localStorage.setItem("fantaInstagramFollowed_v1", "true");
                     }}
-                    className="w-full bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-emerald-950 font-black text-xs uppercase py-3 rounded-xl transition-all cursor-pointer shadow-md text-center"
+                    className="w-full bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-indigo-950 font-black text-xs uppercase py-3 rounded-xl transition-all cursor-pointer shadow-md text-center"
                   >
                     Ho già seguito / Non mostrare più 👍
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowInstagramPopup(false)}
-                    className="w-full text-emerald-300 hover:text-white text-[10.5px] font-bold uppercase transition-colors cursor-pointer py-1"
+                    className="w-full text-indigo-300 hover:text-white text-[10.5px] font-bold uppercase transition-colors cursor-pointer py-1"
                   >
                     Ricordamelo più tardi ➔
                   </button>
@@ -1775,9 +1775,9 @@ export default function Fantacalcetto({
 
         {showSuggestionModal && (
           <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-fade-in font-sans overflow-y-auto">
-            <div className="bg-emerald-950 border-2 border-emerald-800 rounded-3xl max-w-lg w-full shadow-2xl relative my-8 overflow-hidden">
+            <div className="bg-indigo-950 border-2 border-indigo-800 rounded-3xl max-w-lg w-full shadow-2xl relative my-8 overflow-hidden">
               {/* Modal Top Bar */}
-              <div className="flex justify-between items-center bg-emerald-900/60 px-6 py-4 border-b border-emerald-800/40">
+              <div className="flex justify-between items-center bg-indigo-900/60 px-6 py-4 border-b border-indigo-800/40">
                 <div className="flex items-center gap-2">
                   <Lightbulb className="h-5 w-5 text-yellow-300 animate-pulse" />
                   <span className="text-sm font-black text-white uppercase tracking-wider">
@@ -1787,7 +1787,7 @@ export default function Fantacalcetto({
                 <button
                   type="button"
                   onClick={() => setShowSuggestionModal(false)}
-                  className="p-1 rounded-lg hover:bg-emerald-800/50 text-emerald-300 hover:text-white transition-all cursor-pointer"
+                  className="p-1 rounded-lg hover:bg-indigo-800/50 text-indigo-300 hover:text-white transition-all cursor-pointer"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -1795,14 +1795,14 @@ export default function Fantacalcetto({
 
               {/* Modal Content */}
               <div className="p-6 space-y-4 text-left">
-                <p className="text-[11px] text-emerald-300 font-medium leading-relaxed">
+                <p className="text-[11px] text-indigo-300 font-medium leading-relaxed">
                   Hai un'idea per migliorare questa applicazione, implementare
                   nuove statistiche o ottimizzare le regole del torneo? Invia il
                   tuo suggerimento compilando i campi sottostanti.
                 </p>
 
                 {consiglioInviatoConSuccesso ? (
-                  <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs rounded-2xl p-5 text-center leading-relaxed">
+                  <div className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs rounded-2xl p-5 text-center leading-relaxed">
                     <p className="font-extrabold text-[13px] text-yellow-300 mb-1">
                       ✨ Inviato con Successo! ✨
                     </p>
@@ -1824,7 +1824,7 @@ export default function Fantacalcetto({
                       </div>
                     )}
                     <div className="space-y-1">
-                      <label className="block text-[9px] font-black uppercase tracking-wider text-emerald-400 leading-none">
+                      <label className="block text-[9px] font-black uppercase tracking-wider text-indigo-400 leading-none">
                         Tuo Nome / Fantallenatore
                       </label>
                       <input
@@ -1832,11 +1832,11 @@ export default function Fantacalcetto({
                         value={consiglioAutore}
                         onChange={(e) => setConsiglioAutore(e.target.value)}
                         placeholder="Es. Stefano L."
-                        className="w-full bg-emerald-900/45 border border-emerald-800 focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 rounded-xl px-3.5 py-2.5 outline-none text-xs text-white placeholder-emerald-700 font-extrabold"
+                        className="w-full bg-indigo-900/45 border border-indigo-800 focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 rounded-xl px-3.5 py-2.5 outline-none text-xs text-white placeholder-indigo-700 font-extrabold"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="block text-[9px] font-black uppercase tracking-wider text-emerald-400 leading-none">
+                      <label className="block text-[9px] font-black uppercase tracking-wider text-indigo-400 leading-none">
                         Dettaglio del Miglioramento Proposto
                       </label>
                       <textarea
@@ -1844,7 +1844,7 @@ export default function Fantacalcetto({
                         rows={4}
                         onChange={(e) => setConsiglioTesto(e.target.value)}
                         placeholder="Cose da aggiungere? Es: Mi piacerebbe inserire grafici dei prezzi storici o voti divisi per data..."
-                        className="w-full bg-emerald-900/45 border border-emerald-800 focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 rounded-xl px-3.5 py-2.5 outline-none text-xs text-white placeholder-emerald-700 font-medium leading-relaxed"
+                        className="w-full bg-indigo-900/45 border border-indigo-800 focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 rounded-xl px-3.5 py-2.5 outline-none text-xs text-white placeholder-indigo-700 font-medium leading-relaxed"
                       />
                     </div>
 
@@ -1852,7 +1852,7 @@ export default function Fantacalcetto({
                       <button
                         type="button"
                         onClick={() => setShowSuggestionModal(false)}
-                        className="flex-1 bg-emerald-900/30 hover:bg-emerald-900/40 border border-emerald-800 text-emerald-300 font-extrabold text-[10.5px] uppercase py-3 rounded-xl transition-all cursor-pointer"
+                        className="flex-1 bg-indigo-900/30 hover:bg-indigo-900/40 border border-indigo-800 text-indigo-300 font-extrabold text-[10.5px] uppercase py-3 rounded-xl transition-all cursor-pointer"
                       >
                         Annulla
                       </button>
@@ -1907,7 +1907,7 @@ export default function Fantacalcetto({
                             setInvioConsiglioInCorso(false);
                           }
                         }}
-                        className="flex-1 bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 disabled:bg-emerald-900 text-emerald-950 font-black text-[10.5px] uppercase py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                        className="flex-1 bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 disabled:bg-indigo-900 text-indigo-950 font-black text-[10.5px] uppercase py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                       >
                         {invioConsiglioInCorso
                           ? "Invio in corso..."
@@ -1923,9 +1923,9 @@ export default function Fantacalcetto({
 
         {showInstructionsModal && (
           <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-fade-in font-sans overflow-y-auto">
-            <div className="bg-emerald-950 border-2 border-emerald-800 rounded-3xl max-w-lg w-full shadow-2xl relative my-8 overflow-hidden">
+            <div className="bg-indigo-950 border-2 border-indigo-800 rounded-3xl max-w-lg w-full shadow-2xl relative my-8 overflow-hidden">
               {/* Modal Top Bar */}
-              <div className="flex justify-between items-center bg-emerald-900/60 px-6 py-4 border-b border-emerald-800/40">
+              <div className="flex justify-between items-center bg-indigo-900/60 px-6 py-4 border-b border-indigo-800/40">
                 <div className="flex items-center gap-2">
                   <BookOpen className="h-5 w-5 text-yellow-300" />
                   <span className="text-sm font-black text-white uppercase tracking-wider">
@@ -1935,21 +1935,21 @@ export default function Fantacalcetto({
                 <button
                   type="button"
                   onClick={() => setShowInstructionsModal(false)}
-                  className="p-1 rounded-lg hover:bg-emerald-800/50 text-emerald-300 hover:text-white transition-all cursor-pointer"
+                  className="p-1 rounded-lg hover:bg-indigo-800/50 text-indigo-300 hover:text-white transition-all cursor-pointer"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
 
               {/* Sub-tabs with elegant gold active accent */}
-              <div className="flex border-b border-emerald-800/20 bg-emerald-950/40">
+              <div className="flex border-b border-indigo-800/20 bg-indigo-950/40">
                 <button
                   type="button"
                   onClick={() => setInstructionsTab("guida")}
                   className={`flex-1 py-3 text-[11px] font-black uppercase tracking-wider transition-all border-b-2 text-center cursor-pointer ${
                     instructionsTab === "guida"
-                      ? "border-yellow-400 text-yellow-300 bg-emerald-900/20 font-black"
-                      : "border-transparent text-emerald-400 hover:text-emerald-250 hover:bg-emerald-900/10 font-bold"
+                      ? "border-yellow-400 text-yellow-300 bg-indigo-900/20 font-black"
+                      : "border-transparent text-indigo-400 hover:text-indigo-250 hover:bg-indigo-900/10 font-bold"
                   }`}
                 >
                   📖 Come Funziona il Portale
@@ -1959,8 +1959,8 @@ export default function Fantacalcetto({
                   onClick={() => setInstructionsTab("quotazioni")}
                   className={`flex-1 py-3 text-[11px] font-black uppercase tracking-wider transition-all border-b-2 text-center cursor-pointer ${
                     instructionsTab === "quotazioni"
-                      ? "border-yellow-400 text-yellow-300 bg-emerald-900/20 font-black"
-                      : "border-transparent text-emerald-400 hover:text-emerald-250 hover:bg-emerald-900/10 font-bold"
+                      ? "border-yellow-400 text-yellow-300 bg-indigo-900/20 font-black"
+                      : "border-transparent text-indigo-400 hover:text-indigo-250 hover:bg-indigo-900/10 font-bold"
                   }`}
                 >
                   📈 Algoritmo Quotazioni
@@ -1968,7 +1968,7 @@ export default function Fantacalcetto({
               </div>
 
               {/* Modal Content container */}
-              <div className="p-6 max-h-[60vh] overflow-y-auto space-y-5 text-left text-xs text-emerald-100 font-sans leading-relaxed">
+              <div className="p-6 max-h-[60vh] overflow-y-auto space-y-5 text-left text-xs text-indigo-100 font-sans leading-relaxed">
                 {instructionsTab === "guida" ? (
                   <>
                     <div className="space-y-3">
@@ -1981,7 +1981,7 @@ export default function Fantacalcetto({
                         la propria rosa inserendo esattamente{" "}
                         <strong>4 tesserati</strong> (3 Titolari + 1 Panchina).
                       </p>
-                      <p className="bg-emerald-900/25 border border-emerald-800/40 rounded-xl p-3 text-[11px] text-yellow-250 font-sans">
+                      <p className="bg-indigo-900/25 border border-indigo-800/40 rounded-xl p-3 text-[11px] text-yellow-250 font-sans">
                         💡 <strong>PIN di Sicurezza:</strong> All'iscrizione
                         indica un indirizzo email ed un PIN segreto personale.
                         Questo PIN ti servirà in futuro per sbloccare la tua
@@ -1990,7 +1990,7 @@ export default function Fantacalcetto({
                       </p>
                     </div>
 
-                    <div className="space-y-3 border-t border-emerald-900/40 pt-4">
+                    <div className="space-y-3 border-t border-indigo-900/40 pt-4">
                       <h4 className="font-extrabold text-yellow-300 uppercase tracking-wide flex items-center gap-1.5 text-[12px]">
                         ⚽ 2. Titolari e Sostituzione Automatica
                       </h4>
@@ -2003,7 +2003,7 @@ export default function Fantacalcetto({
                       </p>
                     </div>
 
-                    <div className="space-y-3 border-t border-emerald-900/40 pt-4">
+                    <div className="space-y-3 border-t border-indigo-900/40 pt-4">
                       <h4 className="font-extrabold text-yellow-300 uppercase tracking-wide flex items-center gap-1.5 text-[12px]">
                         🔄 3. Mercato: Regola del Cambio Singolo e Slot
                         Flessibile
@@ -2028,7 +2028,7 @@ export default function Fantacalcetto({
                       </p>
                     </div>
 
-                    <div className="space-y-3 border-t border-emerald-900/40 pt-4">
+                    <div className="space-y-3 border-t border-indigo-900/40 pt-4">
                       <h4 className="font-extrabold text-yellow-400 uppercase tracking-wide flex items-center gap-1.5 text-[11.5px]">
                         ⏰ 4. Scadenza Ultima (Blocco Formazioni)
                       </h4>
@@ -2054,20 +2054,20 @@ export default function Fantacalcetto({
                         giocatore tesserato viene calcolato combinando
                         prestazioni reali e bonus:
                       </p>
-                      <div className="bg-emerald-900/20 border border-emerald-800/40 rounded-xl p-3.5 space-y-1 font-mono text-[10.5px]">
-                        <div className="flex justify-between border-b border-emerald-800/40 pb-1">
+                      <div className="bg-indigo-900/20 border border-indigo-800/40 rounded-xl p-3.5 space-y-1 font-mono text-[10.5px]">
+                        <div className="flex justify-between border-b border-indigo-800/40 pb-1">
                           <span>⚽ Gol Segnato:</span>
-                          <span className="text-emerald-400 font-bold">
+                          <span className="text-indigo-400 font-bold">
                             +3.0 pt
                           </span>
                         </div>
-                        <div className="flex justify-between border-b border-emerald-800/40 py-1">
+                        <div className="flex justify-between border-b border-indigo-800/40 py-1">
                           <span>👟 Assist Vincente:</span>
-                          <span className="text-emerald-400 font-bold">
+                          <span className="text-indigo-400 font-bold">
                             +1.0 pt
                           </span>
                         </div>
-                        <div className="flex justify-between border-b border-emerald-800/40 py-1">
+                        <div className="flex justify-between border-b border-indigo-800/40 py-1">
                           <span>🟨 Ammonizione:</span>
                           <span className="text-red-400 font-bold">
                             -0.5 pt
@@ -2082,7 +2082,7 @@ export default function Fantacalcetto({
                       </div>
 
                       <div className="mt-4">
-                        <h5 className="font-bold text-emerald-300 text-[11px] uppercase tracking-wider mb-2">
+                        <h5 className="font-bold text-indigo-300 text-[11px] uppercase tracking-wider mb-2">
                           🏅 Bonus Extra / Generici
                         </h5>
                         <div className="grid grid-cols-1 gap-1.5 font-mono text-[10px]">
@@ -2094,16 +2094,16 @@ export default function Fantacalcetto({
                             return currentGenericBonuses.map((b) => (
                               <div
                                 key={b.id}
-                                className="flex justify-between items-center bg-emerald-900/10 border border-emerald-800/20 rounded p-1.5 px-2"
+                                className="flex justify-between items-center bg-indigo-900/10 border border-indigo-800/20 rounded p-1.5 px-2"
                               >
                                 <div className="pr-2">
                                   <span className="font-bold">{b.nome}</span>
-                                  <div className="text-[8.5px] text-emerald-200/70 font-sans leading-tight mt-0.5">
+                                  <div className="text-[8.5px] text-indigo-200/70 font-sans leading-tight mt-0.5">
                                     {b.descrizione}
                                   </div>
                                 </div>
                                 <span
-                                  className={`font-bold whitespace-nowrap ${typeof b.punti === "number" && b.punti > 0 ? "text-emerald-400" : typeof b.punti === "number" && b.punti < 0 ? "text-red-400" : "text-amber-400"}`}
+                                  className={`font-bold whitespace-nowrap ${typeof b.punti === "number" && b.punti > 0 ? "text-indigo-400" : typeof b.punti === "number" && b.punti < 0 ? "text-red-400" : "text-sky-400"}`}
                                 >
                                   {typeof b.punti === "number"
                                     ? b.punti > 0
@@ -2119,7 +2119,7 @@ export default function Fantacalcetto({
                       </div>
 
                       <div className="mt-4">
-                        <h5 className="font-bold text-amber-300 text-[11px] uppercase tracking-wider mb-2">
+                        <h5 className="font-bold text-sky-300 text-[11px] uppercase tracking-wider mb-2">
                           ⭐ Bonus Ad Personam
                         </h5>
                         <div className="space-y-3 font-mono text-[10px]">
@@ -2143,25 +2143,25 @@ export default function Fantacalcetto({
                             return Object.entries(grouped).map(
                               ([playerName, bns]) => (
                                 <div key={playerName} className="space-y-1">
-                                  <p className="font-bold text-emerald-250 border-b border-emerald-800/30 pb-0.5">
+                                  <p className="font-bold text-indigo-250 border-b border-indigo-800/30 pb-0.5">
                                     {playerName}
                                   </p>
                                   <div className="grid grid-cols-1 gap-1">
                                     {bns.map((b) => (
                                       <div
                                         key={b.id}
-                                        className="flex justify-between items-center bg-emerald-900/10 border border-amber-500/10 rounded p-1.5 px-2"
+                                        className="flex justify-between items-center bg-indigo-900/10 border border-sky-500/10 rounded p-1.5 px-2"
                                       >
                                         <div className="pr-2">
                                           <span className="font-bold">
                                             {b.nome}
                                           </span>
-                                          <div className="text-[8.5px] text-emerald-200/70 font-sans leading-tight mt-0.5">
+                                          <div className="text-[8.5px] text-indigo-200/70 font-sans leading-tight mt-0.5">
                                             {b.descrizione}
                                           </div>
                                         </div>
                                         <span
-                                          className={`font-bold whitespace-nowrap ${typeof b.punti === "number" && b.punti > 0 ? "text-emerald-400" : typeof b.punti === "number" && b.punti < 0 ? "text-red-400" : "text-amber-400"}`}
+                                          className={`font-bold whitespace-nowrap ${typeof b.punti === "number" && b.punti > 0 ? "text-indigo-400" : typeof b.punti === "number" && b.punti < 0 ? "text-red-400" : "text-sky-400"}`}
                                         >
                                           {typeof b.punti === "number"
                                             ? b.punti > 0
@@ -2180,14 +2180,14 @@ export default function Fantacalcetto({
                         </div>
                       </div>
 
-                      <p className="text-[10px] text-emerald-300 mt-2">
+                      <p className="text-[10px] text-indigo-300 mt-2">
                         * Possono essere conteggiati anche bonus personalizzati
                         ad hoc aggiunti dall'Amministratore del torneo per
                         premiare parate decisive, giocate formidabili o autogol.
                       </p>
                     </div>
 
-                    <div className="space-y-3 border-t border-emerald-900/40 pt-4">
+                    <div className="space-y-3 border-t border-indigo-900/40 pt-4">
                       <h4 className="font-extrabold text-yellow-300 uppercase tracking-wide flex items-center gap-1.5 text-[12px]">
                         📈 Meccanismo di Rivalutazione Monetaria
                       </h4>
@@ -2197,16 +2197,16 @@ export default function Fantacalcetto({
                         punti accumulati!
                       </p>
 
-                      <div className="bg-amber-500/10 border border-amber-500/20 text-amber-300 p-3.5 rounded-xl font-medium leading-relaxed font-sans mb-3 text-[11px]">
+                      <div className="bg-sky-500/10 border border-sky-500/20 text-sky-300 p-3.5 rounded-xl font-medium leading-relaxed font-sans mb-3 text-[11px]">
                         🧠 <strong>Regola Base:</strong> Se un giocatore fa
                         esattamente <strong>3 punti</strong>, il suo valore
                         rimane invariato (variazione pari a 0 crediti), poiché
                         il punteggio di 3 rientra nella soglia neutra.
                       </div>
 
-                      <div className="space-y-3 bg-emerald-900/30 border border-emerald-800/50 rounded-2xl p-4 text-[11px]">
+                      <div className="space-y-3 bg-indigo-900/30 border border-indigo-800/50 rounded-2xl p-4 text-[11px]">
                         <div>
-                          <p className="font-extrabold text-yellow-300 uppercase tracking-wider text-[10.5px] mb-1.5 border-b border-emerald-800/20 pb-1">
+                          <p className="font-extrabold text-yellow-300 uppercase tracking-wider text-[10.5px] mb-1.5 border-b border-indigo-800/20 pb-1">
                             📋 Riepilogo Completo delle Fasce di Valore:
                           </p>
                           <ul className="space-y-2 mt-2">
@@ -2222,33 +2222,33 @@ export default function Fantacalcetto({
                                 </span>
                               </div>
                             </li>
-                            <li className="flex items-start gap-1.5 border-t border-emerald-900/40 pt-2">
-                              <span className="text-emerald-400">✨</span>
+                            <li className="flex items-start gap-1.5 border-t border-indigo-900/40 pt-2">
+                              <span className="text-indigo-400">✨</span>
                               <div>
-                                <strong className="text-emerald-350">
+                                <strong className="text-indigo-350">
                                   Fascia 1 (da +4 a +9 punti / da -4 a -9
                                   punti):
                                 </strong>
-                                <span className="block text-emerald-200 text-[10px] mt-0.5">
+                                <span className="block text-indigo-200 text-[10px] mt-0.5">
                                   Variazione di <strong>+1 Izycoin 🪙</strong> o{" "}
                                   <strong>-1 Izycoin 🪙</strong>.
                                 </span>
                               </div>
                             </li>
-                            <li className="flex items-start gap-1.5 border-t border-emerald-900/40 pt-2">
-                              <span className="text-emerald-400">🚀</span>
+                            <li className="flex items-start gap-1.5 border-t border-indigo-900/40 pt-2">
+                              <span className="text-indigo-400">🚀</span>
                               <div>
-                                <strong className="text-emerald-350">
+                                <strong className="text-indigo-350">
                                   Fascia 2 (da +10 a +15 punti / da -10 a -15
                                   punti):
                                 </strong>
-                                <span className="block text-emerald-250 text-[10px] mt-0.5 font-bold">
+                                <span className="block text-indigo-250 text-[10px] mt-0.5 font-bold">
                                   Variazione di <strong>+2 Izycoin 🪙</strong> o{" "}
                                   <strong>-2 Izycoin 🪙</strong>.
                                 </span>
                               </div>
                             </li>
-                            <li className="flex items-start gap-1.5 border-t border-emerald-900/40 pt-2">
+                            <li className="flex items-start gap-1.5 border-t border-indigo-900/40 pt-2">
                               <span className="text-yellow-400">🔥</span>
                               <div>
                                 <strong className="text-yellow-300">
@@ -2265,7 +2265,7 @@ export default function Fantacalcetto({
                         </div>
                       </div>
 
-                      <p className="text-[11px] bg-emerald-900/20 border border-emerald-800/40 text-emerald-300 p-3 rounded-xl font-medium leading-relaxed font-sans mt-3">
+                      <p className="text-[11px] bg-indigo-900/20 border border-indigo-800/40 text-indigo-300 p-3 rounded-xl font-medium leading-relaxed font-sans mt-3">
                         💵 <strong>Strategia Mercato:</strong> Vendendo un
                         calciatore la cui quotazione è cresciuta, incasserai la
                         nuova quotazione rivalutata sul mercato! Questo
@@ -2279,11 +2279,11 @@ export default function Fantacalcetto({
               </div>
 
               {/* Modal Footer */}
-              <div className="bg-emerald-900/40 px-6 py-4 border-t border-emerald-800/40 flex justify-end">
+              <div className="bg-indigo-900/40 px-6 py-4 border-t border-indigo-800/40 flex justify-end">
                 <button
                   type="button"
                   onClick={() => setShowInstructionsModal(false)}
-                  className="bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-emerald-950 font-black text-xs uppercase px-6 py-2.5 rounded-xl transition-all cursor-pointer shadow-md"
+                  className="bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-indigo-950 font-black text-xs uppercase px-6 py-2.5 rounded-xl transition-all cursor-pointer shadow-md"
                 >
                   Ho Capito, grazie! 👍
                 </button>
@@ -2294,13 +2294,13 @@ export default function Fantacalcetto({
         <div className="max-w-4xl w-full mx-auto space-y-6 my-auto">
           {/* Header */}
           <div className="text-center space-y-2">
-            <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] sm:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full select-none font-sans">
+            <span className="bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] sm:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full select-none font-sans">
               🏆 FANTACALCETTO ASD
             </span>
-            <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-emerald-300 font-sans">
+            <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-indigo-300 font-sans">
               Classifica & Portale Fantacalcetto
             </h1>
-            <p className="text-xs sm:text-sm text-emerald-300 max-w-lg mx-auto font-medium leading-relaxed font-sans">
+            <p className="text-xs sm:text-sm text-indigo-300 max-w-lg mx-auto font-medium leading-relaxed font-sans">
               Dedicato ai tornei del lunedì! Guarda i punteggi in tempo reale ed
               iscrivi la tua squadra.
             </p>
@@ -2311,7 +2311,7 @@ export default function Fantacalcetto({
                   setInstructionsTab("guida");
                   setShowInstructionsModal(true);
                 }}
-                className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-emerald-950 px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-md hover:scale-[1.03] duration-150"
+                className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-indigo-950 px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-md hover:scale-[1.03] duration-150"
               >
                 <BookOpen className="h-3.5 w-3.5" />
                 Regolamento & Istruzioni Gioco 📖
@@ -2323,7 +2323,7 @@ export default function Fantacalcetto({
                   setConsiglioError("");
                   setShowSuggestionModal(true);
                 }}
-                className="inline-flex items-center gap-2 bg-emerald-900/60 hover:bg-emerald-850 border border-emerald-705 text-yellow-300 hover:text-yellow-250 px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-md hover:scale-[1.03] duration-150"
+                className="inline-flex items-center gap-2 bg-indigo-900/60 hover:bg-indigo-850 border border-indigo-705 text-yellow-300 hover:text-yellow-250 px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-md hover:scale-[1.03] duration-150"
               >
                 <Lightbulb className="h-3.5 w-3.5 text-yellow-400 animate-pulse" />
                 Proponi Miglioramento 💡
@@ -2341,14 +2341,14 @@ export default function Fantacalcetto({
           </div>
 
           {/* Instagram Follower Engagement Banner */}
-          <div className="bg-gradient-to-r from-purple-950/60 via-pink-950/50 to-amber-950/40 border border-pink-500/20 rounded-2xl p-4 text-center space-y-2.5 max-w-lg mx-auto shadow-lg backdrop-blur-xs">
+          <div className="bg-gradient-to-r from-purple-950/60 via-pink-950/50 to-sky-950/40 border border-pink-500/20 rounded-2xl p-4 text-center space-y-2.5 max-w-lg mx-auto shadow-lg backdrop-blur-xs">
             <div className="flex items-center justify-center gap-1.5">
               <Instagram className="h-4.5 w-4.5 text-pink-400 animate-pulse" />
               <span className="text-[10.5px] font-extrabold uppercase tracking-widest text-pink-300 font-sans">
                 Segui @easyrigging_c5 su Instagram
               </span>
             </div>
-            <p className="text-xs text-emerald-100 leading-relaxed max-w-sm mx-auto font-sans font-medium">
+            <p className="text-xs text-indigo-100 leading-relaxed max-w-sm mx-auto font-sans font-medium">
               Highlights esclusivi, meme del torneo, foto dal campo e pagelle interattive! Aiutaci a far crescere la community di <strong>EasyRigging C5</strong>. 🚀
             </p>
             <div>
@@ -2364,14 +2364,14 @@ export default function Fantacalcetto({
           </div>
 
           {/* Navigation Tabs for Public Portal */}
-          <div className="flex flex-wrap justify-center gap-1.5 max-w-sm sm:max-w-lg mx-auto bg-emerald-950/60 p-1.5 rounded-2xl border border-emerald-850 font-sans">
+          <div className="flex flex-wrap justify-center gap-1.5 max-w-sm sm:max-w-lg mx-auto bg-indigo-950/60 p-1.5 rounded-2xl border border-indigo-850 font-sans">
             <button
               type="button"
               onClick={() => setActivePublicTab("classifica")}
               className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
                 activePublicTab === "classifica"
-                  ? "bg-yellow-400 text-emerald-950 shadow-md font-extrabold"
-                  : "text-emerald-300 hover:text-white hover:bg-emerald-900/30 font-bold"
+                  ? "bg-yellow-400 text-indigo-950 shadow-md font-extrabold"
+                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30 font-bold"
               }`}
             >
               🏆 Classifica
@@ -2381,8 +2381,8 @@ export default function Fantacalcetto({
               onClick={() => setActivePublicTab("partite")}
               className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
                 activePublicTab === "partite"
-                  ? "bg-yellow-400 text-emerald-950 shadow-md font-extrabold"
-                  : "text-emerald-300 hover:text-white hover:bg-emerald-900/30 font-bold"
+                  ? "bg-yellow-400 text-indigo-950 shadow-md font-extrabold"
+                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30 font-bold"
               }`}
             >
               ⚽ Partite
@@ -2395,8 +2395,8 @@ export default function Fantacalcetto({
               }}
               className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
                 activePublicTab === "convocazioni"
-                  ? "bg-yellow-400 text-emerald-950 shadow-md font-extrabold"
-                  : "text-emerald-300 hover:text-white hover:bg-emerald-900/30 font-bold"
+                  ? "bg-yellow-400 text-indigo-950 shadow-md font-extrabold"
+                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30 font-bold"
               }`}
             >
               📋 Convocazioni
@@ -2409,8 +2409,8 @@ export default function Fantacalcetto({
               }}
               className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
                 activePublicTab === "iscrizione"
-                  ? "bg-yellow-400 text-emerald-950 shadow-md font-extrabold"
-                  : "text-emerald-300 hover:text-white hover:bg-emerald-900/30 font-bold"
+                  ? "bg-yellow-400 text-indigo-950 shadow-md font-extrabold"
+                  : "text-indigo-300 hover:text-white hover:bg-indigo-900/30 font-bold"
               }`}
             >
               📝 Iscrizione
@@ -2461,7 +2461,7 @@ export default function Fantacalcetto({
               className={`rounded-xl p-4 border flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-sans shadow-lg ${
                 lockStatus.isLocked
                   ? "bg-red-950/70 border-red-900 text-red-200"
-                  : "bg-emerald-950/60 border-emerald-800/80 text-emerald-100"
+                  : "bg-indigo-950/60 border-indigo-800/80 text-indigo-100"
               }`}
             >
               <div className="flex items-start gap-3">
@@ -2469,7 +2469,7 @@ export default function Fantacalcetto({
                   className={`p-2 rounded-xl shrink-0 mt-0.5 ${
                     lockStatus.isLocked
                       ? "bg-red-900/30 text-red-400 animate-pulse"
-                      : "bg-emerald-900/40 text-emerald-400"
+                      : "bg-indigo-900/40 text-indigo-400"
                   }`}
                 >
                   <AlertCircle className="h-5 w-5" />
@@ -2510,7 +2510,7 @@ export default function Fantacalcetto({
                   className={`text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded-lg inline-block ${
                     lockStatus.isLocked
                       ? "bg-red-850 text-white"
-                      : "bg-amber-500/10 text-amber-300 border border-amber-500/25"
+                      : "bg-sky-500/10 text-sky-300 border border-sky-500/25"
                   }`}
                 >
                   Scadenza: {lockStatus.deadline?.toLocaleDateString("it-IT")}{" "}
@@ -2527,8 +2527,8 @@ export default function Fantacalcetto({
               </div>
             </div>
           ) : (
-            <div className="rounded-xl p-4 border bg-emerald-950/40 border-emerald-900 text-emerald-300/80 text-xs flex items-center gap-3">
-              <AlertCircle className="h-4 w-4 text-emerald-500 shrink-0" />
+            <div className="rounded-xl p-4 border bg-indigo-950/40 border-indigo-900 text-indigo-300/80 text-xs flex items-center gap-3">
+              <AlertCircle className="h-4 w-4 text-indigo-500 shrink-0" />
               <span>
                 Nessuna gara di campionato attualmente programmata in bacheca.
                 Le iscrizioni e formazioni sono aperte.
@@ -2538,9 +2538,9 @@ export default function Fantacalcetto({
 
           {activePublicTab === "classifica" ? (
             <div className="space-y-6 animate-fade-in font-sans">
-              <div className="bg-emerald-900/30 border-l-4 border-emerald-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm">
-                <p className="text-xs text-emerald-200 leading-relaxed font-medium">
-                  <strong className="text-emerald-400">ℹ️ Punto Informativo:</strong> Qui puoi monitorare l'andamento del campionato. Clicca su ciascun team per vedere nel dettaglio il valore attuale della rosa, il tesoretto residuo e le scelte dei giocatori fatte dagli altri partecipanti!
+              <div className="bg-indigo-900/30 border-l-4 border-indigo-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm">
+                <p className="text-xs text-indigo-200 leading-relaxed font-medium">
+                  <strong className="text-indigo-400">ℹ️ Punto Informativo:</strong> Qui puoi monitorare l'andamento del campionato. Clicca su ciascun team per vedere nel dettaglio il valore attuale della rosa, il tesoretto residuo e le scelte dei giocatori fatte dagli altri partecipanti!
                 </p>
               </div>
               {/* Podium View if any */}
@@ -2549,10 +2549,10 @@ export default function Fantacalcetto({
                   {rankedTeams.slice(0, 3).map((item, index) => {
                     const badgeColor =
                       index === 0
-                        ? "bg-yellow-400 text-emerald-950"
+                        ? "bg-yellow-400 text-indigo-950"
                         : index === 1
-                          ? "bg-slate-300 text-emerald-950"
-                          : "bg-amber-600 text-white";
+                          ? "bg-slate-300 text-indigo-950"
+                          : "bg-sky-600 text-white";
                     const subtitleLabel =
                       index === 0
                         ? "🥇 Primo"
@@ -2562,7 +2562,7 @@ export default function Fantacalcetto({
                     return (
                       <div
                         key={item.id}
-                        className="text-center bg-emerald-950/85 border border-emerald-800 p-5 rounded-3xl shadow-xl flex flex-col items-center justify-center relative overflow-hidden backdrop-blur-md font-sans"
+                        className="text-center bg-indigo-950/85 border border-indigo-800 p-5 rounded-3xl shadow-xl flex flex-col items-center justify-center relative overflow-hidden backdrop-blur-md font-sans"
                       >
                         <span
                           className={`text-[9px] uppercase font-black px-2.5 py-1 rounded-full font-sans ${badgeColor}`}
@@ -2575,7 +2575,7 @@ export default function Fantacalcetto({
                         >
                           {item.nomeFantasquadra}
                         </p>
-                        <p className="text-[10px] text-emerald-400 truncate max-w-full font-medium font-sans">
+                        <p className="text-[10px] text-indigo-400 truncate max-w-full font-medium font-sans">
                           Di:{" "}
                           <span className="font-extrabold text-white font-sans">
                             {item.nomePartecipante}
@@ -2583,7 +2583,7 @@ export default function Fantacalcetto({
                         </p>
                         <span className="text-xl font-black font-mono text-white mt-2 flex items-baseline gap-1">
                           {item.score}{" "}
-                          <span className="text-[10px] text-emerald-400 font-bold uppercase font-sans">
+                          <span className="text-[10px] text-indigo-400 font-bold uppercase font-sans">
                             pt
                           </span>
                         </span>
@@ -2594,8 +2594,8 @@ export default function Fantacalcetto({
               )}
 
               {/* Leaderboard Table / Cards */}
-              <div className="bg-emerald-950/80 border border-emerald-800 rounded-3xl p-5 shadow-xl backdrop-blur-md space-y-4 font-sans">
-                <div className="border-b border-emerald-900 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 font-sans">
+              <div className="bg-indigo-950/80 border border-indigo-800 rounded-3xl p-5 shadow-xl backdrop-blur-md space-y-4 font-sans">
+                <div className="border-b border-indigo-900 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 font-sans">
                   <div>
                     <h3 className="font-extrabold text-xs text-white uppercase tracking-wider font-sans flex items-center gap-2">
                       Classifica Generale
@@ -2606,13 +2606,13 @@ export default function Fantacalcetto({
                           setInstructionsTab("guida");
                           setShowInstructionsModal(true);
                         }}
-                        className="text-emerald-400 hover:text-yellow-400 transition-colors"
+                        className="text-indigo-400 hover:text-yellow-400 transition-colors"
                         title="Vedi info su come funziona il torneo"
                       >
                         <BookOpen className="h-4 w-4" />
                       </button>
                     </h3>
-                    <p className="text-[9px] text-emerald-400 font-semibold uppercase tracking-wider font-sans mt-0.5">
+                    <p className="text-[9px] text-indigo-400 font-semibold uppercase tracking-wider font-sans mt-0.5">
                       Aggiornata ad ogni referto inserito dagli Amministratori
                     </p>
                   </div>
@@ -2627,15 +2627,15 @@ export default function Fantacalcetto({
                         <span>📄 Filtra & Apri Referto</span>
                       </button>
                     )}
-                    <span className="bg-emerald-900 text-emerald-200 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full font-mono shrink-0">
+                    <span className="bg-indigo-900 text-indigo-200 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full font-mono shrink-0">
                       {rankedTeams.length} Team
                     </span>
                   </div>
                 </div>
 
                 {rankedTeams.length === 0 ? (
-                  <div className="text-center py-16 text-emerald-500 font-medium font-sans">
-                    <Trophy className="h-10 w-10 mx-auto text-emerald-700 mb-3 animate-pulse" />
+                  <div className="text-center py-16 text-indigo-500 font-medium font-sans">
+                    <Trophy className="h-10 w-10 mx-auto text-indigo-700 mb-3 animate-pulse" />
                     Nessuna fantasquadra registrata nel Fantacalcetto.
                     <br />
                     Iscrivi la prima squadra cliccando sulla tab "Iscrizione"!
@@ -2649,8 +2649,8 @@ export default function Fantacalcetto({
                           key={team.id}
                           className={`border rounded-2xl transition-all font-sans ${
                             isExpanded
-                              ? "border-yellow-400 bg-emerald-900/45"
-                              : "border-emerald-850 bg-emerald-900/10 hover:bg-emerald-900/20"
+                              ? "border-yellow-400 bg-indigo-900/45"
+                              : "border-indigo-850 bg-indigo-900/10 hover:bg-indigo-900/20"
                           }`}
                         >
                           {/* Card header */}
@@ -2664,12 +2664,12 @@ export default function Fantacalcetto({
                               <span
                                 className={`w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs font-black ${
                                   index === 0
-                                    ? "bg-yellow-400 text-emerald-950 font-black h-6.5 w-6.5"
+                                    ? "bg-yellow-400 text-indigo-950 font-black h-6.5 w-6.5"
                                     : index === 1
-                                      ? "bg-slate-300 text-emerald-950"
+                                      ? "bg-slate-300 text-indigo-950"
                                       : index === 2
-                                        ? "bg-amber-600 text-white"
-                                        : "text-emerald-300 bg-emerald-900/50"
+                                        ? "bg-sky-600 text-white"
+                                        : "text-indigo-300 bg-indigo-900/50"
                                 }`}
                               >
                                 {index + 1}
@@ -2678,7 +2678,7 @@ export default function Fantacalcetto({
                                 <p className="font-black text-xs text-white truncate font-sans">
                                   {team.nomeFantasquadra}
                                 </p>
-                                <p className="text-[10px] text-emerald-400 font-bold truncate font-sans">
+                                <p className="text-[10px] text-indigo-400 font-bold truncate font-sans">
                                   Presidente:{" "}
                                   <span className="text-gray-200 font-extrabold font-sans">
                                     {team.nomePartecipante}
@@ -2692,21 +2692,21 @@ export default function Fantacalcetto({
                                 <span className="text-xs font-black font-mono text-yellow-300 block leading-none font-sans">
                                   {team.score} pt
                                 </span>
-                                <span className="text-[8px] uppercase tracking-wider font-extrabold text-emerald-500 mt-0.5 block leading-none font-sans">
+                                <span className="text-[8px] uppercase tracking-wider font-extrabold text-indigo-500 mt-0.5 block leading-none font-sans">
                                   Fantascore
                                 </span>
                               </div>
                               {isExpanded ? (
-                                <ChevronUp className="h-4 w-4 text-emerald-400" />
+                                <ChevronUp className="h-4 w-4 text-indigo-400" />
                               ) : (
-                                <ChevronDown className="h-4 w-4 text-emerald-400" />
+                                <ChevronDown className="h-4 w-4 text-indigo-400" />
                               )}
                             </div>
                           </div>
 
                           {/* Expansion list of players */}
                           {isExpanded && (
-                            <div className="border-t border-emerald-900 p-4 bg-emerald-950/60 space-y-3.5 animate-fade-in text-xs font-sans">
+                            <div className="border-t border-indigo-900 p-4 bg-indigo-950/60 space-y-3.5 animate-fade-in text-xs font-sans">
                               {/* Financial/Roster values block */}
                               {(() => {
                                 const currentTotalVal =
@@ -2724,9 +2724,9 @@ export default function Fantacalcetto({
                                     0,
                                   );
                                 return (
-                                  <div className="grid grid-cols-2 gap-3.5 bg-emerald-950/85 border border-emerald-900 p-3 rounded-xl text-left">
+                                  <div className="grid grid-cols-2 gap-3.5 bg-indigo-950/85 border border-indigo-900 p-3 rounded-xl text-left">
                                     <div>
-                                      <p className="text-[7.5px] uppercase font-bold tracking-widest text-emerald-450 mb-0.5">
+                                      <p className="text-[7.5px] uppercase font-bold tracking-widest text-indigo-450 mb-0.5">
                                         Tesoretto Residuo
                                       </p>
                                       <p className="font-mono text-xs font-black text-yellow-300 leading-none">
@@ -2734,10 +2734,10 @@ export default function Fantacalcetto({
                                       </p>
                                     </div>
                                     <div>
-                                      <p className="text-[7.5px] uppercase font-bold tracking-widest text-emerald-450 mb-0.5">
+                                      <p className="text-[7.5px] uppercase font-bold tracking-widest text-indigo-450 mb-0.5">
                                         Valore Totale Rosa
                                       </p>
-                                      <p className="font-mono text-xs font-black text-emerald-300 leading-none">
+                                      <p className="font-mono text-xs font-black text-indigo-300 leading-none">
                                         {currentTotalVal} Izycoin 🪙
                                       </p>
                                     </div>
@@ -2765,15 +2765,15 @@ export default function Fantacalcetto({
                                           key={pIdx}
                                           className={`border p-2.5 rounded-xl flex items-center justify-between font-sans ${
                                             isBench
-                                              ? "bg-amber-950/30 border-amber-500/25 text-amber-200"
-                                              : "bg-emerald-900/30 border-emerald-850 text-white"
+                                              ? "bg-sky-950/30 border-sky-500/25 text-sky-200"
+                                              : "bg-indigo-900/30 border-indigo-850 text-white"
                                           }`}
                                         >
                                           <div className="min-w-0 pr-1 flex-1 text-left">
                                             <p className="font-black text-[11px] truncate text-gray-100 font-sans">
                                               {pIdx + 1}. {getLastName(pName)}
                                             </p>
-                                            <p className="text-[8px] text-emerald-400/80 font-extrabold uppercase mt-0.5 font-sans">
+                                            <p className="text-[8px] text-indigo-400/80 font-extrabold uppercase mt-0.5 font-sans">
                                               #
                                               {originalPlayer?.numeroMaglia ||
                                                 "??"}{" "}
@@ -2783,7 +2783,7 @@ export default function Fantacalcetto({
                                             </p>
                                           </div>
                                           <span
-                                            className={`text-[8px] px-1.5 py-0.5 rounded font-bold font-mono tracking-wider shadow-sm border ${isBench ? "bg-amber-900/40 text-amber-300 border-amber-500/50" : "bg-emerald-900/40 text-emerald-300 border-emerald-500/50"}`}
+                                            className={`text-[8px] px-1.5 py-0.5 rounded font-bold font-mono tracking-wider shadow-sm border ${isBench ? "bg-sky-900/40 text-sky-300 border-sky-500/50" : "bg-indigo-900/40 text-indigo-300 border-indigo-500/50"}`}
                                           >
                                             {isBench ? "PANCHINA" : "TITOLARE"}
                                           </span>
@@ -2799,13 +2799,13 @@ export default function Fantacalcetto({
                                 const matchBreakdown =
                                   getTeamMatchBreakdownList(team);
                                 return (
-                                  <div className="mt-4 border-t border-emerald-900/40 pt-3 space-y-2">
+                                  <div className="mt-4 border-t border-indigo-900/40 pt-3 space-y-2">
                                     <h4 className="text-[9px] uppercase font-black tracking-wider text-yellow-350 flex items-center gap-1.5 font-sans">
                                       📈 DETTAGLIO PARTITE REFERTATE (
                                       {matchBreakdown.length})
                                     </h4>
                                     {matchBreakdown.length === 0 ? (
-                                      <p className="text-[10px] text-emerald-500 italic pb-1">
+                                      <p className="text-[10px] text-indigo-500 italic pb-1">
                                         Nessun match di campionato refertato
                                         finora per questa squadra.
                                       </p>
@@ -2822,7 +2822,7 @@ export default function Fantacalcetto({
                                                 teamName: team.nomeFantasquadra,
                                               });
                                             }}
-                                            className="bg-emerald-950/40 hover:bg-emerald-900/60 transition-colors border border-emerald-900/50 rounded-xl p-3 flex items-center justify-between cursor-pointer group"
+                                            className="bg-indigo-950/40 hover:bg-indigo-900/60 transition-colors border border-indigo-900/50 rounded-xl p-3 flex items-center justify-between cursor-pointer group"
                                           >
                                             <div className="min-w-0 pr-2">
                                               <p
@@ -2834,7 +2834,7 @@ export default function Fantacalcetto({
                                                   mb.dettagli}
                                               </p>
                                               {mb.dettagli.includes(" - ") && (
-                                                <p className="text-[8px] text-emerald-400 font-medium truncate mt-0.5">
+                                                <p className="text-[8px] text-indigo-400 font-medium truncate mt-0.5">
                                                   {mb.dettagli
                                                     .split(" - ")
                                                     .slice(1)
@@ -2843,13 +2843,13 @@ export default function Fantacalcetto({
                                               )}
                                             </div>
                                             <div className="text-right shrink-0 flex items-center gap-2">
-                                              <span className="font-mono text-[10px] font-black bg-emerald-900 text-yellow-300 border border-emerald-800 px-1.5 py-0.5 rounded-lg shadow-xs group-hover:bg-yellow-400 group-hover:text-emerald-950 transition-colors">
+                                              <span className="font-mono text-[10px] font-black bg-indigo-900 text-yellow-300 border border-indigo-800 px-1.5 py-0.5 rounded-lg shadow-xs group-hover:bg-yellow-400 group-hover:text-indigo-950 transition-colors">
                                                 {mb.puntiTotaliMatch > 0
                                                   ? "+"
                                                   : ""}
                                                 {mb.puntiTotaliMatch} pt
                                               </span>
-                                              <span className="text-[10px] text-emerald-600 group-hover:text-yellow-400 font-bold transition-colors">
+                                              <span className="text-[10px] text-indigo-600 group-hover:text-yellow-400 font-bold transition-colors">
                                                 ➔
                                               </span>
                                             </div>
@@ -2871,14 +2871,14 @@ export default function Fantacalcetto({
             </div>
           ) : activePublicTab === "partite" ? (
             <div className="space-y-6 animate-fade-in font-sans">
-              <div className="bg-emerald-900/30 border-l-4 border-emerald-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm">
-                <p className="text-xs text-emerald-200 leading-relaxed font-medium">
-                  <strong className="text-emerald-400">ℹ️ Punto Informativo:</strong> Archivio delle prestazioni. Controlla qui i voti o i referti caricati dall'amministratore che hanno decretato il FantaScore dei tesserati, incluse pagelle, gol e bonus/malus generali.
+              <div className="bg-indigo-900/30 border-l-4 border-indigo-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm">
+                <p className="text-xs text-indigo-200 leading-relaxed font-medium">
+                  <strong className="text-indigo-400">ℹ️ Punto Informativo:</strong> Archivio delle prestazioni. Controlla qui i voti o i referti caricati dall'amministratore che hanno decretato il FantaScore dei tesserati, incluse pagelle, gol e bonus/malus generali.
                 </p>
               </div>
               {/* Highlight Banner / Link to General Report */}
-              <div className="bg-gradient-to-r from-emerald-950/90 to-emerald-900/60 border border-emerald-800/80 rounded-3xl p-5 shadow-xl backdrop-blur-md space-y-4 font-sans">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-emerald-900/60 pb-4">
+              <div className="bg-gradient-to-r from-indigo-950/90 to-indigo-900/60 border border-indigo-800/80 rounded-3xl p-5 shadow-xl backdrop-blur-md space-y-4 font-sans">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-indigo-900/60 pb-4">
                   <div className="space-y-1">
                     <span className="text-[9px] uppercase font-black text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-md border border-yellow-400/10 tracking-wider">
                       Archivio Ufficiale
@@ -2892,13 +2892,13 @@ export default function Fantacalcetto({
                           setInstructionsTab("guida");
                           setShowInstructionsModal(true);
                         }}
-                        className="text-emerald-400 hover:text-yellow-400 transition-colors"
+                        className="text-indigo-400 hover:text-yellow-400 transition-colors"
                         title="Vedi info sui calcoli dei punti"
                       >
                         <BookOpen className="h-5 w-5" />
                       </button>
                     </h3>
-                    <p className="text-[10.5px] text-emerald-300 font-medium">
+                    <p className="text-[10.5px] text-indigo-300 font-medium">
                       Consulta i risultati omologati dei match e scarica il
                       libretto dei voti.
                     </p>
@@ -2907,7 +2907,7 @@ export default function Fantacalcetto({
                     <button
                       type="button"
                       onClick={() => setShowGeneralReportModal(true)}
-                      className="bg-yellow-400 hover:bg-yellow-500 text-emerald-950 text-[10px] font-black uppercase px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-1.5 cursor-pointer transition-all hover:scale-105 active:scale-95 duration-200"
+                      className="bg-yellow-400 hover:bg-yellow-500 text-indigo-950 text-[10px] font-black uppercase px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-1.5 cursor-pointer transition-all hover:scale-105 active:scale-95 duration-200"
                     >
                       <span>📄 Apri Referto Generale</span>
                     </button>
@@ -2915,12 +2915,12 @@ export default function Fantacalcetto({
                 </div>
 
                 {/* Banner box directing to the general report */}
-                <div className="bg-emerald-950/50 border border-emerald-800/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="bg-indigo-950/50 border border-indigo-800/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="text-left space-y-1">
-                    <h4 className="text-xs font-bold text-emerald-250 uppercase tracking-wide">
+                    <h4 className="text-xs font-bold text-indigo-250 uppercase tracking-wide">
                       Fascicolo Completo Voti
                     </h4>
-                    <p className="text-[10.5px] text-emerald-400/90 leading-normal">
+                    <p className="text-[10.5px] text-indigo-400/90 leading-normal">
                       Il referto generale unisce la classifica ponderata, la
                       composizione delle rose e i dettagli di calcolo di tutte
                       le giornate disputate finora.
@@ -2938,8 +2938,8 @@ export default function Fantacalcetto({
                 </div>
 
                 {allPartite.length === 0 ? (
-                  <div className="py-12 text-center bg-emerald-900/20 rounded-2xl border border-emerald-800/30">
-                    <p className="text-emerald-400/80 font-bold text-xs uppercase tracking-wider">
+                  <div className="py-12 text-center bg-indigo-900/20 rounded-2xl border border-indigo-800/30">
+                    <p className="text-indigo-400/80 font-bold text-xs uppercase tracking-wider">
                       Nessuna gara di campionato registrata nel tabellone.
                     </p>
                   </div>
@@ -2950,7 +2950,7 @@ export default function Fantacalcetto({
                       return (
                         <div
                           key={m.id}
-                          className="bg-emerald-900/20 rounded-2xl border border-emerald-800/40 p-4.5 transition-all hover:bg-emerald-900/30 hover:border-emerald-700/50 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4"
+                          className="bg-indigo-900/20 rounded-2xl border border-indigo-800/40 p-4.5 transition-all hover:bg-indigo-900/30 hover:border-indigo-700/50 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4"
                         >
                           <div className="space-y-1.5 text-left md:max-w-2xl">
                             <div className="flex flex-wrap items-center gap-2">
@@ -2962,7 +2962,7 @@ export default function Fantacalcetto({
                                   : "✓ Conclusa"}
                               </span>
                               {m.dataInserimento && (
-                                <span className="text-[10px] text-emerald-400/70 font-mono">
+                                <span className="text-[10px] text-indigo-400/70 font-mono">
                                   {new Date(
                                     m.dataInserimento,
                                   ).toLocaleDateString("it-IT", {
@@ -2978,8 +2978,8 @@ export default function Fantacalcetto({
                             </p>
 
                             {m.risultato ? (
-                              <div className="inline-flex items-center gap-2 bg-emerald-950/75 border border-emerald-900/60 rounded-lg px-2.5 py-1 mt-1 shadow-sm">
-                                <span className="text-[9.5px] text-emerald-400 uppercase tracking-widest font-black">
+                              <div className="inline-flex items-center gap-2 bg-indigo-950/75 border border-indigo-900/60 rounded-lg px-2.5 py-1 mt-1 shadow-sm">
+                                <span className="text-[9.5px] text-indigo-400 uppercase tracking-widest font-black">
                                   Risultato:
                                 </span>
                                 <span className="font-mono text-xs text-yellow-300 font-extrabold tracking-widest">
@@ -2987,7 +2987,7 @@ export default function Fantacalcetto({
                                 </span>
                               </div>
                             ) : (
-                              <p className="text-[10px] text-emerald-500/70 italic">
+                              <p className="text-[10px] text-indigo-500/70 italic">
                                 Risultato ufficiale non ancora pubblicato.
                               </p>
                             )}
@@ -2996,15 +2996,15 @@ export default function Fantacalcetto({
                           <div className="flex items-center gap-3 self-start md:self-center shrink-0">
                             {m.referto && m.referto.length > 0 ? (
                               <div className="text-right hidden sm:block">
-                                <p className="text-[10.5px] text-emerald-300 font-bold">
+                                <p className="text-[10.5px] text-indigo-300 font-bold">
                                   ✓ {m.referto.length} Voti Presenti
                                 </p>
-                                <p className="text-[8.5px] text-emerald-500/80 uppercase tracking-wider font-semibold">
+                                <p className="text-[8.5px] text-indigo-500/80 uppercase tracking-wider font-semibold">
                                   Dati refertati
                                 </p>
                               </div>
                             ) : (
-                              <p className="text-[10px] text-emerald-500/60 italic hidden sm:block">
+                              <p className="text-[10px] text-indigo-500/60 italic hidden sm:block">
                                 Nessun voto caricato.
                               </p>
                             )}
@@ -3018,9 +3018,9 @@ export default function Fantacalcetto({
             </div>
           ) : activePublicTab === "convocazioni" ? (
             <div className="space-y-6 animate-fade-in font-sans">
-              <div className="bg-emerald-900/30 border-l-4 border-amber-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm">
-                <p className="text-xs text-emerald-200 leading-relaxed font-medium">
-                  <strong className="text-amber-400">ℹ️ Come Schierare la Formazione:</strong> Assicurati di schierare i 4 giocatori ogni settimana (prima che scada il tempo indicato)! Se un tuo titolare non giocherà la partita prenderà s.v. e verrà sostituito in automatico dal voto del tuo giocatore in panchina.
+              <div className="bg-indigo-900/30 border-l-4 border-sky-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm">
+                <p className="text-xs text-indigo-200 leading-relaxed font-medium">
+                  <strong className="text-sky-400">ℹ️ Come Schierare la Formazione:</strong> Assicurati di schierare i 4 giocatori ogni settimana (prima che scada il tempo indicato)! Se un tuo titolare non giocherà la partita prenderà s.v. e verrà sostituito in automatico dal voto del tuo giocatore in panchina.
                 </p>
               </div>
               {(() => {
@@ -3059,13 +3059,13 @@ export default function Fantacalcetto({
                 return (
                   <div className="space-y-6 animate-fade-in">
                     {/* Imminent Match details card */}
-                    <div className="bg-emerald-950/80 border border-emerald-800 rounded-3xl p-5 sm:p-6 shadow-xl backdrop-blur-md space-y-4">
+                    <div className="bg-indigo-950/80 border border-indigo-800 rounded-3xl p-5 sm:p-6 shadow-xl backdrop-blur-md space-y-4">
                       <div className="flex items-start gap-4">
                         <div className="p-3 bg-yellow-400/10 text-yellow-300 border border-yellow-500/20 rounded-2xl shrink-0">
                           <Calendar className="h-6 w-6 text-yellow-400" />
                         </div>
                         <div className="min-w-0 flex-1 text-left">
-                          <span className="text-[9px] uppercase font-black text-emerald-400 tracking-wider flex items-center gap-2">
+                          <span className="text-[9px] uppercase font-black text-indigo-400 tracking-wider flex items-center gap-2">
                             Turno di Gioco Attivo
                             <button
                               type="button"
@@ -3074,7 +3074,7 @@ export default function Fantacalcetto({
                                 setInstructionsTab("guida");
                                 setShowInstructionsModal(true);
                               }}
-                              className="text-emerald-400 hover:text-yellow-400 transition-colors"
+                              className="text-indigo-400 hover:text-yellow-400 transition-colors"
                               title="Vedi info su blocchi formazioni"
                             >
                               <BookOpen className="h-3.5 w-3.5" />
@@ -3088,7 +3088,7 @@ export default function Fantacalcetto({
                                   activeMatch.dettagli}
                               </h2>
                               {activeMatch.dettagli.includes(" - ") && (
-                                <p className="text-[10px] text-emerald-300 font-bold mt-1 uppercase tracking-wide">
+                                <p className="text-[10px] text-indigo-300 font-bold mt-1 uppercase tracking-wide">
                                   📍{" "}
                                   {activeMatch.dettagli
                                     .split(" - ")
@@ -3096,13 +3096,13 @@ export default function Fantacalcetto({
                                     .join(" - ")}
                                 </p>
                               )}
-                              <div className="inline-flex items-center gap-1.5 bg-emerald-900/40 border border-emerald-800 px-2.5 py-1 rounded-lg text-[10px] text-emerald-300 mt-2.5 font-bold uppercase">
+                              <div className="inline-flex items-center gap-1.5 bg-indigo-900/40 border border-indigo-800 px-2.5 py-1 rounded-lg text-[10px] text-indigo-300 mt-2.5 font-bold uppercase">
                                 <span>Stato:</span>
                                 <span
                                   className={
                                     lockStatus.isLocked
                                       ? "text-red-400 font-extrabold"
-                                      : "text-emerald-400 font-extrabold animate-pulse"
+                                      : "text-indigo-400 font-extrabold animate-pulse"
                                   }
                                 >
                                   {lockStatus.isLocked
@@ -3116,7 +3116,7 @@ export default function Fantacalcetto({
                               <h2 className="text-base sm:text-lg font-black text-white mt-0.5 leading-tight">
                                 Nessun turno programmato
                               </h2>
-                              <p className="text-[10.5px] text-emerald-300/80 font-bold leading-relaxed mt-1">
+                              <p className="text-[10.5px] text-indigo-300/80 font-bold leading-relaxed mt-1">
                                 Non ci sono partite imminenti attive. Contatta
                                 gli amministratori per programmare il prossimo
                                 incontro di campionato o amichevole!
@@ -3130,20 +3130,20 @@ export default function Fantacalcetto({
                     {activeMatch && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* CONVOCATI COLUMN */}
-                        <div className="bg-emerald-950/85 border border-emerald-800 p-5 rounded-3xl shadow-xl flex flex-col space-y-4">
-                          <div className="border-b border-emerald-900 pb-3 flex justify-between items-center text-left">
+                        <div className="bg-indigo-950/85 border border-indigo-800 p-5 rounded-3xl shadow-xl flex flex-col space-y-4">
+                          <div className="border-b border-indigo-900 pb-3 flex justify-between items-center text-left">
                             <div className="text-left">
                               <h3 className="font-extrabold text-xs text-white uppercase tracking-wider flex items-center gap-1.5">
-                                <span className="text-emerald-400 font-sans">
+                                <span className="text-indigo-400 font-sans">
                                   🟢
                                 </span>{" "}
                                 GIOCATORI CONVOCATI
                               </h3>
-                              <p className="text-[9px] text-emerald-400 font-black uppercase tracking-wider mt-0.5">
+                              <p className="text-[9px] text-indigo-400 font-black uppercase tracking-wider mt-0.5">
                                 Disponibili per la partita
                               </p>
                             </div>
-                            <span className="bg-emerald-900/65 border border-emerald-800 text-yellow-300 text-[11px] font-black px-3 py-1 rounded-xl shadow-inner font-mono">
+                            <span className="bg-indigo-900/65 border border-indigo-800 text-yellow-300 text-[11px] font-black px-3 py-1 rounded-xl shadow-inner font-mono">
                               {convocatiGiocatori.length +
                                 externalsConvocati.length}
                             </span>
@@ -3152,7 +3152,7 @@ export default function Fantacalcetto({
                           <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
                             {convocatiGiocatori.length === 0 &&
                             externalsConvocati.length === 0 ? (
-                              <div className="text-center py-10 text-emerald-500 text-xs italic font-medium">
+                              <div className="text-center py-10 text-indigo-500 text-xs italic font-medium">
                                 Nessun giocatore attualmente convocato.
                               </div>
                             ) : (
@@ -3160,22 +3160,22 @@ export default function Fantacalcetto({
                                 {convocatiGiocatori.map((p) => (
                                   <div
                                     key={p.nome}
-                                    className="flex items-center justify-between bg-emerald-900/15 border border-emerald-850 p-3 rounded-2xl hover:bg-emerald-900/30 transition-all text-left animate-fadeIn"
+                                    className="flex items-center justify-between bg-indigo-900/15 border border-indigo-850 p-3 rounded-2xl hover:bg-indigo-900/30 transition-all text-left animate-fadeIn"
                                   >
                                     <div className="flex items-center gap-3">
-                                      <div className="w-8 h-8 rounded-xl bg-yellow-400 text-emerald-950 flex items-center justify-center font-black font-mono text-xs shadow-md">
+                                      <div className="w-8 h-8 rounded-xl bg-yellow-400 text-indigo-950 flex items-center justify-center font-black font-mono text-xs shadow-md">
                                         #{p.numeroMaglia || "N/A"}
                                       </div>
                                       <div>
                                         <p className="font-black text-xs text-gray-100">
                                           {getLastName(p.nome)}
                                         </p>
-                                        <span className="text-[8px] uppercase tracking-wider font-extrabold text-emerald-400/90 block mt-0.5 text-left">
+                                        <span className="text-[8px] uppercase tracking-wider font-extrabold text-indigo-400/90 block mt-0.5 text-left">
                                           🛡️ {p.ultimoRuolo || "Calciatore"}
                                         </span>
                                       </div>
                                     </div>
-                                    <span className="bg-emerald-500/15 border border-emerald-500/25 text-emerald-350 text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg">
+                                    <span className="bg-indigo-500/15 border border-indigo-500/25 text-indigo-350 text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg">
                                       Attivo
                                     </span>
                                   </div>
@@ -3184,22 +3184,22 @@ export default function Fantacalcetto({
                                 {externalsConvocati.map((extName) => (
                                   <div
                                     key={extName}
-                                    className="flex items-center justify-between bg-emerald-900/20 border border-amber-900/25 p-3 rounded-2xl transition-all text-left animate-fadeIn"
+                                    className="flex items-center justify-between bg-indigo-900/20 border border-sky-900/25 p-3 rounded-2xl transition-all text-left animate-fadeIn"
                                   >
                                     <div className="flex items-center gap-3">
-                                      <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold font-mono text-xs shadow-md">
+                                      <div className="w-8 h-8 rounded-xl bg-sky-500 text-white flex items-center justify-center font-bold font-mono text-xs shadow-md">
                                         EXT
                                       </div>
                                       <div>
-                                        <p className="font-black text-xs text-amber-200">
+                                        <p className="font-black text-xs text-sky-200">
                                           {getLastName(extName)}
                                         </p>
-                                        <span className="text-[8px] uppercase tracking-wider font-extrabold text-amber-400 block mt-0.5 text-left">
+                                        <span className="text-[8px] uppercase tracking-wider font-extrabold text-sky-400 block mt-0.5 text-left">
                                           👤 Esterno
                                         </span>
                                       </div>
                                     </div>
-                                    <span className="bg-amber-500/15 border border-amber-500/25 text-amber-300 text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg">
+                                    <span className="bg-sky-500/15 border border-sky-500/25 text-sky-300 text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg">
                                       Esterno
                                     </span>
                                   </div>
@@ -3210,8 +3210,8 @@ export default function Fantacalcetto({
                         </div>
 
                         {/* NON CONVOCATI COLUMN */}
-                        <div className="bg-emerald-950/85 border border-emerald-800 p-5 rounded-3xl shadow-xl flex flex-col space-y-4">
-                          <div className="border-b border-emerald-900 pb-3 flex justify-between items-center text-left">
+                        <div className="bg-indigo-950/85 border border-indigo-800 p-5 rounded-3xl shadow-xl flex flex-col space-y-4">
+                          <div className="border-b border-indigo-900 pb-3 flex justify-between items-center text-left">
                             <div className="text-left">
                               <h3 className="font-extrabold text-xs text-white uppercase tracking-wider flex items-center gap-1.5">
                                 <span className="text-red-400 font-sans">
@@ -3223,14 +3223,14 @@ export default function Fantacalcetto({
                                 Non selezionati o indisponibili
                               </p>
                             </div>
-                            <span className="bg-emerald-900/65 border border-emerald-800 text-red-300 text-[11px] font-black px-3 py-1 rounded-xl shadow-inner font-mono">
+                            <span className="bg-indigo-900/65 border border-indigo-800 text-red-300 text-[11px] font-black px-3 py-1 rounded-xl shadow-inner font-mono">
                               {nonConvocatiGiocatori.length}
                             </span>
                           </div>
 
                           <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
                             {nonConvocatiGiocatori.length === 0 ? (
-                              <div className="text-center py-10 text-emerald-500 text-xs italic font-medium">
+                              <div className="text-center py-10 text-indigo-500 text-xs italic font-medium">
                                 Tutti i tesserati della rosa risultano inseriti
                                 convocati!
                               </div>
@@ -3238,17 +3238,17 @@ export default function Fantacalcetto({
                               nonConvocatiGiocatori.map((p) => (
                                 <div
                                   key={p.nome}
-                                  className="flex items-center justify-between bg-emerald-900/10 border border-emerald-850 p-3 rounded-2xl opacity-65 hover:opacity-100 transition-all hover:bg-emerald-900/20 text-left animate-fadeIn"
+                                  className="flex items-center justify-between bg-indigo-900/10 border border-indigo-850 p-3 rounded-2xl opacity-65 hover:opacity-100 transition-all hover:bg-indigo-900/20 text-left animate-fadeIn"
                                 >
                                   <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-xl bg-emerald-950 text-emerald-400 flex items-center justify-center font-bold font-mono text-xs border border-emerald-850">
+                                    <div className="w-8 h-8 rounded-xl bg-indigo-950 text-indigo-400 flex items-center justify-center font-bold font-mono text-xs border border-indigo-850">
                                       #{p.numeroMaglia || "N/A"}
                                     </div>
                                     <div>
                                       <p className="font-extrabold text-xs text-gray-300 line-through decoration-red-900">
                                         {getLastName(p.nome)}
                                       </p>
-                                      <span className="text-[8px] uppercase tracking-wider font-extrabold text-emerald-500 block mt-0.5 text-left">
+                                      <span className="text-[8px] uppercase tracking-wider font-extrabold text-indigo-500 block mt-0.5 text-left">
                                         {p.ultimoRuolo || "Calciatore"}
                                       </span>
                                     </div>
@@ -3273,15 +3273,15 @@ export default function Fantacalcetto({
               className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-12 gap-6 font-sans"
             >
               <div className="lg:col-span-12 xl:col-span-12">
-                <div className="bg-emerald-900/30 border-l-4 border-yellow-500 p-4 rounded-r-xl font-sans shadow-sm mb-4">
-                  <p className="text-xs text-emerald-200 leading-relaxed font-medium">
+                <div className="bg-indigo-900/30 border-l-4 border-yellow-500 p-4 rounded-r-xl font-sans shadow-sm mb-4">
+                  <p className="text-xs text-indigo-200 leading-relaxed font-medium">
                     <strong className="text-yellow-400">ℹ️ Creazione Squadra / Mercato:</strong> Scegli un Nome per il Team, un indirizzo email ed un <strong>PIN segreto</strong> per proteggere la tua rosa. <br/>Il budget massimo al primo accesso è <strong>60 Izycoin</strong> per 4 giocatori. Successivamente potrai effettuare solo <strong>1 cambio a settimana</strong> per massimizzare le plusvalenze!
                   </p>
                 </div>
               </div>
               {/* Left controls column */}
               <div className="lg:col-span-4 xl:col-span-3 space-y-4">
-                <div className="bg-emerald-950/80 border border-emerald-800 rounded-2xl p-5 space-y-4 shadow-xl backdrop-blur-md">
+                <div className="bg-indigo-950/80 border border-indigo-800 rounded-2xl p-5 space-y-4 shadow-xl backdrop-blur-md">
                   <h3 className="font-extrabold text-[11px] uppercase tracking-wider text-yellow-300 flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
                       <User className="h-4.5 w-4.5 text-yellow-400" />{" "}
@@ -3294,7 +3294,7 @@ export default function Fantacalcetto({
                         setInstructionsTab("guida");
                         setShowInstructionsModal(true);
                       }}
-                      className="text-emerald-400 hover:text-yellow-400 transition-colors bg-emerald-900/40 p-1.5 rounded-lg border border-emerald-800"
+                      className="text-indigo-400 hover:text-yellow-400 transition-colors bg-indigo-900/40 p-1.5 rounded-lg border border-indigo-800"
                       title="Vedi info su crediti e mercato"
                     >
                       <BookOpen className="h-4 w-4" />
@@ -3309,14 +3309,14 @@ export default function Fantacalcetto({
 
                   <div className="space-y-4">
                     {/* Nome Fantasquadra Display */}
-                    <div className="space-y-1 bg-emerald-900/40 border border-emerald-900 rounded-xl p-3.5 relative">
+                    <div className="space-y-1 bg-indigo-900/40 border border-indigo-900 rounded-xl p-3.5 relative">
                       <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span className="text-[9px] text-emerald-300 font-extrabold uppercase tracking-wider">
+                        <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+                        <span className="text-[9px] text-indigo-300 font-extrabold uppercase tracking-wider">
                           Online
                         </span>
                       </div>
-                      <label className="block text-[9px] font-black uppercase tracking-widest text-emerald-400">
+                      <label className="block text-[9px] font-black uppercase tracking-widest text-indigo-400">
                         La tua Fantasquadra
                       </label>
                       <div className="flex items-center justify-between py-0.5">
@@ -3329,7 +3329,7 @@ export default function Fantacalcetto({
                             setNuovoNomeSquadra(nomeFantasquadra);
                             setShowRenameModal(true);
                           }}
-                          className="bg-emerald-800/60 hover:bg-emerald-700/80 text-emerald-300 p-1.5 rounded-lg transition-colors"
+                          className="bg-indigo-800/60 hover:bg-indigo-700/80 text-indigo-300 p-1.5 rounded-lg transition-colors"
                           title="Rinomina squadra"
                         >
                           <Pencil className="w-3.5 h-3.5" />
@@ -3338,8 +3338,8 @@ export default function Fantacalcetto({
                     </div>
 
                     {/* Nome Presidente Display */}
-                    <div className="space-y-1 bg-emerald-900/40 border border-emerald-900 rounded-xl p-3.5">
-                      <label className="block text-[9px] font-black uppercase tracking-widest text-emerald-400">
+                    <div className="space-y-1 bg-indigo-900/40 border border-indigo-900 rounded-xl p-3.5">
+                      <label className="block text-[9px] font-black uppercase tracking-widest text-indigo-400">
                         Presidente della Squadra
                       </label>
                       <p className="text-xs font-bold text-gray-200 py-0.5">
@@ -3357,8 +3357,8 @@ export default function Fantacalcetto({
                       );
                       if (matched && matched.email) {
                         return (
-                          <div className="space-y-1 bg-emerald-900/40 border border-emerald-900 rounded-xl p-3.5">
-                            <label className="block text-[9px] font-black uppercase tracking-widest text-emerald-400">
+                          <div className="space-y-1 bg-indigo-900/40 border border-indigo-900 rounded-xl p-3.5">
+                            <label className="block text-[9px] font-black uppercase tracking-widest text-indigo-400">
                               Email Associata
                             </label>
                             <p className="text-xs font-bold text-gray-300 font-mono py-0.5 truncate">
@@ -3392,36 +3392,36 @@ export default function Fantacalcetto({
                           setSyncProgress(0);
                         }
                       }}
-                      className="w-full bg-emerald-950/60 hover:bg-red-950/20 hover:text-red-400 border border-emerald-900 hover:border-red-900/40 text-[10px] text-emerald-300 font-extrabold uppercase py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 mt-2"
+                      className="w-full bg-indigo-950/60 hover:bg-red-950/20 hover:text-red-400 border border-indigo-900 hover:border-red-900/40 text-[10px] text-indigo-300 font-extrabold uppercase py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 mt-2"
                     >
                       🔌 Cambia Squadra / Esci
                     </button>
                   </div>
 
                   {/* Selected Players list */}
-                  <div className="pt-2 border-t border-emerald-900 space-y-3">
+                  <div className="pt-2 border-t border-indigo-900 space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-indigo-400">
                         Roster Selezionato
                       </span>
                       <span
                         className={`text-[11px] px-2.5 py-0.5 rounded-full font-black font-mono transition-all ${
                           selectedPlayers.length === 4
-                            ? "bg-emerald-500 text-emerald-950"
-                            : "bg-emerald-800 text-emerald-200 animate-pulse"
+                            ? "bg-indigo-500 text-indigo-950"
+                            : "bg-indigo-800 text-indigo-200 animate-pulse"
                         }`}
                       >
                         {selectedPlayers.length}/4
                       </span>
                     </div>
 
-                    <div className="bg-emerald-900/30 border border-emerald-900 rounded-xl p-3 min-h-[160px] max-h-[220px] overflow-y-auto space-y-1">
+                    <div className="bg-indigo-900/30 border border-indigo-900 rounded-xl p-3 min-h-[160px] max-h-[220px] overflow-y-auto space-y-1">
                       {selectedPlayers.length === 0 ? (
-                        <div className="text-[10px] text-emerald-500 text-center py-10 font-medium leading-relaxed">
+                        <div className="text-[10px] text-indigo-500 text-center py-10 font-medium leading-relaxed">
                           Seleziona esattamente 4 giocatori dalla lista sulla
                           destra toccando i pulsanti "+".
                           <br />
-                          <span className="text-[9px] text-emerald-600 mt-1.5 block">
+                          <span className="text-[9px] text-indigo-600 mt-1.5 block">
                             (3 Titolari + 1 Panchinaro)
                           </span>
                         </div>
@@ -3433,13 +3433,13 @@ export default function Fantacalcetto({
                               key={idx}
                               className={`flex items-center justify-between px-2 py-1.5 rounded-lg border transition-all text-[11px] font-bold group ${
                                 isPanchinaro
-                                  ? "bg-amber-500/10 border-amber-500/30 text-amber-300 animate-pulse-slow"
-                                  : "bg-emerald-900/40 hover:bg-emerald-900 border-emerald-805/40 text-gray-300"
+                                  ? "bg-sky-500/10 border-sky-500/30 text-sky-300 animate-pulse-slow"
+                                  : "bg-indigo-900/40 hover:bg-indigo-900 border-indigo-805/40 text-gray-300"
                               }`}
                             >
                               <span className="truncate pr-1 flex items-center gap-1.5 min-w-0">
                                 <span
-                                  className={`text-[9px] px-1 rounded font-black ${isPanchinaro ? "bg-amber-400 text-amber-950 font-mono" : "bg-emerald-900 text-emerald-300 font-mono"}`}
+                                  className={`text-[9px] px-1 rounded font-black ${isPanchinaro ? "bg-sky-400 text-sky-950 font-mono" : "bg-indigo-900 text-indigo-300 font-mono"}`}
                                 >
                                   {isPanchinaro ? "PAN" : `TIT`}
                                 </span>
@@ -3459,7 +3459,7 @@ export default function Fantacalcetto({
                                         );
                                         setSelectedPlayers([...others, name]);
                                       }}
-                                      className="text-[8.5px] bg-emerald-950 hover:bg-emerald-800 hover:text-white border border-emerald-800 px-1.5 py-0.5 rounded-md text-emerald-400 transition-all font-bold cursor-pointer"
+                                      className="text-[8.5px] bg-indigo-950 hover:bg-indigo-800 hover:text-white border border-indigo-800 px-1.5 py-0.5 rounded-md text-indigo-400 transition-all font-bold cursor-pointer"
                                       title="Metti in panchina"
                                     >
                                       Metti in Panchina
@@ -3506,23 +3506,23 @@ export default function Fantacalcetto({
                       const overBudget = remaining < 0;
 
                       return (
-                        <div className="bg-emerald-950/40 border border-emerald-900/60 rounded-xl p-3.5 space-y-2 mt-2 leading-tight">
+                        <div className="bg-indigo-950/40 border border-indigo-900/60 rounded-xl p-3.5 space-y-2 mt-2 leading-tight">
                           <div className="flex justify-between items-center text-[11px]">
-                            <span className="font-extrabold text-emerald-300">
+                            <span className="font-extrabold text-indigo-300">
                               Costo Roster Scelto:
                             </span>
                             <span
-                              className={`font-mono font-black border px-2 py-0.5 rounded ${overBudget ? "text-red-400 bg-red-950/20 border-red-900/40" : "text-yellow-300 bg-emerald-950 border-emerald-900"}`}
+                              className={`font-mono font-black border px-2 py-0.5 rounded ${overBudget ? "text-red-400 bg-red-950/20 border-red-900/40" : "text-yellow-300 bg-indigo-950 border-indigo-900"}`}
                             >
                               {totalCost} / {MAX_BUDGET} Izycoin 🪙
                             </span>
                           </div>
                           <div className="flex justify-between items-center text-[11px]">
-                            <span className="font-extrabold text-emerald-300">
+                            <span className="font-extrabold text-indigo-300">
                               Monete Restanti:
                             </span>
                             <span
-                              className={`font-mono font-black ${overBudget ? "text-red-400 animate-pulse font-extrabold" : "text-emerald-400"}`}
+                              className={`font-mono font-black ${overBudget ? "text-red-400 animate-pulse font-extrabold" : "text-indigo-400"}`}
                             >
                               {remaining} Izycoin 🪙
                             </span>
@@ -3605,14 +3605,14 @@ export default function Fantacalcetto({
                       const overBudget = finalCredits < 0;
 
                       return (
-                        <div className="bg-emerald-950/45 border border-emerald-990 rounded-xl p-3.5 space-y-2.5 mt-2 leading-tight text-left">
-                          <h5 className="text-[9px] font-black uppercase text-yellow-300 border-b border-emerald-900/60 pb-1">
+                        <div className="bg-indigo-950/45 border border-indigo-990 rounded-xl p-3.5 space-y-2.5 mt-2 leading-tight text-left">
+                          <h5 className="text-[9px] font-black uppercase text-yellow-300 border-b border-indigo-900/60 pb-1">
                             📊 BILANCIO CAMBIO ROSA {isMercatoLiberoValido ? "(Mercato Libero)" : "(Max 1)"}
                           </h5>
 
                           <div className="grid grid-cols-2 gap-2 text-[10px]">
                             <div>
-                              <p className="text-emerald-400 font-bold">
+                              <p className="text-indigo-400 font-bold">
                                 Credito Residuo Iniziale:
                               </p>
                               <p className="font-mono font-black text-white">
@@ -3620,11 +3620,11 @@ export default function Fantacalcetto({
                               </p>
                             </div>
                             <div>
-                              <p className="text-emerald-400 font-bold">
+                              <p className="text-indigo-400 font-bold">
                                 Sostituzioni Rilevate:
                               </p>
                               <p
-                                className={`font-black ${hasTooManyChanges ? "text-red-400 font-black animate-pulse" : "text-emerald-300"}`}
+                                className={`font-black ${hasTooManyChanges ? "text-red-400 font-black animate-pulse" : "text-indigo-300"}`}
                               >
                                 {numChangesFromOrigin} {isMercatoLiberoValido ? "cambi" : "/ 1 cambio"}
                               </p>
@@ -3633,7 +3633,7 @@ export default function Fantacalcetto({
 
                           {/* Swap Details ledger */}
                           {numChangesFromOrigin > 0 && (
-                            <div className="bg-emerald-950/60 border border-emerald-900 p-2.5 rounded-lg space-y-1 text-[9.5px]">
+                            <div className="bg-indigo-950/60 border border-indigo-900 p-2.5 rounded-lg space-y-1 text-[9.5px]">
                               <div className="flex justify-between items-center">
                                 <span className="text-red-400 font-extrabold truncate max-w-[65%]">
                                   🔴 Cessione: {soldPlayers.join(", ")}
@@ -3643,20 +3643,20 @@ export default function Fantacalcetto({
                                 </span>
                               </div>
                               <div className="flex justify-between items-center">
-                                <span className="text-emerald-400 font-extrabold truncate max-w-[65%]">
+                                <span className="text-indigo-400 font-extrabold truncate max-w-[65%]">
                                   🟢 Acquisto: {boughtPlayers.join(", ")}
                                 </span>
-                                <span className="font-mono text-emerald-450 font-black font-black">
+                                <span className="font-mono text-indigo-450 font-black font-black">
                                   -{boughtPrice} 🪙
                                 </span>
                               </div>
                               {plusvalenzaReale !== 0 && (
-                                <div className="flex justify-between border-t border-emerald-900/40 pt-1 text-[8.5px]">
+                                <div className="flex justify-between border-t border-indigo-900/40 pt-1 text-[8.5px]">
                                   <span className="text-yellow-300 font-extrabold">
                                     📈 Plusvalenza Finanziaria:
                                   </span>
                                   <span
-                                    className={`font-mono font-black ${plusvalenzaReale > 0 ? "text-emerald-450" : "text-red-450"}`}
+                                    className={`font-mono font-black ${plusvalenzaReale > 0 ? "text-indigo-450" : "text-red-450"}`}
                                   >
                                     {plusvalenzaReale > 0
                                       ? `+${plusvalenzaReale}`
@@ -3668,19 +3668,19 @@ export default function Fantacalcetto({
                             </div>
                           )}
 
-                          <div className="flex justify-between items-center text-xs border-t border-emerald-900/40 pt-1.5">
-                            <span className="font-extrabold text-emerald-300 font-sans">
+                          <div className="flex justify-between items-center text-xs border-t border-indigo-900/40 pt-1.5">
+                            <span className="font-extrabold text-indigo-300 font-sans">
                               Nuovo Tesoretto Residuo:
                             </span>
                             <span
-                              className={`font-mono font-black text-sm px-2 py-0.5 rounded border ${overBudget ? "text-red-400 bg-red-950/20 border-red-900/40" : "text-emerald-350 bg-emerald-950 border-emerald-900"}`}
+                              className={`font-mono font-black text-sm px-2 py-0.5 rounded border ${overBudget ? "text-red-400 bg-red-950/20 border-red-900/40" : "text-indigo-350 bg-indigo-950 border-indigo-900"}`}
                             >
                               {finalCredits} Izycoin 🪙
                             </span>
                           </div>
 
                           {hasTooManyChanges && (
-                            <p className="text-[9px] text-amber-300 font-semibold border border-amber-900/30 bg-amber-950/20 p-2 rounded-lg">
+                            <p className="text-[9px] text-sky-300 font-semibold border border-sky-900/30 bg-sky-950/20 p-2 rounded-lg">
                               ⚠️ Errore: Puoi fare al massimo 1 cambio alla
                               volta rispetto alla rosa precedente! Ripristina i
                               giocatori originari.
@@ -3702,7 +3702,7 @@ export default function Fantacalcetto({
                   <button
                     type="submit"
                     disabled={submitting || lockStatus.isLocked}
-                    className="w-full bg-yellow-400 hover:bg-yellow-350 disabled:bg-emerald-900 font-extrabold text-xs uppercase text-emerald-950 py-3 rounded-xl shadow-lg transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    className="w-full bg-yellow-400 hover:bg-yellow-350 disabled:bg-indigo-900 font-extrabold text-xs uppercase text-indigo-950 py-3 rounded-xl shadow-lg transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     {submitting
                       ? "Invio della squadra..."
@@ -3713,19 +3713,19 @@ export default function Fantacalcetto({
                 </div>
 
                 {/* Sezione Consigli/Miglioramenti per il Presidente o l'Amico */}
-                <div className="bg-emerald-950/80 border border-emerald-800 rounded-2xl p-5 space-y-4 shadow-xl backdrop-blur-md">
+                <div className="bg-indigo-950/80 border border-indigo-800 rounded-2xl p-5 space-y-4 shadow-xl backdrop-blur-md">
                   <h3 className="font-extrabold text-[11px] uppercase tracking-wider text-yellow-300 flex items-center gap-1.5">
                     <Lightbulb className="h-4.5 w-4.5 text-yellow-400 animate-pulse" />
                     💡 Proponi un Miglioramento
                   </h3>
-                  <p className="text-[10px] text-emerald-300/90 font-medium leading-relaxed">
+                  <p className="text-[10px] text-indigo-300/90 font-medium leading-relaxed">
                     Hai idee per questa app o l'organizzazione del
                     Fantacalcetto? Invia una proposta! Comparirà direttamente
                     sulla bacheca dell'amministratore.
                   </p>
 
                   {consiglioInviatoConSuccesso ? (
-                    <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[10.5px] rounded-xl p-3.5 font-semibold text-center leading-relaxed">
+                    <div className="bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-[10.5px] rounded-xl p-3.5 font-semibold text-center leading-relaxed">
                       ✨ Grazie! Il tuo suggerimento è stato inviato
                       all'organizzatore con successo.
                       <button
@@ -3744,7 +3744,7 @@ export default function Fantacalcetto({
                         </div>
                       )}
                       <div className="space-y-1">
-                        <label className="block text-[8.5px] font-black uppercase tracking-wider text-emerald-400 leading-none">
+                        <label className="block text-[8.5px] font-black uppercase tracking-wider text-indigo-400 leading-none">
                           Tuo Nome / Mittente
                         </label>
                         <input
@@ -3752,11 +3752,11 @@ export default function Fantacalcetto({
                           value={consiglioAutore}
                           onChange={(e) => setConsiglioAutore(e.target.value)}
                           placeholder="Es. Marco R."
-                          className="w-full bg-emerald-900/40 border border-emerald-850 focus:border-yellow-400 focus:ring-0 rounded-lg px-3 py-2 outline-none text-xs text-white placeholder-emerald-600 font-bold"
+                          className="w-full bg-indigo-900/40 border border-indigo-850 focus:border-yellow-400 focus:ring-0 rounded-lg px-3 py-2 outline-none text-xs text-white placeholder-indigo-600 font-bold"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="block text-[8.5px] font-black uppercase tracking-wider text-emerald-400 leading-none">
+                        <label className="block text-[8.5px] font-black uppercase tracking-wider text-indigo-400 leading-none">
                           La tua idea / consiglio
                         </label>
                         <textarea
@@ -3764,7 +3764,7 @@ export default function Fantacalcetto({
                           rows={3}
                           onChange={(e) => setConsiglioTesto(e.target.value)}
                           placeholder="Es. Vorrei poter vedere la media punti delle fantasquadre..."
-                          className="w-full bg-emerald-900/40 border border-emerald-850 focus:border-yellow-400 focus:ring-0 rounded-lg px-3 py-2 outline-none text-xs text-white placeholder-emerald-600 font-medium"
+                          className="w-full bg-indigo-900/40 border border-indigo-850 focus:border-yellow-400 focus:ring-0 rounded-lg px-3 py-2 outline-none text-xs text-white placeholder-indigo-600 font-medium"
                         />
                       </div>
                       <button
@@ -3817,7 +3817,7 @@ export default function Fantacalcetto({
                             setInvioConsiglioInCorso(false);
                           }
                         }}
-                        className="w-full bg-emerald-800 hover:bg-emerald-700 active:bg-emerald-900 text-yellow-300 hover:text-white font-extrabold text-[10.5px] uppercase py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                        className="w-full bg-indigo-800 hover:bg-indigo-700 active:bg-indigo-900 text-yellow-300 hover:text-white font-extrabold text-[10.5px] uppercase py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                       >
                         {invioConsiglioInCorso
                           ? "Invio..."
@@ -3830,12 +3830,12 @@ export default function Fantacalcetto({
 
               {/* Right pool selection Column */}
               <div className="lg:col-span-8 xl:col-span-6 flex flex-col space-y-4">
-                <div className="bg-emerald-950/80 border border-emerald-800 rounded-3xl p-5 shadow-xl flex-1 flex flex-col min-h-[400px]">
+                <div className="bg-indigo-950/80 border border-indigo-800 rounded-3xl p-5 shadow-xl flex-1 flex flex-col min-h-[400px]">
                   {!isUnlocked ? (
                     <div className="flex-1 flex flex-col justify-center items-center py-10 text-center space-y-6 animate-fadeIn">
                       <div className="relative">
                         <div className="absolute inset-0 bg-yellow-400/10 rounded-full blur-xl animate-pulse"></div>
-                        <div className="bg-emerald-900/40 border-2 border-yellow-400/30 p-5 rounded-full relative">
+                        <div className="bg-indigo-900/40 border-2 border-yellow-400/30 p-5 rounded-full relative">
                           <Lock className="h-10 w-10 text-yellow-400" />
                         </div>
                       </div>
@@ -3844,7 +3844,7 @@ export default function Fantacalcetto({
                         <h4 className="font-extrabold text-sm text-white uppercase tracking-wider font-sans">
                           Operazioni di Mercato Protette 🔒
                         </h4>
-                        <p className="text-[10px] text-emerald-300 font-medium leading-relaxed font-sans px-2">
+                        <p className="text-[10px] text-indigo-300 font-medium leading-relaxed font-sans px-2">
                           Per poter modificare la tua fantasquadra, rimpiazzare
                           i calciatori ed effettuare trasferimenti, effettua
                           prima l'accesso digitando il PIN segreto nel pannello
@@ -3853,9 +3853,9 @@ export default function Fantacalcetto({
                       </div>
 
                       {matchedTeam && (
-                        <div className="w-full max-w-xs bg-emerald-900/20 border border-emerald-850 rounded-2xl p-4 space-y-3 text-left">
-                          <div className="border-b border-emerald-900/50 pb-2 flex justify-between items-center">
-                            <span className="text-[9px] font-black uppercase tracking-wider text-emerald-400 font-sans">
+                        <div className="w-full max-w-xs bg-indigo-900/20 border border-indigo-850 rounded-2xl p-4 space-y-3 text-left">
+                          <div className="border-b border-indigo-900/50 pb-2 flex justify-between items-center">
+                            <span className="text-[9px] font-black uppercase tracking-wider text-indigo-400 font-sans">
                               Rosa Attualmente nel Database
                             </span>
                             <span className="text-[8px] font-bold text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded border border-yellow-400/20">
@@ -3872,14 +3872,14 @@ export default function Fantacalcetto({
                                     key={idx}
                                     className={`flex items-center justify-between px-3 py-1.5 rounded-xl border text-[11px] font-bold ${
                                       isPanchinaro
-                                        ? "bg-amber-500/5 border-amber-500/20 text-amber-300/90"
-                                        : "bg-emerald-900/30 border-emerald-850 text-white/95"
+                                        ? "bg-sky-500/5 border-sky-500/20 text-sky-300/90"
+                                        : "bg-indigo-900/30 border-indigo-850 text-white/95"
                                     }`}
                                   >
                                     <span>
                                       {idx + 1}. {getLastName(pName)}
                                     </span>
-                                    <span className="text-[8px] font-bold uppercase tracking-wider opacity-60 text-emerald-400">
+                                    <span className="text-[8px] font-bold uppercase tracking-wider opacity-60 text-indigo-400">
                                       {isPanchinaro ? "Panc." : "Titolare"}
                                     </span>
                                   </div>
@@ -3890,7 +3890,7 @@ export default function Fantacalcetto({
                             {(!matchedTeam.giocatoriSelezionati ||
                               matchedTeam.giocatoriSelezionati.length ===
                                 0) && (
-                              <p className="text-[10px] text-emerald-500 text-center py-4 italic font-medium">
+                              <p className="text-[10px] text-indigo-500 text-center py-4 italic font-medium">
                                 Nessun giocatore registrato per questa squadra.
                               </p>
                             )}
@@ -3901,18 +3901,18 @@ export default function Fantacalcetto({
                   ) : (
                     <>
                       {/* Search / filter bar */}
-                      <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between pb-4 border-b border-emerald-900">
+                      <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between pb-4 border-b border-indigo-900">
                         <div className="space-y-0.5">
                           <h4 className="font-extrabold text-xs text-white uppercase tracking-wider">
                             Scegli i tuoi Campioni (max 3)
                           </h4>
-                          <p className="text-[10px] text-emerald-400 font-medium">
+                          <p className="text-[10px] text-indigo-400 font-medium">
                             Pool dei giocatori reali attivi tesserati
                           </p>
                         </div>
                         <div className="flex flex-wrap items-center gap-3">
                           {lockStatus.match && currentConvocati.length > 0 && (
-                            <label className="flex items-center gap-1.5 cursor-pointer select-none text-[9px] font-black uppercase text-emerald-400 bg-emerald-900/40 border border-emerald-850 px-2.5 py-1.5 rounded-xl transition-all hover:bg-emerald-900/60">
+                            <label className="flex items-center gap-1.5 cursor-pointer select-none text-[9px] font-black uppercase text-indigo-400 bg-indigo-900/40 border border-indigo-850 px-2.5 py-1.5 rounded-xl transition-all hover:bg-indigo-900/60">
                               <input
                                 type="checkbox"
                                 checked={filterConvocati}
@@ -3925,13 +3925,13 @@ export default function Fantacalcetto({
                             </label>
                           )}
                           <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-emerald-500" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-indigo-500" />
                             <input
                               type="text"
                               value={searchQuery}
                               onChange={(e) => setSearchQuery(e.target.value)}
                               placeholder="Cerca giocatore..."
-                              className="pl-8.5 pr-4 py-1.5 bg-emerald-900/60 border border-emerald-850 rounded-xl text-xs font-semibold focus:border-yellow-400 outline-none w-full sm:w-40 text-white placeholder-emerald-500"
+                              className="pl-8.5 pr-4 py-1.5 bg-indigo-900/60 border border-indigo-850 rounded-xl text-xs font-semibold focus:border-yellow-400 outline-none w-full sm:w-40 text-white placeholder-indigo-500"
                             />
                           </div>
                         </div>
@@ -3939,13 +3939,13 @@ export default function Fantacalcetto({
 
                       {/* Convocati Quick Ref panel */}
                       {lockStatus.match && currentConvocati.length > 0 && (
-                        <div className="mt-4 bg-emerald-900/15 border border-emerald-850/70 rounded-2xl p-3.5 space-y-2">
+                        <div className="mt-4 bg-indigo-900/15 border border-indigo-850/70 rounded-2xl p-3.5 space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="text-[10px] font-black uppercase tracking-wider text-yellow-300 flex items-center gap-1">
                               🏃 CONVOCATI DELLA SETTIMANA (
                               {currentConvocati.length})
                             </span>
-                            <span className="text-[9px] text-emerald-400/80 font-bold hidden sm:inline">
+                            <span className="text-[9px] text-indigo-400/80 font-bold hidden sm:inline">
                               Tocca i giocatori sotto per selezionarli
                             </span>
                           </div>
@@ -3960,8 +3960,8 @@ export default function Fantacalcetto({
                                   onClick={() => handleTogglePlayer(name)}
                                   className={`text-[10px] h-6 font-bold px-2.5 rounded-lg transition-all cursor-pointer select-none border ${
                                     isSelected
-                                      ? "bg-yellow-400 border-yellow-300 text-emerald-950 font-black shadow-md scale-95"
-                                      : "bg-emerald-950/60 border-emerald-850 text-emerald-200 hover:bg-emerald-900/50"
+                                      ? "bg-yellow-400 border-yellow-300 text-indigo-950 font-black shadow-md scale-95"
+                                      : "bg-indigo-950/60 border-indigo-850 text-indigo-200 hover:bg-indigo-900/50"
                                   }`}
                                 >
                                   {getLastName(name)}
@@ -3975,7 +3975,7 @@ export default function Fantacalcetto({
                       {/* Grid selectors */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 overflow-y-auto max-h-[460px] pt-4 pr-1">
                         {filteredPool.length === 0 ? (
-                          <div className="col-span-2 text-center text-xs text-emerald-500 py-20 font-medium">
+                          <div className="col-span-2 text-center text-xs text-indigo-500 py-20 font-medium">
                             Nessun giocatore corrisponde alla ricerca ed ai
                             filtri attivi.
                           </div>
@@ -3994,7 +3994,7 @@ export default function Fantacalcetto({
                                 className={`border rounded-2xl p-3 flex items-center justify-between cursor-pointer select-none transition-all ${
                                   isSelected
                                     ? "bg-yellow-450/15 border-yellow-400 text-white shadow-md ring-1 ring-yellow-400/50"
-                                    : "bg-emerald-900/20 border-emerald-850 text-emerald-100 hover:bg-emerald-900/40"
+                                    : "bg-indigo-900/20 border-indigo-850 text-indigo-100 hover:bg-indigo-900/40"
                                 }`}
                               >
                                 <div className="flex items-center gap-2.5 min-w-0">
@@ -4002,8 +4002,8 @@ export default function Fantacalcetto({
                                   <div
                                     className={`w-8 h-8 rounded-lg flex items-center justify-center font-mono font-black text-xs shrink-0 ${
                                       isSelected
-                                        ? "bg-yellow-400 text-emerald-950"
-                                        : "bg-emerald-800 text-emerald-300"
+                                        ? "bg-yellow-400 text-indigo-950"
+                                        : "bg-indigo-800 text-indigo-300"
                                     }`}
                                   >
                                     #{p.numeroMaglia || "??"}
@@ -4013,15 +4013,15 @@ export default function Fantacalcetto({
                                       {getLastName(p.nome)}
                                     </p>
                                     <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
-                                      <span className="inline-block bg-emerald-950/60 text-[8px] uppercase font-bold tracking-widest text-emerald-450 px-1.5 py-0.5 rounded">
+                                      <span className="inline-block bg-indigo-950/60 text-[8px] uppercase font-bold tracking-widest text-indigo-450 px-1.5 py-0.5 rounded">
                                         {p.ultimoRuolo || "N/D"}
                                       </span>
                                       {lockStatus.match && (
                                         <span
                                           className={`inline-block text-[8px] uppercase font-black tracking-widest px-1.5 py-0.5 rounded ${
                                             isConvocato
-                                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                                              : "bg-amber-550/15 text-amber-300 border border-amber-800/25 animate-pulse"
+                                              ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                                              : "bg-sky-550/15 text-sky-300 border border-sky-800/25 animate-pulse"
                                           }`}
                                         >
                                           {isConvocato
@@ -4048,7 +4048,7 @@ export default function Fantacalcetto({
                                             🪙 {pPrice} Izycoin
                                           </span>
                                           <span
-                                            className={`text-[8px] font-black font-semibold leading-none ${diff > 0 ? "text-emerald-400 font-mono" : diff < 0 ? "text-red-400 font-mono" : "text-gray-400/80 font-mono"}`}
+                                            className={`text-[8px] font-black font-semibold leading-none ${diff > 0 ? "text-indigo-400 font-mono" : diff < 0 ? "text-red-400 font-mono" : "text-gray-400/80 font-mono"}`}
                                           >
                                             {diff > 0
                                               ? `▲ +${diff}`
@@ -4090,7 +4090,7 @@ export default function Fantacalcetto({
                                                 {b.nome}
                                               </span>
                                               :{" "}
-                                              <span className="text-emerald-200/90">
+                                              <span className="text-indigo-200/90">
                                                 {b.descrizione}
                                               </span>
                                             </div>
@@ -4103,11 +4103,11 @@ export default function Fantacalcetto({
 
                                 <div className="shrink-0 pl-1.5">
                                   {isSelected ? (
-                                    <span className="w-6 h-6 rounded-full bg-yellow-400 text-emerald-950 flex items-center justify-center font-black text-xs shadow-sm">
+                                    <span className="w-6 h-6 rounded-full bg-yellow-400 text-indigo-950 flex items-center justify-center font-black text-xs shadow-sm">
                                       ✓
                                     </span>
                                   ) : (
-                                    <span className="w-6 h-6 rounded-full bg-emerald-850 hover:bg-emerald-700 text-emerald-300 flex items-center justify-center font-black text-xs">
+                                    <span className="w-6 h-6 rounded-full bg-indigo-850 hover:bg-indigo-700 text-indigo-300 flex items-center justify-center font-black text-xs">
                                       +
                                     </span>
                                   )}
@@ -4124,11 +4124,11 @@ export default function Fantacalcetto({
 
               {/* Right Market Values Column */}
               <div className="xl:col-span-3 lg:col-span-12 flex flex-col space-y-4">
-                <div className="bg-emerald-950/80 border border-emerald-800 rounded-3xl p-5 shadow-xl flex-1 flex flex-col min-h-[400px]">
-                  <h3 className="font-extrabold text-[11px] uppercase tracking-wider text-yellow-300 flex items-center gap-1.5 mb-3 pb-3 border-b border-emerald-900">
+                <div className="bg-indigo-950/80 border border-indigo-800 rounded-3xl p-5 shadow-xl flex-1 flex flex-col min-h-[400px]">
+                  <h3 className="font-extrabold text-[11px] uppercase tracking-wider text-yellow-300 flex items-center gap-1.5 mb-3 pb-3 border-b border-indigo-900">
                     💰 Tabellone Quotazioni
                   </h3>
-                  <p className="text-[9px] text-emerald-400 font-medium mb-3 leading-tight">
+                  <p className="text-[9px] text-indigo-400 font-medium mb-3 leading-tight">
                     Prezzo base (10) + Valore forma in base alla media degli
                     ultimi 3 voti e bonus passati.
                   </p>
@@ -4136,13 +4136,13 @@ export default function Fantacalcetto({
                     {marketValuations.map((p, idx) => (
                       <div
                         key={idx}
-                        className="flex justify-between items-center bg-emerald-900/20 border border-emerald-850 p-2 rounded-xl transition hover:bg-emerald-900/40"
+                        className="flex justify-between items-center bg-indigo-900/20 border border-indigo-850 p-2 rounded-xl transition hover:bg-indigo-900/40"
                       >
                         <div className="flex flex-col min-w-0 pr-2">
                           <span className="text-[10.5px] font-black text-white truncate">
                             {getLastName(p.nome)}
                           </span>
-                          <span className="text-[8px] text-emerald-400 font-bold uppercase tracking-wider">
+                          <span className="text-[8px] text-indigo-400 font-bold uppercase tracking-wider">
                             {p.ruolo || "N/D"}
                           </span>
                         </div>
@@ -4161,7 +4161,7 @@ export default function Fantacalcetto({
         {/* Custom Transfer Confirmation Modal */}
         {showConfirmModal && proposedTransfer && (
           <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="bg-emerald-950 border-2 border-emerald-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-6 animate-fadeIn relative">
+            <div className="bg-indigo-950 border-2 border-indigo-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-6 animate-fadeIn relative">
               <div className="text-center space-y-2">
                 <div className="bg-yellow-450/15 border border-yellow-500/30 p-3 rounded-full inline-block">
                   <AlertCircle className="h-8 w-8 text-yellow-400 animate-pulse" />
@@ -4169,14 +4169,14 @@ export default function Fantacalcetto({
                 <h3 className="text-sm font-black uppercase tracking-wider text-yellow-300">
                   Riepilogo e Conferma Cambio
                 </h3>
-                <p className="text-[10px] text-emerald-300 font-bold leading-normal">
+                <p className="text-[10px] text-indigo-300 font-bold leading-normal">
                   Controlla i dettagli del movimento di mercato prima di inviare
                   e bloccare la rosa.
                 </p>
               </div>
 
               {/* Dettaglio Movimento */}
-              <div className="bg-emerald-900/40 border border-emerald-800/50 rounded-2xl p-4 space-y-3">
+              <div className="bg-indigo-900/40 border border-indigo-800/50 rounded-2xl p-4 space-y-3">
                 <div className="flex items-center justify-between gap-2.5">
                   <div className="bg-red-950/40 border border-red-900/30 rounded-xl p-3 shrink-1 flex-1 text-center">
                     <span className="block text-[8px] font-black uppercase text-red-400 tracking-wider">
@@ -4205,7 +4205,7 @@ export default function Fantacalcetto({
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-emerald-900 flex justify-between items-center text-[11px] font-semibold text-emerald-300">
+                <div className="pt-2 border-t border-indigo-900 flex justify-between items-center text-[11px] font-semibold text-indigo-300">
                   <span>Credito finale rimanente:</span>
                   <span className="text-yellow-400 font-mono font-bold text-xs">
                     {proposedTransfer.remainingCredits} Izycoin 🪙
@@ -4214,11 +4214,11 @@ export default function Fantacalcetto({
               </div>
 
               {/* Warning Block */}
-              <div className="bg-emerald-950/40 border-2 border-emerald-900/50 rounded-2xl p-4 text-center space-y-1.5">
-                <p className="text-[10.5px] text-emerald-300 font-extrabold leading-relaxed uppercase">
+              <div className="bg-indigo-950/40 border-2 border-indigo-900/50 rounded-2xl p-4 text-center space-y-1.5">
+                <p className="text-[10.5px] text-indigo-300 font-extrabold leading-relaxed uppercase">
                   ATTENZIONE: Stai utilizzando il tuo slot di mercato
                 </p>
-                <p className="text-[9px] text-emerald-400/90 font-bold leading-normal">
+                <p className="text-[9px] text-indigo-400/90 font-bold leading-normal">
                   Il regolamento prevede al massimo un solo cambio per turno di
                   gioco. I 3 giocatori non sostituiti resteranno bloccati,
                   mentre potrai eventualmente ripensarci su quest'ultimo slot
@@ -4235,7 +4235,7 @@ export default function Fantacalcetto({
                     setShowConfirmModal(false);
                     setProposedTransfer(null);
                   }}
-                  className="w-full bg-emerald-900/50 hover:bg-emerald-900 border border-emerald-800 hover:border-emerald-700 font-black text-[10.5px] uppercase text-emerald-300 py-3 rounded-lg transition-all cursor-pointer"
+                  className="w-full bg-indigo-900/50 hover:bg-indigo-900 border border-indigo-800 hover:border-indigo-700 font-black text-[10.5px] uppercase text-indigo-300 py-3 rounded-lg transition-all cursor-pointer"
                 >
                   Annulla
                 </button>
@@ -4243,7 +4243,7 @@ export default function Fantacalcetto({
                   type="button"
                   disabled={submitting}
                   onClick={executeRosterUpdate}
-                  className="w-full bg-yellow-450 hover:bg-yellow-400 disabled:bg-emerald-900 font-black text-[10.5px] uppercase text-emerald-950 py-3 rounded-lg shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer"
+                  className="w-full bg-yellow-450 hover:bg-yellow-400 disabled:bg-indigo-900 font-black text-[10.5px] uppercase text-indigo-950 py-3 rounded-lg shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer"
                 >
                   {submitting ? "Invio..." : "Sì, Conferma"}
                 </button>
@@ -4253,7 +4253,7 @@ export default function Fantacalcetto({
         )}
 
         {/* Foot footer info */}
-        <div className="text-center text-[10px] text-emerald-600 font-bold select-none pt-6 shrink-0">
+        <div className="text-center text-[10px] text-indigo-600 font-bold select-none pt-6 shrink-0">
           Easy Rigging © {new Date().getFullYear()} • Portale protetto e
           criptato
         </div>
@@ -4276,7 +4276,7 @@ export default function Fantacalcetto({
   return (
     <div className="space-y-6">
       {/* Visual Header card */}
-      <div className="bg-emerald-900/10 border border-emerald-800/15 rounded-3xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xs">
+      <div className="bg-indigo-900/10 border border-indigo-800/15 rounded-3xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xs">
         <div className="space-y-1">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
@@ -4317,76 +4317,43 @@ export default function Fantacalcetto({
         </div>
 
         {/* Private Sharing Link trigger widget */}
-        <div className="bg-white border border-gray-150 p-4 rounded-2xl flex flex-col gap-2.5 shadow-xs shrink-0 w-full sm:w-auto">
+        <div className="bg-white border border-gray-150 p-4 rounded-2xl flex flex-col gap-2.5 shadow-xs shrink-0 max-w-sm w-full">
           <div>
-            <h4 className="text-[10px] uppercase font-black tracking-wider text-emerald-700 leading-none">
+            <h4 className="text-[10px] uppercase font-black tracking-wider text-indigo-700 leading-none">
               Canale Pubblico
             </h4>
             <p className="text-[10px] text-gray-400 mt-0.5 leading-tight">
-              Accedi o condividi con i partecipanti
+              Accedi o condividi con i partecipanti per ricevere iscrizioni
+              fanta
             </p>
           </div>
-          
-          {/* Link Primario */}
-          <div className="space-y-2 mb-2 pb-2 border-b border-gray-100">
-            <input
-              type="text"
-              readOnly
-              value={`${window.location.origin}${window.location.pathname}?portal=true`}
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-[10px] font-mono font-bold select-all outline-none text-gray-500"
-            />
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={handleCopyLink}
-                className={`py-1.5 font-bold text-[10.5px] uppercase rounded-lg shadow-2xs cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0 ${
-                  copied
-                    ? "bg-green-600 text-white"
-                    : "bg-gray-100 hover:bg-gray-150 text-gray-800 border border-gray-200"
-                }`}
-              >
-                <Copy className="h-3 w-3" />
-                <span>{copied ? "Copiato" : "Copia Link"}</span>
-              </button>
-              <a
-                href={`${window.location.origin}${window.location.pathname}?portal=true`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="py-1.5 font-bold text-[10.5px] uppercase bg-emerald-900 hover:bg-emerald-800 text-white rounded-lg shadow-2xs transition-all flex items-center justify-center gap-1.5 text-center border border-emerald-950"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-                <span>Apri Portale</span>
-              </a>
-            </div>
-          </div>
-
-          {/* Link Secondario: V2 */}
-          <div className="space-y-2">
-            <input
-              type="text"
-              readOnly
-              value={`${window.location.origin}${window.location.pathname}?portal=v2`}
-              className="w-full bg-indigo-50 border border-indigo-200 rounded-lg px-2.5 py-1.5 text-[10px] font-mono font-bold select-all outline-none text-indigo-500"
-            />
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?portal=v2`);
-                }}
-                className={`py-1.5 font-bold text-[10.5px] uppercase rounded-lg shadow-2xs cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200`}
-              >
-                <Copy className="h-3 w-3" />
-                <span>Copia V2</span>
-              </button>
-              <a
-                href={`${window.location.origin}${window.location.pathname}?portal=v2`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="py-1.5 font-bold text-[10.5px] uppercase bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-2xs transition-all flex items-center justify-center gap-1.5 text-center"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-                <span>Fantacalcetto Prova (V2)</span>
-              </a>
-            </div>
+          <input
+            type="text"
+            readOnly
+            value={`${window.location.origin}${window.location.pathname}?portal=true`}
+            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-[10px] font-mono font-bold select-all outline-none text-gray-500"
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={handleCopyLink}
+              className={`py-1.5 font-bold text-[10.5px] uppercase rounded-lg shadow-2xs cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0 ${
+                copied
+                  ? "bg-green-600 text-white"
+                  : "bg-gray-100 hover:bg-gray-150 text-gray-800 border border-gray-200"
+              }`}
+            >
+              <Copy className="h-3 w-3" />
+              <span>{copied ? "Copiato" : "Copia Link"}</span>
+            </button>
+            <a
+              href={`${window.location.origin}${window.location.pathname}?portal=true`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="py-1.5 font-bold text-[10.5px] uppercase bg-indigo-900 hover:bg-indigo-800 text-white rounded-lg shadow-2xs transition-all flex items-center justify-center gap-1.5 text-center border border-indigo-950"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              <span>Apri Portale</span>
+            </a>
           </div>
         </div>
       </div>
@@ -4394,7 +4361,7 @@ export default function Fantacalcetto({
       {/* Grid summarizing stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         <div className="bg-white border border-gray-150 rounded-2xl p-4.5 shadow-2xs flex items-center gap-4">
-          <div className="w-11 h-11 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-700">
+          <div className="w-11 h-11 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-700">
             <Users className="h-6 w-6" />
           </div>
           <div>
@@ -4422,7 +4389,7 @@ export default function Fantacalcetto({
         </div>
 
         <div className="bg-white border border-gray-150 rounded-2xl p-4.5 shadow-2xs flex items-center gap-4 col-span-1 sm:col-span-2 md:col-span-1">
-          <div className="w-11 h-11 bg-amber-50 rounded-xl flex items-center justify-center text-amber-700">
+          <div className="w-11 h-11 bg-sky-50 rounded-xl flex items-center justify-center text-sky-700">
             <Award className="h-6 w-6" />
           </div>
           <div>
@@ -4463,7 +4430,7 @@ export default function Fantacalcetto({
                     <span>📄 Referto Generale (Tutti i Voti)</span>
                   </button>
                 )}
-                <span className="bg-emerald-100 text-emerald-850 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shrink-0">
+                <span className="bg-indigo-100 text-indigo-850 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shrink-0">
                   Ufficiale
                 </span>
               </div>
@@ -4484,7 +4451,7 @@ export default function Fantacalcetto({
                         ? "bg-yellow-100 text-yellow-800 border-yellow-250 animate-bounce"
                         : index === 1
                           ? "bg-slate-100 text-slate-800 border-slate-250"
-                          : "bg-amber-100 text-amber-800 border-amber-250";
+                          : "bg-sky-100 text-sky-800 border-sky-250";
                     const subtitleLabel =
                       index === 0
                         ? "🥇 Primo"
@@ -4510,7 +4477,7 @@ export default function Fantacalcetto({
                         <p className="text-[10px] text-gray-400 truncate max-w-[115px]">
                           Da {item.nomePartecipante}
                         </p>
-                        <span className="text-base font-black font-mono text-emerald-800 mt-1">
+                        <span className="text-base font-black font-mono text-indigo-800 mt-1">
                           {item.score}{" "}
                           <span className="text-[10px] text-gray-400 font-bold">
                             pnt
@@ -4548,7 +4515,7 @@ export default function Fantacalcetto({
                                     : index === 1
                                       ? "bg-slate-200 text-slate-800"
                                       : index === 2
-                                        ? "bg-amber-650 text-white"
+                                        ? "bg-sky-650 text-white"
                                         : "text-gray-500 bg-gray-100"
                                 }`}
                               >
@@ -4567,7 +4534,7 @@ export default function Fantacalcetto({
                               </p>
                             </td>
                             <td className="px-3 py-3 text-right">
-                              <span className="text-sm font-black font-mono text-emerald-700">
+                              <span className="text-sm font-black font-mono text-indigo-700">
                                 {team.score}
                               </span>
                               <span className="text-[10px] font-bold text-gray-400 ml-1">
@@ -4633,7 +4600,7 @@ export default function Fantacalcetto({
                             id="team-select-dropdown"
                             value={selectedTeamToView.id}
                             onChange={(e) => setExpandedTeamId(e.target.value)}
-                            className="w-full sm:w-64 px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-extrabold text-blue-950 shadow-xs focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 cursor-pointer"
+                            className="w-full sm:w-64 px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-extrabold text-blue-950 shadow-xs focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 cursor-pointer"
                           >
                             {sortedTeams.map((team) => (
                               <option key={team.id} value={team.id}>
@@ -4662,15 +4629,15 @@ export default function Fantacalcetto({
                             onClick={() => setExpandedTeamId(team.id)}
                             className={`px-3.5 py-2.5 rounded-xl border text-left flex flex-col transition-all cursor-pointer ${
                               selectedTeamToView.id === team.id
-                                ? "bg-emerald-950 border-emerald-800 text-white shadow-md ring-2 ring-emerald-500/30 scale-100"
-                                : "bg-white border-gray-200 text-gray-600 hover:bg-emerald-50 hover:border-emerald-200 scale-95 opacity-80"
+                                ? "bg-indigo-950 border-indigo-800 text-white shadow-md ring-2 ring-indigo-500/30 scale-100"
+                                : "bg-white border-gray-200 text-gray-600 hover:bg-indigo-50 hover:border-indigo-200 scale-95 opacity-80"
                             }`}
                           >
                             <span className="font-black text-xs uppercase tracking-wider truncate mb-0.5">
                               {team.nomeFantasquadra}
                             </span>
                             <span
-                              className={`text-[9px] font-bold truncate ${selectedTeamToView.id === team.id ? "text-emerald-400" : "text-gray-400"}`}
+                              className={`text-[9px] font-bold truncate ${selectedTeamToView.id === team.id ? "text-indigo-400" : "text-gray-400"}`}
                             >
                               👤 {team.nomePartecipante}
                             </span>
@@ -4680,21 +4647,21 @@ export default function Fantacalcetto({
                     </div>
 
                     {/* MASTER DETAIL VIEW FOR SELECTED TEAM */}
-                    <div className="border border-emerald-100 bg-emerald-50/40 rounded-2xl p-4 sm:p-5 space-y-5 animate-fadeIn shadow-sm">
+                    <div className="border border-indigo-100 bg-indigo-50/40 rounded-2xl p-4 sm:p-5 space-y-5 animate-fadeIn shadow-sm">
                       {/* Header */}
-                      <div className="flex justify-between items-start border-b border-emerald-100 pb-4">
+                      <div className="flex justify-between items-start border-b border-indigo-100 pb-4">
                         <div className="min-w-0 pr-4">
-                          <h2 className="text-base sm:text-lg font-black text-emerald-950 mb-1 truncate">
+                          <h2 className="text-base sm:text-lg font-black text-indigo-950 mb-1 truncate">
                             {selectedTeamToView.nomeFantasquadra}
                           </h2>
-                          <p className="text-[10px] text-emerald-700 font-bold uppercase tracking-widest flex items-center gap-2 flex-wrap">
+                          <p className="text-[10px] text-indigo-700 font-bold uppercase tracking-widest flex items-center gap-2 flex-wrap">
                             <span>
                               👤 {selectedTeamToView.nomePartecipante}
                             </span>
-                            <span className="text-emerald-300 hidden sm:inline">
+                            <span className="text-indigo-300 hidden sm:inline">
                               •
                             </span>
-                            <span className="bg-emerald-100/50 px-1.5 py-0.5 rounded text-emerald-800">
+                            <span className="bg-indigo-100/50 px-1.5 py-0.5 rounded text-indigo-800">
                               Iscritto il{" "}
                               {new Date(
                                 selectedTeamToView.dataInserimento,
@@ -4702,11 +4669,11 @@ export default function Fantacalcetto({
                             </span>
                           </p>
                         </div>
-                        <div className="text-right shrink-0 bg-white border border-emerald-100 rounded-xl px-3 py-2 shadow-xs">
-                          <span className="text-xl font-black font-mono text-emerald-700 block leading-none">
+                        <div className="text-right shrink-0 bg-white border border-indigo-100 rounded-xl px-3 py-2 shadow-xs">
+                          <span className="text-xl font-black font-mono text-indigo-700 block leading-none">
                             {score}
                           </span>
-                          <span className="text-[8px] uppercase tracking-wider font-extrabold text-emerald-500/80 block mt-1 leading-none">
+                          <span className="text-[8px] uppercase tracking-wider font-extrabold text-indigo-500/80 block mt-1 leading-none">
                             Punti Fanta
                           </span>
                         </div>
@@ -4714,11 +4681,11 @@ export default function Fantacalcetto({
 
                       {/* Roster & Bonuses */}
                       <div>
-                        <div className="flex items-center justify-between border-b border-emerald-200 pb-1.5 mb-3">
-                          <h4 className="text-[10px] uppercase font-black tracking-widest text-emerald-800 flex items-center gap-1.5">
+                        <div className="flex items-center justify-between border-b border-indigo-200 pb-1.5 mb-3">
+                          <h4 className="text-[10px] uppercase font-black tracking-widest text-indigo-800 flex items-center gap-1.5">
                             <span>👥</span> Roster & Statistiche
                           </h4>
-                          <span className="text-[9px] font-bold text-emerald-600 bg-emerald-200/50 px-2 py-0.5 rounded-full">
+                          <span className="text-[9px] font-bold text-indigo-600 bg-indigo-200/50 px-2 py-0.5 rounded-full">
                             {selectedTeamToView.giocatoriSelezionati.length}/4
                           </span>
                         </div>
@@ -4740,8 +4707,8 @@ export default function Fantacalcetto({
                                   key={index}
                                   className={`border p-3 rounded-xl flex flex-col gap-2 ${
                                     isBench
-                                      ? "bg-amber-50/80 border-amber-200 shadow-xs"
-                                      : "bg-white border-emerald-100 shadow-xs"
+                                      ? "bg-sky-50/80 border-sky-200 shadow-xs"
+                                      : "bg-white border-indigo-100 shadow-xs"
                                   }`}
                                 >
                                   <div className="flex justify-between items-start">
@@ -4751,14 +4718,14 @@ export default function Fantacalcetto({
                                           {index + 1}. {getLastName(pName)}
                                         </span>
                                         <span
-                                          className={`text-[8px] px-1.5 py-0.5 rounded leading-none font-bold font-mono tracking-wide ${isBench ? "bg-amber-100 text-amber-900" : "bg-emerald-100 text-emerald-900"}`}
+                                          className={`text-[8px] px-1.5 py-0.5 rounded leading-none font-bold font-mono tracking-wide ${isBench ? "bg-sky-100 text-sky-900" : "bg-indigo-100 text-indigo-900"}`}
                                         >
                                           {isBench ? "Panchina" : "Titolare"}
                                         </span>
                                       </p>
                                     </div>
                                     <span
-                                      className="font-mono text-[10px] bg-emerald-900 text-yellow-300 border border-emerald-800 rounded-lg px-2 py-1 shrink-0 font-black shadow-xs"
+                                      className="font-mono text-[10px] bg-indigo-900 text-yellow-300 border border-indigo-800 rounded-lg px-2 py-1 shrink-0 font-black shadow-xs"
                                       title="Fantascore campionato"
                                     >
                                       {stats.fantaScore > 0 ? "+" : ""}
@@ -4767,7 +4734,7 @@ export default function Fantacalcetto({
                                   </div>
 
                                   <div className="text-[9.5px] leading-relaxed">
-                                    <p className="text-emerald-700 font-black mb-1.5">
+                                    <p className="text-indigo-700 font-black mb-1.5">
                                       STATISTICHE GENERALI (
                                       {stats.campionato.gol +
                                         stats.campionato.assist +
@@ -4783,7 +4750,7 @@ export default function Fantacalcetto({
                                         <span className="block text-gray-400 font-bold uppercase text-[8px]">
                                           Gol
                                         </span>
-                                        <span className="font-black text-emerald-600">
+                                        <span className="font-black text-indigo-600">
                                           {stats.campionato.gol}{" "}
                                           <span className="text-[8px] font-mono opacity-60">
                                             (+
@@ -4796,7 +4763,7 @@ export default function Fantacalcetto({
                                         <span className="block text-gray-400 font-bold uppercase text-[8px]">
                                           Assist
                                         </span>
-                                        <span className="font-black text-emerald-600">
+                                        <span className="font-black text-indigo-600">
                                           {stats.campionato.assist}{" "}
                                           <span className="text-[8px] font-mono opacity-60">
                                             (+
@@ -4810,7 +4777,7 @@ export default function Fantacalcetto({
                                         <span className="block text-gray-400 font-bold uppercase text-[8px]">
                                           Gialli
                                         </span>
-                                        <span className="font-black text-amber-600">
+                                        <span className="font-black text-sky-600">
                                           {stats.campionato.ammonizioni}{" "}
                                           <span className="text-[8px] font-mono opacity-60">
                                             (
@@ -4839,14 +4806,14 @@ export default function Fantacalcetto({
                                     {/* Bonus Visibility Block */}
                                     {userBonuses.length > 0 ? (
                                       <div className="mt-2.5">
-                                        <p className="text-amber-700 font-black mb-1 uppercase text-[8.5px] tracking-wider">
+                                        <p className="text-sky-700 font-black mb-1 uppercase text-[8.5px] tracking-wider">
                                           🌟 Bonus Univoci Assegnati:
                                         </p>
                                         <div className="flex flex-wrap gap-1">
                                           {userBonuses.map((b, i) => (
                                             <div
                                               key={i}
-                                              className="text-[8.5px] font-bold text-amber-900 bg-amber-100/60 px-1.5 py-1 rounded-md border border-amber-200/60 inline-flex items-center gap-1"
+                                              className="text-[8.5px] font-bold text-sky-900 bg-sky-100/60 px-1.5 py-1 rounded-md border border-sky-200/60 inline-flex items-center gap-1"
                                               title={b.descrizione}
                                             >
                                               <span>🎒</span>{" "}
@@ -4877,7 +4844,7 @@ export default function Fantacalcetto({
                           getTeamMatchBreakdownList(selectedTeamToView);
                         return (
                           <div className="pt-2">
-                            <h4 className="text-[10px] uppercase font-black tracking-widest text-emerald-800 flex items-center gap-1.5 border-b border-emerald-200 pb-1.5 mb-3">
+                            <h4 className="text-[10px] uppercase font-black tracking-widest text-indigo-800 flex items-center gap-1.5 border-b border-indigo-200 pb-1.5 mb-3">
                               <span>📈</span> DETTAGLIO PARTITE REFERTATE (
                               {matchBreakdown.length})
                             </h4>
@@ -4902,11 +4869,11 @@ export default function Fantacalcetto({
                                           selectedTeamToView.nomeFantasquadra,
                                       });
                                     }}
-                                    className="bg-white border border-emerald-100/60 rounded-xl p-3.5 flex items-center justify-between shadow-sm hover:shadow-md hover:border-emerald-300 transition-all cursor-pointer group"
+                                    className="bg-white border border-indigo-100/60 rounded-xl p-3.5 flex items-center justify-between shadow-sm hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer group"
                                   >
                                     <div className="min-w-0 pr-2">
                                       <p
-                                        className="text-[11px] font-black text-emerald-950 truncate group-hover:text-emerald-700 transition-colors"
+                                        className="text-[11px] font-black text-indigo-950 truncate group-hover:text-indigo-700 transition-colors"
                                         title={mb.dettagli}
                                       >
                                         ⚔️{" "}
@@ -4923,11 +4890,11 @@ export default function Fantacalcetto({
                                       )}
                                     </div>
                                     <div className="text-right shrink-0 flex items-center gap-2.5">
-                                      <span className="font-mono text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-1 rounded-lg group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                      <span className="font-mono text-[11px] font-black bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-1 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                                         {mb.puntiTotaliMatch > 0 ? "+" : ""}
                                         {mb.puntiTotaliMatch} pt
                                       </span>
-                                      <span className="text-[10px] text-gray-300 group-hover:text-emerald-500 font-bold transition-colors">
+                                      <span className="text-[10px] text-gray-300 group-hover:text-indigo-500 font-bold transition-colors">
                                         ➔
                                       </span>
                                     </div>
@@ -4941,7 +4908,7 @@ export default function Fantacalcetto({
 
                       {/* Delete Admin Action */}
                       {isEditor && (
-                        <div className="flex justify-end pt-3 border-t border-emerald-200 mt-4">
+                        <div className="flex justify-end pt-3 border-t border-indigo-200 mt-4">
                           <button
                             type="button"
                             onClick={async (e) => {
@@ -4988,16 +4955,16 @@ export default function Fantacalcetto({
 
       {showRenameModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm px-4">
-          <div className="bg-emerald-950 border border-emerald-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4 font-sans text-center">
+          <div className="bg-indigo-950 border border-indigo-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4 font-sans text-center">
             <h3 className="text-lg font-black text-white uppercase tracking-wider">
               Rinomina Squadra
             </h3>
-            <p className="text-xs text-emerald-200">
+            <p className="text-xs text-indigo-200">
               Inserisci il nuovo nome da assegnare alla tua squadra. L'azione sarà immediata.
             </p>
             <input
               type="text"
-              className="w-full bg-emerald-900 border border-emerald-700 rounded-xl px-4 py-3 text-white text-sm font-bold uppercase focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full bg-indigo-900 border border-indigo-700 rounded-xl px-4 py-3 text-white text-sm font-bold uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="Es. Atletico Fanta"
               value={nuovoNomeSquadra}
               onChange={(e) => setNuovoNomeSquadra(e.target.value)}
@@ -5006,7 +4973,7 @@ export default function Fantacalcetto({
               <button
                 type="button"
                 onClick={() => setShowRenameModal(false)}
-                className="flex-1 bg-emerald-900/60 hover:bg-emerald-800/80 text-emerald-200 py-3 rounded-xl font-bold uppercase text-xs transition-colors"
+                className="flex-1 bg-indigo-900/60 hover:bg-indigo-800/80 text-indigo-200 py-3 rounded-xl font-bold uppercase text-xs transition-colors"
                 disabled={submitting}
               >
                 Annulla
@@ -5029,7 +4996,7 @@ export default function Fantacalcetto({
                   }
                 }}
                 disabled={submitting || !nuovoNomeSquadra.trim() || nuovoNomeSquadra.trim() === nomeFantasquadra}
-                className="flex-1 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-emerald-950 py-3 rounded-xl font-black uppercase text-xs transition-colors"
+                className="flex-1 bg-indigo-500 hover:bg-indigo-400 disabled:opacity-50 text-indigo-950 py-3 rounded-xl font-black uppercase text-xs transition-colors"
               >
                 {submitting ? "Salvataggio..." : "Salva Nuove Info"}
               </button>
@@ -5039,7 +5006,7 @@ export default function Fantacalcetto({
       )}
 
       {showMercatoModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-950/80 backdrop-blur-sm px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-indigo-950/80 backdrop-blur-sm px-4">
           <div className="bg-white border-2 border-blue-900 rounded-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto shadow-2xl relative p-5 font-sans">
             <h3 className="text-lg font-black text-blue-900 uppercase mb-2">Attiva Sessione Libera</h3>
             <p className="text-xs text-gray-600 mb-4 font-medium leading-relaxed">
@@ -5106,42 +5073,42 @@ export default function Fantacalcetto({
 
 function GeneralReportModal({ rankedTeams, getTeamMatchBreakdownList, onClose, generateGeneralReportPdf, partiteChiuse }: any) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-950/80 backdrop-blur-sm px-4">
-      <div className="bg-white border-2 border-emerald-900 rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-3 right-3 text-emerald-900 hover:text-red-600 bg-emerald-100 hover:bg-emerald-200 p-1.5 rounded-full transition-colors z-10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-indigo-950/80 backdrop-blur-sm px-4">
+      <div className="bg-white border-2 border-indigo-900 rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-3 right-3 text-indigo-900 hover:text-red-600 bg-indigo-100 hover:bg-indigo-200 p-1.5 rounded-full transition-colors z-10">
           <X className="w-5 h-5" />
         </button>
 
         <div className="p-5 font-sans">
-          <div className="border-b border-emerald-100 pb-4 mb-4 pr-6">
-            <h3 className="text-lg font-black text-emerald-950 mb-1 leading-tight uppercase tracking-tight">
+          <div className="border-b border-indigo-100 pb-4 mb-4 pr-6">
+            <h3 className="text-lg font-black text-indigo-950 mb-1 leading-tight uppercase tracking-tight">
               📄 Referto Generale
             </h3>
-            <p className="text-xs text-emerald-700 font-extrabold flex items-center justify-between">
+            <p className="text-xs text-indigo-700 font-extrabold flex items-center justify-between">
               Classifica e Punteggi di tutte le squadre
             </p>
           </div>
 
           <div className="space-y-6">
             <div>
-              <h4 className="text-xs font-black uppercase text-emerald-900 bg-emerald-100 px-2 py-1 rounded inline-block mb-3">1. Classifica Generale</h4>
-              <div className="overflow-x-auto rounded-xl border border-emerald-200 shadow-sm">
+              <h4 className="text-xs font-black uppercase text-indigo-900 bg-indigo-100 px-2 py-1 rounded inline-block mb-3">1. Classifica Generale</h4>
+              <div className="overflow-x-auto rounded-xl border border-indigo-200 shadow-sm">
                 <table className="w-full text-[10px] text-left border-collapse">
                   <thead>
-                    <tr className="bg-emerald-800 text-white font-extrabold uppercase tracking-wider">
-                      <th className="p-2 border-b border-emerald-900">Pos</th>
-                      <th className="p-2 border-b border-emerald-900">Squadra</th>
-                      <th className="p-2 border-b border-emerald-900">Presidente</th>
-                      <th className="p-2 border-b border-emerald-900 text-right">Punti Fanta</th>
+                    <tr className="bg-indigo-800 text-white font-extrabold uppercase tracking-wider">
+                      <th className="p-2 border-b border-indigo-900">Pos</th>
+                      <th className="p-2 border-b border-indigo-900">Squadra</th>
+                      <th className="p-2 border-b border-indigo-900">Presidente</th>
+                      <th className="p-2 border-b border-indigo-900 text-right">Punti Fanta</th>
                     </tr>
                   </thead>
                   <tbody>
                     {rankedTeams.map((team: any, idx: number) => (
-                      <tr key={team.id} className="border-b border-emerald-100 hover:bg-emerald-50 text-gray-800">
+                      <tr key={team.id} className="border-b border-indigo-100 hover:bg-indigo-50 text-gray-800">
                         <td className="p-2 font-black">{idx + 1}°</td>
                         <td className="p-2 font-extrabold truncate max-w-[120px]">{team.nomeFantasquadra}</td>
                         <td className="p-2 font-semibold truncate max-w-[100px]">{team.nomePartecipante}</td>
-                        <td className="p-2 font-mono font-black text-right text-emerald-700">{team.score} pt</td>
+                        <td className="p-2 font-mono font-black text-right text-indigo-700">{team.score} pt</td>
                       </tr>
                     ))}
                   </tbody>
@@ -5150,28 +5117,28 @@ function GeneralReportModal({ rankedTeams, getTeamMatchBreakdownList, onClose, g
             </div>
 
             <div>
-              <h4 className="text-xs font-black uppercase text-emerald-900 bg-emerald-100 px-2 py-1 rounded inline-block mb-3">2. Dettagli per Squadra</h4>
+              <h4 className="text-xs font-black uppercase text-indigo-900 bg-indigo-100 px-2 py-1 rounded inline-block mb-3">2. Dettagli per Squadra</h4>
               <div className="space-y-4">
                 {rankedTeams.map((team: any) => {
                   const breakdowns = getTeamMatchBreakdownList(team);
                   return (
-                    <div key={team.id} className="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
-                      <h5 className="font-extrabold text-[11px] text-emerald-900 uppercase border-b border-emerald-200 pb-1 mb-2">⚽ {team.nomeFantasquadra} ({team.score} pt)</h5>
+                    <div key={team.id} className="bg-indigo-50 border border-indigo-200 rounded-xl p-3">
+                      <h5 className="font-extrabold text-[11px] text-indigo-900 uppercase border-b border-indigo-200 pb-1 mb-2">⚽ {team.nomeFantasquadra} ({team.score} pt)</h5>
                       {breakdowns.length === 0 ? (
-                        <p className="text-[10px] italic text-emerald-600">Nessuna partita refertata</p>
+                        <p className="text-[10px] italic text-indigo-600">Nessuna partita refertata</p>
                       ) : (
                         <div className="space-y-2">
                           {breakdowns.map((mb: any, mIdx: number) => (
-                           <div key={mIdx} className="bg-white border border-emerald-100 rounded-lg p-2 text-[9px] flexflex-col gap-1">
+                           <div key={mIdx} className="bg-white border border-indigo-100 rounded-lg p-2 text-[9px] flexflex-col gap-1">
                              <div className="flex justify-between items-center bg-gray-50 p-1 rounded font-bold mb-1 border-b border-gray-100">
                                <span className="text-gray-800 uppercase tracking-widest">{mb.dettagli.split(" - ")[0]}</span>
-                               <span className="text-emerald-700 bg-emerald-100 px-1 rounded">+{mb.puntiTotaliMatch} pt</span>
+                               <span className="text-indigo-700 bg-indigo-100 px-1 rounded">+{mb.puntiTotaliMatch} pt</span>
                              </div>
                              <div className="flex flex-wrap gap-1.5">
                                {mb.giocatoriKpi.map((kpi: any, kIdx: number) => {
                                  const isOut = kpi.stato === "Sostituito" || kpi.stato === "Assente";
                                  return (
-                                   <div key={kIdx} className={`px-1.5 py-0.5 rounded border ${isOut ? "bg-red-50 text-red-700 border-red-200 line-through opacity-70" : "bg-emerald-50 text-emerald-800 border-emerald-200 font-bold"}`}>
+                                   <div key={kIdx} className={`px-1.5 py-0.5 rounded border ${isOut ? "bg-red-50 text-red-700 border-red-200 line-through opacity-70" : "bg-indigo-50 text-indigo-800 border-indigo-200 font-bold"}`}>
                                       {kpi.nome}: {isOut ? "0" : kpi.fantaScore}pt
                                    </div>
                                  )
@@ -5217,27 +5184,27 @@ function MatchBreakdownModal({
   if (!mb) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-950/80 backdrop-blur-sm px-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-indigo-950/80 backdrop-blur-sm px-4">
       <div
-        className="bg-white border-2 border-emerald-900 rounded-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto shadow-2xl relative"
+        className="bg-white border-2 border-indigo-900 rounded-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto shadow-2xl relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-emerald-900 hover:text-red-600 bg-emerald-100 hover:bg-emerald-200 p-1.5 rounded-full transition-colors z-10"
+          className="absolute top-3 right-3 text-indigo-900 hover:text-red-600 bg-indigo-100 hover:bg-indigo-200 p-1.5 rounded-full transition-colors z-10"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="p-5 font-sans">
-          <div className="border-b border-emerald-100 pb-3 mb-4 pr-6">
-            <h3 className="text-sm font-black text-emerald-950 mb-1 leading-tight uppercase tracking-tight">
+          <div className="border-b border-indigo-100 pb-3 mb-4 pr-6">
+            <h3 className="text-sm font-black text-indigo-950 mb-1 leading-tight uppercase tracking-tight">
               ⚔️ {mb.dettagli}
             </h3>
-            <p className="text-xs text-emerald-700 font-extrabold flex items-center justify-between">
+            <p className="text-xs text-indigo-700 font-extrabold flex items-center justify-between">
               <span>
                 Risultato:{" "}
-                <span className="text-emerald-900 bg-emerald-100 px-1.5 py-0.5 rounded ml-1">
+                <span className="text-indigo-900 bg-indigo-100 px-1.5 py-0.5 rounded ml-1">
                   {mb.risultato}
                 </span>
               </span>
@@ -5283,7 +5250,7 @@ function MatchBreakdownModal({
               return (
                 <div
                   key={kIdx}
-                  className={`p-3 rounded-xl border ${isSubentrato ? "bg-amber-50 border-amber-200" : isSostituito || isAssente ? "bg-red-50 border-red-200 opacity-60" : "bg-emerald-50 border-emerald-100"}`}
+                  className={`p-3 rounded-xl border ${isSubentrato ? "bg-sky-50 border-sky-200" : isSostituito || isAssente ? "bg-red-50 border-red-200 opacity-60" : "bg-indigo-50 border-indigo-100"}`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="font-extrabold text-xs text-gray-900 truncate pr-2">
@@ -5295,7 +5262,7 @@ function MatchBreakdownModal({
                       )}
                     </span>
                     <span
-                      className={`font-mono font-black text-sm ${isSubentrato ? "text-amber-700" : isSostituito || isAssente ? "text-red-700" : "text-emerald-700"}`}
+                      className={`font-mono font-black text-sm ${isSubentrato ? "text-sky-700" : isSostituito || isAssente ? "text-red-700" : "text-indigo-700"}`}
                     >
                       {displayPoints} pt
                     </span>
@@ -5308,7 +5275,7 @@ function MatchBreakdownModal({
                           "bg-gray-100 text-gray-700 border-gray-200";
                         if (h.includes("⚽"))
                           colorClass =
-                            "bg-emerald-100 text-emerald-800 border-emerald-300 shadow-[0_0_6px_rgba(52,211,153,0.3)]";
+                            "bg-indigo-100 text-indigo-800 border-indigo-300 shadow-[0_0_6px_rgba(52,211,153,0.3)]";
                         if (h.includes("🤝"))
                           colorClass =
                             "bg-blue-100 text-blue-800 border-blue-300";
