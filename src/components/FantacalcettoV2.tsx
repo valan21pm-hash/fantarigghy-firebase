@@ -3476,7 +3476,7 @@ export default function FantacalcettoV2({
                       </span>
                     </div>
 
-                    <div className="bg-green-900 border-2 border-green-700/50 rounded-2xl p-4 min-h-[240px] relative overflow-hidden flex flex-col justify-between shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
+                    <div className="bg-green-900 border-2 border-green-700/50 rounded-2xl p-4 min-h-[300px] relative overflow-hidden flex flex-col justify-between shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
                       {/* Field lines simulation */}
                       <div className="absolute inset-0 opacity-20 pointer-events-none">
                         <div className="absolute top-1/2 left-0 right-0 border-t-2 border-white"></div>
@@ -3495,93 +3495,65 @@ export default function FantacalcettoV2({
                           </span>
                         </div>
                       ) : (
-                        <div className="h-full flex flex-col justify-between relative z-10 gap-2">
-                          {/* Titolari (Top line) */}
-                          <div className="flex justify-center items-end gap-2 sm:gap-4 h-24">
-                            {selectedPlayers.slice(0, 3).map((name, idx) => {
-                              const g = giocatori.find((p) => p.nome === name);
-                              const roleColorClass = getRoleColor(g?.ultimoRuolo || "");
-                              return (
-                                <div key={`tit-${idx}`} className="flex flex-col items-center justify-center gap-1 group relative w-1/3">
-                                  <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-full border-2 flex items-center justify-center text-sm font-black font-mono shadow-xl relative z-10 ${roleColorClass}`}>
-                                    {g?.numeroMaglia || "-"}
-                                  </div>
-                                  <div className="bg-indigo-950 text-white text-[9px] font-bold px-1.5 py-0.5 rounded border border-indigo-700 truncate w-full max-w-[80px] text-center shadow-lg relative z-20">
-                                    {getLastName(name)}
-                                  </div>
-                                  
-                                  {/* Hover Actions */}
-                                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                                    {selectedPlayers.length === 4 && (
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          const others = selectedPlayers.filter((p) => p !== name);
-                                          setSelectedPlayers([...others, name]);
-                                        }}
-                                        className="bg-indigo-600 text-white w-5 h-5 rounded-md flex items-center justify-center cursor-pointer shadow-lg border border-indigo-400"
-                                        title="Sposta in panchina"
-                                      >
-                                        <ChevronDown className="w-3.5 h-3.5" />
-                                      </button>
-                                    )}
+                        <div className="h-full w-full relative z-10">
+                          {selectedPlayers.map((name, idx) => {
+                            const g = giocatori.find((p) => p.nome === name);
+                            const roleColorClass = getRoleColor(g?.ultimoRuolo || "");
+                            
+                            const isSubentro = idx === 3;
+
+                            let positionClass = "";
+                            if (idx === 0) positionClass = "top-4 left-1/2 -translate-x-1/2";
+                            else if (idx === 1) positionClass = "top-1/2 -translate-y-1/2 left-2 sm:left-8";
+                            else if (idx === 2) positionClass = "top-1/2 -translate-y-1/2 right-2 sm:right-8";
+                            else if (idx === 3) positionClass = "bottom-4 left-1/2 -translate-x-1/2";
+                            
+                            return (
+                              <div key={`${name}-${idx}`} className={`absolute flex flex-col items-center justify-center gap-1 group w-16 sm:w-20 transition-all ${positionClass} ${isSubentro ? 'opacity-90 hover:opacity-100' : ''}`}>
+                                {isSubentro && (
+                                  <span className="text-[8px] bg-sky-600 text-white font-black uppercase tracking-widest px-2 py-0.5 rounded-full absolute -top-4 left-1/2 -translate-x-1/2 shadow-md whitespace-nowrap">
+                                    Subentro
+                                  </span>
+                                )}
+                                
+                                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 flex items-center justify-center text-sm font-black font-mono shadow-xl relative z-10 ${roleColorClass}`}>
+                                  {g?.numeroMaglia || "-"}
+                                </div>
+                                <div className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border truncate w-full flex-grow text-center shadow-lg relative z-20 ${isSubentro ? 'bg-sky-950 text-sky-200 border-sky-800' : 'bg-indigo-950 text-white border-indigo-700'}`}>
+                                  {getLastName(name)}
+                                </div>
+                                
+                                {/* Hover Actions */}
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity z-30">
+                                  {selectedPlayers.length === 4 && (
                                     <button
                                       type="button"
-                                      onClick={() => handleTogglePlayer(name)}
-                                      className="bg-red-600 text-white w-5 h-5 rounded-md flex items-center justify-center font-black cursor-pointer shadow-lg border border-red-400 text-xs"
-                                    >
-                                      ×
-                                    </button>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-
-                          {/* Panchina (Bottom line) */}
-                          {selectedPlayers.length > 3 && (
-                            <div className="mt-6 pt-3 border-t-2 border-dashed border-green-400/40 flex flex-col items-center relative">
-                              <span className="text-[9px] bg-sky-600 text-white font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full absolute -top-2.5 left-1/2 -translate-x-1/2 shadow-md">
-                                Subentro
-                              </span>
-                              {selectedPlayers.slice(3, 4).map((name) => {
-                                const g = giocatori.find((p) => p.nome === name);
-                                const roleColorClass = getRoleColor(g?.ultimoRuolo || "");
-                                return (
-                                  <div key="pan" className="flex flex-col items-center justify-center gap-1 group relative w-1/3 opacity-90 transition-opacity hover:opacity-100">
-                                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center text-xs font-black font-mono shadow-xl relative z-10 ${roleColorClass}`}>
-                                      {g?.numeroMaglia || "-"}
-                                    </div>
-                                    <div className="bg-sky-950 text-sky-200 text-[9px] font-bold px-1.5 py-0.5 rounded border border-sky-800 truncate w-full max-w-[80px] text-center shadow-lg relative z-20">
-                                      {getLastName(name)}
-                                    </div>
-                                    
-                                    {/* Hover Actions */}
-                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-30">
-                                      <button
-                                        type="button"
-                                        onClick={() => {
+                                      onClick={() => {
+                                        if (isSubentro) {
                                           const others = selectedPlayers.filter((p) => p !== name);
                                           setSelectedPlayers([name, ...others]);
-                                        }}
-                                        className="bg-sky-600 text-white w-5 h-5 rounded-md flex items-center justify-center cursor-pointer shadow-lg border border-sky-400"
-                                        title="Sposta titolare"
-                                      >
-                                        <ChevronUp className="w-3.5 h-3.5" />
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleTogglePlayer(name)}
-                                        className="bg-red-600 text-white w-5 h-5 rounded-md flex items-center justify-center font-black cursor-pointer shadow-lg border border-red-400 text-xs"
-                                      >
-                                        ×
-                                      </button>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
+                                        } else {
+                                          const others = selectedPlayers.filter((p) => p !== name);
+                                          setSelectedPlayers([...others, name]);
+                                        }
+                                      }}
+                                      className={`${isSubentro ? 'bg-sky-600 border-sky-400' : 'bg-indigo-600 border-indigo-400'} text-white w-5 h-5 rounded-md flex items-center justify-center cursor-pointer shadow-lg border`}
+                                      title={isSubentro ? "Sposta Titolare" : "Sposta in Panchina"}
+                                    >
+                                      {isSubentro ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                                    </button>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleTogglePlayer(name)}
+                                    className="bg-red-600 text-white w-5 h-5 rounded-md flex items-center justify-center font-black cursor-pointer shadow-lg border border-red-400 text-xs"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
