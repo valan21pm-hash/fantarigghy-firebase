@@ -59,7 +59,7 @@ import {
 import { generateMatchPdf, generateGeneralReportPdf } from "../lib/pdfHelper";
 import BonusManager from "./BonusManager";
 
-const MercatoCountdown = ({ targetDate }: { targetDate: string }) => {
+const MercatoCountdown = ({ targetDate, className }: { targetDate: string, className?: string }) => {
   const [timeLeft, setTimeLeft] = useState("");
 
   useEffect(() => {
@@ -91,7 +91,7 @@ const MercatoCountdown = ({ targetDate }: { targetDate: string }) => {
     return () => clearInterval(interval);
   }, [targetDate]);
 
-  return <span className="font-mono bg-blue-950 px-1.5 py-0.5 rounded text-blue-300 ml-2">{timeLeft}</span>;
+  return <span className={className !== undefined ? className : "font-mono bg-blue-950 px-1.5 py-0.5 rounded text-blue-300 ml-2"}>{timeLeft}</span>;
 };
 
 interface FantacalcettoProps {
@@ -2965,7 +2965,7 @@ export default function FantacalcettoV2({
                            <div className="text-center py-4">
                              <p className="text-indigo-200 text-xs font-medium mb-1.5uppercase tracking-wider">Termine Consegna Formazione</p>
                              <div className="font-mono text-xl sm:text-2xl font-black text-yellow-400 tracking-widest bg-indigo-900/40 inline-flex items-center justify-center min-w-[200px] py-2.5 rounded-xl border border-indigo-800/80 shadow-md">
-                               {timeLeft || "SCADUTO"}
+                               {lockStatus.deadline ? <MercatoCountdown targetDate={lockStatus.deadline.toISOString()} className="" /> : (lockStatus.timeLeftString || "SCADUTO")}
                              </div>
                              <p className="text-white font-black text-sm sm:text-base mt-4 px-2 uppercase tracking-wide">{matchAttuale.dettagli}</p>
                            </div>
