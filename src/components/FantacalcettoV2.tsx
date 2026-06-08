@@ -160,22 +160,31 @@ const renderPlayerOnPitch = (
   const isSubentro = idx === 3;
 
   return (
-    <div key={`${name}-${idx}`} className={`flex flex-col items-center justify-center gap-1 group w-16 sm:w-20 transition-all ${isSubentro ? 'opacity-90 hover:opacity-100 relative' : 'relative'}`}>
-      {isSubentro && (
-        <span className="text-[8px] bg-sky-600 text-white font-black uppercase tracking-widest px-2 py-0.5 rounded-full absolute -top-4 left-1/2 -translate-x-1/2 shadow-md whitespace-nowrap">
-          Subentro
-        </span>
-      )}
-      
-      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 flex items-center justify-center text-sm font-black font-mono shadow-xl relative z-10 ${roleColorClass}`}>
+    <div key={`${name}-${idx}`} className={`flex flex-col items-center justify-center gap-1.5 sm:gap-2 group w-[72px] sm:w-[90px] transition-all relative ${isSubentro ? 'opacity-95' : ''}`}>
+      <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border-[3px] flex items-center justify-center text-lg sm:text-xl font-black font-mono shadow-2xl relative z-10 ${roleColorClass}`}>
         {g?.numeroMaglia || "-"}
       </div>
-      <div className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border truncate w-full flex-grow text-center shadow-lg relative z-20 ${isSubentro ? 'bg-sky-950 text-sky-200 border-sky-800' : 'bg-indigo-950 text-white border-indigo-700'}`}>
+      <div className={`text-[11px] sm:text-[12px] font-bold px-2 py-1 rounded-md border truncate w-full flex-grow text-center shadow-lg relative z-20 uppercase tracking-tight ${isSubentro ? 'bg-sky-950/90 text-sky-200 border-sky-600' : 'bg-indigo-950/90 text-white border-indigo-500'}`}>
         {getLastName(name)}
       </div>
       
-      {/* Hover Actions - always visible on mobile/touch since the user mentioned "pigro e poca pazienza" */}
-      <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center justify-center gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity z-30">
+      {/* Sempre visibili per massima usabilità (no hover required) */}
+      <div className="absolute -top-4 -right-3 sm:-top-5 sm:-right-4 flex flex-col items-center justify-center gap-1 z-30">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            handleTogglePlayer(name);
+          }}
+          className="bg-red-600 hover:bg-red-500 text-white w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-black cursor-pointer shadow-xl border-2 border-red-400/50 text-base active:scale-90 transition-transform"
+          aria-label="Rimuovi giocatore"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="absolute -top-4 -left-3 sm:-top-5 sm:-left-4 flex flex-col items-center justify-center gap-1 z-30">
         {selectedPlayers.length === 4 && (
           <button
             type="button"
@@ -190,23 +199,12 @@ const renderPlayerOnPitch = (
                 setSelectedPlayers([...others, name]);
               }
             }}
-            className={`${isSubentro ? 'bg-sky-600 border-sky-400' : 'bg-indigo-600 border-indigo-400'} text-white w-6 h-6 rounded-md flex items-center justify-center cursor-pointer shadow-lg border active:scale-95`}
+            className={`${isSubentro ? 'bg-sky-600 hover:bg-sky-500 border-sky-300/50 text-white' : 'bg-indigo-600 hover:bg-indigo-500 border-indigo-300/50 text-white'} w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center cursor-pointer shadow-xl border-2 active:scale-90 transition-transform`}
             title={isSubentro ? "Sposta Titolare" : "Sposta in Panchina"}
           >
-            {isSubentro ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            {isSubentro ? <ChevronUp className="w-5 h-5 font-black" /> : <ChevronDown className="w-5 h-5 font-black" />}
           </button>
         )}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            handleTogglePlayer(name);
-          }}
-          className="bg-red-600 text-white w-6 h-6 rounded-md flex items-center justify-center font-black cursor-pointer shadow-lg border border-red-400 text-sm active:scale-95"
-        >
-          ×
-        </button>
       </div>
     </div>
   );
@@ -3560,16 +3558,34 @@ export default function FantacalcettoV2({
                           </span>
                         </div>
                       ) : (
-                        <div className="h-full w-full relative z-10 flex flex-col justify-between py-1 sm:py-2">
-                          <div className="flex justify-center">
-                            {selectedPlayers[0] && renderPlayerOnPitch(selectedPlayers[0], 0, giocatori, selectedPlayers, setSelectedPlayers, handleTogglePlayer)}
+                        <div className="h-full w-full relative z-10 flex flex-col justify-between pt-2 pb-1 sm:pt-4 sm:pb-2 gap-4">
+                          {/* Area Titolari */}
+                          <div className="flex flex-col w-full relative gap-4">
+                            <div className="absolute -top-3 sm:-top-5 left-1/2 -translate-x-1/2 flex justify-center z-0 pointer-events-none">
+                              <span className="text-[12px] sm:text-xs bg-indigo-950/90 font-black uppercase tracking-widest text-indigo-300 px-6 py-1.5 rounded-bl-3xl rounded-br-3xl border-x-2 border-b-2 border-indigo-500/70 shadow-lg backdrop-blur-md">
+                                Titolari
+                              </span>
+                            </div>
+
+                            <div className="flex justify-center mt-6 sm:mt-8 z-10">
+                              {selectedPlayers[0] && renderPlayerOnPitch(selectedPlayers[0], 0, giocatori, selectedPlayers, setSelectedPlayers, handleTogglePlayer)}
+                            </div>
+                            <div className="flex justify-between px-2 sm:px-10 z-10">
+                              {selectedPlayers[1] && renderPlayerOnPitch(selectedPlayers[1], 1, giocatori, selectedPlayers, setSelectedPlayers, handleTogglePlayer)}
+                              {selectedPlayers[2] && renderPlayerOnPitch(selectedPlayers[2], 2, giocatori, selectedPlayers, setSelectedPlayers, handleTogglePlayer)}
+                            </div>
                           </div>
-                          <div className="flex justify-between px-2 sm:px-8">
-                            {selectedPlayers[1] && renderPlayerOnPitch(selectedPlayers[1], 1, giocatori, selectedPlayers, setSelectedPlayers, handleTogglePlayer)}
-                            {selectedPlayers[2] && renderPlayerOnPitch(selectedPlayers[2], 2, giocatori, selectedPlayers, setSelectedPlayers, handleTogglePlayer)}
-                          </div>
-                          <div className="flex justify-center">
-                            {selectedPlayers[3] && renderPlayerOnPitch(selectedPlayers[3], 3, giocatori, selectedPlayers, setSelectedPlayers, handleTogglePlayer)}
+
+                          {/* Area Panchina */}
+                          <div className="mt-4 pt-6 sm:pt-8 border-t-4 border-dashed border-white/60 flex flex-col items-center relative w-full">
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0">
+                              <span className="text-[12px] sm:text-xs bg-sky-700 font-black uppercase tracking-widest text-white px-8 py-1.5 flex items-center justify-center rounded-full shadow-xl border-4 border-sky-300">
+                                Panchina
+                              </span>
+                            </div>
+                            <div className="flex justify-center w-full z-10 mt-1 sm:mt-2">
+                              {selectedPlayers[3] && renderPlayerOnPitch(selectedPlayers[3], 3, giocatori, selectedPlayers, setSelectedPlayers, handleTogglePlayer)}
+                            </div>
                           </div>
                         </div>
                       )}
