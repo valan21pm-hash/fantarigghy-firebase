@@ -5402,9 +5402,9 @@ function MatchBreakdownModal({
               // Standard Gol and Assist are not added as standalone highlights on the card,
               // since they are already accounted for inside the role bonus list details with their correct values.
               if (kpi.amm > 0)
-                highlights.push(`🟨 ${kpi.amm} Amm (-${kpi.amm * 0.5})`);
+                highlights.push(`🟨 ${kpi.amm} Amm`);
               if (kpi.rossi > 0)
-                highlights.push(`🟥 ${kpi.rossi} Esp (-${kpi.rossi * 1})`);
+                highlights.push(`🟥 ${kpi.rossi} Esp`);
               if (kpi.bonusBreakdownStr) {
                 highlights.push(`🎒 Bonus: ${kpi.bonusBreakdownStr}`);
               } else if (kpi.bonusPts !== 0) {

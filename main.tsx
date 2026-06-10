@@ -40,10 +40,10 @@ export const generateMatchPdf = (teamName: string, mb: any) => {
     else if (kpi.stato === "Assente") subStatus = "Assente";
     
     const highlights: string[] = [];
-    if (kpi.gol > 0) highlights.push(`${kpi.gol} Gol (+${kpi.gol * 3})`);
-    if (kpi.assist > 0) highlights.push(`${kpi.assist} Assist (+${kpi.assist * 1})`);
-    if (kpi.amm > 0) highlights.push(`${kpi.amm} Amm (-${kpi.amm * 0.5})`);
-    if (kpi.rossi > 0) highlights.push(`${kpi.rossi} Esp (-${kpi.rossi * 1})`);
+    if (kpi.gol > 0) highlights.push(`${kpi.gol} Gol`);
+    if (kpi.assist > 0) highlights.push(`${kpi.assist} Assist`);
+    if (kpi.amm > 0) highlights.push(`${kpi.amm} Amm`);
+    if (kpi.rossi > 0) highlights.push(`${kpi.rossi} Esp`);
     const bonusPts = kpi.bonusPts || 0;
     if (bonusPts !== 0) highlights.push(`Bonus: ${bonusPts > 0 ? "+" : ""}${bonusPts}`);
 
