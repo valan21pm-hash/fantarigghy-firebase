@@ -1,785 +1,1973 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import React, { useState } from "react";
-import { Calendar, CheckSquare, ClipboardCheck, Plus, Users, Trash2, Shuffle, Check, ArrowLeft } from "lucide-react";
-import { Giocatore, getLastName } from "../types";
-
-interface ConvocationsProps {
-  giocatori: Giocatore[];
-  campi: string[];
-  onCreaPartita: (
-    costo: number,
-    convocati: string[],
-    dettagli: string,
-    campo: string,
-    mappaRuoli: Record<string, string>
-  ) => Promise<void>;
-  isEditor?: boolean;
-}
-
-const RUOLI = ["Portiere", "Centrale", "Laterale", "Pivot", "Allenatore", "Tifoso"];
-
-export default function Convocations({
-  giocatori,
-  campi,
-  onCreaPartita,
-  isEditor = false,
-}: ConvocationsProps) {
-  // Mode switcher: "campionato" (standard convocations) vs "amichevole" (friendly match with lineups)
-  const [activeMode, setActiveMode] = useState<"campionato" | "amichevole">("campionato");
-
-  // Core fields
-  const [data, setData] = useState("");
-  const [ora, setOra] = useState("");
-  const [campo, setCampo] = useState("");
-  const [nuovoCampo, setNuovoCampo] = useState("");
-  const [costo, setCosto] = useState("");
-  const [avversario, setAvversario] = useState("");
-
-  // Convocati checklist state (default we check all active players)
-  const [selezionati, setSelezionati] = useState<string[]>(
-    giocatori.filter(g => g.attivo).map(g => g.nome)
-  );
-
-  // Mappa ruoli convocati
-  const [ruoliConvocati, setRuoliConvocati] = useState<Record<string, string>>(
-    giocatori.reduce((acc, curr) => {
-      acc[curr.nome] = curr.ultimoRuolo || "";
-      return acc;
-    }, {} as Record<string, string>)
-  );
-
-  // Friendly match specific fields
-  const [squadraA, setSquadraA] = useState("Noi");
-  const [squadraB, setSquadraB] = useState("Avversari");
-  const [esterni, setEsterni] = useState<string[]>([]);
-  const [nuovoEsterno, setNuovoEsterno] = useState("");
-  const [lineupStep, setLineupStep] = useState(false);
-  const [lineupAssignments, setLineupAssignments] = useState<Record<string, "A" | "B">>({});
-
-  const handleToggleSelectAll = () => {
-    const activeOnes = giocatori.filter(g => g.attivo).map(g => g.nome);
-    if (selezionati.length === activeOnes.length) {
-      setSelezionati([]);
-    } else {
-      setSelezionati(activeOnes);
+{
+  "giocatori": [
+    {
+      "nome": "Manuel Palmas",
+      "saldo": 1,
+      "gol": 2,
+      "ammonizioni": 0,
+      "ultimoRuolo": "Centrale",
+      "assist": 2,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "golSubitiRigore": 0,
+      "golSubitiPiazzato": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "numeroMaglia": 28
+    },
+    {
+      "nome": "Salvatore Roberto Pinna",
+      "saldo": 2,
+      "gol": 4,
+      "ammonizioni": 0,
+      "ultimoRuolo": "Pivot",
+      "assist": 2,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "golSubitiRigore": 0,
+      "golSubitiPiazzato": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "numeroMaglia": 9
+    },
+    {
+      "nome": "Marco Scarpellini",
+      "saldo": 2,
+      "gol": 1,
+      "ammonizioni": 0,
+      "ultimoRuolo": "Centrale",
+      "assist": 4,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "golSubitiRigore": 0,
+      "golSubitiPiazzato": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "numeroMaglia": 10
+    },
+    {
+      "nome": "Michele Carrone",
+      "saldo": 1,
+      "gol": 0,
+      "ammonizioni": 0,
+      "ultimoRuolo": "Laterale",
+      "assist": 0,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "golSubitiRigore": 0,
+      "golSubitiPiazzato": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "numeroMaglia": 20
+    },
+    {
+      "nome": "Enrico Mulas",
+      "saldo": 2,
+      "gol": 0,
+      "ammonizioni": 0,
+      "ultimoRuolo": "Portiere",
+      "assist": 0,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "golSubitiRigore": 0,
+      "golSubitiPiazzato": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "numeroMaglia": 13
+    },
+    {
+      "nome": "Davide Bayre",
+      "saldo": 0,
+      "gol": 0,
+      "ammonizioni": 0,
+      "ultimoRuolo": "Allenatore",
+      "assist": 0,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "golSubitiRigore": 0,
+      "golSubitiPiazzato": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "numeroMaglia": 5
+    },
+    {
+      "nome": "Alberto Garau",
+      "saldo": 2,
+      "gol": 1,
+      "ammonizioni": 0,
+      "ultimoRuolo": "Portiere",
+      "assist": 0,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "golSubitiRigore": 0,
+      "golSubitiPiazzato": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "numeroMaglia": 12
+    },
+    {
+      "nome": "Lorenzo Pittiu",
+      "saldo": 2,
+      "gol": 3,
+      "ammonizioni": 0,
+      "ultimoRuolo": "Laterale",
+      "assist": 4,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "golSubitiRigore": 0,
+      "golSubitiPiazzato": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "numeroMaglia": 21
+    },
+    {
+      "nome": "Mario Conti",
+      "saldo": 7,
+      "gol": 5,
+      "ammonizioni": 0,
+      "ultimoRuolo": "Laterale",
+      "assist": 3,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "golSubitiRigore": 0,
+      "golSubitiPiazzato": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "numeroMaglia": 19
+    },
+    {
+      "nome": "Sergio Pippia",
+      "saldo": 5,
+      "gol": 1,
+      "ammonizioni": 0,
+      "ultimoRuolo": "Laterale",
+      "assist": 0,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "golSubitiRigore": 0,
+      "golSubitiPiazzato": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "numeroMaglia": 11
+    },
+    {
+      "nome": "Giampaolo Mattana",
+      "saldo": 3,
+      "gol": 5,
+      "ammonizioni": 0,
+      "ultimoRuolo": "Laterale",
+      "assist": 0,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "golSubitiRigore": 0,
+      "golSubitiPiazzato": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "numeroMaglia": 30
+    },
+    {
+      "nome": "Fabrizio Alimonda",
+      "saldo": 7,
+      "gol": 0,
+      "ammonizioni": 0,
+      "ultimoRuolo": "Laterale",
+      "assist": 0,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "golSubitiRigore": 0,
+      "golSubitiPiazzato": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "numeroMaglia": 96
+    },
+    {
+      "nome": "Matteo Scattu",
+      "saldo": 0,
+      "gol": 2,
+      "ammonizioni": 1,
+      "ultimoRuolo": "Centrale",
+      "assist": 0,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "golSubitiRigore": 0,
+      "golSubitiPiazzato": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "numeroMaglia": 77
+    },
+    {
+      "nome": "Stefano Michele Lauro",
+      "saldo": 11,
+      "gol": 0,
+      "ammonizioni": 0,
+      "ultimoRuolo": "Pivot",
+      "assist": 0,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "golSubitiRigore": 0,
+      "golSubitiPiazzato": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "numeroMaglia": 45
+    },
+    {
+      "nome": "Federico Addis",
+      "saldo": 0,
+      "gol": 0,
+      "ammonizioni": 0,
+      "ultimoRuolo": "Pivot",
+      "assist": 0,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "golSubitiRigore": 0,
+      "golSubitiPiazzato": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "numeroMaglia": 17
+    },
+    {
+      "nome": "Nicola Orlandini",
+      "saldo": 4,
+      "gol": 0,
+      "ammonizioni": 0,
+      "ultimoRuolo": "Pivot",
+      "assist": 0,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "golSubitiRigore": 0,
+      "golSubitiPiazzato": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "numeroMaglia": 14
     }
-  };
-
-  const handleTogglePlayer = (nome: string) => {
-    if (selezionati.includes(nome)) {
-      setSelezionati(selezionati.filter(x => x !== nome));
-    } else {
-      setSelezionati([...selezionati, nome]);
-    }
-  };
-
-  const handleRoleChange = (nome: string, ruolo: string) => {
-    setRuoliConvocati({
-      ...ruoliConvocati,
-      [nome]: ruolo,
-    });
-  };
-
-  // Add a temporary external player name
-  const handleAddEsterno = () => {
-    const nomeLibero = nuovoEsterno.trim();
-    if (!nomeLibero) return;
-    const nomeCompleto = `${nomeLibero} (Esterno)`;
-    if (esterni.includes(nomeCompleto) || giocatori.some(g => g.nome.toLowerCase() === nomeLibero.toLowerCase())) {
-      alert("Questo nome è già presente in lista!");
-      return;
-    }
-    setEsterni([...esterni, nomeCompleto]);
-    setNuovoEsterno("");
-  };
-
-  const handleRemoveEsterno = (nome: string) => {
-    setEsterni(esterni.filter(e => e !== nome));
-  };
-
-  // Stagger/Alternating setup for line-ups
-  const handleRandomizeLineup = () => {
-    const tutteUnite = [...selezionati, ...esterni];
-    const nState: Record<string, "A" | "B"> = {};
-    tutteUnite.forEach((nome, i) => {
-      nState[nome] = i % 2 === 0 ? "A" : "B";
-    });
-    setLineupAssignments(nState);
-  };
-
-  // Advance to Friendly match squad composing step
-  const handleProcediFormazione = () => {
-    let finalData = data;
-    let finalOra = ora;
-    let finalCampo = campo;
-
-    if (!finalData) {
-      finalData = new Date().toISOString().split("T")[0];
-    }
-    if (!finalOra) {
-      finalOra = "21:00";
-    }
-    if (!finalCampo) {
-      finalCampo = campi[0] || "Campo Amichevole";
-    }
-
-    // Force values so they are defined when saving
-    setData(finalData);
-    setOra(finalOra);
-    setCampo(finalCampo);
-
-    const tutteConvocati = [...selezionati, ...esterni];
-    if (tutteConvocati.length < 2) {
-      alert("Si prega di includere almeno due calciatori (interni o esterni) per comporre le squadre.");
-      return;
-    }
-
-    // Prepare initial step state (even indices to A, odd to B)
-    const nState: Record<string, "A" | "B"> = {};
-    tutteConvocati.forEach((nome, i) => {
-      nState[nome] = i % 2 === 0 ? "A" : "B";
-    });
-    setLineupAssignments(nState);
-    setLineupStep(true);
-  };
-
-  // Save friendly match
-  const handleSalvaAmichevole = async () => {
-    const campoScelto = campo === "NUOVO" ? nuovoCampo.trim() : (campo || campi[0] || "Campo Amichevole");
-    const costoTotale = parseFloat(costo) || 0;
-
-    let localData = data || new Date().toISOString().split("T")[0];
-    // Format Date to long Italian string
-    const [year, month, day] = localData.split("-");
-    const dateObj = new Date(Number(year), Number(month) - 1, Number(day), 12, 0, 0);
-    const formatter = new Intl.DateTimeFormat("it-IT", { weekday: "long", day: "numeric", month: "long" });
-    let dataLeggibile = formatter.format(dateObj);
-    dataLeggibile = dataLeggibile.charAt(0).toUpperCase() + dataLeggibile.slice(1);
-
-    const tutteLeSquadre = [...selezionati, ...esterni];
-    const formatiA = tutteLeSquadre.filter(name => lineupAssignments[name] === "A");
-    const formatiB = tutteLeSquadre.filter(name => lineupAssignments[name] === "B");
-
-    const formazioniStr = `\n\n👕 *${squadraA}*:\n${formatiA.map(n => n.replace(" (Esterno)", "")).join(", ")}\n\n👕 *${squadraB}*:\n${formatiB.map(n => n.replace(" (Esterno)", "")).join(", ")}`;
-    const dettagliDatabase = `${dataLeggibile} ore ${ora || "21:00"} - ${campoScelto} (${squadraA} vs ${squadraB}) [Amichevole]` + formazioniStr;
-
-    // Create the match row in backend!
-    await onCreaPartita(costoTotale, tutteLeSquadre, dettagliDatabase, campoScelto, {});
-
-    // Prepare share text containing ONLY those items! (squads and players)
-    let msg = `👕 *${squadraA}*\n`;
-    formatiA.forEach(n => {
-      const cleanName = n.replace(" (Esterno)", "");
-      msg += `- ${cleanName}\n`;
-    });
-    msg += `\n👕 *${squadraB}*\n`;
-    formatiB.forEach(n => {
-      const cleanName = n.replace(" (Esterno)", "");
-      msg += `- ${cleanName}\n`;
-    });
-
-    navigator.clipboard.writeText(msg.trim());
-    alert("Partita Amichevole creata con successo nel sistema! ⚠️ Fai SUBITO la formazione nella sezione 'Lavagna' (Formazione). La formazione del match è pronta negli appunti!");
-
-    // Reset forms and exit step
-    setData("");
-    setOra("");
-    setCampo("");
-    setNuovoCampo("");
-    setCosto("");
-    setEsterni([]);
-    setLineupStep(false);
-  };
-
-  // Submit standard convocations (Campionato / Interna)
-  const handleSubmitCampionato = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!data || !ora || !campo) {
-      alert("Si prega di inserire data, ora e campo da gioco.");
-      return;
-    }
-
-    if (selezionati.length === 0) {
-      alert("Si prega di selezionare almeno un convocato.");
-      return;
-    }
-
-    const campoScelto = campo === "NUOVO" ? nuovoCampo.trim() : campo;
-    if (!campoScelto) {
-      alert("Inserire un nome valido per il nuovo campo.");
-      return;
-    }
-
-    // Format Date from YYYY-MM-DD to DD/MM/YYYY
-    const [year, month, day] = data.split("-");
-    const formattedDate = `${day}/${month}/${year}`;
-
-    const dettagliDatabase = `${formattedDate} ${ora}, ${campoScelto}` + (avversario ? ` vs ${avversario}` : "");
-    const costoTotale = parseFloat(costo) || 0;
-
-    // Structure WhatsApp message
-    const rigaAvversario = avversario ? `🆚 *Avversario:* ${avversario}\n` : "";
-    let msg = `⚽ *NUOVA CONVOCAZIONE* ⚽\n\n📅 ${formattedDate} *${ora}*\n📍 ${campoScelto}\n${rigaAvversario}💰 Costo: ${costoTotale}€\n\n`;
-
-    // Grouping players by role
-    RUOLI.forEach(role => {
-      const playersInRole = selezionati.filter(name => ruoliConvocati[name] === role);
-      if (playersInRole.length > 0) {
-        msg += `*${role.toUpperCase()}*\n`;
-        playersInRole.forEach(name => {
-          const gInfo = giocatori.find(x => x.nome === name);
-          msg += `- ${name} (#${gInfo?.numeroMaglia || "99"})\n`;
-        });
-        msg += `\n`;
+  ],
+  "campi": [
+    "Futura Sales",
+    "Verderame",
+    "Seminario"
+  ],
+  "partite": [
+    {
+      "id": "0ae665e0-7530-4e29-8bbb-3678aba05edd",
+      "dataInserimento": "25/05/2026 17.14.39",
+      "dettagli": "Lunedì 25 maggio ore 21:00 - Seminario (TEAM SCURO vs TEAM BIANCO) [Amichevole]\n\n👕 TEAM SCURO:\nMario Conti, Sergio Pippia, Salvatore Roberto Pinna, Lorenzo Pittiu, Marco Scarpellini\n\n👕 TEAM BIANCO:\nGiampaolo Mattana, Alberto Garau, Manuel Palmas, Matteo Scattu, AMICO SCATTU (Esterno)",
+      "costo": 40,
+      "convocati": [
+        "Mario Conti",
+        "Sergio Pippia",
+        "Salvatore Roberto Pinna",
+        "Giampaolo Mattana",
+        "Alberto Garau",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Matteo Scattu",
+        "AMICO SCATTU (Esterno)"
+      ],
+      "stato": "Chiusa",
+      "risultato": "14-12",
+      "referto": [
+        {
+          "subitiRigore": "0",
+          "nome": "Mario Conti",
+          "assist": "3",
+          "pagaQuota": true,
+          "amm": "0",
+          "subitiPiazzato": "0",
+          "rossi": "0",
+          "gol": "5",
+          "subitiAzione": "0"
+        },
+        {
+          "rossi": "0",
+          "gol": "1",
+          "subitiAzione": "0",
+          "subitiRigore": "0",
+          "nome": "Sergio Pippia",
+          "pagaQuota": true,
+          "assist": "0",
+          "amm": "0",
+          "subitiPiazzato": "0"
+        },
+        {
+          "subitiPiazzato": "0",
+          "subitiRigore": "0",
+          "nome": "Salvatore Roberto Pinna",
+          "pagaQuota": true,
+          "assist": "2",
+          "amm": "0",
+          "gol": "4",
+          "subitiAzione": "0",
+          "rossi": "0"
+        },
+        {
+          "nome": "Giampaolo Mattana",
+          "subitiRigore": "0",
+          "amm": "0",
+          "assist": "0",
+          "pagaQuota": true,
+          "subitiPiazzato": "0",
+          "rossi": "0",
+          "gol": "5",
+          "subitiAzione": "0"
+        },
+        {
+          "subitiRigore": "0",
+          "nome": "Alberto Garau",
+          "pagaQuota": true,
+          "assist": "0",
+          "amm": "0",
+          "subitiPiazzato": "0",
+          "rossi": "0",
+          "gol": "1",
+          "subitiAzione": "0"
+        },
+        {
+          "nome": "Lorenzo Pittiu",
+          "subitiRigore": "0",
+          "amm": "0",
+          "pagaQuota": true,
+          "assist": "4",
+          "subitiPiazzato": "0",
+          "rossi": "0",
+          "gol": "3",
+          "subitiAzione": "0"
+        },
+        {
+          "rossi": "0",
+          "subitiAzione": "0",
+          "gol": "2",
+          "amm": "0",
+          "pagaQuota": true,
+          "assist": "2",
+          "nome": "Manuel Palmas",
+          "subitiRigore": "0",
+          "subitiPiazzato": "0"
+        },
+        {
+          "subitiPiazzato": "0",
+          "nome": "Marco Scarpellini",
+          "subitiRigore": "0",
+          "amm": "0",
+          "assist": "4",
+          "pagaQuota": true,
+          "gol": "1",
+          "subitiAzione": "0",
+          "rossi": "0"
+        },
+        {
+          "gol": "2",
+          "subitiAzione": "0",
+          "rossi": "0",
+          "subitiPiazzato": "0",
+          "nome": "Matteo Scattu",
+          "subitiRigore": "0",
+          "amm": "1",
+          "pagaQuota": true,
+          "assist": "0"
+        },
+        {
+          "subitiRigore": "0",
+          "nome": "AMICO SCATTU (Esterno)",
+          "pagaQuota": true,
+          "assist": "0",
+          "amm": "0",
+          "subitiPiazzato": "0",
+          "rossi": "0",
+          "gol": "4",
+          "subitiAzione": "0"
+        }
+      ],
+      "formazione": {
+        "titolari": [],
+        "panchina": []
+      },
+      "inviatoFanta": false,
+      "rosterSnapshot": {}
+    },
+    {
+      "id": "cl2uyyu-mpv9n0hu",
+      "dataInserimento": "2026-06-01T13:50:25.203Z",
+      "dettagli": "Lunedì 1 giugno ore 20:00 - Verderame (Scuri vs Chiari) [Amichevole]\n\n👕 *Scuri*:\nMichele Carrone, Marco Scarpellini, Sergio Pippia, Federico Addis, Porcella (Esterno)\n\n👕 *Chiari*:\nManuel Palmas, Salvatore Roberto Pinna, Lorenzo Pittiu, Stefano Michele Lauro, Spanedda (Esterno)",
+      "costo": 35,
+      "convocati": [
+        "Manuel Palmas",
+        "Salvatore Roberto Pinna",
+        "Lorenzo Pittiu",
+        "Stefano Michele Lauro",
+        "Michele Carrone",
+        "Marco Scarpellini",
+        "Sergio Pippia",
+        "Federico Addis",
+        "Spanedda (Esterno)",
+        "Porcella (Esterno)"
+      ],
+      "stato": "Chiusa",
+      "risultato": "14-10",
+      "referto": [
+        {
+          "nome": "Manuel Palmas",
+          "gol": 0,
+          "assist": 0,
+          "amm": 0,
+          "rossi": 0,
+          "subitiAzione": 0,
+          "subitiRigore": 0,
+          "subitiPiazzato": 0,
+          "pagaQuota": true,
+          "bonusAttivi": []
+        },
+        {
+          "nome": "Salvatore Roberto Pinna",
+          "gol": 0,
+          "assist": 0,
+          "amm": 0,
+          "rossi": 0,
+          "subitiAzione": 0,
+          "subitiRigore": 0,
+          "subitiPiazzato": 0,
+          "pagaQuota": true,
+          "bonusAttivi": []
+        },
+        {
+          "nome": "Lorenzo Pittiu",
+          "gol": 0,
+          "assist": 0,
+          "amm": 0,
+          "rossi": 0,
+          "subitiAzione": 0,
+          "subitiRigore": 0,
+          "subitiPiazzato": 0,
+          "pagaQuota": true,
+          "bonusAttivi": []
+        },
+        {
+          "nome": "Stefano Michele Lauro",
+          "gol": 0,
+          "assist": 0,
+          "amm": 0,
+          "rossi": 0,
+          "subitiAzione": 0,
+          "subitiRigore": 0,
+          "subitiPiazzato": 0,
+          "pagaQuota": true,
+          "bonusAttivi": []
+        },
+        {
+          "nome": "Michele Carrone",
+          "gol": 0,
+          "assist": 0,
+          "amm": 0,
+          "rossi": 0,
+          "subitiAzione": 0,
+          "subitiRigore": 0,
+          "subitiPiazzato": 0,
+          "pagaQuota": true,
+          "bonusAttivi": []
+        },
+        {
+          "nome": "Marco Scarpellini",
+          "gol": 0,
+          "assist": 0,
+          "amm": 0,
+          "rossi": 0,
+          "subitiAzione": 0,
+          "subitiRigore": 0,
+          "subitiPiazzato": 0,
+          "pagaQuota": true,
+          "bonusAttivi": []
+        },
+        {
+          "nome": "Sergio Pippia",
+          "gol": 0,
+          "assist": 0,
+          "amm": 0,
+          "rossi": 0,
+          "subitiAzione": 0,
+          "subitiRigore": 0,
+          "subitiPiazzato": 0,
+          "pagaQuota": true,
+          "bonusAttivi": []
+        },
+        {
+          "nome": "Federico Addis",
+          "gol": 0,
+          "assist": 0,
+          "amm": 0,
+          "rossi": 0,
+          "subitiAzione": 0,
+          "subitiRigore": 0,
+          "subitiPiazzato": 0,
+          "pagaQuota": true,
+          "bonusAttivi": []
+        },
+        {
+          "nome": "Spanedda (Esterno)",
+          "gol": 0,
+          "assist": 0,
+          "amm": 0,
+          "rossi": 0,
+          "subitiAzione": 0,
+          "subitiRigore": 0,
+          "subitiPiazzato": 0,
+          "pagaQuota": true,
+          "bonusAttivi": []
+        },
+        {
+          "nome": "Porcella (Esterno)",
+          "gol": 0,
+          "assist": 0,
+          "amm": 0,
+          "rossi": 0,
+          "subitiAzione": 0,
+          "subitiRigore": 0,
+          "subitiPiazzato": 0,
+          "pagaQuota": true,
+          "bonusAttivi": []
+        }
+      ],
+      "formazione": {
+        "titolari": [
+          "Michele Carrone",
+          "Marco Scarpellini",
+          "Sergio Pippia",
+          "Federico Addis",
+          "Porcella (Esterno)"
+        ],
+        "panchina": [
+          "Manuel Palmas",
+          "Salvatore Roberto Pinna",
+          "Lorenzo Pittiu",
+          "Stefano Michele Lauro",
+          "Spanedda (Esterno)"
+        ]
+      },
+      "inviatoFanta": false,
+      "rosterSnapshot": {
+        "fs-1780146759640-rule": [
+          "Manuel Palmas",
+          "Marco Scarpellini",
+          "Enrico Mulas"
+        ]
       }
-    });
-
-    // Handle players without role
-    const withoutRole = selezionati.filter(name => !ruoliConvocati[name] || !RUOLI.includes(ruoliConvocati[name]));
-    if (withoutRole.length > 0) {
-      msg += `*SENZA RUOLO*\n`;
-      withoutRole.forEach(name => {
-        const gInfo = giocatori.find(x => x.nome === name);
-        msg += `- ${name} (#${gInfo?.numeroMaglia || "99"})\n`;
-      });
-      msg += `\n`;
     }
-
-    // Create standard game in backend
-    await onCreaPartita(costoTotale, selezionati, dettagliDatabase, campoScelto, ruoliConvocati);
-
-    // Copy to clipboard
-    navigator.clipboard.writeText(msg.trim());
-    alert("Evento Convocazione creato con successo nel sistema! ⚠️ Fai SUBITO la formazione nella sezione 'Lavagna' (Formazione). Il testo per WhatsApp è pronto per essere incollato!");
-
-    // Reset forms
-    setData("");
-    setOra("");
-    setCampo("");
-    setNuovoCampo("");
-    setCosto("");
-    setAvversario("");
-  };
-
-  if (!isEditor) {
-    return (
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" id="sezione-convocazioni">
-        <div className="bg-slate-900 px-6 py-4">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <span>⚽</span> Convocazioni & Gare
-          </h2>
-          <p className="text-xs text-slate-300">
-            Punto di coordinamento partite
-          </p>
-        </div>
-        <div className="p-12 text-center max-w-sm mx-auto space-y-4">
-          <div className="text-4xl font-semibold">🔒</div>
-          <h3 className="text-lg font-bold text-gray-800 tracking-tight">Area riservata agli amministratori</h3>
-        </div>
-      </div>
-    );
-  }
-
-  // Visual layout for dividing players to Team A and Team B (Step 2 of Amichevole)
-  if (lineupStep) {
-    const tutteUnite = [...selezionati, ...esterni];
-    return (
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="bg-slate-900 px-6 py-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <span>👕</span> Componi le Formazioni Amichevole
-            </h2>
-            <p className="text-xs text-slate-300">
-              Assegna ciascun partecipante selezionato a una delle due squadre
-            </p>
-          </div>
-          <button
-            onClick={() => setLineupStep(false)}
-            className="text-slate-300 hover:text-white flex items-center gap-1 text-xs cursor-pointer font-extrabold"
-          >
-            <ArrowLeft className="h-4 w-4" /> Indietro
-          </button>
-        </div>
-
-        <div className="p-6 space-y-6">
-          <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center justify-between flex-wrap gap-4">
-            <div className="text-sm text-slate-800 font-medium">
-              Hai <b className="font-extrabold">{tutteUnite.length} convocati totali</b>. Puoi dividerli equamente o personalizzarli a mano!
-            </div>
-            <button
-              type="button"
-              onClick={handleRandomizeLineup}
-              className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-4 py-2 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <Shuffle className="h-3.5 w-3.5" /> Alterna Automatico
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[50vh] overflow-y-auto border border-gray-100 rounded-xl p-4 bg-gray-50/50">
-            {tutteUnite.map(nome => {
-              const teamSelected = lineupAssignments[nome] || "A";
-              const isEst = nome.includes("(Esterno)");
-              return (
-                <div
-                  key={nome}
-                  className={`p-3.5 rounded-xl border flex items-center justify-between gap-4 bg-white transition-all shadow-xs ${
-                    teamSelected === "A" ? "border-l-4 border-l-blue-500" : "border-l-4 border-l-orange-500"
-                  }`}
-                >
-                  <div className="flex flex-col truncate">
-                    <span className="font-bold text-gray-800 text-sm truncate">{getLastName(nome)}</span>
-                    <span className="text-[10px] uppercase font-bold text-gray-400">
-                      {isEst ? "Giocatore Esterno" : "Rosa Interna"}
-                    </span>
-                  </div>
-
-                  <div className="flex bg-gray-100 p-0.5 rounded-lg shrink-0 select-none">
-                    <button
-                      type="button"
-                      onClick={() => setLineupAssignments({ ...lineupAssignments, [nome]: "A" })}
-                      className={`px-3 py-1.5 rounded-md text-xs font-black transition-all cursor-pointer ${
-                        teamSelected === "A"
-                          ? "bg-blue-600 text-white shadow-xs"
-                          : "text-gray-500 hover:text-gray-800"
-                      }`}
-                    >
-                      {squadraA}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setLineupAssignments({ ...lineupAssignments, [nome]: "B" })}
-                      className={`px-3 py-1.5 rounded-md text-xs font-black transition-all cursor-pointer ${
-                        teamSelected === "B"
-                          ? "bg-orange-600 text-white shadow-xs"
-                          : "text-gray-500 hover:text-gray-800"
-                      }`}
-                    >
-                      {squadraB}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Formations preview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
-              <h4 className="font-extrabold text-blue-900 border-b border-blue-200 pb-1.5 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <span>👕</span> {squadraA} ({tutteUnite.filter(n => lineupAssignments[n] === "A").length})
-              </h4>
-              <ul className="space-y-1 text-slate-700 text-xs">
-                {tutteUnite.filter(n => lineupAssignments[n] === "A").map(n => <li key={n}>- {n}</li>)}
-              </ul>
-            </div>
-
-            <div className="p-4 bg-orange-50 border border-orange-100 rounded-xl">
-              <h4 className="font-extrabold text-orange-950 border-b border-orange-200 pb-1.5 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <span>👕</span> {squadraB} ({tutteUnite.filter(n => lineupAssignments[n] === "B").length})
-              </h4>
-              <ul className="space-y-1 text-slate-700 text-xs">
-                {tutteUnite.filter(n => lineupAssignments[n] === "B").map(n => <li key={n}>- {n}</li>)}
-              </ul>
-            </div>
-          </div>
-
-          <div className="flex gap-3 pt-3 border-t">
-            <button
-              type="button"
-              onClick={() => setLineupStep(false)}
-              className="px-5 py-3 bg-gray-150 hover:bg-gray-200 rounded-xl text-gray-700 font-extrabold text-sm transition-colors flex items-center gap-2 cursor-pointer"
-            >
-              <ArrowLeft className="h-4 w-4" /> Modifica Invito
-            </button>
-            <button
-              type="button"
-              onClick={handleSalvaAmichevole}
-              className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <Check className="h-5 w-5" /> Salva Amichevole & Copia Formazioni WhatsApp
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" id="sezione-convocazioni">
-      <div className="bg-slate-900 px-6 py-4">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <span>⚽</span> Gestione Convocazioni & Gare
-        </h2>
-        <p className="text-xs text-slate-300">
-          Programma una partita e genera la convocazione. Puoi scegliere tra Campionato Interno o Match Amichevole.
-        </p>
-      </div>
-
-      {/* Tabs Selector for Game Modes */}
-      <div className="flex border-b border-slate-200 bg-slate-50 p-2 gap-1.5">
-        <button
-          onClick={() => setActiveMode("campionato")}
-          className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-            activeMode === "campionato"
-              ? "bg-white border border-slate-200 text-slate-800 shadow-xs"
-              : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/50"
-          }`}
-        >
-          🏆 Campionato / Interna
-        </button>
-        <button
-          onClick={() => setActiveMode("amichevole")}
-          className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-            activeMode === "amichevole"
-              ? "bg-white border border-slate-200 text-slate-800 shadow-xs"
-              : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/50"
-          }`}
-        >
-          🤝 Partita Amichevole
-        </button>
-      </div>
-
-      <div className="p-6 space-y-6">
-        {/* Date, Hour and Field Options (Common fields - shown for both types of matches) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Data Gara</label>
-            <input
-              type="date"
-              required
-              value={data}
-              onChange={e => setData(e.target.value)}
-              className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Ora Calcio d'Inizio</label>
-            <input
-              type="time"
-              required
-              value={ora}
-              onChange={e => setOra(e.target.value)}
-              className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Campo da Gioco</label>
-            <select
-              required
-              value={campo}
-              onChange={e => setCampo(e.target.value)}
-              className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
-            >
-              <option value="">Seleziona Campo...</option>
-              {campi.map(c => (
-                <option key={c} value={c}>
-                  {c                }
-                </option>
-              ))}
-              <option value="NUOVO" className="font-bold text-slate-755">
-                + Nuovo Campo...
-              </option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Costo Totale Campo (€)</label>
-            <input
-              type="number"
-              step="0.01"
-              placeholder="es. 60"
-              value={costo}
-              onChange={e => setCosto(e.target.value)}
-              className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
-            />
-          </div>
-        </div>
-
-        {/* Conditional text input for new field */}
-        {campo === "NUOVO" && (
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-            <label className="block text-xs font-bold text-slate-800 uppercase mb-1">Nome Nuovo Campo</label>
-            <input
-              type="text"
-              required
-              placeholder="es. Impianto Sportivo San Siro"
-              value={nuovoCampo}
-              onChange={e => setNuovoCampo(e.target.value)}
-              className="w-full text-sm p-3 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
-            />
-          </div>
-        )}
-
-        {/* Mode Dependent: Campionato vs Amichevole Form */}
-        {activeMode === "campionato" ? (
-          <form onSubmit={handleSubmitCampionato} className="space-y-6">
-            <div>
-              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
-                Squadra Avversaria <span className="text-gray-400 font-normal">(lasciare vuoto se interna)</span>
-              </label>
-              <input
-                type="text"
-                placeholder="es. Scapoli FC"
-                value={avversario}
-                onChange={e => setAvversario(e.target.value)}
-                className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
-              />
-            </div>
-
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
-                  <Users className="h-4 w-4" /> Seleziona Giocatori & Ruoli ({selezionati.length} scelti)
-                </h3>
-                <button
-                  type="button"
-                  onClick={handleToggleSelectAll}
-                  className="text-xs text-slate-700 font-bold cursor-pointer hover:underline"
-                >
-                  Invita/Deseleziona Tutti Attivi
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto border border-gray-100 rounded-xl p-4 bg-gray-50">
-                {giocatori.map(g => {
-                  const checked = selezionati.includes(g.nome);
-                  return (
-                    <div
-                      key={g.nome}
-                      className={`p-3 rounded-lg border flex flex-col justify-between gap-2.5 transition-all ${
-                        checked
-                          ? "bg-slate-50 border-slate-200 text-slate-800 shadow-xs"
-                          : "bg-white border-gray-200 text-gray-400 opacity-60"
-                      } ${!g.attivo ? "bg-red-50/20 border-red-100" : ""}`}
-                    >
-                      <label className="flex items-center gap-2 cursor-pointer w-full">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => handleTogglePlayer(g.nome)}
-                          className="w-4 h-4 rounded text-slate-800 focus:ring-slate-500"
-                        />
-                        <span className="font-bold text-sm truncate flex-1">
-                          {g.nome}{" "}
-                          <span className="text-[10px] font-mono font-semibold text-indigo-600 bg-indigo-50/50 px-1 py-0.2 rounded border border-indigo-150/40 ml-1">
-                            {g.numeroMaglia}
-                          </span>
-                        </span>
-                        {!g.attivo && (
-                          <span className="text-[9px] bg-red-150 text-red-700 px-1 py-0.2 rounded font-extrabold uppercase ml-1">
-                            Inattivo
-                          </span>
-                        )}
-                      </label>
-
-                      {/* Position role selector */}
-                      <div className="flex items-center gap-1.5 border-t border-dashed border-slate-200 pt-2 shrink-0">
-                        <span className="text-[10px] uppercase font-semibold text-gray-400">Ruolo:</span>
-                        <select
-                          disabled={!checked}
-                          value={ruoliConvocati[g.nome] || ""}
-                          onChange={e => handleRoleChange(g.nome, e.target.value)}
-                          className="text-xs p-1 border rounded bg-white font-medium text-gray-700 disabled:bg-gray-100 disabled:text-gray-400 focus:outline-none flex-1"
-                        >
-                          <option value="">Seleziona...</option>
-                          {RUOLI.map(r => (
-                            <option key={r} value={r}>
-                              {r}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-4 border-t border-gray-100">
-              <button
-                type="submit"
-                className="w-full sm:w-auto px-6 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <ClipboardCheck className="h-5 w-5" /> Crea Evento & Copia Testo WhatsApp
-              </button>
-            </div>
-          </form>
-        ) : (
-          <div className="space-y-6">
-            {/* Friendly match custom team names */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nome Squadra A</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Noi"
-                  value={squadraA}
-                  onChange={e => setSquadraA(e.target.value)}
-                  className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none font-bold"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nome Squadra B</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Avversari"
-                  value={squadraB}
-                  onChange={e => setSquadraB(e.target.value)}
-                  className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none font-bold"
-                />
-              </div>
-            </div>
-
-            {/* Total Players Counter for Amichevole */}
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-2xs">
-              <div>
-                <span className="text-xs font-bold text-slate-800 uppercase tracking-wider block">Giocatori Scelti per l'Amichevole</span>
-                <span className="text-xs text-slate-600">
-                  Consigliato: esattamente <strong>10 giocatori</strong> (rosa interna + esterni)
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className={`text-base font-black px-3 py-1.5 rounded-lg border transition-colors ${
-                  (selezionati.length + esterni.length) === 10
-                    ? "bg-slate-800 border-slate-900 text-white"
-                    : "bg-amber-100 border-amber-200 text-amber-800"
-                }`}>
-                  {selezionati.length + esterni.length} / 10 scelti
-                </span>
-                {(selezionati.length + esterni.length) !== 10 ? (
-                  <span className="text-[11px] font-bold text-amber-700">
-                    ⚠️ {selezionati.length + esterni.length < 10 ? "Seleziona altri!" : "Troppi giocatori!"}
-                  </span>
-                ) : (
-                  <span className="text-[11px] font-bold text-slate-700 block">
-                    ✅ Perfetto!
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Players Checklist (Roster) */}
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
-                  <span className="font-bold text-gray-700">1. Seleziona Convocati Interni ({selezionati.length} scelti)</span>
-                </h3>
-                <button
-                  type="button"
-                  onClick={handleToggleSelectAll}
-                  className="text-xs text-slate-700 font-bold cursor-pointer hover:underline"
-                >
-                  Deseleziona/Seleziona Tutti Attivi
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-48 overflow-y-auto border border-gray-150 rounded-xl p-3 bg-gray-50">
-                {giocatori.map(g => {
-                  const checked = selezionati.includes(g.nome);
-                  return (
-                    <label
-                      key={g.nome}
-                      className={`p-2.5 rounded-lg border text-xs font-bold flex items-center gap-2.5 cursor-pointer truncate transition-all ${
-                        checked
-                          ? "bg-white border-slate-305 text-slate-900 shadow-xs"
-                          : "bg-gray-100/55 border-gray-200 text-gray-400"
-                      } ${!g.attivo ? "bg-red-50/20 border-red-100 cursor-not-allowed opacity-50" : ""}`}
-                    >
-                      <input
-                        type="checkbox"
-                        disabled={!g.attivo}
-                        checked={checked}
-                        onChange={() => handleTogglePlayer(g.nome)}
-                        className="w-3.5 h-3.5 rounded text-slate-800 focus:ring-slate-500"
-                      />
-                      <span className="truncate flex-1">{g.nome}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* External players registry */}
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-              <h4 className="font-bold text-xs text-slate-900 uppercase tracking-wider">
-                2. Aggiungi Giocatori Esterni (Opzionale)
-              </h4>
-              <p className="text-[10px] text-slate-600 font-medium">
-                I giocatori esterni non appartengono alla rosa interna e non subiranno addebiti personali diretti sui saldi, ma influiranno sul conteggio paganti riducendo la quota campo.
-              </p>
-
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="es. Cristiano"
-                  value={nuovoEsterno}
-                  onChange={e => setNuovoEsterno(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleAddEsterno();
-                    }
-                  }}
-                  className="flex-1 text-sm p-3 bg-white border border-slate-205 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddEsterno}
-                  className="px-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg text-sm shrink-0 shadow-sm transition-colors cursor-pointer"
-                >
-                  Aggiungi +
-                </button>
-              </div>
-
-              {/* Badges of added external players */}
-              <div className="flex flex-wrap gap-1.5 p-2 bg-white/70 border border-slate-200 rounded-lg min-h-[44px]">
-                {esterni.length === 0 ? (
-                  <span className="text-[11px] text-gray-400 italic font-medium m-auto">
-                    Nessun giocatore esterno aggiunto.
-                  </span>
-                ) : (
-                  esterni.map(n => (
-                    <span
-                      key={n}
-                      className="bg-slate-50 text-slate-800 border border-slate-150 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-2xs"
-                    >
-                      {n.replace(" (Esterno)", "")}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveEsterno(n)}
-                        className="text-red-600 font-bold text-xs hover:text-red-800"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* Advance Button */}
-            <div className="flex justify-end pt-4 border-t border-gray-100">
-              <button
-                type="button"
-                onClick={handleProcediFormazione}
-                className="w-full sm:w-auto px-6 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer"
-              >
-                Procedi alla Formazione 📋
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  ],
+  "logs": [
+    {
+      "data": "31/05/2026, 21:22:32",
+      "operazione": "Ricarica Massiva",
+      "importo": "2.00",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Davide Bayre (2€)"
+    },
+    {
+      "data": "31/05/2026, 21:18:44",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 03/06/2026 20:00, Seminario vs GLi altri"
+    },
+    {
+      "data": "31/05/2026, 21:00:28",
+      "operazione": "Rosa",
+      "importo": "-",
+      "dettagli": "Eliminato giocatore: <pinco <pallino"
+    },
+    {
+      "data": "31/05/2026, 21:00:13",
+      "operazione": "Rosa",
+      "importo": "-",
+      "dettagli": "Aggiunto giocatore: <pinco <pallino"
+    },
+    {
+      "data": "30/05/2026, 18:05:30",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 03/06/2026 20:00, Seminario vs GLi altri"
+    },
+    {
+      "data": "30/05/2026, 18:05:18",
+      "operazione": "Chiusura Partita",
+      "importo": "0",
+      "dettagli": "Chiusa partita (03/06/2026 20:00, Seminario vs GLi altri), addebitati 0.00€ a 9 giocatori."
+    },
+    {
+      "data": "30/05/2026, 18:04:44",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 03/06/2026 20:00, Seminario vs GLi altri"
+    },
+    {
+      "data": "30/05/2026, 18:03:35",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 03/06/2026 20:00, Seminario vs GLi altri"
+    },
+    {
+      "data": "30/05/2026, 18:02:38",
+      "operazione": "Chiusura Partita",
+      "importo": "0",
+      "dettagli": "Chiusa partita (03/06/2026 20:00, Seminario vs GLi altri), addebitati 0.00€ a 9 giocatori."
+    },
+    {
+      "data": "30/05/2026, 18:02:30",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 03/06/2026 20:00, Seminario vs GLi altri"
+    },
+    {
+      "data": "30/05/2026, 14:24:03",
+      "operazione": "Sondaggi/Consigli",
+      "importo": "-",
+      "dettagli": "Proposta di Manuel: \"Quando cambio giocatore dopo una partita...\""
+    },
+    {
+      "data": "30/05/2026, 14:22:47",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Ma smettila' di Manuel"
+    },
+    {
+      "data": "30/05/2026, 14:22:00",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Ma smettila' di Manuel"
+    },
+    {
+      "data": "30/05/2026, 14:04:48",
+      "operazione": "Ricarica Massiva",
+      "importo": "1.00",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Davide Bayre (1€)"
+    },
+    {
+      "data": "30/05/2026, 13:23:47",
+      "operazione": "Chiusura Partita",
+      "importo": "0",
+      "dettagli": "Chiusa partita (03/06/2026 20:00, Seminario vs GLi altri), addebitati 0.00€ a 9 giocatori."
+    },
+    {
+      "data": "30/05/2026, 13:20:57",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Ma smettila' di Manuel"
+    },
+    {
+      "data": "30/05/2026, 13:19:31",
+      "operazione": "Partite",
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: 03/06/2026 20:00, Seminario vs GLi altri"
+    },
+    {
+      "data": "30/05/2026, 13:12:39",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma smettila da parte di Manuel"
+    },
+    {
+      "data": "28/05/2026, 08:33:08",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 28/05/2026 03:52, Futura Sales vs kugjh"
+    },
+    {
+      "data": "27/05/2026, 20:55:10",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: hhjkhkjkjh (Manuel)"
+    },
+    {
+      "data": "27/05/2026, 20:54:31",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'hhjkhkjkjh' di Manuel"
+    },
+    {
+      "data": "27/05/2026, 20:54:08",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: hhjkhkjkjh da parte di Manuel"
+    },
+    {
+      "data": "27/05/2026, 20:53:14",
+      "operazione": "Partite",
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: 28/05/2026 03:52, Futura Sales vs kugjh"
+    },
+    {
+      "data": "27/05/2026, 15:18:31",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Manuel (Accabbadda)"
+    },
+    {
+      "data": "27/05/2026, 15:18:25",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Manuel (Ma finiamola 2)"
+    },
+    {
+      "data": "27/05/2026, 15:18:20",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Manuel (Ma smettiamola)"
+    },
+    {
+      "data": "27/05/2026, 15:18:05",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 27/05/2026 20:00, Futura Sales vs gli altri"
+    },
+    {
+      "data": "27/05/2026, 15:17:55",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita precedentemente chiusa: 27/05/2026 20:00, Futura Sales vs gli altri"
+    },
+    {
+      "data": "27/05/2026, 15:15:01",
+      "operazione": "Chiusura Partita",
+      "importo": "0",
+      "dettagli": "Chiusa partita (27/05/2026 20:00, Futura Sales vs gli altri), addebitati 0.00€ a 10 giocatori."
+    },
+    {
+      "data": "27/05/2026, 15:13:12",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Manuel' di Ma smettiamola"
+    },
+    {
+      "data": "27/05/2026, 15:11:39",
+      "operazione": "Partite",
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: 27/05/2026 20:00, Futura Sales vs gli altri"
+    },
+    {
+      "data": "27/05/2026, 11:27:30",
+      "operazione": "Sondaggi/Consigli",
+      "importo": "-",
+      "dettagli": "Proposta di D: \"D\""
+    },
+    {
+      "data": "26/05/2026, 18:10:09",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 26/05/2026 21:00, Futura Sales"
+    },
+    {
+      "data": "26/05/2026, 18:10:01",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita precedentemente chiusa: 26/05/2026 21:00, Futura Sales"
+    },
+    {
+      "data": "26/05/2026, 18:09:53",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 26/05/2026 21:00, Seminario"
+    },
+    {
+      "data": "26/05/2026, 18:09:43",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita precedentemente chiusa: 26/05/2026 21:00, Seminario"
+    },
+    {
+      "data": "26/05/2026, 18:07:58",
+      "operazione": "Chiusura Partita",
+      "importo": "0",
+      "dettagli": "Chiusa partita (26/05/2026 21:00, Seminario), addebitati 0.00€ a 10 giocatori."
+    },
+    {
+      "data": "26/05/2026, 16:35:17",
+      "operazione": "Partite",
+      "importo": "0",
+      "dettagli": "Modificato referto partita chiusa: 26/05/2026 21:00, Futura Sales"
+    },
+    {
+      "data": "26/05/2026, 16:22:38",
+      "operazione": "Partite",
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: 26/05/2026 21:00, Seminario"
+    },
+    {
+      "data": "26/05/2026, 16:20:33",
+      "operazione": "Chiusura Partita",
+      "importo": "0",
+      "dettagli": "Chiusa partita (26/05/2026 21:00, Futura Sales), addebitati 0.00€ a 9 giocatori."
+    },
+    {
+      "data": "26/05/2026, 16:18:53",
+      "operazione": "Partite",
+      "importo": "40",
+      "dettagli": "Creata partita convocazione: 26/05/2026 21:00, Futura Sales"
+    },
+    {
+      "data": "26/05/2026, 16:18:14",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma smettiamola da parte di Manuel"
+    },
+    {
+      "data": "26/05/2026, 16:17:56",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Ma finiamola 2' di Manuel"
+    },
+    {
+      "data": "26/05/2026, 16:17:12",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma finiamola 2 da parte di Manuel"
+    },
+    {
+      "data": "26/05/2026, 16:16:30",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Manuel da parte di Ma smettiamola"
+    },
+    {
+      "data": "26/05/2026, 08:49:42",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Mafiniamola da parte di Manuel"
+    },
+    {
+      "data": "26/05/2026, 08:48:42",
+      "operazione": "Sondaggi/Consigli",
+      "importo": "-",
+      "dettagli": "Proposta di kgkugk: \"lòkjòjòj\""
+    },
+    {
+      "data": "25/05/2026, 23:06:43",
+      "operazione": "Partite",
+      "importo": "40",
+      "dettagli": "Creata partita convocazione: 28/05/2026 04:06, Futura Sales vs Scapoli fc"
+    },
+    {
+      "data": "25/05/2026, 23:05:37",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma finiamola da parte di Manuel"
+    },
+    {
+      "data": "25/05/2026, 22:37:04",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta: Ma finiamola da parte di Manuel"
+    },
+    {
+      "data": "03/06/2026, 20:32:44",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'ciao' di manuel (CoinEasy residui: 35)"
+    },
+    {
+      "data": "03/06/2026, 17:51:40",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Manujjj' di Manuel (CoinEasy residui: 0)"
+    },
+    {
+      "data": "03/06/2026, 17:51:22",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Manujjj' di Manuel (CoinEasy residui: 0)"
+    },
+    {
+      "data": "03/06/2026, 17:47:58",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Essegus' di Marco (CoinEasy residui: 0)"
+    },
+    {
+      "data": "03/06/2026, 17:45:07",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Essegus da parte di Marco"
+    },
+    {
+      "data": "03/06/2026, 17:17:10",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Jjjjjhhh' di Maniel (CoinEasy residui: 5)"
+    },
+    {
+      "data": "03/06/2026, 17:16:35",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Jjjjjhhh da parte di Maniel"
+    },
+    {
+      "data": "03/06/2026, 15:21:26",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Manujjj' di Manuel (CoinEasy residui: 25)"
+    },
+    {
+      "data": "03/06/2026, 15:20:58",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Manujjj da parte di Manuel"
+    },
+    {
+      "data": "03/06/2026, 12:54:44",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'ciao' di manuel (CoinEasy residui: 0)"
+    },
+    {
+      "data": "03/06/2026, 12:53:49",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'ciao' di manuel (CoinEasy residui: 0)"
+    },
+    {
+      "data": "03/06/2026, 12:51:25",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'ciao' di manuel (CoinEasy residui: 0)"
+    },
+    {
+      "data": "03/06/2026, 12:50:58",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: ciao da parte di manuel"
+    },
+    {
+      "data": "03/06/2026, 11:37:09",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ciao da parte di Manuel"
+    },
+    {
+      "data": "03/06/2026, 09:56:52",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: tgtg (Manuel)"
+    },
+    {
+      "data": "03/06/2026, 09:51:03",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: tgtg da parte di Manuel"
+    },
+    {
+      "data": "03/06/2026, 09:49:58",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel (CoinEasy residui: 25)"
+    },
+    {
+      "data": "03/06/2026, 06:12:26",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel (CoinEasy residui: 0)"
+    },
+    {
+      "data": "03/06/2026, 06:10:54",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel (CoinEasy residui: 0)"
+    },
+    {
+      "data": "02/06/2026, 20:58:14",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Ma smettila' di Manuel"
+    },
+    {
+      "data": "02/06/2026, 20:44:36",
+      "operazione": "Partite",
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: 29/06/2026 01:44, Seminario"
+    },
+    {
+      "data": "01/06/2026, 20:16:36",
+      "operazione": "Sondaggi/Consigli",
+      "importo": "-",
+      "dettagli": "Proposta di Manuel: \"Indatinqi dati sulla pagina fantacalcett...\""
+    },
+    {
+      "data": "01/06/2026, 19:44:35",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Eliminata definitivamente partita chiusa: 03/06/2026 20:00, Seminario vs GLi altri"
+    },
+    {
+      "data": "01/06/2026, 19:44:24",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Chiavo Veronica da parte di Stefano lauro"
+    },
+    {
+      "data": "01/06/2026, 19:44:17",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: FC Arroddu Stuart da parte di Francesco Spanedda"
+    },
+    {
+      "data": "01/06/2026, 19:44:05",
+      "operazione": "Sondaggi/Consigli",
+      "importo": "-",
+      "dettagli": "Proposta di Francesco S.: \"Il Gol di Pinna deve dare il doppio dei ...\""
+    },
+    {
+      "data": "01/06/2026, 19:40:28",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ginger da parte di Michele Carrone"
+    },
+    {
+      "data": "01/06/2026, 19:38:46",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Izi rigghi da parte di Marco Scarpellini"
+    },
+    {
+      "data": "01/06/2026, 19:37:58",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Izi Riggee da parte di Lorenzo Pittiu"
+    },
+    {
+      "data": "01/06/2026, 19:20:47",
+      "operazione": "Chiusura Partita",
+      "importo": "35",
+      "dettagli": "Chiusa partita (Lunedì 1 giugno ore 20:00 - Verderame (Scuri vs Chiari) [Amichevole]\n\n👕 *Scuri*:\nMichele Carrone, Marco Scarpellini, Sergio Pippia, Federico Addis, Porcella (Esterno)\n\n👕 *Chiari*:\nManuel Palmas, Salvatore Roberto Pinna, Lorenzo Pittiu, Stefano Michele Lauro, Spanedda (Esterno)), addebitati 3.50€ a 10 giocatori."
+    },
+    {
+      "data": "01/06/2026, 19:18:54",
+      "operazione": "Ricarica Massiva",
+      "importo": "4.00",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Lorenzo Pittiu (4€)"
+    },
+    {
+      "data": "01/06/2026, 19:15:29",
+      "operazione": "Ricarica Massiva",
+      "importo": "38.50.00",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Federico Addis (4€), Sergio Pippia (5€), Stefano Michele Lauro (10€), Marco Scarpellini (5€), Manuel Palmas (7€), Michele Carrone (4€), Salvatore Roberto Pinna (3.5€)"
+    },
+    {
+      "data": "01/06/2026, 17:23:24",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Eliminata definitivamente partita chiusa: Martedì 30 giugno ore 19:13 - Futura Sales (Noi vs Avversari) [Amichevole]\n\n👕 *Noi*:\nManuel Palmas, Marco Scarpellini, Lorenzo Pittiu, Davide Bayre, pinco\n\n👕 *Avversari*:\nSalvatore Roberto Pinna, Michele Carrone, Alberto Garau, Enrico Mulas, pallino"
+    },
+    {
+      "data": "01/06/2026, 17:23:09",
+      "operazione": "Chiusura Partita",
+      "importo": "0",
+      "dettagli": "Chiusa partita (Martedì 30 giugno ore 19:13 - Futura Sales (Noi vs Avversari) [Amichevole]\n\n👕 *Noi*:\nManuel Palmas, Marco Scarpellini, Lorenzo Pittiu, Davide Bayre, pinco\n\n👕 *Avversari*:\nSalvatore Roberto Pinna, Michele Carrone, Alberto Garau, Enrico Mulas, pallino), addebitati 0.00€ a 10 giocatori."
+    },
+    {
+      "data": "01/06/2026, 17:14:22",
+      "operazione": "Partite",
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: Martedì 30 giugno ore 19:13 - Futura Sales (Noi vs Avversari) [Amichevole]\n\n👕 *Noi*:\nManuel Palmas, Marco Scarpellini, Lorenzo Pittiu, Davide Bayre, pinco\n\n👕 *Avversari*:\nSalvatore Roberto Pinna, Michele Carrone, Alberto Garau, Enrico Mulas, pallino"
+    },
+    {
+      "data": "01/06/2026, 13:50:10",
+      "operazione": "Partite",
+      "importo": "35",
+      "dettagli": "Creata partita convocazione: Lunedì 1 giugno ore 20:00 - Verderame (Scuri vs Chiari) [Amichevole]\n\n👕 *Scuri*:\nMichele Carrone, Marco Scarpellini, Sergio Pippia, Federico Addis, Porcella (Esterno)\n\n👕 *Chiari*:\nManuel Palmas, Salvatore Roberto Pinna, Lorenzo Pittiu, Stefano Michele Lauro, Spanedda (Esterno)"
+    },
+    {
+      "data": "01/06/2026, 09:25:22",
+      "operazione": "Partite",
+      "importo": "35",
+      "dettagli": "Creata partita convocazione: Lunedì 1 giugno ore 20:00 - Verderame (Scuri vs Chiari) [Amichevole]\n\n👕 *Scuri*:\nManuel Palmas, Stefano Michele Lauro, Sergio Pippia, Michele Carrone, Spanedda (Esterno)\n\n👕 *Chiari*:\nSalvatore Roberto Pinna, Federico Addis, Marco Scarpellini, Lorenzo Pittiu, Porcella (Esterno)"
+    },
+    {
+      "data": "25/05/2026 22.48.16",
+      "operazione": "Modifica Partita",
+      "importo": "40",
+      "dettagli": "Modificata partita in archivio (Saldi e Stat ricalcolati): Lunedì 25 maggio ore 21:00 - Seminario (TEAM SCURO vs TEAM BIANCO) [Amichevole]"
+    },
+    {
+      "data": "25/05/2026 22.36.56",
+      "operazione": "Modifica Partita",
+      "importo": "40",
+      "dettagli": "Modificata partita in archivio (Saldi e Stat ricalcolati): Lunedì 25 maggio ore 21:00 - Seminario (TEAM SCURO vs TEAM BIANCO) [Amichevole]"
+    },
+    {
+      "data": "25/05/2026 22.30.35",
+      "operazione": "Modifica Rosa",
+      "importo": "-2",
+      "dettagli": "Modificati dati per: Manuel Palmas"
+    },
+    {
+      "data": "25/05/2026 22.24.53",
+      "operazione": "Chiusura Partita",
+      "importo": "40",
+      "dettagli": "Dettagli: Lunedì 25 maggio ore 21:00 - Seminario (TEAM SCURO vs TEAM BIANCO) [Amichevole] | Presenti: 10 (10 paganti) (Quota: 4.00€)"
+    },
+    {
+      "data": "25/05/2026 22.24.21",
+      "operazione": "Ricarica Massiva",
+      "importo": "5",
+      "dettagli": "Versamento da: Sergio Pippia"
+    },
+    {
+      "data": "25/05/2026 22.24.21",
+      "operazione": "Ricarica Massiva",
+      "importo": "5",
+      "dettagli": "Versamento da: Alberto Garau"
+    },
+    {
+      "data": "25/05/2026 22.24.20",
+      "operazione": "Ricarica Massiva",
+      "importo": "5",
+      "dettagli": "Versamento da: Giampaolo Mattana"
+    },
+    {
+      "data": "25/05/2026 22.24.20",
+      "operazione": "Ricarica Massiva",
+      "importo": "5",
+      "dettagli": "Versamento da: Salvatore Roberto Pinna"
+    },
+    {
+      "data": "25/05/2026 22.24.20",
+      "operazione": "Ricarica Massiva",
+      "importo": "5",
+      "dettagli": "Versamento da: Lorenzo Pittiu"
+    },
+    {
+      "data": "25/05/2026 22.24.20",
+      "operazione": "Ricarica Massiva",
+      "importo": "5",
+      "dettagli": "Versamento da: Marco Scarpellini"
+    },
+    {
+      "data": "25/05/2026 22.24.20",
+      "operazione": "Ricarica Massiva",
+      "importo": "4",
+      "dettagli": "Versamento da: Manuel Palmas"
+    },
+    {
+      "data": "25/05/2026 22.24.18",
+      "operazione": "Ricarica Massiva",
+      "importo": "5",
+      "dettagli": "Versamento da: Mario Conti"
+    },
+    {
+      "data": "25/05/2026 22.24.18",
+      "operazione": "Ricarica Massiva",
+      "importo": "4",
+      "dettagli": "Versamento da: Matteo Scattu"
+    },
+    {
+      "data": "25/05/2026 17.14.40",
+      "operazione": "Creazione Amichevole",
+      "importo": "40",
+      "dettagli": "Creata con formazioni e referto in attesa"
+    },
+    {
+      "data": "25/05/2026 17.13.16",
+      "operazione": "Annullamento",
+      "importo": "-",
+      "dettagli": "Annullata partita in attesa: Lunedì 25 maggio ore 21:00 - Seminario (TEAM SCURO vs TEAM BIANCO) [Amichevole]"
+    },
+    {
+      "data": "25/05/2026 17.12.43",
+      "operazione": "Creazione Amichevole",
+      "importo": "40",
+      "dettagli": "Creata con formazioni e referto in attesa"
+    },
+    {
+      "data": "25/05/2026 17.09.14",
+      "operazione": "Annullamento",
+      "importo": "-",
+      "dettagli": "Annullata partita in attesa: Mercoledì 20 maggio ore 22:06 - Futura Sales (Noi vs loro) [Amichevole]"
+    },
+    {
+      "data": "25/05/2026 17.07.06",
+      "operazione": "Creazione Amichevole",
+      "importo": "40",
+      "dettagli": "Creata con formazioni e referto in attesa"
+    },
+    {
+      "data": "25/05/2026 15.38.43",
+      "operazione": "Ricarica Massiva",
+      "importo": "10",
+      "dettagli": "Versamento da: Fabrizio Alimonda"
+    },
+    {
+      "data": "25/05/2026 15.38.07",
+      "operazione": "Annullamento",
+      "importo": "-",
+      "dettagli": "Annullata partita in attesa: Lunedì 25 maggio ore 21:00 - Seminario (Team scuro vs Team bianco) [Amichevole]"
+    },
+    {
+      "data": "25/05/2026 15.30.28",
+      "operazione": "Creazione Amichevole",
+      "importo": "40",
+      "dettagli": "Creata con formazioni e referto in attesa"
+    },
+    {
+      "data": "21/05/2026 21.59.59",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Mario Conti impostato come: Attivato"
+    },
+    {
+      "data": "21/05/2026 21.59.51",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Mario Conti impostato come: Disattivato"
+    },
+    {
+      "data": "21/05/2026 13.21.06",
+      "operazione": "Modifica Rosa",
+      "importo": "",
+      "dettagli": "Modificati dati per: Davide Bayre"
+    },
+    {
+      "data": "21/05/2026 13.18.37",
+      "operazione": "Ricarica",
+      "importo": "0,5",
+      "dettagli": "Versamento da: Federico Addis"
+    },
+    {
+      "data": "21/05/2026 13.18.29",
+      "operazione": "Ricarica",
+      "importo": "0,5",
+      "dettagli": "Versamento da: Lorenzo Pittiu"
+    },
+    {
+      "data": "21/05/2026 13.18.15",
+      "operazione": "Ricarica",
+      "importo": "1",
+      "dettagli": "Versamento da: Manuel Palmas"
+    },
+    {
+      "data": "21/05/2026 13.18.04",
+      "operazione": "Ricarica",
+      "importo": "1,55",
+      "dettagli": "Versamento da: Alberto Garau"
+    },
+    {
+      "data": "21/05/2026 13.17.46",
+      "operazione": "Ricarica",
+      "importo": "2",
+      "dettagli": "Versamento da: Giampaolo Mattana"
+    },
+    {
+      "data": "21/05/2026 13.17.34",
+      "operazione": "Ricarica",
+      "importo": "2,4",
+      "dettagli": "Versamento da: Sergio Pippia"
+    },
+    {
+      "data": "21/05/2026 13.17.11",
+      "operazione": "Ricarica",
+      "importo": "2,5",
+      "dettagli": "Versamento da: Enrico Mulas"
+    },
+    {
+      "data": "21/05/2026 13.17.00",
+      "operazione": "Modifica Rosa",
+      "importo": "3.20",
+      "dettagli": "Modificati dati per: Matteo Scattu"
+    },
+    {
+      "data": "21/05/2026 13.16.36",
+      "operazione": "Modifica Rosa",
+      "importo": "6",
+      "dettagli": "Modificati dati per: Mario Conti"
+    },
+    {
+      "data": "21/05/2026 13.16.17",
+      "operazione": "Modifica Rosa",
+      "importo": "4",
+      "dettagli": "Modificati dati per: Nicola Orlandini"
+    },
+    {
+      "data": "21/05/2026 13.15.30",
+      "operazione": "Ricarica",
+      "importo": "5",
+      "dettagli": "Versamento da: Davide Bayre"
+    },
+    {
+      "data": "21/05/2026 13.15.02",
+      "operazione": "Ricarica",
+      "importo": "5",
+      "dettagli": "Versamento da: Salvatore Roberto Pinna"
+    },
+    {
+      "data": "21/05/2026 13.06.48",
+      "operazione": "Modifica Rosa",
+      "importo": "10",
+      "dettagli": "Modificati dati per: Fabrizio Alimonda"
+    },
+    {
+      "data": "21/05/2026 13.03.12",
+      "operazione": "Storno e Annullamento",
+      "importo": "39",
+      "dettagli": "Annullata partita archiviata e ripristinati saldi/statistiche: Lunedì 25 maggio ore 15:47 - Futura Sales (Chiari vs Scuri) [Amichevole]"
+    },
+    {
+      "data": "21/05/2026 12.49.57",
+      "operazione": "Chiusura Partita",
+      "importo": "100",
+      "dettagli": "Dettagli: Lunedì 25 maggio ore 15:47 - Futura Sales (Chiari vs Scuri) [Amichevole] | Presenti: 10 (10 paganti) (Quota: 10.00€)"
+    },
+    {
+      "data": "21/05/2026 12.48.02",
+      "operazione": "Creazione Amichevole",
+      "importo": "39",
+      "dettagli": "Creata con formazioni e referto in attesa"
+    },
+    {
+      "data": "21/05/2026 12.33.20",
+      "operazione": "Modifica Rosa",
+      "importo": "1",
+      "dettagli": "Modificati dati per: Manuel Palmas"
+    },
+    {
+      "data": "21/05/2026 12.33.02",
+      "operazione": "Ricarica",
+      "importo": "1000",
+      "dettagli": "Versamento da: Manuel Palmas"
+    },
+    {
+      "data": "21/05/2026 12.32.20",
+      "operazione": "Annullamento",
+      "importo": "-",
+      "dettagli": "Annullata partita: Lunedì 25 maggio ore 12:30 - Seminario (Scuri vs Chiari) [Amichevole]"
+    },
+    {
+      "data": "21/05/2026 12.31.06",
+      "operazione": "Creazione Amichevole",
+      "importo": "39",
+      "dettagli": "Lunedì 25 maggio ore 12:30 - Seminario (Scuri vs Chiari) [Amichevole]"
+    },
+    {
+      "data": "20/05/2026 18.12.13",
+      "operazione": "Annullamento",
+      "importo": "-",
+      "dettagli": "Annullata partita: Venerdì 29 maggio ore 21:04, Futura Sales (Amichevole)"
+    },
+    {
+      "data": "20/05/2026 18.04.13",
+      "operazione": "Nuova Partita",
+      "importo": "0",
+      "dettagli": "Pianificata: Venerdì 29 maggio ore 21:04, Futura Sales (Amichevole) con 10 giocatori"
+    },
+    {
+      "data": "20/05/2026 16.45.02",
+      "operazione": "Amichevole",
+      "importo": "40",
+      "dettagli": "deminario | Partecipanti totali: 10 | Rosa: 9 | Esterni: 1 | Quota individuale: 4.00€ | Esterni: porcella?"
+    },
+    {
+      "data": "20/05/2026 16.45.02",
+      "operazione": "Amichevole",
+      "importo": "40",
+      "dettagli": "deminario | Partecipanti totali: 10 | Rosa: 9 | Esterni: 1 | Quota individuale: 4.00€ | Esterni: porcella?"
+    },
+    {
+      "data": "20/05/2026 15.46.24",
+      "operazione": "Nuova Partita",
+      "importo": "40",
+      "dettagli": "Pianificata: Lunedì 25 maggio ore 21:00, Futura Sales (Amichevole) con 10 giocatori"
+    },
+    {
+      "data": "19/05/2026 23.22.21",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Matteo Scattu impostato come: Attivato"
+    },
+    {
+      "data": "19/05/2026 23.21.39",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Matteo Scattu impostato come: Disattivato"
+    },
+    {
+      "data": "19/05/2026 22.25.13",
+      "operazione": "Ricarica",
+      "importo": "1",
+      "dettagli": "Versamento da: Sergio Pippia"
+    },
+    {
+      "data": "19/05/2026 22.24.44",
+      "operazione": "Ricarica",
+      "importo": "1",
+      "dettagli": "Versamento da: Salvatore Roberto Pinna"
+    },
+    {
+      "data": "19/05/2026 22.21.09",
+      "operazione": "Ricarica",
+      "importo": "1",
+      "dettagli": "Versamento da: Lorenzo Pittiu"
+    },
+    {
+      "data": "19/05/2026 22.20.59",
+      "operazione": "Ricarica",
+      "importo": "2",
+      "dettagli": "Versamento da: Mario Conti"
+    },
+    {
+      "data": "19/05/2026 22.20.48",
+      "operazione": "Ricarica",
+      "importo": "1",
+      "dettagli": "Versamento da: Michele Carrone"
+    },
+    {
+      "data": "18/05/2026 22.31.46",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Nicola Orlandini impostato come: Attivato"
+    },
+    {
+      "data": "18/05/2026 22.31.41",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Nicola Orlandini"
+    },
+    {
+      "data": "17/05/2026 18.43.08",
+      "operazione": "Ricarica",
+      "importo": "10",
+      "dettagli": "Versamento da: Fabrizio Alimonda"
+    },
+    {
+      "data": "17/05/2026 18.36.56",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Fabrizio Alimonda impostato come: Attivato"
+    },
+    {
+      "data": "17/05/2026 18.36.50",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Fabrizio Alimonda"
+    },
+    {
+      "data": "16/05/2026 7.41.15",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Matteo Scattu"
+    },
+    {
+      "data": "16/05/2026 7.41.03",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Stefano Michele Lauro"
+    },
+    {
+      "data": "16/05/2026 7.40.51",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Giampaolo Mattana"
+    },
+    {
+      "data": "16/05/2026 7.40.41",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Manuel Palmas"
+    },
+    {
+      "data": "16/05/2026 7.40.22",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Lorenzo Pittiu"
+    },
+    {
+      "data": "16/05/2026 7.40.12",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Michele Carrone"
+    },
+    {
+      "data": "16/05/2026 7.39.57",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Mario Conti"
+    },
+    {
+      "data": "16/05/2026 7.39.25",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Enrico Mulas"
+    },
+    {
+      "data": "16/05/2026 7.39.08",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Marco Scarpellini"
+    },
+    {
+      "data": "16/05/2026 7.38.55",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Salvatore Roberto Pinna"
+    },
+    {
+      "data": "16/05/2026 7.37.30",
+      "operazione": "Chiusura Partita",
+      "importo": "40",
+      "dettagli": "2026-05-17 21:00, Seminario (Quota: 4.00€)"
+    },
+    {
+      "data": "16/05/2026 7.32.07",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Nicola Orlandini"
+    },
+    {
+      "data": "16/05/2026 7.31.49",
+      "operazione": "Rosa",
+      "importo": "-",
+      "dettagli": "Aggiunto giocatore: Nicola Orlandini"
+    },
+    {
+      "data": "16/05/2026 7.31.02",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Stefano Michele Lauro impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.30.58",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Matteo Scattu impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.30.53",
+      "operazione": "Quota Iscrizione",
+      "importo": "-10",
+      "dettagli": "Versamento iscrizione da: Matteo Scattu"
+    },
+    {
+      "data": "16/05/2026 7.30.36",
+      "operazione": "Quota Iscrizione",
+      "importo": "-10",
+      "dettagli": "Versamento iscrizione da: Stefano Michele Lauro"
+    },
+    {
+      "data": "16/05/2026 7.30.09",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Alberto Garau impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.29.38",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Giampaolo Mattana impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.29.34",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Lorenzo Pittiu impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.29.30",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Michele Carrone impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.29.27",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Mario Conti impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.29.23",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Federico Addis impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.29.19",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Alberto Garau impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.29.14",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Enrico Mulas impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.29.08",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Sergio Pippia impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.29.04",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Marco Scarpellini impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.29.00",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Salvatore Roberto Pinna impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.28.56",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Davide Bayre impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.28.51",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Matteo Scattu"
+    },
+    {
+      "data": "16/05/2026 7.28.50",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Matteo Scattu"
+    },
+    {
+      "data": "16/05/2026 7.28.38",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Stefano Michele Lauro"
+    },
+    {
+      "data": "16/05/2026 7.28.37",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Stefano Michele Lauro"
+    },
+    {
+      "data": "16/05/2026 7.28.29",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Giampaolo Mattana"
+    },
+    {
+      "data": "16/05/2026 7.28.09",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Lorenzo Pittiu"
+    },
+    {
+      "data": "16/05/2026 7.28.02",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Michele Carrone"
+    },
+    {
+      "data": "16/05/2026 7.27.52",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Mario Conti"
+    },
+    {
+      "data": "16/05/2026 7.27.44",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Federico Addis"
+    },
+    {
+      "data": "16/05/2026 7.27.37",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Enrico Mulas"
+    },
+    {
+      "data": "16/05/2026 7.27.29",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Alberto Garau"
+    },
+    {
+      "data": "16/05/2026 7.27.20",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Sergio Pippia"
+    },
+    {
+      "data": "16/05/2026 7.27.08",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Marco Scarpellini"
+    },
+    {
+      "data": "16/05/2026 7.27.00",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Salvatore Roberto Pinna"
+    },
+    {
+      "data": "16/05/2026 7.26.53",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Davide Bayre"
+    },
+    {
+      "data": "16/05/2026 7.26.42",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 17. Federico Addis"
+    },
+    {
+      "data": "16/05/2026 7.26.24",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 45. Stefano Michele Lauro"
+    },
+    {
+      "data": "16/05/2026 7.26.11",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 77. Matteo Scattu"
+    },
+    {
+      "data": "16/05/2026 7.25.54",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 96. Fabrizio Alimonda"
+    },
+    {
+      "data": "16/05/2026 7.25.32",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 30. Giampaolo Mattana"
+    },
+    {
+      "data": "16/05/2026 7.25.14",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 11. Sergio Pippia"
+    },
+    {
+      "data": "16/05/2026 7.24.09",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 19. Mario Conti"
+    },
+    {
+      "data": "16/05/2026 7.23.32",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Manuel Palmas"
+    },
+    {
+      "data": "16/05/2026 7.23.12",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 21. Lorenzo Pittiu"
+    },
+    {
+      "data": "16/05/2026 7.22.49",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 12. Alberto Garau"
+    },
+    {
+      "data": "16/05/2026 7.22.32",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 5. Davide Bayre"
+    },
+    {
+      "data": "16/05/2026 7.22.14",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 13. Enrico Mulas"
+    },
+    {
+      "data": "16/05/2026 7.21.40",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 20. Michele Carrone"
+    },
+    {
+      "data": "16/05/2026 7.21.23",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 10. Marco Scarpellini"
+    },
+    {
+      "data": "16/05/2026 7.21.03",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Il migliore Salvatore Roberto Pinna"
+    },
+    {
+      "data": "16/05/2026 7.20.41",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Manuel Palmas impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.20.18",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Manuel Palmas"
+    },
+    {
+      "data": "03/06/2026, 21:18:13",
+      "operazione": "Chiusura Partita",
+      "importo": "0",
+      "dettagli": "Chiusa partita (29/06/2026 01:44, Seminario), addebitati 0.00€ a 9 giocatori."
+    },
+    {
+      "data": "03/06/2026, 21:18:31",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 29/06/2026 01:44, Seminario"
+    },
+    {
+      "data": "03/06/2026, 21:26:27",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Bella Balla da parte di Roberto"
+    },
+    {
+      "data": "03/06/2026, 21:58:36",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: FC Ma che Cazzo ne so da parte di Francesco Spanedda"
+    },
+    {
+      "data": "03/06/2026, 22:01:53",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Eliminata definitivamente partita chiusa: 29/06/2026 01:44, Seminario"
+    },
+    {
+      "data": "03/06/2026, 22:07:46",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Balotelli fc da parte di Stefano lauro"
+    },
+    {
+      "data": "03/06/2026, 22:14:52",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Balotelli fc' di Stefano lauro (CoinEasy residui: 1)"
+    },
+    {
+      "data": "03/06/2026, 22:38:22",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Jjjjjhhh (Maniel)"
+    },
+    {
+      "data": "03/06/2026, 22:38:27",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Manujjj (Manuel)"
+    },
+    {
+      "data": "03/06/2026, 22:38:35",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Essegus (Marco)"
+    },
+    {
+      "data": "03/06/2026, 22:38:40",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: ciao (manuel)"
+    },
+    {
+      "data": "03/06/2026, 22:44:51",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Izi rigghi (Marco Scarpellini)"
+    },
+    {
+      "data": "03/06/2026, 22:44:55",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Bella Balla (Roberto)"
+    },
+    {
+      "data": "03/06/2026, 22:44:58",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: FC Ma che Cazzo ne so (Francesco Spanedda)"
+    },
+    {
+      "data": "03/06/2026, 22:45:02",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Balotelli fc (Stefano lauro)"
+    },
+    {
+      "data": "03/06/2026, 22:49:36",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma smettila da parte di Manuel"
+    },
+    {
+      "data": "03/06/2026, 22:51:52",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel (Izycoin residui: 0)"
+    },
+    {
+      "data": "03/06/2026, 22:57:40",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Ma smettila (Manuel)"
+    },
+    {
+      "data": "03/06/2026, 22:57:44",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: ciao (manuel)"
+    },
+    {
+      "data": "03/06/2026, 22:57:47",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Essegus (Marco)"
+    },
+    {
+      "data": "03/06/2026, 22:57:50",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Manujjj (Manuel)"
+    },
+    {
+      "data": "03/06/2026, 22:57:53",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Jjjjjhhh (Maniel)"
+    },
+    {
+      "data": "03/06/2026, 22:57:57",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Izi rigghi (Marco Scarpellini)"
+    }
+  ],
+  "fantasquadre": [],
+  "consigli": [
+    {
+      "id": "c-1780151043639-oyqhj",
+      "autore": "Manuel",
+      "testo": "Quando cambio giocatore dopo una partita refertate, non togliermi i punti del giocatore che ho sostituito",
+      "data": "30/05/2026, 14:24:03",
+      "letto": false
+    },
+    {
+      "id": "c-1780343045559-r1y4b",
+      "autore": "Francesco S.",
+      "testo": "Il Gol di Pinna deve dare il doppio dei punti",
+      "data": "01/06/2026, 19:44:05",
+      "letto": false
+    },
+    {
+      "id": "c-1780344996749-x2vc1",
+      "autore": "Manuel",
+      "testo": "Indatinqi dati sulla pagina fantacalcetto devono vedersi sempre, non solo quando è loggato il sito principale.  Altrimenti che vuole cambiare la squadra non può farlo",
+      "data": "01/06/2026, 20:16:36",
+      "letto": false
+    }
+  ]
 }

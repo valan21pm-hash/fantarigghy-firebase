@@ -145,6 +145,19 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  // Compute active bonuses by merging user-defined bonuses (if any) with defaults.
+  // This ensures functionality like "Gol Laterale" is always restored if missing.
+  const activeBonuses = React.useMemo(() => {
+    if (!data?.bonuses || data.bonuses.length === 0) return DEFAULT_BONUSES;
+    const merged = [...data.bonuses];
+    DEFAULT_BONUSES.forEach(def => {
+      if (!merged.find(b => b.id === def.id)) {
+        merged.push(def);
+      }
+    });
+    return merged;
+  }, [data?.bonuses]);
+
   const isEditor = true; // Chiunque ha il link privato dell'app è amministratore e può modificare!
 
   const handleLogin = async () => {
@@ -479,7 +492,7 @@ export default function App() {
         fantasquadre={data?.fantasquadre || []}
         partiteChiuse={partiteChiuse}
         partiteAperte={partiteAperte}
-        bonuses={data?.bonuses}
+        bonuses={activeBonuses}
         sessioneMercatoLibero={data?.sessioneMercatoLibero}
         scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
         onIscriviFantasquadra={handleIscriviFantasquadra}
@@ -517,7 +530,7 @@ export default function App() {
         fantasquadre={data?.fantasquadre || []}
         partiteChiuse={partiteChiuse}
         partiteAperte={partiteAperte}
-        bonuses={data?.bonuses}
+        bonuses={activeBonuses}
         sessioneMercatoLibero={data?.sessioneMercatoLibero}
         scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
         portale1Bloccato={data?.portale1Bloccato}
@@ -863,7 +876,7 @@ export default function App() {
               isEditor={isEditor}
               selectedMatchId={selectedRefertoMatchId}
               onSelectMatchId={setSelectedRefertoMatchId}
-              bonuses={data?.bonuses || DEFAULT_BONUSES}
+              bonuses={activeBonuses}
             />
           )}
 
@@ -876,7 +889,7 @@ export default function App() {
               onEliminaChiusa={handleEliminaChiusa}
               isEditor={isEditor}
               onInviaFanta={handleInviaFanta}
-              bonuses={data?.bonuses || DEFAULT_BONUSES}
+              bonuses={activeBonuses}
             />
           )}
 
@@ -896,7 +909,7 @@ export default function App() {
               fantasquadre={data?.fantasquadre || []}
               partiteChiuse={partiteChiuse}
               partiteAperte={partiteAperte}
-              bonuses={data?.bonuses}
+              bonuses={activeBonuses}
               sessioneMercatoLibero={data?.sessioneMercatoLibero}
               scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
               portale1Bloccato={data?.portale1Bloccato}
@@ -917,7 +930,7 @@ export default function App() {
 
           {activeTab === "bonus" && (
             <BonusManager
-              bonuses={data?.bonuses || DEFAULT_BONUSES}
+              bonuses={activeBonuses}
               giocatori={giocatori}
               isEditor={isEditor}
               onUpdateBonuses={handleUpdateBonuses}
