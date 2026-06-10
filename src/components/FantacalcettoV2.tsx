@@ -114,6 +114,8 @@ interface FantacalcettoProps {
   onCreaConsiglio?: (autore: string, testo: string) => Promise<any>;
   onUpdateBonuses?: (bonuses: CustomBonusDef[]) => Promise<any>;
   onToggleMercatoLibero?: (attivo: boolean, scadenza?: string | null) => Promise<any>;
+  portale1Bloccato?: boolean;
+  onTogglePortaleBlocco?: (bloccato: boolean) => Promise<any>;
   onMigrate?: () => void;
   consigli?: any[];
   isEditor?: boolean;
@@ -224,6 +226,8 @@ export default function FantacalcettoV2({
   onCreaConsiglio,
   onUpdateBonuses,
   onToggleMercatoLibero,
+  portale1Bloccato = false,
+  onTogglePortaleBlocco,
   consigli = [],
   isEditor = false,
   isAdminMode = false,
@@ -4516,6 +4520,19 @@ export default function FantacalcettoV2({
               <span>Apri Portale</span>
             </a>
           </div>
+          {isEditor && (
+            <button
+              onClick={() => onTogglePortaleBlocco && onTogglePortaleBlocco(!portale1Bloccato)}
+              className={`w-full mt-2 py-1.5 font-bold text-[10.5px] uppercase rounded-lg shadow-2xs cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0 ${
+                portale1Bloccato
+                  ? "bg-red-100 text-red-800 border border-red-200 hover:bg-red-200"
+                  : "bg-slate-100 text-slate-800 border border-slate-200 hover:bg-slate-200"
+              }`}
+            >
+              {portale1Bloccato ? <Lock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5 opacity-50" />}
+              <span>{portale1Bloccato ? "Sblocca Portale" : "Blocca Portale"}</span>
+            </button>
+          )}
         </div>
       </div>
 

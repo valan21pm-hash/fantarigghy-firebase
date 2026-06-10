@@ -456,6 +456,20 @@ export default function App() {
   const isAdminAuthenticated = user && authorizedEmails.includes(userEmail);
 
   if (isPublicPortalV2) {
+    if (data?.portale1Bloccato && !isAdminAuthenticated) {
+      return (
+        <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
+          <Lock className="w-16 h-16 text-indigo-400 mb-6" />
+          <h1 className="text-3xl font-black text-white tracking-tight mb-3">
+            Sito in manutenzione
+          </h1>
+          <p className="text-slate-400 max-w-md antialiased leading-relaxed">
+            Il portale Fantacalcetto è momentaneamente in fase di aggiornamento. Torneremo online al più presto.
+          </p>
+        </div>
+      );
+    }
+
     const giocatori = data?.giocatori || [];
     const partiteChiuse = data?.partiteChiuse || [];
     const partiteAperte = data?.partiteAperte || [];
