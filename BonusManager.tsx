@@ -48,20 +48,20 @@ export default function PodioGraficoDinamico({
     podiumData = top3.map((t, idx) => ({
       rank: idx + 1,
       name: t.nomeFantasquadra,
-      score: Number(Number(t.score).toFixed(1))
+      score: Number(t.score).toFixed(1)
     }));
   } else if (targetId === "GiocatoriAssoluti") {
     title = "MIGLIORI GIOCATORI";
     subtitle = "Classifica Assoluta Invididuale";
     const scoringPlayers = giocatori.map(g => {
-      const stats = calculatePlayerChampionshipStats(g.nome, partiteChiuse, bonuses, giocatori);
+      const stats = calculatePlayerChampionshipStats(g.nome, partiteChiuse, bonuses);
       return { nome: g.nome, score: stats.fantaScore };
     }).sort((a, b) => b.score - a.score);
     
     podiumData = scoringPlayers.slice(0, 3).map((p, idx) => ({
       rank: idx + 1,
       name: p.nome,
-      score: Number(p.score.toFixed(1))
+      score: p.score.toFixed(1)
     }));
   } else {
     // Specific Fantasquadra
@@ -70,21 +70,21 @@ export default function PodioGraficoDinamico({
       title = fq.nomeFantasquadra.toUpperCase();
       subtitle = "I Migliori della Rosa";
       const teamPlayers = fq.giocatoriSelezionati.map(nome => {
-        const stats = calculatePlayerChampionshipStats(nome, partiteChiuse, bonuses, giocatori);
+        const stats = calculatePlayerChampionshipStats(nome, partiteChiuse, bonuses);
         return { nome, score: stats.fantaScore };
       }).sort((a, b) => b.score - a.score);
 
       podiumData = teamPlayers.slice(0, 3).map((p, idx) => ({
         rank: idx + 1,
         name: p.nome,
-        score: Number(p.score.toFixed(1))
+        score: p.score.toFixed(1)
       }));
     }
   }
 
   // Se ci sono meno di 3, riempiamo per evitare crash
   while(podiumData.length < 3) {
-      podiumData.push({ rank: podiumData.length + 1, name: "-", score: 0 });
+      podiumData.push({ rank: podiumData.length + 1, name: "-", score: "0" });
   }
 
   const p1 = podiumData[0];

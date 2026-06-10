@@ -145,19 +145,6 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  // Compute active bonuses by merging user-defined bonuses (if any) with defaults.
-  // This ensures functionality like "Gol Laterale" is always restored if missing.
-  const activeBonuses = React.useMemo(() => {
-    if (!data?.bonuses || data.bonuses.length === 0) return DEFAULT_BONUSES;
-    const merged = [...data.bonuses];
-    DEFAULT_BONUSES.forEach(def => {
-      if (!merged.find(b => b.id === def.id)) {
-        merged.push(def);
-      }
-    });
-    return merged;
-  }, [data?.bonuses]);
-
   const isEditor = true; // Chiunque ha il link privato dell'app è amministratore e può modificare!
 
   const handleLogin = async () => {
@@ -436,10 +423,6 @@ export default function App() {
     return await executePostAction("/api/settings/mercato-libero", { attivo, scadenza });
   };
 
-  const handleTogglePortaleBlocco = async (bloccato: boolean) => {
-    return await executePostAction("/api/settings/portale1-blocco", { bloccato });
-  };
-
   // 6. Consigli/Miglioramenti callbacks
   const handleCreaConsiglio = async (autore: string, testo: string) => {
     return await executePostAction("/api/consigli/crea", { autore, testo });
@@ -469,20 +452,6 @@ export default function App() {
   const isAdminAuthenticated = user && authorizedEmails.includes(userEmail);
 
   if (isPublicPortalV2) {
-    if (data?.portale1Bloccato && !isAdminAuthenticated) {
-      return (
-        <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
-          <Lock className="w-16 h-16 text-indigo-400 mb-6" />
-          <h1 className="text-3xl font-black text-white tracking-tight mb-3">
-            Sito in manutenzione
-          </h1>
-          <p className="text-slate-400 max-w-md antialiased leading-relaxed">
-            Il portale Fantacalcetto è momentaneamente in fase di aggiornamento. Torneremo online al più presto.
-          </p>
-        </div>
-      );
-    }
-
     const giocatori = data?.giocatori || [];
     const partiteChiuse = data?.partiteChiuse || [];
     const partiteAperte = data?.partiteAperte || [];
@@ -492,7 +461,7 @@ export default function App() {
         fantasquadre={data?.fantasquadre || []}
         partiteChiuse={partiteChiuse}
         partiteAperte={partiteAperte}
-        bonuses={activeBonuses}
+        bonuses={data?.bonuses}
         sessioneMercatoLibero={data?.sessioneMercatoLibero}
         scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
         onIscriviFantasquadra={handleIscriviFantasquadra}
@@ -507,20 +476,6 @@ export default function App() {
   }
 
   if (isPublicPortal) {
-    if (data?.portale1Bloccato && !isAdminAuthenticated) {
-      return (
-        <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
-          <Lock className="w-16 h-16 text-indigo-400 mb-6" />
-          <h1 className="text-3xl font-black text-white tracking-tight mb-3">
-            Sito in manutenzione
-          </h1>
-          <p className="text-slate-400 max-w-md antialiased leading-relaxed">
-            Il portale Fantacalcetto è momentaneamente in fase di aggiornamento. Torneremo online al più presto.
-          </p>
-        </div>
-      );
-    }
-
     const giocatori = data?.giocatori || [];
     const partiteChiuse = data?.partiteChiuse || [];
     const partiteAperte = data?.partiteAperte || [];
@@ -530,17 +485,15 @@ export default function App() {
         fantasquadre={data?.fantasquadre || []}
         partiteChiuse={partiteChiuse}
         partiteAperte={partiteAperte}
-        bonuses={activeBonuses}
+        bonuses={data?.bonuses}
         sessioneMercatoLibero={data?.sessioneMercatoLibero}
         scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
-        portale1Bloccato={data?.portale1Bloccato}
         onIscriviFantasquadra={handleIscriviFantasquadra}
         onRinominaFantasquadra={handleRinominaFantasquadra}
         onEliminaFantasquadra={handleEliminaFantasquadra}
         onCreaConsiglio={handleCreaConsiglio}
         onUpdateBonuses={handleUpdateBonuses}
         onToggleMercatoLibero={handleToggleMercatoLibero}
-        onTogglePortaleBlocco={handleTogglePortaleBlocco}
         consigli={data?.consigli || []}
         isEditor={isEditor}
         isAdminMode={false}
@@ -602,12 +555,6 @@ export default function App() {
               className="w-full bg-slate-950 border border-emerald-900/50 hover:bg-slate-900 active:bg-slate-800 text-emerald-400 font-bold text-xs uppercase py-3.5 rounded-xl shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center gap-2 font-sans mt-2"
             >
               🌐 Vai al Portale Fanta-Calcetto
-            </button>
-            <button
-              onClick={() => setIsPublicPortalV2(true)}
-              className="w-full bg-slate-950 border border-indigo-900/50 hover:bg-slate-900 active:bg-slate-800 text-indigo-400 font-bold text-xs uppercase py-3.5 rounded-xl shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center gap-2 font-sans mt-2"
-            >
-              🚀 Vai al Portale V2 (Nuovo Layout)
             </button>
           </div>
 
@@ -876,7 +823,7 @@ export default function App() {
               isEditor={isEditor}
               selectedMatchId={selectedRefertoMatchId}
               onSelectMatchId={setSelectedRefertoMatchId}
-              bonuses={activeBonuses}
+              bonuses={data?.bonuses || DEFAULT_BONUSES}
             />
           )}
 
@@ -889,7 +836,7 @@ export default function App() {
               onEliminaChiusa={handleEliminaChiusa}
               isEditor={isEditor}
               onInviaFanta={handleInviaFanta}
-              bonuses={activeBonuses}
+              bonuses={data?.bonuses || DEFAULT_BONUSES}
             />
           )}
 
@@ -909,17 +856,15 @@ export default function App() {
               fantasquadre={data?.fantasquadre || []}
               partiteChiuse={partiteChiuse}
               partiteAperte={partiteAperte}
-              bonuses={activeBonuses}
+              bonuses={data?.bonuses}
               sessioneMercatoLibero={data?.sessioneMercatoLibero}
               scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
-              portale1Bloccato={data?.portale1Bloccato}
               onIscriviFantasquadra={handleIscriviFantasquadra}
               onRinominaFantasquadra={handleRinominaFantasquadra}
               onEliminaFantasquadra={handleEliminaFantasquadra}
               onCreaConsiglio={handleCreaConsiglio}
               onUpdateBonuses={handleUpdateBonuses}
               onToggleMercatoLibero={handleToggleMercatoLibero}
-              onTogglePortaleBlocco={handleTogglePortaleBlocco}
               onMigrate={handleMigrate}
               consigli={data?.consigli || []}
               isEditor={isEditor}
@@ -930,7 +875,7 @@ export default function App() {
 
           {activeTab === "bonus" && (
             <BonusManager
-              bonuses={activeBonuses}
+              bonuses={data?.bonuses || DEFAULT_BONUSES}
               giocatori={giocatori}
               isEditor={isEditor}
               onUpdateBonuses={handleUpdateBonuses}

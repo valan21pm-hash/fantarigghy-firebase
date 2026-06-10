@@ -36,9 +36,7 @@ import {
   Banknote,
   ClipboardList,
   Clock,
-  BarChart3,
 } from "lucide-react";
-import StatsHub from "./StatsHub";
 import {
   Giocatore,
   Fantasquadra,
@@ -116,8 +114,6 @@ interface FantacalcettoProps {
   onCreaConsiglio?: (autore: string, testo: string) => Promise<any>;
   onUpdateBonuses?: (bonuses: CustomBonusDef[]) => Promise<any>;
   onToggleMercatoLibero?: (attivo: boolean, scadenza?: string | null) => Promise<any>;
-  portale1Bloccato?: boolean;
-  onTogglePortaleBlocco?: (bloccato: boolean) => Promise<any>;
   onMigrate?: () => void;
   consigli?: any[];
   isEditor?: boolean;
@@ -128,8 +124,8 @@ interface FantacalcettoProps {
 // Fantasy Point Formula constants
 const GOAL_POINTS = 3;
 const ASSIST_POINTS = 1;
-const AMMO_POINTS = -1;
-const ESPU_POINTS = -3;
+const AMMO_POINTS = -0.5;
+const ESPU_POINTS = -1;
 
 const getRoleColor = (ruolo: string) => {
   const r = (ruolo || "").toLowerCase();
@@ -228,8 +224,6 @@ export default function FantacalcettoV2({
   onCreaConsiglio,
   onUpdateBonuses,
   onToggleMercatoLibero,
-  portale1Bloccato = false,
-  onTogglePortaleBlocco,
   consigli = [],
   isEditor = false,
   isAdminMode = false,
@@ -253,7 +247,7 @@ export default function FantacalcettoV2({
   }, [sessioneMercatoLibero, scadenzaMercatoLibero]);
 
   const [activePublicTab, setActivePublicTab] = useState<
-    "home" | "rosa" | "mercato" | "classifica" | "regolamento" | "statistiche"
+    "home" | "rosa" | "mercato" | "classifica" | "regolamento"
   >("mercato");
   const allPartite = React.useMemo(() => {
     return [...partiteAperte, ...partiteChiuse].filter(
@@ -635,7 +629,6 @@ export default function FantacalcettoV2({
         const rEsp = r ? Number(r.rossi) || 0 : 0;
         const rBonusAttivi = r ? r.bonusAttivi || [] : [];
 
-        const gInfoFallback = giocatori.find(g => g.nome.toLowerCase() === pName.toLowerCase());
         const bonusPts = r
           ? getPlayerBonusPointsForMatch(
               pName,
@@ -643,9 +636,7 @@ export default function FantacalcettoV2({
               rGol,
               rAssist,
               bonuses,
-              r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
-              rAmm,
-              rEsp
+              r.snapshotGiocatore?.ultimoRuolo
             )
           : 0;
 
@@ -657,9 +648,7 @@ export default function FantacalcettoV2({
             rGol,
             rAssist,
             bonuses,
-            r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
-            rAmm,
-            rEsp
+            r.snapshotGiocatore?.ultimoRuolo
           );
           if (breakdown.length > 0) {
             bonusBreakdownStr =
@@ -1279,16 +1268,13 @@ export default function FantacalcettoV2({
             const rEsp = Number(r.rossi) || 0;
             const rBonusAttivi = r.bonusAttivi || [];
 
-            const gInfo = giocatori.find(g => g.nome.toLowerCase() === nome.toLowerCase());
             const matchBonusPts = getPlayerBonusPointsForMatch(
               nome,
               rBonusAttivi,
               rGol,
               rAssist,
               bonuses,
-              r.snapshotGiocatore?.ultimoRuolo || gInfo?.ultimoRuolo,
-              rAmm,
-              rEsp
+              r.snapshotGiocatore?.ultimoRuolo
             );
 
             if (isAmichevole || m.inviatoFanta === true) {
@@ -1298,9 +1284,7 @@ export default function FantacalcettoV2({
                 rGol,
                 rAssist,
                 bonuses,
-                r.snapshotGiocatore?.ultimoRuolo || gInfo?.ultimoRuolo,
-                rAmm,
-                rEsp
+                r.snapshotGiocatore?.ultimoRuolo
               );
               breakdown.forEach(b => {
                 const foundBonusDef = bonuses.find(def => def.nome === b.nome);
@@ -2330,38 +2314,59 @@ export default function FantacalcettoV2({
                           <p className="font-extrabold text-yellow-300 uppercase tracking-wider text-[10.5px] mb-1.5 border-b border-indigo-800/20 pb-1">
                             📋 Riepilogo Completo delle Fasce di Valore:
                           </p>
-                          <div className="space-y-4 mt-2">
-                            <div>
-                              <span className="text-yellow-400 font-extrabold text-xs uppercase block mb-1">🏃 Calciatori Attivi (Presenti al Match):</span>
-                              <ul className="space-y-1.5 list-disc pl-4 text-emerald-200 text-[11px]">
-                                <li><strong>Fascia Neutra (tra +10 e +15 punti):</strong> Valore Invariato 🪙 (0)</li>
-                                <li><strong>Innalzamento (tra +16 e +19 punti):</strong> Variazione di <strong>+1 Izycoin 🪙</strong></li>
-                                <li><strong>Bonus Performance (da +20 punti in su):</strong> Variazione di <strong>+2 Izycoin 🪙</strong></li>
-                                <li><strong>Calo Moderato (tra -5 e +9 punti):</strong> Variazione di <strong>-1 Izycoin 🪙</strong></li>
-                                <li><strong>Perdita Significativa (tra -10 e -6 punti):</strong> Variazione di <strong>-2 Izycoin 🪙</strong></li>
-                                <li><strong>Crollo Valore (da -11 punti in giù):</strong> Variazione di <strong>-3 Izycoin 🪙</strong></li>
-                              </ul>
-                            </div>
-                            
-                            <div className="border-t border-indigo-950/40 pt-2.5">
-                              <span className="text-cyan-400 font-extrabold text-xs uppercase block mb-1">📢 Calciatori Assenti (Non Partecipanti):</span>
-                              <ul className="space-y-1.5 list-disc pl-4 text-cyan-200 text-[11px]">
-                                <li><strong>Fascia Stazionaria (tra -1 e +6 punti):</strong> Valore Invariato 🪙 (0)</li>
-                                <li><strong>Rivalutazione (tra +7 e +14 punti):</strong> Variazione di <strong>+1 Izycoin 🪙</strong></li>
-                                <li><strong>Crescita Elevata (da +15 punti in su):</strong> Variazione di <strong>+2 Izycoin 🪙</strong></li>
-                                <li><strong>Svalutazione Lieve (tra -5 e -2 punti):</strong> Variazione di <strong>-1 Izycoin 🪙</strong></li>
-                                <li><strong>Penalità Forte (tra -10 e -6 punti):</strong> Variazione di <strong>-2 Izycoin 🪙</strong></li>
-                                <li><strong>Default Valore (da -11 punti in giù):</strong> Variazione di <strong>-3 Izycoin 🪙</strong></li>
-                              </ul>
-                            </div>
-
-                            <div className="border-t border-indigo-950/40 pt-2.5 bg-rose-955/20 p-2 rounded-lg border border-rose-900/30 text-[11px]">
-                              <span className="text-rose-455 font-extrabold text-xs uppercase block mb-0.5">📦 Malus BRT (Penale Logistica):</span>
-                              <span className="text-rose-200 leading-relaxed block">
-                                Se attivo (opzione spuntata a referto), viene applicata una detrazione supplementare fissa di <strong>-1 Izycoin 🪙</strong> a fine partita.
-                              </span>
-                            </div>
-                          </div>
+                          <ul className="space-y-2 mt-2">
+                            <li className="flex items-start gap-1.5">
+                              <span className="text-gray-400">⚖️</span>
+                              <div>
+                                <strong className="text-white">
+                                  Fascia Neutra (da -3 a +3 punti):
+                                </strong>
+                                <span className="block text-gray-300 text-[10px] mt-0.5">
+                                  Variazione di <strong>0 Izycoin</strong> (il
+                                  prezzo resta quello base).
+                                </span>
+                              </div>
+                            </li>
+                            <li className="flex items-start gap-1.5 border-t border-indigo-900/40 pt-2">
+                              <span className="text-indigo-400">✨</span>
+                              <div>
+                                <strong className="text-indigo-350">
+                                  Fascia 1 (da +4 a +9 punti / da -4 a -9
+                                  punti):
+                                </strong>
+                                <span className="block text-indigo-200 text-[10px] mt-0.5">
+                                  Variazione di <strong>+1 Izycoin 🪙</strong> o{" "}
+                                  <strong>-1 Izycoin 🪙</strong>.
+                                </span>
+                              </div>
+                            </li>
+                            <li className="flex items-start gap-1.5 border-t border-indigo-900/40 pt-2">
+                              <span className="text-indigo-400">🚀</span>
+                              <div>
+                                <strong className="text-indigo-350">
+                                  Fascia 2 (da +10 a +15 punti / da -10 a -15
+                                  punti):
+                                </strong>
+                                <span className="block text-indigo-250 text-[10px] mt-0.5 font-bold">
+                                  Variazione di <strong>+2 Izycoin 🪙</strong> o{" "}
+                                  <strong>-2 Izycoin 🪙</strong>.
+                                </span>
+                              </div>
+                            </li>
+                            <li className="flex items-start gap-1.5 border-t border-indigo-900/40 pt-2">
+                              <span className="text-yellow-400">🔥</span>
+                              <div>
+                                <strong className="text-yellow-300">
+                                  Successive (ogni scaglione di 6 punti):
+                                </strong>
+                                <span className="block text-yellow-100 text-[10px] mt-0.5">
+                                  Variazione incrementale di ulteriori{" "}
+                                  <strong>+1 / -1 Izycoin</strong> per ciascuna
+                                  fascia.
+                                </span>
+                              </div>
+                            </li>
+                          </ul>
                         </div>
                       </div>
 
@@ -2532,19 +2537,6 @@ export default function FantacalcettoV2({
               <ClipboardList className={`w-5 h-5 md:w-3.5 md:h-3.5 ${activePublicTab === "regolamento" ? "fill-yellow-400 md:fill-none" : ""}`} />
               <span className="hidden md:inline">Regolamento</span>
               <span className="md:hidden mt-0.5 tracking-tight">Regole</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActivePublicTab("statistiche")}
-              className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-1.5 rounded-xl text-[9px] md:text-[10.5px] font-bold md:font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
-                activePublicTab === "statistiche"
-                  ? "text-yellow-400 md:bg-yellow-400 md:text-indigo-950 shadow-none md:shadow-md"
-                  : "text-indigo-400 hover:text-white hover:bg-indigo-900/30"
-              }`}
-            >
-              <BarChart3 className={`w-5 h-5 md:w-3.5 md:h-3.5 ${activePublicTab === "statistiche" ? "fill-yellow-400 md:fill-none" : ""}`} />
-              <span className="hidden md:inline">Statistiche</span>
-              <span className="md:hidden mt-0.5 tracking-tight">Stats</span>
             </button>
           </div>
 
@@ -2752,11 +2744,11 @@ export default function FantacalcettoV2({
                     {rankedTeams.length > 0 && (
                       <button
                         type="button"
-                        onClick={() => setActivePublicTab("statistiche")}
+                        onClick={() => setShowGeneralReportModal(true)}
                         className="bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1 cursor-pointer transition-transform hover:-translate-y-0.5"
-                        title="Vedi referto, statistiche avanzate ed esporta per i social"
+                        title="Vedi referto con tutti i voti assegnati in tutte le partite"
                       >
-                        <span>📊 Filtra & Apri Statistiche</span>
+                        <span>📄 Filtra & Apri Referto</span>
                       </button>
                     )}
                     <span className="bg-indigo-900 text-indigo-200 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full font-mono shrink-0">
@@ -2850,9 +2842,6 @@ export default function FantacalcettoV2({
                                         getPlayerCurrentPrice(
                                           name,
                                           stats.fantaScore,
-                                          partiteChiuse,
-                                          bonuses,
-                                          giocatori
                                         )
                                       );
                                     },
@@ -3096,14 +3085,20 @@ export default function FantacalcettoV2({
                                  </span>
                                </div>
 
-                               {/* Link unificato all'Hub Statistiche centralizzato */}
-                               <div className="mt-2 border-t border-indigo-800/40 pt-2 text-center">
-                                 <button
-                                   onClick={() => setActivePublicTab("statistiche")}
-                                   className="w-full bg-indigo-900/40 hover:bg-yellow-400 hover:text-indigo-950 text-indigo-300 text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-all cursor-pointer flex items-center justify-center gap-1"
-                                 >
-                                    <BarChart3 className="w-3.5 h-3.5" />
-                                    <span>Vedi su Hub Statistiche 📊</span>
+                               {/* Nuovi report / export buttons per singola partita */}
+                               <div className="flex flex-col gap-1.5 mt-2 border-t border-indigo-800/40 pt-2">
+                                 <span className="text-[8px] uppercase font-bold text-indigo-400">Esporta Report PDF:</span>
+                                 <button onClick={() => generatePartitaGiocatoriPdf(m)} className="w-full text-left bg-indigo-950/50 hover:bg-yellow-400 hover:text-indigo-900 border border-indigo-800/50 text-indigo-200 text-[9px] font-bold uppercase py-1 px-2 rounded flex justify-between transition-colors shadow-sm">
+                                   Giocatori
+                                   <Download className="w-3 h-3" />
+                                 </button>
+                                 <button onClick={() => setMatchForPlayerChoice(m)} className="w-full text-left bg-indigo-950/50 hover:bg-yellow-400 hover:text-indigo-900 border border-indigo-800/50 text-indigo-200 text-[9px] font-bold uppercase py-1 px-2 rounded flex justify-between transition-colors shadow-sm">
+                                   Singolo Giocatore
+                                   <Download className="w-3 h-3" />
+                                 </button>
+                                 <button onClick={() => setMatchForTeamChoice(m)} className="w-full text-left bg-indigo-950/50 hover:bg-yellow-400 hover:text-indigo-900 border border-indigo-800/50 text-indigo-200 text-[9px] font-bold uppercase py-1 px-2 rounded flex justify-between transition-colors shadow-sm">
+                                   Squadra
+                                   <Download className="w-3 h-3" />
                                  </button>
                                </div>
 
@@ -3126,11 +3121,11 @@ export default function FantacalcettoV2({
                         {rankedTeams.length > 0 && (
                           <button
                             type="button"
-                            onClick={() => setActivePublicTab("statistiche")}
+                            onClick={() => setShowGeneralReportModal(true)}
                             className="bg-indigo-900/50 hover:bg-yellow-400 hover:text-indigo-950 text-indigo-200 border border-indigo-800/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 transition-all group col-span-2 shadow-sm"
                           >
                             <ClipboardList className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                            <span className="text-[10px] font-black uppercase tracking-wider">Apri Hub Statistiche</span>
+                            <span className="text-[10px] font-black uppercase tracking-wider">Apri Referto Generale</span>
                           </button>
                         )}
                         <button
@@ -4191,7 +4186,7 @@ export default function FantacalcettoV2({
                                 <div className="flex items-center xl:items-end justify-between xl:justify-center border-t xl:border-t-0 border-indigo-900/50 pt-3 xl:pt-0 mt-3 xl:mt-0 gap-4">
                                   {(() => {
                                     const playerStats = getPlayerStatsObj(p.nome);
-                                    const pPrice = getPlayerCurrentPrice(p.nome, playerStats.fantaScore, partiteChiuse, bonuses, giocatori);
+                                    const pPrice = getPlayerCurrentPrice(p.nome, playerStats.fantaScore);
                                     const basePrice = getPlayerBasePrice(p.nome);
                                     const diff = pPrice - basePrice;
                                     return (
@@ -4308,16 +4303,6 @@ export default function FantacalcettoV2({
             <div className="space-y-6 animate-fade-in font-sans p-6 text-center border-2 border-dashed border-indigo-800 rounded-3xl mt-6">
               <h2 className="text-xl font-black text-yellow-300 uppercase tracking-widest">Regolamento & Modificatori</h2>
               <p className="text-indigo-300 text-sm font-medium">Qui troverai presto il riepilogo della gestione bonus/malus personalizzati e il calcolo dei modificatori della fanta-lega.</p>
-            </div>
-          ) : activePublicTab === "statistiche" ? (
-            <div className="mt-6 animate-fade-in">
-              <StatsHub
-                giocatori={giocatori}
-                fantasquadre={fantasquadre}
-                partiteChiuse={partiteChiuse || []}
-                bonuses={bonuses}
-                getTeamMatchBreakdownList={getTeamMatchBreakdownList}
-              />
             </div>
           ) : null}
         </div>
@@ -4529,19 +4514,6 @@ export default function FantacalcettoV2({
               <span>Apri Portale</span>
             </a>
           </div>
-          {isEditor && (
-            <button
-              onClick={() => onTogglePortaleBlocco && onTogglePortaleBlocco(!portale1Bloccato)}
-              className={`w-full mt-2 py-1.5 font-bold text-[10.5px] uppercase rounded-lg shadow-2xs cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0 ${
-                portale1Bloccato
-                  ? "bg-red-100 text-red-800 border border-red-200 hover:bg-red-200"
-                  : "bg-slate-100 text-slate-800 border border-slate-200 hover:bg-slate-200"
-              }`}
-            >
-              {portale1Bloccato ? <Lock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5 opacity-50" />}
-              <span>{portale1Bloccato ? "Sblocca Portale" : "Blocca Portale"}</span>
-            </button>
-          )}
         </div>
       </div>
 
@@ -4584,7 +4556,8 @@ export default function FantacalcettoV2({
               Formula Fantacalcetto
             </span>
             <span className="text-xs font-bold text-gray-600">
-              Punti base disattivati. Calcolo tramite Bonus/Malus Extra e Ruoli.
+              Gol ({GOAL_POINTS}pt), Assist ({ASSIST_POINTS}pt), Amm (
+              {AMMO_POINTS}pt), Esp ({ESPU_POINTS}pt)
             </span>
           </div>
         </div>
@@ -5244,17 +5217,6 @@ export default function FantacalcettoV2({
         </div>
       )}
 
-      {/* 📊 SEZIONE REPORT E STATISTICHE CENTRALIZZATA PER L'ADMIN */}
-      <div className="pt-8 border-t border-gray-200">
-        <StatsHub
-          giocatori={giocatori}
-          fantasquadre={fantasquadre}
-          partiteChiuse={partiteChiuse || []}
-          bonuses={bonuses}
-          getTeamMatchBreakdownList={getTeamMatchBreakdownList}
-        />
-      </div>
-
       {showGeneralReportModal && (
         <GeneralReportModal
           rankedTeams={rankedTeams}
@@ -5473,12 +5435,14 @@ function MatchBreakdownModal({
           <div className="space-y-2">
             {mb.giocatoriKpi.map((kpi: any, kIdx: number) => {
               const highlights: string[] = [];
-              // Standard Gol and Assist are not added as standalone highlights on the card,
-              // since they are already accounted for inside the role bonus list details with their correct values.
+              if (kpi.gol > 0)
+                highlights.push(`⚽ ${kpi.gol} Gol (+${kpi.gol * 3})`);
+              if (kpi.assist > 0)
+                highlights.push(`🤝 ${kpi.assist} Assist (+${kpi.assist * 1})`);
               if (kpi.amm > 0)
-                highlights.push(`🟨 ${kpi.amm} Amm`);
+                highlights.push(`🟨 ${kpi.amm} Amm (-${kpi.amm * 0.5})`);
               if (kpi.rossi > 0)
-                highlights.push(`🟥 ${kpi.rossi} Esp`);
+                highlights.push(`🟥 ${kpi.rossi} Esp (-${kpi.rossi * 1})`);
               if (kpi.bonusBreakdownStr) {
                 highlights.push(`🎒 Bonus: ${kpi.bonusBreakdownStr}`);
               } else if (kpi.bonusPts !== 0) {

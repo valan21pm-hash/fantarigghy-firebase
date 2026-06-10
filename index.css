@@ -1,1183 +1,1830 @@
-import React, { useState, useMemo } from "react";
-import {
-  BarChart3,
-  Trophy,
-  Users,
-  User,
-  Copy,
-  Sparkles,
-  TrendingUp,
-  TrendingDown,
-  Search,
-  Award,
-  Shield,
-  Activity,
-  Check,
-  Calendar,
-  Layers,
-  ArrowUpDown,
-  Hash,
-  Share2
-} from "lucide-react";
-import {
-  Giocatore,
-  Fantasquadra,
-  Partita,
-  CustomBonusDef,
-  DEFAULT_BONUSES,
-  calculatePlayerChampionshipStats,
-  getPlayerCurrentPrice,
-  getPlayerBasePrice,
-  getPlayerBonusBreakdownForMatch,
-  getPlayerBonusKey
-} from "../types";
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-interface StatsHubProps {
+import React, { useState, useEffect } from "react";
+import { CheckCircle2, Trophy, AlertTriangle } from "lucide-react";
+import { Giocatore, Partita, RefertoGiocatore, getPlayerBonusKey, CustomBonusDef, DEFAULT_BONUSES } from "../types";
+
+interface MatchReportProps {
   giocatori: Giocatore[];
-  fantasquadre: Fantasquadra[];
-  partiteChiuse: Partita[];
+  partiteAperte: Partita[];
+  onChiudiPartita: (
+    idPartita: string,
+    costoFinale: number,
+    presenti: string[],
+    risultato: string,
+    referto: RefertoGiocatore[],
+    note?: string
+  ) => Promise<void>;
+  onSalvaBozza?: (
+    idPartita: string,
+    costoFinale: number,
+    presenti: string[],
+    risultato: string,
+    referto: RefertoGiocatore[],
+    note?: string
+  ) => Promise<void>;
+  onAggiungiConvocato?: (idPartita: string, nomeGiocatore: string) => Promise<void>;
+  onCreaBackupBozza?: (backup: any) => Promise<void>;
+  onEliminaBackupBozza?: (backupId: string) => Promise<void>;
+  savedBackups?: any[];
+  onAnnullaPartita: (idPartita: string) => Promise<void>;
+  isEditor?: boolean;
+  selectedMatchId?: string;
+  onSelectMatchId?: (id: string) => void;
   bonuses?: CustomBonusDef[];
-  getTeamMatchBreakdownList: (team: Fantasquadra) => any[];
 }
 
-export default function StatsHub({
+export default function MatchReport({
   giocatori,
-  fantasquadre,
-  partiteChiuse,
-  bonuses = DEFAULT_BONUSES,
-  getTeamMatchBreakdownList
-}: StatsHubProps) {
-  // Hub States
-  const [timeframe, setTimeframe] = useState<"global" | "giornata">("global");
-  const [selectedGiornataId, setSelectedGiornataId] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"giocatori" | "squadre" | "bonus">("giocatori");
-  const [sortOrder, setSortOrder] = useState<"crescente" | "decrescente">("crescente");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [copied, setCopied] = useState(false);
-  const [selectedTeamFilter, setSelectedTeamFilter] = useState<string>("Tutte");
-  const [selectedPlayerFilter, setSelectedPlayerFilter] = useState<string>("Tutti");
-  const [selectedBonusFilter, setSelectedBonusFilter] = useState<string>("Tutti");
-
-  // Available valid Closed Matches for calculations (non-friendly)
-  const validMatches = useMemo(() => {
-    return (partiteChiuse || []).filter(
-      (m) =>
-        m.stato === "Chiusa" &&
-        m.inviatoFanta === true &&
-        !(m.dettagli || "").toLowerCase().includes("amichevole")
+  partiteAperte,
+  onChiudiPartita,
+  onSalvaBozza,
+  onAggiungiConvocato,
+  onCreaBackupBozza,
+  onEliminaBackupBozza,
+  savedBackups = [],
+  onAnnullaPartita,
+  isEditor = false,
+  selectedMatchId: externalSelectedMatchId,
+  onSelectMatchId,
+  bonuses
+}: MatchReportProps) {
+  if (!isEditor) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" id="sezione-referto">
+        <div className="bg-slate-900 px-6 py-4">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <span>📝</span> Inserisci Referto
+          </h2>
+          <p className="text-xs text-slate-300">
+            Chiudi partite e aggiorna statistiche
+          </p>
+        </div>
+        <div className="p-12 text-center max-w-sm mx-auto space-y-4">
+          <div className="text-4xl font-semibold">🔒</div>
+          <h3 className="text-lg font-bold text-gray-800 tracking-tight">Area riservata agli amministratori</h3>
+        </div>
+      </div>
     );
-  }, [partiteChiuse]);
-
-  // Set default selected jornada if none is selected
-  React.useEffect(() => {
-    if (validMatches.length > 0 && !selectedGiornataId) {
-      setSelectedGiornataId(validMatches[0].id);
-    }
-  }, [validMatches, selectedGiornataId]);
-
-  const selectedGiornataObj = useMemo(() => {
-    return validMatches.find((m) => m.id === selectedGiornataId);
-  }, [validMatches, selectedGiornataId]);
-
-  // Clean label/name for the selected jornada or global state
-  const currentPeriodLabel = useMemo(() => {
-    if (timeframe === "global") return "Torneo Completo";
-    if (selectedGiornataObj) return selectedGiornataObj.dettagli || selectedGiornataObj.nome || "Giornata Selezionata";
-    return "Nessuna Giornata";
-  }, [timeframe, selectedGiornataObj]);
-
-  // 1. ADVANCED PLAYER STATISTICS CALCULATION
-  const playerStatsList = useMemo(() => {
-    return giocatori.map((g) => {
-      // Base info
-      const basePrice = getPlayerBasePrice(g.nome);
-      
-      // Calculate overall stats
-      let score = 0;
-      let golCount = 0;
-      let assistCount = 0;
-      let ammCount = 0;
-      let espCount = 0;
-      let matchesPlayed = 0;
-
-      // Track individual bonus counts
-      const bonusCounts: Record<string, number> = {};
-
-      // Match-by-match pricing history
-      let currentPrice = basePrice;
-      let lastMatchChange = 0;
-
-      // Filter matches depending on selected timeframe
-      const targetMatches = timeframe === "global" 
-        ? validMatches 
-        : (selectedGiornataObj ? [selectedGiornataObj] : []);
-
-      // Calculate state for player
-      validMatches.forEach((m) => {
-        if (!m.referto) return;
-        const r = m.referto.find((x) => x.nome.toLowerCase() === g.nome.toLowerCase());
-        if (!r) return;
-
-        const isPresente = r.statoPresenza === "giocato";
-        const rGol = isPresente ? (Number(r.gol) || 0) : 0;
-        const rAssist = isPresente ? (Number(r.assist) || 0) : 0;
-        const rAmm = isPresente ? (Number(r.amm) || 0) : 0;
-        const rEsp = isPresente ? (Number(r.rossi) || 0) : 0;
-        const rBonusAttivi = r.bonusAttivi || [];
-
-        // Pricing logic up to this match
-        const breakdown = getPlayerBonusBreakdownForMatch(
-          g.nome,
-          rBonusAttivi,
-          rGol,
-          rAssist,
-          bonuses,
-          r.snapshotGiocatore?.ultimoRuolo || g.ultimoRuolo,
-          rAmm,
-          rEsp
-        );
-
-        let matchBonusVal = breakdown.reduce((acc, curr) => acc + curr.puntiVal, 0);
-        let matchScore = parseFloat(matchBonusVal.toFixed(1));
-
-        let change = 0;
-        if (isPresente) {
-          // Convocati (Presenti/Giocati)
-          if (matchScore >= 20) {
-            change = 2;
-          } else if (matchScore >= 16 && matchScore <= 19) {
-            change = 1;
-          } else if (matchScore >= 10 && matchScore <= 15) {
-            change = 0;
-          } else if (matchScore >= -5 && matchScore <= 9) {
-            change = -1;
-          } else if (matchScore >= -10 && matchScore <= -6) {
-            change = -2;
-          } else if (matchScore <= -11) {
-            change = -3;
-          }
-        } else {
-          // Non Convocati (Assenti, Sostituti o non a referto)
-          if (matchScore >= 15) {
-            change = 2;
-          } else if (matchScore >= 7 && matchScore <= 14) {
-            change = 1;
-          } else if (matchScore >= -1 && matchScore <= 6) {
-            change = 0;
-          } else if (matchScore >= -5 && matchScore <= -2) {
-            change = -1;
-          } else if (matchScore >= -10 && matchScore <= -6) {
-            change = -2;
-          } else if (matchScore <= -11) {
-            change = -3;
-          }
-        }
-
-        // Variazione supplementare di -1 Izycoin se Malus BRT e' spuntato
-        if (r && r.malusBrt === true) {
-          change -= 1;
-        }
-
-        // Apply accumulation if calculating values chronologically
-        currentPrice = Math.max(1, currentPrice + change);
-
-        // If this is the currently selected match for individual view
-        if (timeframe === "giornata" && m.id === selectedGiornataId) {
-          lastMatchChange = change;
-        }
-      });
-
-      // Compute actual view score, stats & bonus frequencies for the selected period
-      targetMatches.forEach((m) => {
-        if (!m.referto) return;
-        const r = m.referto.find((x) => x.nome.toLowerCase() === g.nome.toLowerCase());
-        if (!r) return;
-
-        const isPresente = r.statoPresenza === "giocato";
-        if (isPresente) {
-          matchesPlayed++;
-        }
-
-        const rGol = isPresente ? (Number(r.gol) || 0) : 0;
-        const rAssist = isPresente ? (Number(r.assist) || 0) : 0;
-        const rAmm = isPresente ? (Number(r.amm) || 0) : 0;
-        const rEsp = isPresente ? (Number(r.rossi) || 0) : 0;
-        const rBonusAttivi = r.bonusAttivi || [];
-
-        const breakdown = getPlayerBonusBreakdownForMatch(
-          g.nome,
-          rBonusAttivi,
-          rGol,
-          rAssist,
-          bonuses,
-          r.snapshotGiocatore?.ultimoRuolo || g.ultimoRuolo,
-          rAmm,
-          rEsp
-        );
-
-        let matchBonusVal = breakdown.reduce((acc, curr) => acc + curr.puntiVal, 0);
-        let matchScore = parseFloat(matchBonusVal.toFixed(1));
-
-        score += matchScore;
-        golCount += rGol;
-        assistCount += rAssist;
-        ammCount += rAmm;
-        espCount += rEsp;
-
-        // Count bonuses
-        breakdown.forEach((b) => {
-          bonusCounts[b.nome] = (bonusCounts[b.nome] || 0) + 1;
-        });
-      });
-
-      // If timeframe is global, last change can be current total diff
-      if (timeframe === "global") {
-        lastMatchChange = currentPrice - basePrice;
-      }
-
-      return {
-        nome: g.nome,
-        ruolo: g.ultimoRuolo,
-        score: parseFloat(score.toFixed(1)),
-        gol: golCount,
-        assist: assistCount,
-        amm: ammCount,
-        esp: espCount,
-        matchesPlayed,
-        basePrice,
-        currentPrice,
-        priceChange: lastMatchChange,
-        bonusCounts
-      };
-    });
-  }, [giocatori, validMatches, timeframe, selectedGiornataId, selectedGiornataObj, bonuses]);
-
-  // Sorted & Filtered Player list
-  const filteredPlayerStats = useMemo(() => {
-    let list = playerStatsList;
-
-    // Apply Team filter
-    if (selectedTeamFilter !== "Tutte") {
-      const targetTeam = fantasquadre.find(t => t.id === selectedTeamFilter);
-      if (targetTeam) {
-        list = list.filter(p => targetTeam.giocatoriSelezionati.includes(p.nome));
-      }
-    }
-
-    // Apply Player name search
-    if (searchQuery.trim() !== "") {
-      list = list.filter((p) =>
-        p.nome.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    // Apply Player filter
-    if (selectedPlayerFilter !== "Tutti") {
-      list = list.filter(p => p.nome === selectedPlayerFilter);
-    }
-
-    // Apply Bonus/Malus filter
-    if (selectedBonusFilter !== "Tutti") {
-      list = list.filter(p => p.bonusCounts[selectedBonusFilter] > 0);
-    }
-
-    list.sort((a, b) => {
-      if (sortOrder === "crescente") {
-        return a.score - b.score || a.nome.localeCompare(b.nome);
-      } else {
-        return b.score - a.score || a.nome.localeCompare(b.nome);
-      }
-    });
-
-    return list;
-  }, [playerStatsList, searchQuery, sortOrder, selectedTeamFilter, selectedPlayerFilter, selectedBonusFilter, fantasquadre]);
-
-
-  // 2. ADVANCED FANTASQUADRA STATISTICS CALCULATION
-  const teamStatsList = useMemo(() => {
-    return fantasquadre.map((team) => {
-      let score = 0;
-      const bonusFrequencies: Record<string, number> = {};
-
-      const breakdowns = getTeamMatchBreakdownList(team);
-
-      // Filter based on timeframe selection
-      const targetBreakdowns = timeframe === "global"
-        ? breakdowns
-        : breakdowns.filter((b) => b.matchId === selectedGiornataId);
-
-      targetBreakdowns.forEach((m) => {
-        score += m.puntiTotaliMatch || 0;
-
-        // Aggregate player KPIs for the team
-        if (m.giocatoriKpi) {
-          m.giocatoriKpi.forEach((kpi: any) => {
-            // Re-fetch individual match referto to see specific bonuses
-            const matchObj = validMatches.find((v) => v.id === m.matchId);
-            const r = matchObj?.referto?.find((x) => x.nome.toLowerCase() === kpi.nome.toLowerCase());
-            if (r) {
-              const rGol = r.statoPresenza === "giocato" ? (Number(r.gol) || 0) : 0;
-              const rAssist = r.statoPresenza === "giocato" ? (Number(r.assist) || 0) : 0;
-              const rAmm = r.statoPresenza === "giocato" ? (Number(r.amm) || 0) : 0;
-              const rEsp = r.statoPresenza === "giocato" ? (Number(r.rossi) || 0) : 0;
-              const rBonusAttivi = r.bonusAttivi || [];
-
-              const breakdown = getPlayerBonusBreakdownForMatch(
-                kpi.nome,
-                rBonusAttivi,
-                rGol,
-                rAssist,
-                bonuses,
-                r.snapshotGiocatore?.ultimoRuolo,
-                rAmm,
-                rEsp
-              );
-
-              breakdown.forEach((b) => {
-                bonusFrequencies[b.nome] = (bonusFrequencies[b.nome] || 0) + 1;
-              });
-            }
-          });
-        }
-      });
-
-      return {
-        ...team,
-        score: parseFloat(score.toFixed(1)),
-        bonusFrequencies,
-        numMatches: targetBreakdowns.length
-      };
-    });
-  }, [fantasquadre, validMatches, timeframe, selectedGiornataId, bonuses, getTeamMatchBreakdownList]);
-
-  // Sorted team stats
-  const sortedTeamStats = useMemo(() => {
-    let list = [...teamStatsList];
-    if (selectedTeamFilter !== "Tutte") {
-      list = list.filter(t => t.id === selectedTeamFilter);
-    }
-    list.sort((a, b) => {
-      if (sortOrder === "crescente") {
-        return a.score - b.score || a.nomeFantasquadra.localeCompare(b.nomeFantasquadra);
-      } else {
-        return b.score - a.score || a.nomeFantasquadra.localeCompare(b.nomeFantasquadra);
-      }
-    });
-    return list;
-  }, [teamStatsList, sortOrder, selectedTeamFilter]);
-
-
-  // 3. THEMATIC BONUS/MALUS CLASSIFY
-  const bonusStatsList = useMemo(() => {
-    // Collect all bonuses and malus activation counts
-    const counts: Record<string, { definition: CustomBonusDef; activatedBy: Record<string, number>; totalCount: number }> = {};
-
-    // Seed definitions
-    bonuses.forEach((b) => {
-      counts[b.nome] = {
-        definition: b,
-        activatedBy: {},
-        totalCount: 0
-      };
-    });
-
-    const targetMatches = timeframe === "global"
-      ? validMatches
-      : (selectedGiornataObj ? [selectedGiornataObj] : []);
-
-    targetMatches.forEach((m) => {
-      if (!m.referto) return;
-      m.referto.forEach((r) => {
-        const isPresente = r.statoPresenza === "giocato";
-        const rGol = isPresente ? (Number(r.gol) || 0) : 0;
-        const rAssist = isPresente ? (Number(r.assist) || 0) : 0;
-        const rAmm = isPresente ? (Number(r.amm) || 0) : 0;
-        const rEsp = isPresente ? (Number(r.rossi) || 0) : 0;
-        const rBonusAttivi = r.bonusAttivi || [];
-
-        const breakdown = getPlayerBonusBreakdownForMatch(
-          r.nome,
-          rBonusAttivi,
-          rGol,
-          rAssist,
-          bonuses,
-          r.snapshotGiocatore?.ultimoRuolo,
-          rAmm,
-          rEsp
-        );
-
-        breakdown.forEach((b) => {
-          if (!counts[b.nome]) {
-            // Dynamically seed if not present
-            counts[b.nome] = {
-              definition: { id: "dyn", nome: b.nome, descrizione: "Bonus automatico", punti: b.puntiVal },
-              activatedBy: {},
-              totalCount: 0
-            };
-          }
-          counts[b.nome].totalCount++;
-          counts[b.nome].activatedBy[r.nome] = (counts[b.nome].activatedBy[r.nome] || 0) + 1;
-        });
-      });
-    });
-
-    const list = Object.values(counts);
-    let filteredList = list;
-
-    if (selectedBonusFilter !== "Tutti") {
-      filteredList = filteredList.filter(b => b.definition.nome === selectedBonusFilter);
-    }
-
-    if (selectedPlayerFilter !== "Tutti") {
-      filteredList = filteredList.map(b => {
-        const pCnt = b.activatedBy[selectedPlayerFilter] || 0;
-        return {
-          ...b,
-          totalCount: pCnt,
-          activatedBy: pCnt > 0 ? { [selectedPlayerFilter]: pCnt } : {}
-        };
-      }).filter(b => b.totalCount > 0);
-    }
-
-    filteredList.sort((a, b) => {
-      if (sortOrder === "crescente") {
-        return a.totalCount - b.totalCount || a.definition.nome.localeCompare(b.definition.nome);
-      } else {
-        return b.totalCount - a.totalCount || a.definition.nome.localeCompare(b.definition.nome);
-      }
-    });
-
-    return filteredList;
-  }, [bonuses, validMatches, timeframe, selectedGiornataId, selectedGiornataObj, sortOrder, selectedBonusFilter, selectedPlayerFilter]);
-
-
-  // If a single player is selected, let's assemble their match history breakdown
-  const selectedPlayerMatchHistory = useMemo(() => {
-    if (selectedPlayerFilter === "Tutti") return [];
-    
-    const history: any[] = [];
-    validMatches.forEach((m) => {
-      if (!m.referto) return;
-      const r = m.referto.find((x) => x.nome.toLowerCase() === selectedPlayerFilter.toLowerCase());
-      if (!r) return;
-
-      const isPresente = r.statoPresenza === "giocato";
-      const rGol = isPresente ? (Number(r.gol) || 0) : 0;
-      const rAssist = isPresente ? (Number(r.assist) || 0) : 0;
-      const rAmm = isPresente ? (Number(r.amm) || 0) : 0;
-      const rEsp = isPresente ? (Number(r.rossi) || 0) : 0;
-      const rBonusAttivi = r.bonusAttivi || [];
-
-      const breakdown = getPlayerBonusBreakdownForMatch(
-        selectedPlayerFilter,
-        rBonusAttivi,
-        rGol,
-        rAssist,
-        bonuses,
-        r.snapshotGiocatore?.ultimoRuolo,
-        rAmm,
-        rEsp
-      );
-
-      let matchBonusVal = breakdown.reduce((acc, curr) => acc + curr.puntiVal, 0);
-      let matchScore = parseFloat(matchBonusVal.toFixed(1));
-
-      let change = 0;
-      if (isPresente) {
-        if (matchScore >= 20) change = 2;
-        else if (matchScore >= 16 && matchScore <= 19) change = 1;
-        else if (matchScore >= 10 && matchScore <= 15) change = 0;
-        else if (matchScore >= -5 && matchScore <= 9) change = -1;
-        else if (matchScore >= -10 && matchScore <= -6) change = -2;
-        else change = -3;
-      } else {
-        if (matchScore >= 15) change = 2;
-        else if (matchScore >= 7 && matchScore <= 14) change = 1;
-        else if (matchScore >= -1 && matchScore <= 6) change = 0;
-        else if (matchScore >= -5 && matchScore <= -2) change = -1;
-        else if (matchScore >= -10 && matchScore <= -6) change = -2;
-        else change = -3;
-      }
-
-      if (r.malusBrt === true) {
-        change -= 1;
-      }
-
-      history.push({
-        matchId: m.id,
-        matchNome: m.nome || m.dettagli || m.id,
-        statoPresenza: r.statoPresenza,
-        score: matchScore,
-        priceChange: change,
-        gol: rGol,
-        assist: rAssist,
-        amm: rAmm,
-        esp: rEsp,
-        bonuses: breakdown,
-        malusBrt: r.malusBrt === true
-      });
-    });
-
-    return history;
-  }, [selectedPlayerFilter, validMatches, bonuses]);
-
-
-  // 4. GENERATING COPYABLE SOCIAL EXPORT TEXT (formatted, beautiful, rich of emojis)
-  const socialExportText = useMemo(() => {
-    let titleEmoji = "📊";
-    if (activeTab === "squadre") titleEmoji = "🏆";
-    if (activeTab === "bonus") titleEmoji = "⚡";
-
-    let textForCopy = `${titleEmoji} *REPORT FANTA-STATS* ${titleEmoji}\n`;
-    textForCopy += `📅 _Periodo: ${currentPeriodLabel}_\n`;
-    textForCopy += `📈 _Ordinamento: ${sortOrder === "crescente" ? "Crescente 📈" : "Decrescente 📉"}_\n\n`;
-
-    if (activeTab === "giocatori") {
-      textForCopy += `👤 *LEADERBOARD GIOCATORI:*\n`;
-      filteredPlayerStats.slice(0, 15).forEach((p, idx) => {
-        const rankNum = idx + 1;
-        const changeSign = p.priceChange >= 0 ? `+${p.priceChange}` : `${p.priceChange}`;
-        textForCopy += `${rankNum}. [${p.ruolo.toUpperCase()}] *${p.nome}* | *${p.score} pts*\n`;
-        textForCopy += `   🪙 Valore: ${p.currentPrice} (${changeSign} Izycoin) | 👕 Presenze: ${p.matchesPlayed}\n`;
-        
-        const topBonusList = Object.entries(p.bonusCounts)
-          .sort((a, b) => Number(b[1]) - Number(a[1]))
-          .slice(0, 2);
-        if (topBonusList.length > 0) {
-          const bonusStr = topBonusList.map(([bName, bCnt]) => `${bName} (x${bCnt})`).join(", ");
-          textForCopy += `   ✨ Top Bonus: ${bonusStr}\n`;
-        }
-      });
-      if (filteredPlayerStats.length > 15) {
-        textForCopy += `\n...e altri ${filteredPlayerStats.length - 15} giocatori!`;
-      }
-    } else if (activeTab === "squadre") {
-      textForCopy += `🏆 *CLASSIFICA FANTASQUADRE:*\n`;
-      sortedTeamStats.forEach((t, idx) => {
-        const rankNum = idx + 1;
-        textForCopy += `${rankNum}. *${t.nomeFantasquadra}* (${t.nomePartecipante})\n`;
-        textForCopy += `   ⚽ Punti: *${t.score} pts* in ${t.numMatches} G.\n`;
-
-        const topBonusList = Object.entries(t.bonusFrequencies)
-          .sort((a, b) => Number(b[1]) - Number(a[1]))
-          .slice(0, 3);
-        if (topBonusList.length > 0) {
-          const bonusStr = topBonusList.map(([bName, bCnt]) => `${bName} (x${bCnt})`).join(", ");
-          textForCopy += `   📌 Bonus del Team: ${bonusStr}\n`;
-        }
-      });
-    } else {
-      textForCopy += `⚡ *FOCUS STATISTICHE BONUS/MALUS:*\n`;
-      bonusStatsList.slice(0, 15).forEach((b, idx) => {
-        const rankNum = idx + 1;
-        textForCopy += `${rankNum}. *${b.definition.nome}*\n`;
-        textForCopy += `   🎯 Attivazioni: *${b.totalCount} volte*\n`;
-
-        const playersAtt = Object.entries(b.activatedBy)
-          .sort((a, b) => Number(b[1]) - Number(a[1]))
-          .slice(0, 3)
-          .map(([pName, pCnt]) => `${pName} (${pCnt})`)
-          .join(", ");
-        if (playersAtt) {
-          textForCopy += `   🏃 Top Giocatori: ${playersAtt}\n`;
-        }
-      });
-    }
-
-    textForCopy += `\n⚽ #FantaEasyRigging #Fantacalcetto #Izycoin 🪙`;
-    return textForCopy;
-  }, [activeTab, currentPeriodLabel, sortOrder, filteredPlayerStats, sortedTeamStats, bonusStatsList]);
-
-  const handleCopyClipboard = async () => {
+  }
+
+  const [selectedMatchId, setSelectedMatchId] = useState("");
+  const [risultato, setRisultato] = useState("");
+  const [costo, setCosto] = useState("");
+  const [note, setNote] = useState("");
+
+  const activeMatch = partiteAperte.find(p => p.id === selectedMatchId);
+  const isAmichevole = activeMatch ? activeMatch.dettagli.includes("[Amichevole]") : false;
+
+  // Custom UI Modals & Notifications States
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showAnnullaModal, setShowAnnullaModal] = useState(false);
+  const [confirmModalData, setConfirmModalData] = useState<{
+    risultato: string;
+    costoTotale: number;
+    pagantiConteggio: number;
+    quotaSingola: number;
+    refertoCompleto: RefertoGiocatore[];
+    presentsList?: string[];
+  } | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Tabs structure
+  const [activeTab, setActiveTab] = useState<"referto" | "generic" | "personal">("referto");
+  
+  // Verification tracking for Generic and Personal Bonuses
+  const [verifiedGeneric, setVerifiedGeneric] = useState<Record<string, boolean>>({});
+  const [verifiedPersonal, setVerifiedPersonal] = useState<Record<string, boolean>>({});
+
+  // Stats input state
+  // key of map: player name. Value: stats
+  const [presents, setPresents] = useState<string[]>([]);
+  const [payers, setPayers] = useState<string[]>([]);
+  const [goals, setGoals] = useState<Record<string, string>>({});
+  const [assists, setAssists] = useState<Record<string, string>>({});
+  const [yellows, setYellows] = useState<Record<string, string>>({});
+  const [reds, setReds] = useState<Record<string, string>>({});
+  const [subAzione, setSubAzione] = useState<Record<string, string>>({});
+  const [subRigore, setSubRigore] = useState<Record<string, string>>({});
+  const [subPiazzato, setSubPiazzato] = useState<Record<string, string>>({});
+  const [selectedBonuses, setSelectedBonuses] = useState<Record<string, string[]>>({});
+  const [statoPresenza, setStatoPresenza] = useState<Record<string, "giocato" | "assente" | "sostituito">>({});
+  const [sostitutoDa, setSostitutoDa] = useState<Record<string, string>>({});
+  const [editingPlayerName, setEditingPlayerName] = useState<string | null>(null);
+  const [noEventsPlayers, setNoEventsPlayers] = useState<Record<string, boolean>>({});
+  const [extraConvocato, setExtraConvocato] = useState<string>("");
+  const [isAddingExtra, setIsAddingExtra] = useState(false);
+
+  const [hasBackedUpDraft, setHasBackedUpDraft] = useState(false);
+  const [showBackupsModal, setShowBackupsModal] = useState(false);
+  const [tipoInvio, setTipoInvio] = useState<"provvisorio" | "definitivo">("provvisorio");
+  const [postSubmitState, setPostSubmitState] = useState<"provvisorio" | "definitivo" | null>(null);
+
+  // Initialize form state when match changes
+
+  const handleBackupBozza = async () => {
+    if (!activeMatch) return;
     try {
-      await navigator.clipboard.writeText(socialExportText);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      alert("Copia non riuscita, per favore copia manualmente la casella di testo.");
+      const newBackup = {
+        id: "backup_" + Date.now(),
+        createdAt: new Date().toLocaleString(),
+        idPartita: activeMatch.id,
+        dettagliPartita: activeMatch.dettagli,
+        presents,
+        payers,
+        costo,
+        risultato,
+        note,
+        goals,
+        assists,
+        yellows,
+        reds,
+        subAzione,
+        subRigore,
+        subPiazzato,
+        selectedBonuses,
+        statoPresenza,
+        sostitutoDa,
+        noEventsPlayers,
+        verifiedGeneric,
+        verifiedPersonal,
+      };
+      if (onCreaBackupBozza) {
+        await onCreaBackupBozza(newBackup);
+      }
+      setHasBackedUpDraft(true);
+      setSuccessMessage("Backup bozza creato e salvato con successo.");
+      setTimeout(() => {
+         setSuccessMessage(null);
+      }, 4000);
+    } catch (e: any) {
+      setValidationError("Failed to create backup: " + e.message);
+    }
+  };
+
+  const handleRestoreBackup = (b: any) => {
+    if (!window.confirm("Sei sicuro di voler ripristinare questo backup? I dati attualmente inseriti nel referto andranno persi.")) return;
+    if (b.idPartita !== activeMatch?.id) {
+       if (!window.confirm(`Attenzione! Questo backup fa riferimento a un'altra partita ("${b.dettagliPartita}"). Vuoi procedere comunque?`)) return;
+    }
+    setPresents(b.presents || []);
+    setPayers(b.payers || []);
+    setCosto(b.costo || "");
+    setRisultato(b.risultato || "");
+    setNote(b.note || "");
+    setGoals(b.goals || {});
+    setAssists(b.assists || {});
+    setYellows(b.yellows || {});
+    setReds(b.reds || {});
+    setSubAzione(b.subAzione || {});
+    setSubRigore(b.subRigore || {});
+    setSubPiazzato(b.subPiazzato || {});
+    setSelectedBonuses(b.selectedBonuses || {});
+    setStatoPresenza(b.statoPresenza || {});
+    setSostitutoDa(b.sostitutoDa || {});
+    setNoEventsPlayers(b.noEventsPlayers || {});
+    setVerifiedGeneric(b.verifiedGeneric || {});
+    setVerifiedPersonal(b.verifiedPersonal || {});
+    setHasBackedUpDraft(true);
+    setShowBackupsModal(false);
+  };
+
+  const handleDeleteBackup = async (id: string) => {
+    if (!window.confirm("Vuoi davvero eliminare definitivamente questo backup della bozza?")) return;
+    if (onEliminaBackupBozza) {
+      await onEliminaBackupBozza(id);
+    }
+  };
+
+  // Initialize form state when match changes
+  const handleSelectMatch = (id: string) => {
+    setSelectedMatchId(id);
+    if (onSelectMatchId) onSelectMatchId(id);
+    setValidationError(null);
+    setSuccessMessage(null);
+    setHasBackedUpDraft(false);
+    setActiveTab("referto");
+    const m = partiteAperte.find(p => p.id === id);
+    if (m) {
+      const hasReferto = m.referto && m.referto.length > 0;
+      setRisultato(hasReferto ? (m.risultato || "") : "");
+      setCosto(m.costo.toString());
+      setNote(hasReferto ? (m.note || "") : "");
+      
+      if (hasReferto) {
+        const presentsList = m.referto.map(r => r.nome);
+        const payersList = m.referto.filter(r => r.pagaQuota).map(r => r.nome);
+        setPresents(presentsList);
+        setPayers(payersList);
+
+        const gMap: Record<string, string> = {};
+        const aMap: Record<string, string> = {};
+        const yMap: Record<string, string> = {};
+        const rMap: Record<string, string> = {};
+        const saMap: Record<string, string> = {};
+        const srMap: Record<string, string> = {};
+        const spMap: Record<string, string> = {};
+        const bMap: Record<string, string[]> = {};
+        const statoPresMap: Record<string, "giocato" | "assente" | "sostituito"> = {};
+        const sostDaMap: Record<string, string> = {};
+        const noEventsMap: Record<string, boolean> = {};
+        const vGenMap: Record<string, boolean> = {};
+        const vPerMap: Record<string, boolean> = {};
+
+        m.referto.forEach(r => {
+          if (r.gol > 0) gMap[r.nome] = r.gol.toString();
+          if (r.assist > 0) aMap[r.nome] = r.assist.toString();
+          if (r.amm > 0) yMap[r.nome] = r.amm.toString();
+          if (r.rossi > 0) rMap[r.nome] = r.rossi.toString();
+          if (r.subitiAzione > 0) saMap[r.nome] = r.subitiAzione.toString();
+          if (r.subitiRigore > 0) srMap[r.nome] = r.subitiRigore.toString();
+          if (r.subitiPiazzato > 0) spMap[r.nome] = r.subitiPiazzato.toString();
+          if (r.bonusAttivi && r.bonusAttivi.length > 0) {
+            bMap[r.nome] = r.bonusAttivi;
+          }
+          statoPresMap[r.nome] = r.statoPresenza || (presentsList.includes(r.nome) ? "giocato" : "assente");
+          sostDaMap[r.nome] = r.sostitutoDa || "";
+          
+          if (r.verifiedGeneric) vGenMap[r.nome] = true;
+          if (r.verifiedPersonal) vPerMap[r.nome] = true;
+
+          // Auto-mark Nessun Evento if they played but have zero stats
+          const isPresent = statoPresMap[r.nome] === "giocato";
+          const hasStats = r.gol > 0 || r.assist > 0 || r.amm > 0 || r.rossi > 0 || (r.subitiAzione || 0) > 0 || (r.subitiRigore || 0) > 0 || (r.subitiPiazzato || 0) > 0;
+          if (isPresent && !hasStats) {
+            noEventsMap[r.nome] = true;
+          }
+        });
+
+        setGoals(gMap);
+        setAssists(aMap);
+        setYellows(yMap);
+        setReds(rMap);
+        setSubAzione(saMap);
+        setSubRigore(srMap);
+        setSubPiazzato(spMap);
+        setSelectedBonuses(bMap);
+        setStatoPresenza(statoPresMap);
+        setSostitutoDa(sostDaMap);
+        setNoEventsPlayers(noEventsMap);
+        
+        setVerifiedGeneric(vGenMap);
+        setVerifiedPersonal(vPerMap);
+      } else {
+        setPresents(m.convocati);
+        setPayers(m.convocati);
+        // Empty stats maps
+        setGoals({});
+        setAssists({});
+        setYellows({});
+        setReds({});
+        setSubAzione({});
+        setSubRigore({});
+        setSubPiazzato({});
+        setSelectedBonuses({});
+
+        const initialStatoPres: Record<string, "giocato" | "assente" | "sostituito"> = {};
+        const initialSostDa: Record<string, string> = {};
+        m.convocati.forEach(name => {
+          initialStatoPres[name] = "giocato";
+          initialSostDa[name] = "";
+        });
+        setStatoPresenza(initialStatoPres);
+        setSostitutoDa(initialSostDa);
+        setVerifiedGeneric({});
+        setVerifiedPersonal({});
+        setNoEventsPlayers({});
+      }
+    } else {
+      setPresents([]);
+      setPayers([]);
+      setNote("");
+      setSelectedBonuses({});
+      setStatoPresenza({});
+      setSostitutoDa({});
+      setVerifiedGeneric({});
+      setVerifiedPersonal({});
+    }
+  };
+
+  useEffect(() => {
+    if (externalSelectedMatchId !== undefined && externalSelectedMatchId !== selectedMatchId) {
+      handleSelectMatch(externalSelectedMatchId);
+    }
+  }, [externalSelectedMatchId]);
+
+  const handleToggleBonus = (player: string, bonusId: string) => {
+    setSelectedBonuses(prev => {
+      const current = prev[player] || [];
+      const updated = current.includes(bonusId)
+        ? current.filter(id => id !== bonusId)
+        : [...current, bonusId];
+      return { ...prev, [player]: updated };
+    });
+  };
+
+  const handleTogglePresent = (nome: string) => {
+    if (presents.includes(nome)) {
+      setPresents(presents.filter(x => x !== nome));
+      // Remove from payers too
+      setPayers(payers.filter(x => x !== nome));
+    } else {
+      setPresents([...presents, nome]);
+      setPayers([...payers, nome]);
+    }
+  };
+
+  const handleTogglePayer = (nome: string) => {
+    if (payers.includes(nome)) {
+      setPayers(payers.filter(x => x !== nome));
+    } else {
+      setPayers([...payers, nome]);
+    }
+  };
+
+  const handleStatNumberInput = (
+    nome: string,
+    val: string,
+    setter: React.Dispatch<React.SetStateAction<Record<string, string>>>
+  ) => {
+    setter(prev => ({ ...prev, [nome]: val }));
+    const parsed = parseInt(val) || 0;
+    if (parsed > 0) {
+      setNoEventsPlayers(prev => ({ ...prev, [nome]: false }));
+    }
+  };
+
+  const buildReferto = (): RefertoGiocatore[] => {
+    if (!activeMatch) return [];
+    
+    const activeSubstitutes = activeMatch.convocati
+      .filter(nome => statoPresenza[nome] === "sostituito" && sostitutoDa[nome])
+      .map(nome => sostitutoDa[nome]);
+
+    const unconvokedPlayers = giocatori
+      .filter(g => g.attivo)
+      .filter(g => !activeMatch.convocati.includes(g.nome))
+      .filter(g => !activeSubstitutes.includes(g.nome));
+
+    const allPlayersInReport = [...activeMatch.convocati, ...activeSubstitutes, ...unconvokedPlayers.map(g => g.nome)];
+
+    return allPlayersInReport.map(nome => {
+      const isConvocato = activeMatch.convocati.includes(nome);
+      const isSubstitute = activeSubstitutes.includes(nome);
+      
+      let pres: "giocato" | "assente" | "sostituito" = "giocato";
+      if (isConvocato) {
+        pres = statoPresenza[nome] || "giocato";
+      } else if (isSubstitute) {
+        pres = "giocato";
+      } else {
+        pres = "assente";
+      }
+      
+      const isPresent = pres === "giocato";
+
+      return {
+        nome,
+        gol: isPresent ? parseInt(goals[nome] || "0") : 0,
+        assist: isPresent ? parseInt(assists[nome] || "0") : 0,
+        amm: isPresent ? parseInt(yellows[nome] || "0") : 0,
+        rossi: isPresent ? parseInt(reds[nome] || "0") : 0,
+        subitiAzione: isPresent ? parseInt(subAzione[nome] || "0") : 0,
+        subitiRigore: isPresent ? parseInt(subRigore[nome] || "0") : 0,
+        subitiPiazzato: isPresent ? parseInt(subPiazzato[nome] || "0") : 0,
+        pagaQuota: isPresent ? payers.includes(nome) : false,
+        bonusAttivi: pres !== "sostituito" ? (selectedBonuses[nome] || []) : [],
+        statoPresenza: pres,
+        sostitutoDa: isConvocato ? (sostitutoDa[nome] || "") : "",
+        verifiedGeneric: !!verifiedGeneric[nome],
+        verifiedPersonal: !!verifiedPersonal[nome],
+        snapshotGiocatore: giocatori.find(x => x.nome === nome),
+      };
+    });
+  };
+
+  const handleSalvaBozza = async () => {
+    if (!activeMatch || !onSalvaBozza) return;
+    try {
+      setValidationError(null);
+      
+      const presentsList: string[] = [];
+      activeMatch.convocati.forEach(nome => {
+        const state = statoPresenza[nome] || "giocato";
+        if (state === "giocato") {
+          presentsList.push(nome);
+        } else if (state === "sostituito" && sostitutoDa[nome]) {
+          presentsList.push(sostitutoDa[nome]);
+        }
+      });
+      
+      const costNum = parseFloat(costo) || parseFloat(activeMatch.costo?.toString() || "0");
+      const refertoCompleto = buildReferto();
+
+      await onSalvaBozza(
+        activeMatch.id,
+        costNum,
+        presentsList,
+        risultato.trim(),
+        refertoCompleto,
+        note.trim()
+      );
+      
+      setSuccessMessage("Bozza salvata con successo!");
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err: any) {
+      setValidationError(`Errore durante il salvataggio della bozza: ${err.message || err}`);
+    }
+  };
+
+  const handleSubmitReport = (e: React.FormEvent) => {
+    e.preventDefault();
+    setValidationError(null);
+    setSuccessMessage(null);
+    if (!selectedMatchId || !activeMatch) return;
+    
+    if (!hasBackedUpDraft) {
+      setValidationError("E' obbligatorio effettuare il backup della bozza sul dispositivo prima di procedere all'invio o alla chiusura del referto. Trovi il pulsante 'Backup Bozza di Sicurezza' a fine pagina.");
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      return;
+    }
+
+    if (!risultato.trim()) {
+      setValidationError("Si prega di inserire il risultato finale (es. 5-3).");
+      return;
+    }
+
+    // Build actual presents list for database (those who actually played)
+    const presentsList: string[] = [];
+    activeMatch.convocati.forEach(nome => {
+      const state = statoPresenza[nome] || "giocato";
+      if (state === "giocato") {
+        presentsList.push(nome);
+      } else if (state === "sostituito" && sostitutoDa[nome]) {
+        presentsList.push(sostitutoDa[nome]);
+      }
+    });
+
+    if (presentsList.length === 0) {
+      setValidationError("Si prega di selezionare almeno un giocatore presente.");
+      return;
+    }
+
+    const costNum = parseFloat(costo) || 0;
+    const pagantiList = payers.filter(name => presentsList.includes(name));
+    const pagantiConteggio = pagantiList.length;
+    
+    if (pagantiConteggio === 0 && costNum > 0) {
+      setValidationError("La partita ha un costo ma non ci sono paganti selezionati!");
+      return;
+    }
+
+    // --- Referto Validation Check (At least one stat or Nessun Evento) ---
+    const invalidPlayersInReferto: string[] = [];
+    presentsList.forEach(nome => {
+      const g = giocatori.find(x => x.nome === nome);
+      const isPortiere = g?.ultimoRuolo === "Portiere";
+      const pGoals = Number(goals[nome]) || 0;
+      const pAssists = Number(assists[nome]) || 0;
+      const pYellows = Number(yellows[nome]) || 0;
+      const pReds = Number(reds[nome]) || 0;
+      const pSubAzione = Number(subAzione[nome]) || 0;
+      const pSubRigore = Number(subRigore[nome]) || 0;
+      const pSubPiazzato = Number(subPiazzato[nome]) || 0;
+      
+      const hasStatsEvent = pGoals > 0 || pAssists > 0 || pYellows > 0 || pReds > 0 || (isPortiere && (pSubAzione > 0 || pSubRigore > 0 || pSubPiazzato > 0));
+      let hasNessunEvento = !!noEventsPlayers[nome];
+
+      // If the user already clicked "Assegna Nessun Bonus/Malus" for this player, 
+      // automatically assume "Nessun Evento" to avoid blocking them twice
+      if (!hasStatsEvent && !hasNessunEvento && verifiedGeneric[nome]) {
+        hasNessunEvento = true;
+      }
+
+      if (!hasStatsEvent && !hasNessunEvento) {
+        invalidPlayersInReferto.push(nome);
+      }
+    });
+
+    if (invalidPlayersInReferto.length > 0) {
+      setValidationError(
+        `Azione bloccata per verifica dettagli: è obbligatorio che ogni singolo giocatore presente a referto abbia registrato almeno un evento/statistica (Gol, Assist, Cartellini) OPPURE sia stata spuntata la casella "Nessun evento".\n\nI seguenti giocatori non hanno alcuno stato definito:\n${invalidPlayersInReferto.map(n => `• ${n}`).join("\n")}\n\nClicca sul nome del giocatore e metti la spunta su "Nessun Evento" se non ha fatto gol/assist o preso cartellini.`
+      );
+      return;
+    }
+
+    // --- Strict Bonus Verification Flow ---
+    if (!isAmichevole) {
+      const allBonuses = bonuses || DEFAULT_BONUSES;
+      const genericBonusIds = allBonuses.filter(b => !b.isPersonale).map(b => b.id);
+      const personalBonusIds = allBonuses.filter(b => b.isPersonale).map(b => b.id);
+
+      const activeGiocatori = giocatori.filter(g => g.attivo);
+
+      const giocatoriMancantiGenerico = activeGiocatori.filter(g => {
+        const pBonuses = selectedBonuses[g.nome] || [];
+        const hasGeneric = pBonuses.some(bId => genericBonusIds.includes(bId));
+        if (hasGeneric) return false;
+        return !verifiedGeneric[g.nome];
+      });
+
+      const giocatoriMancantiPersonali = activeGiocatori.filter(g => {
+        const pBonuses = selectedBonuses[g.nome] || [];
+        const hasPersonal = pBonuses.some(bId => personalBonusIds.includes(bId));
+        if (hasPersonal) return false;
+        return !verifiedPersonal[g.nome];
+      });
+
+      if (giocatoriMancantiGenerico.length > 0 || giocatoriMancantiPersonali.length > 0) {
+        let errorMsg = "Attenzione / Errore Azione bloccata: è obbligatorio verificare tutti i giocatori per i bonus generici e personali.\n";
+        
+        if (giocatoriMancantiGenerico.length > 0) {
+          const nomiGenerico = giocatoriMancantiGenerico.map(g => g.nome).join(", ");
+          errorMsg += `\nRiassunto giocatori mancanti nella sezione Bonus Generici:
+  • Mancano all'appello i seguenti giocatori: ${nomiGenerico}.`;
+        }
+        
+        if (giocatoriMancantiPersonali.length > 0) {
+          const nomiPersonali = giocatoriMancantiPersonali.map(g => g.nome).join(", ");
+          errorMsg += `\nRiassunto giocatori mancanti nella sezione Bonus Personali:
+  • Mancano all'appello i seguenti giocatori: ${nomiPersonali}.`;
+        }
+        
+        errorMsg += `\n\nAttenzione: usa il tasto 'Assegna Nessun Bonus/Malus a tutti i rimanenti' in fondo alla tab corrispondente per velocizzare la procedura.`;
+        setValidationError(errorMsg);
+        return;
+      }
+    }
+    // ------------------------------------------------------
+
+    // Form accurate dynamic list of players to save in the report
+    const refertoCompleto = buildReferto();
+
+    const individualDebt = pagantiConteggio > 0 ? costNum / pagantiConteggio : 0;
+    
+    setConfirmModalData({
+      risultato: risultato.trim(),
+      costoTotale: costNum,
+      pagantiConteggio,
+      quotaSingola: individualDebt,
+      refertoCompleto,
+      presentsList
+    });
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmClose = async () => {
+    if (!confirmModalData || !selectedMatchId) return;
+    try {
+      setValidationError(null);
+      await onChiudiPartita(
+        selectedMatchId,
+        confirmModalData.costoTotale,
+        confirmModalData.presentsList,
+        confirmModalData.risultato,
+        confirmModalData.refertoCompleto,
+        note.trim()
+      );
+      
+      setSuccessMessage("Partita refertata con successo! I saldi dei conti sono stati aggiornati.");
+      
+      // Store post submission state before clearing
+      setPostSubmitState(tipoInvio);
+
+      // Clear states
+      setSelectedMatchId("");
+      setRisultato("");
+      setCosto("");
+      setNote("");
+      setSelectedBonuses({});
+      setShowConfirmModal(false);
+      setConfirmModalData(null);
+    } catch (err: any) {
+      setValidationError(`Errore durante la chiusura: ${err.message || err}`);
+      setShowConfirmModal(false);
+    }
+  };
+
+  const handleAnnullaClick = () => {
+    if (!selectedMatchId) return;
+    setShowAnnullaModal(true);
+  };
+
+  const handleConfirmAnnulla = async () => {
+    try {
+      setValidationError(null);
+      await onAnnullaPartita(selectedMatchId);
+      setSuccessMessage("Partita annullata e rimossa con successo dal sistema.");
+      setSelectedMatchId("");
+      setShowAnnullaModal(false);
+    } catch (err: any) {
+      setValidationError(`Errore durante l'annullamento: ${err.message || err}`);
+      setShowAnnullaModal(false);
     }
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-7 text-white shadow-xl space-y-6 font-sans">
-      
-      {/* 🚀 Header unico centralizzato */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-indigo-650/20 text-indigo-400 rounded-2xl border border-indigo-500/20 shadow-inner">
-            <BarChart3 className="h-6 w-6" />
-          </div>
-          <div>
-            <h2 className="text-xl font-black uppercase tracking-tight text-white flex items-center gap-1.5">
-              Hub Statistiche & Social Export
-              <span className="text-[10px] bg-indigo-900 text-indigo-300 font-bold px-2 py-0.5 rounded-full uppercase">
-                Unificato
-              </span>
-            </h2>
-            <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
-              Resoconti dettagliati per giocatori, fantasquadre, variazioni di valore e conteggio dei bonus.
-            </p>
-          </div>
-        </div>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" id="sezione-referto">
+      <div className="bg-slate-900 px-6 py-4 border-b border-slate-850">
+        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <span>📝</span> Inserisci Referto Gara
+        </h2>
+        <p className="text-xs text-slate-300">
+          Registra il punteggio, gol, assist e cartellini di ogni convocato per aggiornare le classifiche
+        </p>
       </div>
 
-      {/* 🛠️ FILTRO CENTRALE DI CONTROLLO */}
-      <div className="bg-slate-950/60 p-4.5 rounded-2xl border border-slate-850/80 grid grid-cols-1 md:grid-cols-12 gap-4">
-        
-        {/* Selettore Tab Principale */}
-        <div className="md:col-span-4 space-y-1.5 col-span-1">
-          <label className="text-[10px] uppercase font-black tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Layers className="h-3 w-3 text-indigo-400" /> Seleziona Report
-          </label>
-          <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800">
-            <button
-              onClick={() => { setActiveTab("giocatori"); setSearchQuery(""); }}
-              className={`flex-1 text-center py-2 text-xs font-black rounded-lg transition-all uppercase flex items-center justify-center gap-1.5 ${
-                activeTab === "giocatori" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-400 hover:text-white"
-              }`}
-            >
-              <User className="h-3.5 w-3.5" /> Giocatori
-            </button>
-            <button
-              onClick={() => { setActiveTab("squadre"); setSearchQuery(""); }}
-              className={`flex-1 text-center py-2 text-xs font-black rounded-lg transition-all uppercase flex items-center justify-center gap-1.5 ${
-                activeTab === "squadre" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-400 hover:text-white"
-              }`}
-            >
-              <Trophy className="h-3.5 w-3.5" /> Squadre
-            </button>
-            <button
-              onClick={() => { setActiveTab("bonus"); setSearchQuery(""); }}
-              className={`flex-1 text-center py-2 text-xs font-black rounded-lg transition-all uppercase flex items-center justify-center gap-1.5 ${
-                activeTab === "bonus" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-400 hover:text-white"
-              }`}
-            >
-              <Sparkles className="h-3.5 w-3.5" /> Bonus Info
-            </button>
-          </div>
-        </div>
-
-        {/* Selettore Temporale (Giornata vs Global) */}
-        <div className="md:col-span-5 space-y-1.5 col-span-1">
-          <label className="text-[10px] uppercase font-black tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Calendar className="h-3 w-3 text-indigo-400" /> Orizzonte Temporale
-          </label>
-          <div className="flex gap-2">
-            <div className="flex bg-slate-900 p-0.5 rounded-xl border border-slate-850 flex-1">
-              <button
-                onClick={() => setTimeframe("global")}
-                className={`flex-1 text-center py-2 text-xs font-bold rounded-lg transition-all ${
-                  timeframe === "global" ? "bg-slate-800 text-white" : "text-slate-400 hover:text-white"
-                }`}
-              >
-                Campionato Totale
-              </button>
-              <button
-                onClick={() => setTimeframe("giornata")}
-                className={`flex-1 text-center py-2 text-xs font-bold rounded-lg transition-all ${
-                  timeframe === "giornata" ? "bg-slate-800 text-white" : "text-slate-400 hover:text-white"
-                }`}
-              >
-                Singola Giornata
-              </button>
+      <div className="p-6 space-y-4">
+        {/* Inline Alerts for Sandbox Friendliness */}
+        {successMessage && (
+          <div className="p-4 bg-slate-50 text-slate-800 border border-slate-200 rounded-xl flex items-start gap-2.5 text-xs font-bold animate-in fade-in duration-200">
+            <CheckCircle2 className="h-5 w-5 text-slate-605 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="font-extrabold uppercase text-[10px] tracking-wider text-slate-950">Operazione Completata</p>
+              <p className="text-[11px] font-semibold text-slate-900">{successMessage}</p>
             </div>
-
-            {timeframe === "giornata" && validMatches.length > 0 && (
-              <select
-                value={selectedGiornataId}
-                onChange={(e) => setSelectedGiornataId(e.target.value)}
-                className="bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 w-32 shrink-0 cursor-pointer"
-              >
-                {validMatches.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.nome || m.dettagli || m.id}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-        </div>
-
-        {/* Ordinamento (Crescente default / Decrescente) */}
-        <div className="md:col-span-3 space-y-1.5 col-span-1">
-          <label className="text-[10px] uppercase font-black tracking-wider text-slate-400 flex items-center gap-1.5">
-            <ArrowUpDown className="h-3 w-3 text-indigo-400" /> Ordinamento Classifiche
-          </label>
-          <button
-            onClick={() => setSortOrder(sortOrder === "crescente" ? "decrescente" : "crescente")}
-            className="w-full bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-slate-700 py-2 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-colors cursor-pointer text-indigo-300 hover:text-indigo-100"
-          >
-            {sortOrder === "crescente" ? (
-              <>
-                <TrendingUp className="h-4 w-4" />
-                <span>Crescente 📈 (Ascendente)</span>
-              </>
-            ) : (
-              <>
-                <TrendingDown className="h-4 w-4" />
-                <span>Decrescente 📉 (Discendente)</span>
-              </>
-            )}
-          </button>
-        </div>
-
-      </div>
-
-      {/* 🔮 FILTRI MULTI-LIVELLO AVANZATI */}
-      <div className="bg-slate-950/45 p-4 rounded-2xl border border-slate-800/80 flex flex-col md:flex-row gap-4 items-stretch md:items-end justify-between">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1">
-          {/* A. Filtra per Squadra */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400 flex items-center gap-1.5">
-              <Trophy className="h-3 w-3 text-indigo-400" /> Filtra Squadra
-            </label>
-            <select
-              value={selectedTeamFilter}
-              onChange={(e) => {
-                setSelectedTeamFilter(e.target.value);
-                // Reset player filter if changing team
-                setSelectedPlayerFilter("Tutti");
-              }}
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+            <button 
+              type="button" 
+              onClick={() => setSuccessMessage(null)}
+              className="ml-auto text-slate-700 hover:text-slate-900 text-[11px] font-bold uppercase tracking-wide cursor-pointer"
             >
-              <option value="Tutte">⚽ Tutte le Squadre</option>
-              {fantasquadre.map((team) => (
-                <option key={team.id} value={team.id}>
-                  {team.nomeFantasquadra}
-                </option>
-              ))}
-            </select>
+              chiudi
+            </button>
           </div>
-
-          {/* B. Filtra per Giocatore */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400 flex items-center gap-1.5">
-              <User className="h-3 w-3 text-indigo-400" /> Filtra Giocatore
-            </label>
-            <select
-              value={selectedPlayerFilter}
-              onChange={(e) => setSelectedPlayerFilter(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-            >
-              <option value="Tutti">🏃 Tutti i Giocatori</option>
-              {giocatori
-                .filter((g) => {
-                  if (selectedTeamFilter === "Tutte") return true;
-                  const t = fantasquadre.find((x) => x.id === selectedTeamFilter);
-                  return t?.giocatoriSelezionati.includes(g.nome);
-                })
-                .sort((a,b) => a.nome.localeCompare(b.nome))
-                .map((g) => (
-                  <option key={g.nome} value={g.nome}>
-                    {g.nome} ({g.ultimoRuolo})
-                  </option>
-                ))}
-            </select>
-          </div>
-
-          {/* C. Filtra per Bonus / Malus */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400 flex items-center gap-1.5">
-              <Sparkles className="h-3 w-3 text-indigo-400" /> Filtra Bonus/Malus
-            </label>
-            <select
-              value={selectedBonusFilter}
-              onChange={(e) => setSelectedBonusFilter(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-            >
-              <option value="Tutti">✨ Tutti i Bonus/Malus</option>
-              {bonuses.map((b) => (
-                <option key={b.nome} value={b.nome}>
-                  {b.nome} ({b.punti > 0 ? `+${b.punti}` : b.punti} pt)
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Bottone Reset Filtri */}
-        {(selectedTeamFilter !== "Tutte" || selectedPlayerFilter !== "Tutti" || selectedBonusFilter !== "Tutti") && (
-          <button
-            onClick={() => {
-              setSelectedTeamFilter("Tutte");
-              setSelectedPlayerFilter("Tutti");
-              setSelectedBonusFilter("Tutti");
-            }}
-            className="text-[10px] uppercase font-black bg-slate-800 hover:bg-slate-750 text-red-400 hover:text-red-300 border border-slate-700 px-4 py-2.5 rounded-xl transition-colors shrink-0 cursor-pointer"
-          >
-            Reset Filtri ❌
-          </button>
         )}
-      </div>
 
-      {/* 🔴 PANNELLO DETTAGLIO TIMELINE SINGOLO GIOCATORE */}
-      {selectedPlayerFilter !== "Tutti" && selectedPlayerMatchHistory.length > 0 && (
-        <div className="bg-slate-950/60 p-5 rounded-2xl border border-slate-800 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-850 pb-3">
+        {validationError && (
+          <div className="p-4 bg-red-50 text-red-800 border border-red-200 rounded-xl flex items-start gap-2.5 text-xs font-bold animate-in' fade-in duration-200">
+            <AlertTriangle className="h-5 w-5 text-red-650 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="font-extrabold uppercase text-[10px] tracking-wider text-red-950">Attenzione / Errore</p>
+              <p className="text-[11px] font-semibold text-red-900">{validationError}</p>
+            </div>
+            <button 
+              type="button" 
+              onClick={() => setValidationError(null)}
+              className="ml-auto text-red-750 hover:text-red-950 text-[11px] font-extrabold uppercase tracking-wide cursor-pointer"
+            >
+              chiudi
+            </button>
+          </div>
+        )}
+
+        <div>
+          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Seleziona Partita da Chiudere</label>
+          <select
+            value={selectedMatchId}
+            onChange={e => handleSelectMatch(e.target.value)}
+            className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
+          >
+            <option value="">-- Seleziona Gara --</option>
+            {partiteAperte.map(p => (
+              <option key={p.id} value={p.id}>
+                {p.dettagli}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {activeMatch && activeMatch.referto && activeMatch.referto.length > 0 && (
+          <div className="p-3 bg-indigo-50 border border-indigo-250 rounded-xl text-indigo-900 text-xs font-semibold flex items-start gap-2.5 animate-in fade-in duration-200">
+            <span className="text-sm shrink-0 mt-0.5">💡</span>
             <div>
-              <h3 className="text-sm font-black uppercase text-yellow-400 flex items-center gap-1.5">
-                <Activity className="h-4 w-4 text-yellow-400 animate-pulse" /> Zoom Prestazioni: {selectedPlayerFilter}
-              </h3>
-              <p className="text-[10px] text-slate-400 mt-0.5">
-                Rapporto cronologico dettagliato partita per partita (Fasce Izycoin, Voto, Bonus e Malus BRT).
+              <p className="font-extrabold uppercase text-[10px] tracking-wider text-indigo-950">Referto Precompilato Caricato</p>
+              <p className="text-[11.5px] font-medium text-indigo-800 leading-relaxed mt-0.5">
+                Questa partita è stata riaperta conservando i dati del referto e il risultato. Modifica solo i dati che vuoi aggiornare qui sotto e infine clicca su <strong>Chiudi Partita &amp; Addebita Quote</strong> per salvare le modifiche definitive.
               </p>
             </div>
           </div>
+        )}
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-            {/* Statistiche Totali del Giocatore Filtered */}
-            {filteredPlayerStats.slice(0, 1).map((p) => (
-              <div key={p.nome} className="md:col-span-4 bg-slate-900/80 p-4 rounded-xl border border-indigo-950 flex flex-col justify-between space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-900/40 font-black px-2 py-0.5 rounded uppercase">
-                      {p.ruolo}
-                    </span>
-                    <span className="text-xs font-bold text-slate-400">Total Score:</span>
-                  </div>
-                  <h4 className="text-2xl font-black text-white">{p.nome}</h4>
-                  <div className="text-3xl font-black text-yellow-400 font-mono">
-                    {p.score} <span className="text-sm font-bold text-slate-400">punti fanta</span>
-                  </div>
+        {activeMatch ? (
+          <form onSubmit={handleSubmitReport} className="space-y-6">
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-900 uppercase mb-1">Risultato Finale Gara</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="es. 6-4"
+                    value={risultato}
+                    onChange={e => setRisultato(e.target.value)}
+                    className="w-full text-sm p-3 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none font-bold"
+                  />
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-center pt-2 border-t border-slate-850">
-                  <div className="bg-slate-950/40 p-2 rounded">
-                    <div className="text-[10px] font-bold text-slate-450 uppercase">Prezzo Base</div>
-                    <div className="text-sm font-mono font-black text-slate-300">{p.basePrice} 🪙</div>
-                  </div>
-                  <div className="bg-slate-950/40 p-2 rounded">
-                    <div className="text-[10px] font-bold text-slate-450 uppercase">Valore Attuale</div>
-                    <div className="text-sm font-mono font-black text-emerald-400">{p.currentPrice} 🪙</div>
-                  </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-900 uppercase mb-1">Costo Finale Campo (€)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    placeholder="es. 60"
+                    value={costo}
+                    onChange={e => setCosto(e.target.value)}
+                    className="w-full text-sm p-3 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none font-semibold"
+                  />
                 </div>
               </div>
-            ))}
 
-            {/* Timeline dei Match */}
-            <div className="md:col-span-8 bg-slate-900/60 rounded-xl border border-slate-800 p-4 max-h-[280px] overflow-y-auto space-y-2">
-              {selectedPlayerMatchHistory.map((h, i) => {
-                const diffColor = h.priceChange > 0 ? "text-green-400" : h.priceChange < 0 ? "text-red-400" : "text-slate-400";
-                const diffPrefix = h.priceChange > 0 ? "+" : "";
+              <div>
+                <label className="block text-xs font-bold text-slate-900 uppercase mb-1 flex justify-between items-center">
+                  <span>Note della partita</span>
+                  <span className="text-[10px] text-gray-500 font-normal lowercase italic">Opzionale - premi invio o ignora se vuoto</span>
+                </label>
+                <textarea
+                  placeholder="es. Arbitro impeccabile, gran gol di tacco di Mario, ammonizione per proteste..."
+                  value={note}
+                  onChange={e => setNote(e.target.value)}
+                  rows={2}
+                  className="w-full text-sm p-3 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none resize-none placeholder-gray-400 font-medium"
+                />
+              </div>
+            </div>
 
-                return (
-                  <div key={i} className="bg-slate-950/50 p-3 rounded-lg border border-slate-850 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                    <div className="space-y-0.5">
-                      <div className="text-xs font-black text-white flex items-center gap-1.5">
-                        <span className="text-[9px] bg-slate-805 text-slate-400 px-1.5 py-0.5 rounded font-mono">
-                          {i+1}° Incontro
-                        </span>
-                        {h.matchNome}
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-400 font-medium font-sans">
-                        <span>Presenza:</span>
-                        <span className={`font-bold uppercase ${h.statoPresenza === "giocato" ? "text-emerald-400" : "text-slate-500"}`}>
-                          {h.statoPresenza}
-                        </span>
-                        <span>• Score:</span>
-                        <span className="font-extrabold text-yellow-400 font-mono">{h.score} pts</span>
-                        {h.malusBrt && (
-                          <span className="bg-rose-955 text-rose-300 px-1.5 rounded font-black text-[8.5px]">
-                            📦 MALUS BRT ATTIVO
-                          </span>
+            {/* TABS NAVIGATION */}
+            <div className="flex border-b border-gray-200 mt-6 mb-4">
+              <button
+                type="button"
+                className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider text-center border-b-2 transition-all cursor-pointer ${
+                  activeTab === "referto" 
+                    ? "border-slate-800 text-slate-900 bg-slate-50/50" 
+                    : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+                }`}
+                onClick={() => setActiveTab("referto")}
+              >
+                1. Referto Gara
+              </button>
+              {!isAmichevole && (
+                <button
+                  type="button"
+                  className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider text-center border-b-2 transition-all cursor-pointer ${
+                    activeTab === "generic" 
+                      ? "border-slate-800 text-slate-900 bg-slate-50/50" 
+                      : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setActiveTab("generic")}
+                >
+                  2. Bonus Generici
+                </button>
+              )}
+              {!isAmichevole && (
+                <button
+                  type="button"
+                  className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider text-center border-b-2 transition-all cursor-pointer ${
+                    activeTab === "personal" 
+                      ? "border-slate-800 text-slate-900 bg-slate-50/50" 
+                      : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setActiveTab("personal")}
+                >
+                  3. Bonus Personali
+                </button>
+              )}
+            </div>
+
+            {/* Attendance & stats input list */}
+            {activeTab === "referto" && (
+            <>
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">
+                  Referto Individuale Giocatori
+                </h3>
+                <span className="text-[10px] text-gray-400 font-bold uppercase">
+                  Clicca un giocatore per modificare
+                </span>
+              </div>
+
+              <div className="border border-gray-100 rounded-xl p-3.5 bg-gray-50 max-h-[500px] overflow-y-auto space-y-4">
+                {(() => {
+                  const activeSubstitutes = activeMatch.convocati
+                    .filter(nome => statoPresenza[nome] === "sostituito" && sostitutoDa[nome])
+                    .map(nome => sostitutoDa[nome]);
+
+                  const convocatiAndSubs: { nome: string; parentConvocato?: string; isSubstitute?: boolean }[] = [];
+                  activeMatch.convocati.forEach(nome => {
+                    convocatiAndSubs.push({ nome });
+                    const st = statoPresenza[nome] || "giocato";
+                    if (st === "sostituito" && sostitutoDa[nome]) {
+                      convocatiAndSubs.push({
+                        nome: sostitutoDa[nome],
+                        parentConvocato: nome,
+                        isSubstitute: true
+                      });
+                    }
+                  });
+
+                  const unconvokedList = giocatori
+                    .filter(g => g.attivo)
+                    .filter(g => !activeMatch.convocati.includes(g.nome))
+                    .filter(g => !activeSubstitutes.includes(g.nome));
+
+                  return (
+                    <>
+                      {/* GRUPPO A: CONVOCATI IN CAMPO E ASSENTI */}
+                      <div>
+                        <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-gray-200">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-black text-slate-800 uppercase tracking-wider">👕 Giocatori Convocati ({activeMatch.convocati.length})</span>
+                          </div>
+                          {onAggiungiConvocato && !isAddingExtra && (
+                            <button
+                              type="button"
+                              onClick={() => setIsAddingExtra(true)}
+                              className="text-[10px] font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 px-2 py-1 rounded border border-orange-200 transition-colors"
+                            >
+                              + Aggiungi
+                            </button>
+                          )}
+                        </div>
+                        {isAddingExtra && (
+                          <div className="mb-4 bg-orange-50/50 p-3 rounded-lg border border-orange-100 flex items-center gap-2">
+                            <select
+                              value={extraConvocato}
+                              onChange={(e) => setExtraConvocato(e.target.value)}
+                              className="flex-1 text-xs p-2 bg-white border border-gray-200 rounded focus:ring-2 focus:ring-orange-500 font-bold outline-none"
+                            >
+                              <option value="">-- Seleziona Giocatore Extra --</option>
+                              {giocatori
+                                .filter(gj => gj.attivo && !activeMatch.convocati.includes(gj.nome))
+                                .map(nc => (
+                                  <option key={nc.nome} value={nc.nome}>{nc.nome}</option>
+                                ))}
+                            </select>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (!extraConvocato) return;
+                                try {
+                                  await onAggiungiConvocato?.(activeMatch.id, extraConvocato);
+                                  setIsAddingExtra(false);
+                                  setExtraConvocato("");
+                                  // The match array updates automatically as the component rerenders or data refetches 
+                                  // through App.tsx -> useApp(). In case it needs specific sync, onAggiungiConvocato should trigger it.
+                                } catch (e) {
+                                  alert("Errore");
+                                }
+                              }}
+                              className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-3 py-2 rounded transition-colors"
+                            >
+                              Conferma
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsAddingExtra(false);
+                                setExtraConvocato("");
+                              }}
+                              className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-xs px-3 py-2 rounded transition-colors"
+                            >
+                              Annulla
+                            </button>
+                          </div>
                         )}
-                      </div>
-                    </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          {convocatiAndSubs.map((item, idx) => {
+                            const { nome, parentConvocato, isSubstitute } = item;
+                            const g = giocatori.find(x => x.nome === nome);
+                            const isPortiere = g?.ultimoRuolo === "Portiere";
 
-                    <div className="flex items-center gap-3">
-                      {/* Event details */}
-                      <div className="flex items-center gap-1.5 text-[10px] bg-slate-900 border border-slate-800 px-2 py-1 rounded">
-                        {h.gol > 0 && <span className="text-white font-extrabold">⚽ {h.gol}</span>}
-                        {h.assist > 0 && <span className="text-cyan-400 font-extrabold">🎯 {h.assist}</span>}
-                        {h.amm > 0 && <span className="text-yellow-400 font-bold">🟨 {h.amm}</span>}
-                        {h.esp > 0 && <span className="text-red-500 font-bold">🟥 {h.esp}</span>}
-                        {h.bonuses.length > 0 && (
-                          <span className="text-indigo-400 font-extrabold">
-                            ⚡ {h.bonuses.length} bonus
-                          </span>
-                        )}
-                        {h.gol === 0 && h.assist === 0 && h.amm === 0 && h.esp === 0 && h.bonuses.length === 0 && (
-                          <span className="text-slate-550 italic font-bold">Invariato</span>
-                        )}
-                      </div>
+                            const state = isSubstitute ? "giocato" : (statoPresenza[nome] || "giocato");
+                            const isPresent = state === "giocato";
 
-                      <div className="text-right font-mono text-xs w-20">
-                        <div className="text-[9px] font-bold text-slate-500 uppercase leading-none">Variazione</div>
-                        <div className={`${diffColor} font-black mt-0.5`}>
-                          {diffPrefix}{h.priceChange} Izycoin 🪙
+                            // count active stats
+                            const pGoals = Number(goals[nome]) || 0;
+                            const pAssists = Number(assists[nome]) || 0;
+                            const pYellows = Number(yellows[nome]) || 0;
+                            const pReds = Number(reds[nome]) || 0;
+                            const pSubAzione = Number(subAzione[nome]) || 0;
+                            const pSubRigore = Number(subRigore[nome]) || 0;
+                            const pSubPiazzato = Number(subPiazzato[nome]) || 0;
+                            const pBonuses = selectedBonuses[nome] || [];
+
+                            const pills = [];
+                            if (pGoals > 0) pills.push(`⚽ ${pGoals}`);
+                            if (pAssists > 0) pills.push(`👟 ${pAssists}`);
+                            if (pYellows > 0) pills.push(`🟨 ${pYellows}`);
+                            if (pReds > 0) pills.push(`🟥 ${pReds}`);
+                            if (isPortiere && (pSubAzione > 0 || pSubRigore > 0 || pSubPiazzato > 0)) {
+                              pills.push(`🧤 -${pSubAzione + pSubRigore + pSubPiazzato}`);
+                            }
+                            if (!isAmichevole && pBonuses.length > 0) pills.push(`🎒 +${pBonuses.length}`);
+
+                            let cardClass = "";
+                            let dotClass = "";
+                            let subtitle = "";
+
+                            if (isSubstitute) {
+                              cardClass = "bg-emerald-50/50 border-emerald-250 text-emerald-950 hover:bg-emerald-100 hover:border-emerald-350";
+                              dotClass = "bg-emerald-600 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse";
+                              subtitle = `#${g?.numeroMaglia || "??"} • 🔁 Subentrato per ${parentConvocato}`;
+                            } else if (state === "giocato") {
+                              cardClass = "bg-white border-slate-300 hover:border-slate-400 hover:shadow-md text-gray-900";
+                              dotClass = "bg-slate-700 shadow-[0_0_8px_#334155]";
+                              subtitle = `#${g?.numeroMaglia || "??"} • ${g?.ultimoRuolo || "Calciatore"}`;
+                            } else if (state === "assente") {
+                              cardClass = "bg-red-50/40 border-red-200 text-red-900 opacity-80 hover:bg-red-100/40 hover:border-red-300";
+                              dotClass = "bg-red-400";
+                              subtitle = `#${g?.numeroMaglia || "??"} • ❌ Non in Campo`;
+                            } else if (state === "sostituito") {
+                              cardClass = "bg-orange-50/40 border-orange-200 text-orange-950 opacity-80 hover:bg-orange-100/30 hover:border-orange-300";
+                              dotClass = "bg-orange-400";
+                              subtitle = `#${g?.numeroMaglia || "??"} • 🔁 Sostituto da: ${sostitutoDa[nome] || "Nessuno"}`;
+                            }
+
+                            return (
+                              <button
+                                type="button"
+                                key={`${nome}-${idx}`}
+                                onClick={() => setEditingPlayerName(nome)}
+                                className={`w-full text-left p-3.5 rounded-xl border transition-all duration-200 cursor-pointer flex justify-between items-center group relative ${cardClass}`}
+                              >
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <div className={`w-3 h-3 rounded-full shrink-0 ${dotClass}`} />
+                                  <div className="min-w-0">
+                                    <span className="font-extrabold text-sm block truncate group-hover:text-slate-900">
+                                      {nome}
+                                    </span>
+                                    <span className="text-[10px] font-mono font-bold block mt-0.5">
+                                      {subtitle}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="flex flex-wrap gap-1 items-center justify-end max-w-[50%] shrink-0">
+                                  {isPresent && !noEventsPlayers[nome] && pills.length === 0 && (
+                                    <span className="bg-amber-100 text-amber-900 border border-amber-300 font-black text-[9px] px-1.5 py-0.5 rounded animate-pulse tracking-wide uppercase">
+                                      ⚠️ Da Definire
+                                    </span>
+                                  )}
+                                  {isPresent && noEventsPlayers[nome] && (
+                                    <span className="bg-emerald-100 text-emerald-900 border border-emerald-300 font-black text-[9px] px-1.5 py-0.5 rounded tracking-wide uppercase">
+                                      ✔️ Nessun Evento
+                                    </span>
+                                  )}
+                                  {pills.length > 0 ? (
+                                    pills.map((p, pIdx) => (
+                                      <span key={pIdx} className="bg-gray-150 text-gray-800 font-bold text-[9px] px-1.5 py-0.5 rounded border border-gray-200">
+                                        {p}
+                                      </span>
+                                    ))
+                                  ) : (
+                                    (!isPresent || !noEventsPlayers[nome]) && (
+                                      <span className="text-[10px] text-gray-405 group-hover:text-slate-700 transition-colors flex items-center gap-1 font-semibold uppercase">
+                                        {isPresent ? "Dettagli ➔" : state === "assente" ? "Dettagli Extra" : "Reclutato"}
+                                      </span>
+                                    )
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
+
+                      {/* GRUPPO B: NON CONVOCATI / PANCHINARI (BONUS ESTERNI/TIFO) */}
+                      {unconvokedList.length > 0 && (
+                        <div>
+                          <div className="flex items-center gap-1.5 pb-2 mb-2.5 border-b border-gray-200 pt-2">
+                            <span className="text-[11px] font-black text-indigo-750 uppercase tracking-wider">📢 Sostenitori e Panchinari (Non Convocati)</span>
+                            <span className="text-[9px] font-black bg-indigo-50 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded ml-auto uppercase tracking-wide">Bonus Esterni</span>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            {unconvokedList.map((g, idx) => {
+                              const nome = g.nome;
+                              const pBonuses = selectedBonuses[nome] || [];
+                              const pills = [];
+                              if (pBonuses.length > 0) pills.push(`🎒 +${pBonuses.length}`);
+
+                              const cardClass = "bg-indigo-50/30 border-indigo-150 hover:bg-indigo-100/40 hover:border-indigo-250 text-indigo-950";
+                              const dotClass = pBonuses.length > 0 ? "bg-indigo-600 shadow-[0_0_8px_rgba(79,70,229,0.5)] animate-pulse" : "bg-indigo-400";
+                              const subtitle = `#${g.numeroMaglia || "??"} • 📣 Non Convocato`;
+
+                              return (
+                                <button
+                                  type="button"
+                                  key={`unconvoked-${nome}-${idx}`}
+                                  onClick={() => setEditingPlayerName(nome)}
+                                  className={`w-full text-left p-3.5 rounded-xl border transition-all duration-200 cursor-pointer flex justify-between items-center group relative ${cardClass}`}
+                                >
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className={`w-3 h-3 rounded-full shrink-0 ${dotClass}`} />
+                                    <div className="min-w-0">
+                                      <span className="font-extrabold text-sm block truncate group-hover:text-slate-900">
+                                        {nome}
+                                      </span>
+                                      <span className="text-[10px] font-mono font-bold block mt-0.5 text-indigo-600">
+                                        {subtitle}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex flex-wrap gap-1 items-center justify-end max-w-[50%] shrink-0">
+                                    {pills.length > 0 ? (
+                                      pills.map((p, pIdx) => (
+                                        <span key={pIdx} className="bg-indigo-100 text-indigo-805 border border-indigo-200 font-bold text-[9px] px-1.5 py-0.5 rounded">
+                                          {p}
+                                        </span>
+                                      ))
+                                    ) : (
+                                      <span className="text-[10px] text-indigo-400 group-hover:text-indigo-750 transition-colors flex items-center gap-1 font-semibold uppercase">
+                                        Assegna Bonus ➔
+                                      </span>
+                                    )}
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+
+              {/* ACTION QUICK FIX ALL NO EVENTS */}
+              <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4">
+                 <p className="text-xs text-amber-800 font-bold mb-3">Tutti i giocatori presenti che non hanno né gol, né assist, né cartellini devono obbligatoriamente avere la spunta "Nessun Evento". Se hai fretta, usa questo pulsante:</p>
+                 <button
+                   type="button"
+                   onClick={() => {
+                     const newNoEvents = { ...noEventsPlayers };
+                     const activeSubstitutes = (activeMatch?.convocati || [])
+                       .filter(nome => statoPresenza[nome] === "sostituito" && sostitutoDa[nome])
+                       .map(nome => sostitutoDa[nome]);
+                     
+                     const unconvokedPlayers = giocatori
+                       .filter(g => g.attivo)
+                       .filter(g => !(activeMatch?.convocati || []).includes(g.nome))
+                       .filter(g => !activeSubstitutes.includes(g.nome));
+                 
+                     const allPlayersInReport = [...(activeMatch?.convocati || []), ...activeSubstitutes, ...unconvokedPlayers.map(g => g.nome)];
+                     
+                     allPlayersInReport.forEach(nome => {
+                       const isConvocato = (activeMatch?.convocati || []).includes(nome);
+                       const isSubstitute = activeSubstitutes.includes(nome);
+                       let pres = "giocato";
+                       if (isConvocato) {
+                         pres = statoPresenza[nome] || "giocato";
+                       } else if (isSubstitute) {
+                         pres = "giocato";
+                       } else {
+                         pres = "assente";
+                       }
+                       const isPresent = pres === "giocato";
+                 
+                       const g = giocatori.find(x => x.nome === nome);
+                       const isPortiere = g?.ultimoRuolo === "Portiere";
+                       const pGoals = Number(goals[nome]) || 0;
+                       const pAssists = Number(assists[nome]) || 0;
+                       const pYellows = Number(yellows[nome]) || 0;
+                       const pReds = Number(reds[nome]) || 0;
+                       const pSubAzione = Number(subAzione[nome]) || 0;
+                       const pSubRigore = Number(subRigore[nome]) || 0;
+                       const pSubPiazzato = Number(subPiazzato[nome]) || 0;
+                       
+                       const hasStatsEvent = pGoals > 0 || pAssists > 0 || pYellows > 0 || pReds > 0 || (isPortiere && (pSubAzione > 0 || pSubRigore > 0 || pSubPiazzato > 0));
+                       
+                       if (isPresent && !hasStatsEvent) {
+                         newNoEvents[nome] = true;
+                       }
+                     });
+                     setNoEventsPlayers(newNoEvents);
+                   }}
+                   className="w-full py-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs uppercase tracking-wider rounded-lg shadow-sm cursor-pointer"
+                 >
+                   ✨ Imposta "Nessun Evento" ai restanti giocatori
+                 </button>
+              </div>
+            </div>
+
+            {/* POPUP MODAL FOR INTERACTIVE PLAYER STATS & BONUSES */}
+            {editingPlayerName && (() => {
+              const nome = editingPlayerName;
+              const g = giocatori.find(x => x.nome === nome);
+              const isPortiere = g?.ultimoRuolo === "Portiere";
+              const isConvocato = activeMatch.convocati.includes(nome);
+
+              const activeSubstitutes = activeMatch.convocati
+                .filter(nm => statoPresenza[nm] === "sostituito" && sostitutoDa[nm])
+                .map(nm => sostitutoDa[nm]);
+              const isSubstitute = activeSubstitutes.includes(nome);
+              const isUnconvoked = !isConvocato && !isSubstitute;
+
+              const currentStato = isConvocato 
+                ? (statoPresenza[nome] || "giocato") 
+                : (isSubstitute ? "giocato" : "assente");
+              
+              const allBonuses = bonuses || DEFAULT_BONUSES;
+              const currentGenericBonuses = allBonuses.filter(b => !b.isPersonale);
+              const isCurrentlyPlaying = currentStato === "giocato";
+              const isPayer = payers.includes(nome);
+              const bonusKey = getPlayerBonusKey(nome);
+              const baseBonuses = bonusKey ? allBonuses.filter(b => b.isPersonale && b.giocatoreId === bonusKey) : [];
+
+              return (
+                <div 
+                  className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs transition-opacity overflow-y-auto animate-fade-in"
+                  onClick={() => setEditingPlayerName(null)}
+                >
+                  <div 
+                    className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 w-full max-w-lg my-8 relative text-left box-border"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setEditingPlayerName(null)}
+                      className="absolute top-4 right-4 text-gray-400 hover:text-gray-750 font-extrabold text-lg cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                    
+                    <div className="border-b pb-3 mb-4 space-y-1">
+                      <h4 className="text-base font-black text-gray-900 flex items-center gap-2">
+                        👤 Modifica Statistiche e Bonus
+                      </h4>
+                      <p className={`text-xs font-bold ${isUnconvoked ? "text-indigo-700" : "text-slate-800"}`}>
+                        {nome} (Ruolo: {g?.ultimoRuolo || "Calciatore"} • Maglia #{g?.numeroMaglia || "??"} {
+                          isUnconvoked 
+                            ? "• 📢 Non Convocato" 
+                            : isSubstitute 
+                              ? "• 🔁 Sostituto Last-Minute" 
+                              : ""
+                        })
+                      </p>
+                    </div>
+
+                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                      
+                      {/* STATO PRESENZA CONVOCATO */}
+                      {isConvocato && (
+                        <div className="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                          <span className="block text-[10px] uppercase font-black tracking-wider text-slate-600">Presenza e Convocazione</span>
+                          <div className="grid grid-cols-3 gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setStatoPresenza(prev => ({ ...prev, [nome]: "giocato" }));
+                                if (!presents.includes(nome)) setPresents(prev => [...prev, nome]);
+                                if (!payers.includes(nome)) setPayers(prev => [...prev, nome]);
+                              }}
+                              className={`px-2 py-2.5 rounded-xl border font-extrabold text-[11px] transition-all flex flex-col items-center gap-1 cursor-pointer ${
+                                currentStato === "giocato"
+                                  ? "border-emerald-500 bg-emerald-50 text-emerald-900 shadow-xs"
+                                  : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                              }`}
+                            >
+                              <span>✅</span>
+                              <span>Ha giocato</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setStatoPresenza(prev => ({ ...prev, [nome]: "assente" }));
+                                setPresents(prev => prev.filter(x => x !== nome));
+                                setPayers(prev => prev.filter(x => x !== nome));
+                              }}
+                              className={`px-2 py-2.5 rounded-xl border font-extrabold text-[11px] transition-all flex flex-col items-center gap-1 cursor-pointer ${
+                                currentStato === "assente"
+                                  ? "border-red-500 bg-red-50 text-red-900 shadow-xs"
+                                  : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                              }`}
+                            >
+                              <span>❌</span>
+                              <span>Assente</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setStatoPresenza(prev => ({ ...prev, [nome]: "sostituito" }));
+                                setPresents(prev => prev.filter(x => x !== nome));
+                                setPayers(prev => prev.filter(x => x !== nome));
+                              }}
+                              className={`px-2 py-2.5 rounded-xl border font-extrabold text-[11px] transition-all flex flex-col items-center gap-1 cursor-pointer ${
+                                currentStato === "sostituito"
+                                  ? "border-orange-500 bg-orange-50 text-orange-900 shadow-xs"
+                                  : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                              }`}
+                            >
+                              <span>🔁</span>
+                              <span>Sostituito</span>
+                            </button>
+                          </div>
+
+                          {currentStato === "sostituito" && (
+                            <div className="bg-white p-3 rounded-lg border border-orange-200 mt-2 space-y-1">
+                              <label className="block text-[10px] font-black uppercase text-orange-950">Seleziona Sostituto alla Rosa</label>
+                              <select
+                                value={sostitutoDa[nome] || ""}
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setSostitutoDa(prev => ({ ...prev, [nome]: val }));
+                                  if (val) {
+                                    if (!presents.includes(val)) setPresents(prev => [...prev, val]);
+                                    if (!payers.includes(val)) setPayers(prev => [...prev, val]);
+                                  }
+                                }}
+                                className="w-full text-xs p-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 font-extrabold outline-none"
+                              >
+                                <option value="">-- Seleziona Sostituto --</option>
+                                {giocatori
+                                  .filter(gj => gj.attivo)
+                                  .filter(gj => !activeMatch.convocati.includes(gj.nome))
+                                  .map(nc => (
+                                    <option key={nc.nome} value={nc.nome}>{nc.nome} (#{nc.numeroMaglia || "??"} • {nc.ultimoRuolo})</option>
+                                  ))}
+                              </select>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* STATO INFORMATIVO PER CHI NON GIOCA */}
+                      {!isCurrentlyPlaying && (
+                        <div className="p-3.5 bg-indigo-50 border border-indigo-150 rounded-xl text-xs font-bold text-indigo-900 leading-snug">
+                          {isUnconvoked ? (
+                            <span>📢 <strong>Sostenitore Non Convocato:</strong> Questo giocatore non prende parte all'incontro sul campo, ma può ricevere bonus personali ed esterni per la sua partecipazione o il tifo a bordo campo!</span>
+                          ) : currentStato === "assente" ? (
+                            <span>❌ <strong>Convocato Assente:</strong> Questo giocatore è registrato come Assente e non giocherà sul campo, ma può comunque ottenere bonus esterni/social!</span>
+                          ) : (
+                            <span>🔁 <strong>Sostituito:</strong> Questo giocatore è sostituito all'ultimo momento da <strong>{sostitutoDa[nome] || "Nessuno"}</strong>. I suoi bonus e statistiche sono registrati sulla scheda del sostituto.</span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* QUOTA DI PAGAMENTO SE PRESENTE/GIOCANTE */}
+                      {isCurrentlyPlaying && (
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                          <label className="flex items-center gap-2 cursor-pointer font-bold text-xs text-slate-905">
+                            <input
+                              type="checkbox"
+                              checked={isPayer}
+                              onChange={() => handleTogglePayer(nome)}
+                              className="w-4 h-4 text-slate-800 focus:ring-slate-500 rounded cursor-pointer"
+                            />
+                            <div className="flex flex-col">
+                              <span className="font-extrabold text-slate-950 text-sm">Paga Quota Campo</span>
+                              <span className="text-[10px] text-gray-400 font-medium font-sans">Quota campo standard per la partita</span>
+                            </div>
+                          </label>
+                        </div>
+                      )}
+
+                      {isCurrentlyPlaying && (
+                        <>
+                          {/* "Nessun Evento" Checkbox Option */}
+                          <div className="bg-amber-50/50 p-3 rounded-xl border border-amber-100 mb-2">
+                            <label className="flex items-center gap-2.5 cursor-pointer font-bold text-xs text-amber-950 select-none">
+                              <input
+                                type="checkbox"
+                                checked={!!noEventsPlayers[nome]}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setNoEventsPlayers(prev => ({ ...prev, [nome]: checked }));
+                                  if (checked) {
+                                    setGoals(prev => ({ ...prev, [nome]: "" }));
+                                    setAssists(prev => ({ ...prev, [nome]: "" }));
+                                    setYellows(prev => ({ ...prev, [nome]: "" }));
+                                    setReds(prev => ({ ...prev, [nome]: "" }));
+                                    setSubAzione(prev => ({ ...prev, [nome]: "" }));
+                                    setSubRigore(prev => ({ ...prev, [nome]: "" }));
+                                    setSubPiazzato(prev => ({ ...prev, [nome]: "" }));
+                                  }
+                                }}
+                                className="w-5 h-5 text-amber-700 focus:ring-amber-500 rounded border-amber-300 cursor-pointer"
+                              />
+                              <div className="flex flex-col">
+                                <span className="font-extrabold text-amber-950 text-sm">Nessun Evento / Statistica</span>
+                                <span className="text-[10px] text-amber-800/80 font-medium">Spunta questa casella se il giocatore ha giocato senza registrare gol, assist o cartellini.</span>
+                              </div>
+                            </label>
+                          </div>
+
+                          {/* STATS BASE GRID */}
+                          <div>
+                            <span className="block text-[10px] uppercase font-black tracking-wider text-gray-400 mb-2">Statistiche Principali</span>
+                            <div className="grid grid-cols-4 gap-2">
+                              <div>
+                                <span className="block text-[9px] font-bold text-center mb-1 text-gray-500">⚽ Gol</span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder="0"
+                                  value={goals[nome] || ""}
+                                  onChange={e => handleStatNumberInput(nome, e.target.value, setGoals)}
+                                  className="w-full text-xs p-2 text-center border rounded-lg font-bold bg-white"
+                                />
+                              </div>
+                              <div>
+                                <span className="block text-[9px] font-bold text-center mb-1 text-gray-500">👟 Assist</span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder="0"
+                                  value={assists[nome] || ""}
+                                  onChange={e => handleStatNumberInput(nome, e.target.value, setAssists)}
+                                  className="w-full text-xs p-2 text-center border rounded-lg font-bold bg-white"
+                                />
+                              </div>
+                              <div>
+                                <span className="block text-[9px] font-bold text-center mb-1 text-yellow-650 font-mono">🟨 Gialli</span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder="0"
+                                  value={yellows[nome] || ""}
+                                  onChange={e => handleStatNumberInput(nome, e.target.value, setYellows)}
+                                  className="w-full text-xs p-2 text-center border border-yellow-250 bg-yellow-50/20 rounded-lg font-extrabold"
+                                />
+                              </div>
+                              <div>
+                                <span className="block text-[9px] font-bold text-center mb-1 text-red-650 font-mono">🟥 Rossi</span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder="0"
+                                  value={reds[nome] || ""}
+                                  onChange={e => handleStatNumberInput(nome, e.target.value, setReds)}
+                                  className="w-full text-xs p-2 text-center border border-red-250 bg-red-50/20 rounded-lg font-extrabold"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* PORTIERE STATS */}
+                          {isPortiere && (
+                            <div className="bg-sky-50/20 p-3 rounded-xl border border-sky-100">
+                              <span className="block text-[9px] font-black uppercase text-sky-850 tracking-wider mb-2">🧤 Gol Subiti (Portiere)</span>
+                              <div className="grid grid-cols-3 gap-2">
+                                <div>
+                                  <span className="block text-[9px] font-bold text-gray-650 text-center mb-1">Azione</span>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="0"
+                                    value={subAzione[nome] || ""}
+                                    onChange={e => handleStatNumberInput(nome, e.target.value, setSubAzione)}
+                                    className="w-full text-xs p-1.5 text-center border bg-white rounded-lg font-semibold"
+                                  />
+                                </div>
+                                <div>
+                                  <span className="block text-[9px] font-bold text-gray-650 text-center mb-1">Rigore</span>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="0"
+                                    value={subRigore[nome] || ""}
+                                    onChange={e => handleStatNumberInput(nome, e.target.value, setSubRigore)}
+                                    className="w-full text-xs p-1.5 text-center border bg-white rounded-lg font-semibold"
+                                  />
+                                </div>
+                                <div>
+                                  <span className="block text-[9px] font-bold text-gray-650 text-center mb-1">Puniz.</span>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="0"
+                                    value={subPiazzato[nome] || ""}
+                                    onChange={e => handleStatNumberInput(nome, e.target.value, setSubPiazzato)}
+                                    className="w-full text-xs p-1.5 text-center border bg-white rounded-lg font-semibold"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+
+                    </div>
+
+                    <div className="border-t pt-3.5 mt-4">
+                      <button
+                        type="button"
+                        onClick={() => setEditingPlayerName(null)}
+                        className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-sm rounded-xl cursor-pointer text-center"
+                      >
+                        Conferma e Salva
+                      </button>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              );
+            })()}
+            </>
+            )}
+
+            {/* TABS CONTENT: BONUS GENERICI */}
+            {activeTab === "generic" && (
+              <div className="space-y-6">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-4">
+                  <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-widest border-b border-slate-200 pb-2">
+                    🛡️ Assegnazione Bonus Generici
+                  </h3>
+                  <div className="space-y-2">
+                    {(bonuses || DEFAULT_BONUSES).filter(b => !b.isPersonale && !b.isAutomatic).map(b => (
+                      <details key={b.id} className="bg-white border text-sm border-gray-200 rounded-lg group">
+                        <summary className="p-3 cursor-pointer font-bold text-slate-800 group-open:border-b border-gray-100 flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <span>{b.nome} {typeof b.punti === 'number' ? (b.punti > 0 ? `(+${b.punti}pt)` : `(${b.punti}pt)`) : ''}</span>
+                            <span className="text-[10px] text-gray-500 font-medium">{b.descrizione}</span>
+                          </div>
+                          <span className="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <div className="p-3 bg-gray-50 max-h-[300px] overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                          {giocatori.filter(g => g.attivo).map(g => {
+                             const isChecked = (selectedBonuses[g.nome] || []).includes(b.id);
+                             return (
+                               <label key={`${b.id}-${g.nome}`} className="flex items-center gap-2 p-2 bg-white border border-gray-150 rounded cursor-pointer hover:bg-gray-50">
+                                 <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={() => handleToggleBonus(g.nome, b.id)}
+                                    className="w-4 h-4 text-emerald-600 rounded cursor-pointer"
+                                 />
+                                 <span className="text-xs font-bold text-gray-800 truncate">{g.nome}</span>
+                               </label>
+                             )
+                          })}
+                        </div>
+                      </details>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50/50 border border-yellow-200/50 rounded-xl p-4">
+                   <h3 className="text-xs font-extrabold text-yellow-800 uppercase tracking-widest border-b border-yellow-200/50 pb-2 mb-3">
+                     ⚠️ Giocatori Senza Bonus Generici
+                   </h3>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-4 max-h-[160px] overflow-y-auto">
+                     {giocatori.filter(g => g.attivo).map(g => {
+                       const pBonuses = selectedBonuses[g.nome] || [];
+                       const hasGeneric = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && !b.isPersonale && !b.isAutomatic));
+                       if (hasGeneric) return null;
+                       
+                       return (
+                         <label key={`ver-gen-${g.nome}`} className="flex items-center gap-2 p-2 bg-white border border-yellow-200/50 rounded cursor-pointer">
+                           <input
+                              type="checkbox"
+                              checked={!!verifiedGeneric[g.nome]}
+                              onChange={(e) => setVerifiedGeneric(prev => ({ ...prev, [g.nome]: e.target.checked }))}
+                              className="w-4 h-4 text-yellow-600 rounded cursor-pointer"
+                           />
+                           <span className="text-xs font-bold text-gray-700 truncate">{g.nome} - Nessuno</span>
+                         </label>
+                       )
+                     })}
+                   </div>
+                   
+                   <button
+                     type="button"
+                     onClick={() => {
+                       const newVer = { ...verifiedGeneric };
+                       giocatori.filter(g => g.attivo).forEach(g => {
+                         const pBonuses = selectedBonuses[g.nome] || [];
+                         const hasGeneric = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && !b.isPersonale && !b.isAutomatic));
+                         if (!hasGeneric) newVer[g.nome] = true;
+                       });
+                       setVerifiedGeneric(newVer);
+                     }}
+                     className="w-full py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-black text-xs uppercase tracking-wider rounded-lg shadow-sm cursor-pointer"
+                   >
+                     ✨ Assegna "Nessun Bonus/Malus" a tutti i rimanenti
+                   </button>
+                </div>
+              </div>
+            )}
+
+            {/* TABS CONTENT: BONUS PERSONALI */}
+            {activeTab === "personal" && (
+              <div className="space-y-6">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-4">
+                  <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-widest border-b border-slate-200 pb-2">
+                    🎒 Bonus Personali
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[600px] overflow-y-auto pr-1">
+                    {giocatori.filter(g => g.attivo).map(g => {
+                      const bonusKey = getPlayerBonusKey(g.nome);
+                      const baseBonuses = bonusKey ? (bonuses || DEFAULT_BONUSES).filter(b => b.isPersonale && b.giocatoreId === bonusKey) : [];
+                      
+                      return (
+                        <div key={`bp-${g.nome}`} className="bg-white border border-gray-200 rounded-lg p-3">
+                           <h4 className="text-xs font-black text-gray-800 pb-1.5 border-b border-gray-100 mb-2 truncate">{g.nome}</h4>
+                           {baseBonuses.length === 0 ? (
+                             <p className="text-[10px] text-gray-400 font-medium italic">Nessun bonus personale configurato.</p>
+                           ) : (
+                             <div className="space-y-1.5 mb-2">
+                               {baseBonuses.map(b => {
+                                  const isChecked = (selectedBonuses[g.nome] || []).includes(b.id);
+                                  return (
+                                    <label key={b.id} className="flex flex-start gap-2 p-1.5 bg-gray-50 border border-gray-150 rounded cursor-pointer hover:bg-white transition-colors">
+                                      <input
+                                         type="checkbox"
+                                         checked={isChecked}
+                                         onChange={() => handleToggleBonus(g.nome, b.id)}
+                                         className="w-3.5 h-3.5 mt-0.5 text-emerald-600 rounded cursor-pointer"
+                                      />
+                                      <div className="leading-tight min-w-0">
+                                        <span className="text-xs font-bold text-slate-800 block truncate">{b.nome}</span>
+                                      </div>
+                                    </label>
+                                  )
+                               })}
+                             </div>
+                           )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50/50 border border-yellow-200/50 rounded-xl p-4">
+                   <h3 className="text-xs font-extrabold text-yellow-800 uppercase tracking-widest border-b border-yellow-200/50 pb-2 mb-3">
+                     ⚠️ Giocatori Senza Bonus Personali
+                   </h3>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-4 max-h-[160px] overflow-y-auto">
+                     {giocatori.filter(g => g.attivo).map(g => {
+                       const pBonuses = selectedBonuses[g.nome] || [];
+                       const hasPersonal = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && b.isPersonale));
+                       if (hasPersonal) return null;
+                       
+                       return (
+                         <label key={`ver-pers-${g.nome}`} className="flex items-center gap-2 p-2 bg-white border border-yellow-200/50 rounded cursor-pointer">
+                           <input
+                              type="checkbox"
+                              checked={!!verifiedPersonal[g.nome]}
+                              onChange={(e) => setVerifiedPersonal(prev => ({ ...prev, [g.nome]: e.target.checked }))}
+                              className="w-4 h-4 text-yellow-600 rounded cursor-pointer"
+                           />
+                           <span className="text-xs font-bold text-gray-700 truncate">{g.nome} - Nessuno</span>
+                         </label>
+                       )
+                     })}
+                   </div>
+                   
+                   <button
+                     type="button"
+                     onClick={() => {
+                       const newVer = { ...verifiedPersonal };
+                       giocatori.filter(g => g.attivo).forEach(g => {
+                         const pBonuses = selectedBonuses[g.nome] || [];
+                         const hasPersonal = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && b.isPersonale));
+                         if (!hasPersonal) newVer[g.nome] = true;
+                       });
+                       setVerifiedPersonal(newVer);
+                     }}
+                     className="w-full py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-950 font-black text-xs uppercase tracking-wider rounded-lg shadow-sm cursor-pointer"
+                   >
+                     ✨ Assegna "Nessun Bonus/Malus" a tutti i rimanenti
+                   </button>
+                </div>
+              </div>
+            )}
+
+            {/* Backup actions */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+              <button
+                type="button"
+                onClick={handleBackupBozza}
+                className="flex-1 py-3 bg-orange-100 hover:bg-orange-200 text-orange-900 border border-orange-200 font-extrabold text-sm uppercase tracking-wider rounded-xl shadow-sm transition-colors cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>💾</span> Backup Bozza di Sicurezza
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowBackupsModal(true)}
+                className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-200 font-extrabold text-sm uppercase tracking-wider rounded-xl shadow-sm transition-colors cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>📂</span> Recupera un Backup ({savedBackups.length})
+              </button>
+            </div>
+
+            {/* Actions Bar */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-3">
+              <button
+                type="submit"
+                className="flex-1 py-3 bg-slate-800 hover:bg-slate-750 rounded-xl text-white text-sm shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer font-bold"
+              >
+                <CheckCircle2 className="h-5 w-5" /> Chiudi Partita & Addebita Quote
+              </button>
+              {onSalvaBozza && (
+                <button
+                  type="button"
+                  onClick={handleSalvaBozza}
+                  className="flex-1 py-3 bg-slate-200 hover:bg-slate-300 rounded-xl text-slate-800 text-sm shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer font-bold"
+                >
+                  💾 Salva Bozza
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleAnnullaClick}
+                className="py-3 px-4 bg-red-100 hover:bg-red-250 text-red-700 font-extrabold text-sm rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <AlertTriangle className="h-5 w-5" /> Annulla Evento
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="py-8 bg-gray-50 border border-dashed border-gray-200 rounded-xl text-center text-gray-400 italic text-sm">
+            Nessuna gara selezionata. Scegli un evento in cima per registrarne il referto finale.
+          </div>
+        )}
+      </div>
+
+      {/* Confirm Close Match Modal */}
+      {showConfirmModal && confirmModalData && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl border border-gray-100 animate-in fade-in zoom-in-95 duration-200 text-left text-gray-905">
+            <div className="bg-slate-800 p-4 font-bold text-white flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-white shrink-0" />
+              <span>Conferma Chiusura Partita</span>
+            </div>
+            <div className="p-5 space-y-4 text-left">
+              <p className="text-xs text-gray-600 font-medium leading-relaxed">
+                Stai per salvare definitivamente il referto del match e addebitare le quote campo ai conti dei singoli giocatori presenti selezionati.
+              </p>
+              
+              <div className="bg-gray-55 p-3.5 rounded-xl border border-gray-150 space-y-2 text-xs text-gray-700 font-mono">
+                <div className="flex justify-between border-b pb-1.5 border-dashed border-gray-200">
+                  <span className="font-bold text-gray-500 uppercase">🏆 Risultato:</span>
+                  <span className="font-extrabold text-gray-900">{confirmModalData.risultato}</span>
+                </div>
+                <div className="flex justify-between border-b pb-1.5 border-dashed border-gray-200">
+                  <span className="font-bold text-gray-500 uppercase">💰 Costo totale:</span>
+                  <span className="font-extrabold text-gray-900">{confirmModalData.costoTotale.toFixed(2)}€</span>
+                </div>
+                <div className="flex justify-between border-b pb-1.5 border-dashed border-gray-200">
+                  <span className="font-bold text-gray-500 uppercase">👥 Giocatori Paganti:</span>
+                  <span className="font-extrabold text-gray-900">{confirmModalData.pagantiConteggio}</span>
+                </div>
+                <div className="flex justify-between pt-0.5 font-sans">
+                  <span className="font-bold text-slate-800 uppercase text-[10.5px]">💸 Quota Singola Addebitata:</span>
+                  <span className="font-black text-slate-700 text-sm">{confirmModalData.quotaSingola.toFixed(2)}€ / testa</span>
+                </div>
+              </div>
+
+              <p className="text-[10px] text-amber-700 font-semibold bg-amber-50 border border-amber-200 rounded-lg p-2.5 leading-relaxed">
+                ⚠️ I saldi personali di ciascun pagante saranno ridotti di {confirmModalData.quotaSingola.toFixed(2)}€. Questa operazione aggiornerà l'archivio {isAmichevole ? "delle amichevoli" : "delle classifiche e i punti Fantacalcetto"} in tempo reale.
+              </p>
+
+              <div className="pt-2">
+                <p className="text-[11px] font-bold text-gray-800 mb-2">Tipologia Invio Referto:</p>
+                <div className="flex flex-col gap-2">
+                  <label className={`flex items-center gap-2 p-3 border rounded-xl cursor-pointer transition-colors ${tipoInvio === 'provvisorio' ? 'bg-indigo-50 border-indigo-500' : 'bg-white border-gray-200'}`}>
+                    <input type="radio" value="provvisorio" checked={tipoInvio === 'provvisorio'} onChange={() => setTipoInvio("provvisorio")} className="accent-indigo-600 w-4 h-4" />
+                    <div>
+                      <p className="font-bold text-xs text-indigo-900">Provvisorio</p>
+                      <p className="text-[10px] text-indigo-700">In attesa pagelle e bonus ATLeague.</p>
+                    </div>
+                  </label>
+                  <label className={`flex items-center gap-2 p-3 border rounded-xl cursor-pointer transition-colors ${tipoInvio === 'definitivo' ? 'bg-emerald-50 border-emerald-500' : 'bg-white border-gray-200'}`}>
+                    <input type="radio" value="definitivo" checked={tipoInvio === 'definitivo'} onChange={() => setTipoInvio("definitivo")} className="accent-emerald-600 w-4 h-4" />
+                    <div>
+                      <p className="font-bold text-xs text-emerald-900">Definitivo</p>
+                      <p className="text-[10px] text-emerald-700">Dati completi e pronti per l'archivio.</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex gap-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={handleConfirmClose}
+                  className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-xs rounded-xl shadow-sm transition-colors cursor-pointer text-center"
+                >
+                  Sì, Conferma e Addebita
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmModal(false)}
+                  className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-extrabold text-xs rounded-xl transition-colors cursor-pointer"
+                >
+                  Annulla
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* 🔍 BARRA DI RICERCA GIOCATORI */}
-      {activeTab === "giocatori" && (
-        <div className="relative">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
-            <Search className="h-4 w-4" />
-          </span>
-          <input
-            type="text"
-            placeholder="Cerca un giocatore..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-850 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium"
-          />
+      {/* Cancel Match Modal */}
+      {showAnnullaModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-sm w-full overflow-hidden shadow-2xl border border-gray-100 animate-in fade-in zoom-in-95 duration-200 text-left text-gray-905">
+            <div className="bg-red-800 p-4 font-bold text-white flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-200 shrink-0" />
+              <span>Annulla Evento Partita</span>
+            </div>
+            <div className="p-5 space-y-4 text-left">
+              <p className="text-xs text-gray-600 font-medium leading-relaxed">
+                Sei sicuro di voler annullare e rimuovere questo evento partita aperta? Questa operazione è definitiva e rimuoverà la convocazione dal database corrente.
+              </p>
+
+              <div className="flex gap-2.5 pt-1">
+                <button
+                  type="button"
+                  onClick={handleConfirmAnnulla}
+                  className="flex-1 py-2.5 bg-red-650 hover:bg-red-550 text-white font-extrabold text-xs rounded-xl shadow-sm transition-colors cursor-pointer"
+                >
+                  Sì, Rimuovi Partita
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAnnullaModal(false)}
+                  className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-extrabold text-xs rounded-xl transition-colors cursor-pointer"
+                >
+                  Annulla
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Backups List Modal */}
+      {showBackupsModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-gray-100 flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-slate-800 p-4 font-bold text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span>📂</span>
+                <span>Recupero Backup Bozza</span>
+              </div>
+              <button onClick={() => setShowBackupsModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <div className="p-4 overflow-y-auto space-y-3 flex-1 bg-gray-50">
+              {savedBackups.length === 0 ? (
+                <p className="text-sm text-gray-500 italic text-center py-6">Non ci sono backup salvati su questo dispositivo.</p>
+              ) : (
+                savedBackups.map((bak: any) => (
+                  <div key={bak.id} className="bg-white border text-left border-gray-200 rounded-xl p-3 shadow-sm flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                    <div>
+                      <p className="text-xs font-black text-gray-900 leading-tight mb-1">{bak.dettagliPartita}</p>
+                      <p className="text-[10px] text-gray-500 font-medium">Salvato il: {bak.createdAt}</p>
+                      <p className="text-[10px] text-indigo-600 font-bold mt-1">Risultato inserito: {bak.risultato || "N/D"}</p>
+                    </div>
+                    <div className="flex gap-2 w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
+                       <button onClick={() => handleRestoreBackup(bak)} className="flex-1 sm:flex-none text-[10px] font-bold px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 rounded transition-colors">
+                         Ripristina
+                       </button>
+                       <button onClick={() => handleDeleteBackup(bak.id)} className="flex-1 sm:flex-none text-[10px] font-bold px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-800 rounded transition-colors">
+                         Elimina
+                       </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="p-4 bg-white border-t border-gray-100">
+               <button
+                 type="button"
+                 onClick={() => setShowBackupsModal(false)}
+                 className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 font-extrabold text-xs rounded-xl transition-colors cursor-pointer"
+               >
+                 Chiudi
+               </button>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* 🚀 RENDER DEI FILTRI DI VISUALIZZAZIONE */}
-      <div className="overflow-x-auto rounded-2xl border border-slate-850 bg-slate-950/40">
-        
-        {/* A. VISTA GIOCATORI */}
-        {activeTab === "giocatori" && (
-          <table className="w-full text-left border-collapse font-sans min-w-[640px]">
-            <thead>
-              <tr className="border-b border-slate-800 bg-slate-950/80 text-[10px] uppercase font-bold text-slate-400">
-                <th className="py-3 px-4 w-12 text-center font-black">Piazz.</th>
-                <th className="py-3 px-4">Giocatore</th>
-                <th className="py-3 px-4 w-28 text-center">Ruolo</th>
-                <th className="py-3 px-4 text-center">FantaScore</th>
-                <th className="py-3 px-4 text-center">Presenze</th>
-                <th className="py-3 px-4 text-center w-40">Quotazione Base / Attuale</th>
-                <th className="py-3 px-4">Bonus Attivati nel Periodo</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-850/60">
-              {filteredPlayerStats.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-8 text-center text-xs text-slate-500 font-medium">
-                    Nessun giocatore corrisponde alla ricerca.
-                  </td>
-                </tr>
-              ) : (
-                filteredPlayerStats.map((p, idx) => {
-                  const pricingDiff = p.priceChange;
-                  const diffColor = pricingDiff > 0 ? "text-green-400" : pricingDiff < 0 ? "text-red-400" : "text-slate-400";
-                  const diffPrefix = pricingDiff > 0 ? "+" : "";
-
-                  return (
-                    <tr key={p.nome} className="hover:bg-slate-900/40 transition-colors">
-                      <td className="py-3.5 px-4 font-mono text-xs font-extrabold text-slate-400 text-center">
-                        {idx + 1}°
-                      </td>
-                      <td className="py-3.5 px-4 font-semibold text-white">
-                        {p.nome}
-                      </td>
-                      <td className="py-3.5 px-4 text-center">
-                        <span className={`text-[9px] uppercase font-black tracking-widest px-2 py-0.5 rounded ${
-                          p.ruolo === "Portiere" ? "bg-amber-500/10 text-amber-400 border border-amber-500/15" :
-                          p.ruolo === "Centrale" ? "bg-sky-500/10 text-sky-400 border border-sky-500/15" :
-                          p.ruolo === "Laterale" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/15" :
-                          "bg-rose-500/10 text-rose-400 border border-rose-500/15"
-                        }`}>
-                          {p.ruolo}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 text-center font-black font-mono text-xs text-yellow-300">
-                        {p.score} pt
-                      </td>
-                      <td className="py-3.5 px-4 text-center font-mono text-xs text-slate-300 font-bold">
-                        {p.matchesPlayed} G.
-                      </td>
-                      <td className="py-3.5 px-4 text-center font-mono text-xs">
-                        <div className="flex items-center justify-center gap-1 text-slate-300 font-bold">
-                          <span>{p.basePrice}</span>
-                          <span>➜</span>
-                          <span className="text-white font-extrabold">{p.currentPrice} 🪙</span>
-                          <span className={`${diffColor} text-[10px] font-bold shrink-0 ml-1`}>
-                            ({diffPrefix}{pricingDiff} 🪙)
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <div className="flex flex-wrap gap-1.5 max-w-sm">
-                          {Object.entries(p.bonusCounts).length === 0 ? (
-                            <span className="text-[10px] text-slate-500 font-bold">-</span>
-                          ) : (
-                            Object.entries(p.bonusCounts).map(([bName, bCnt]) => (
-                              <span key={bName} className="text-[9px] font-bold bg-indigo-950/60 border border-indigo-900/50 text-indigo-300 px-2 py-0.5 rounded-lg shrink-0">
-                                {bName} <strong className="text-white">x{bCnt}</strong>
-                              </span>
-                            ))
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        )}
-
-        {/* B. VISTA SQUADRE (FANTASQUADRE) */}
-        {activeTab === "squadre" && (
-          <table className="w-full text-left border-collapse font-sans min-w-[600px]">
-            <thead>
-              <tr className="border-b border-slate-800 bg-slate-950/80 text-[10px] uppercase font-bold text-slate-400">
-                <th className="py-3 px-4 w-12 text-center font-black">Piazz.</th>
-                <th className="py-3 px-4">Nome Fantasquadra</th>
-                <th className="py-3 px-4">Presidente / Partecipante</th>
-                <th className="py-3 px-4 text-center">Giornate Calcolate</th>
-                <th className="py-3 px-4 text-center">FantaScore Cumulativo</th>
-                <th className="py-3 px-4">Conteggio Speciali del Team no-cap</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-850/60">
-              {sortedTeamStats.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-8 text-center text-xs text-slate-500 font-medium">
-                    Nessuna fantasquadra trovata.
-                  </td>
-                </tr>
-              ) : (
-                sortedTeamStats.map((t, idx) => (
-                  <tr key={t.id} className="hover:bg-slate-900/40 transition-colors">
-                    <td className="py-3.5 px-4 font-mono text-xs font-extrabold text-slate-400 text-center">
-                      {idx + 1}°
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-yellow-300 uppercase tracking-tight">
-                      {t.nomeFantasquadra}
-                    </td>
-                    <td className="py-3.5 px-4 font-semibold text-slate-300">
-                      {t.nomePartecipante}
-                    </td>
-                    <td className="py-3.5 px-4 text-center font-mono text-xs text-slate-400">
-                      {t.numMatches} Giornate
-                    </td>
-                    <td className="py-3.5 px-4 text-center font-mono text-xs font-black text-white">
-                      {t.score} pt
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <div className="flex flex-wrap gap-1.5 max-w-md">
-                        {Object.entries(t.bonusFrequencies).length === 0 ? (
-                          <span className="text-[10px] text-slate-500 font-semibold">-</span>
-                        ) : (
-                          Object.entries(t.bonusFrequencies)
-                            .sort((a,b) => Number(b[1]) - Number(a[1]))
-                            .map(([bName, bCnt]) => (
-                              <span key={bName} className="text-[9px] font-bold bg-slate-900 border border-slate-800 text-slate-300 px-2 py-0.5 rounded-lg hover:border-slate-700 transition-colors">
-                                {bName} <strong className="text-yellow-400">x{bCnt}</strong>
-                              </span>
-                            ))
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
-
-        {/* C. FOCUS BONUS & MALUS */}
-        {activeTab === "bonus" && (
-          <table className="w-full text-left border-collapse font-sans min-w-[500px]">
-            <thead>
-              <tr className="border-b border-slate-800 bg-slate-950/80 text-[10px] uppercase font-bold text-slate-400">
-                <th className="py-3 px-4 w-12 text-center font-black">Rank.</th>
-                <th className="py-3 px-4 w-60">Nome Bonus / Malus</th>
-                <th className="py-3 px-4">Valore Fanta-Punti</th>
-                <th className="py-3 px-4 text-center">Volte Attivato nel Periodo</th>
-                <th className="py-3 px-4">Chi lo ha attivato maggiormente</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-850/60">
-              {bonusStatsList.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-8 text-center text-xs text-slate-500 font-medium">
-                    Nessun dato di attivazione disponibile.
-                  </td>
-                </tr>
-              ) : (
-                bonusStatsList.map((b, idx) => {
-                  const ptsVal = b.definition.punti;
-                  const ptsColor = ptsVal > 0 ? "text-green-400" : ptsVal < 0 ? "text-red-400" : "text-slate-400";
-                  const ptsPrefix = ptsVal > 0 ? "+" : "";
-
-                  return (
-                    <tr key={b.definition.nome} className="hover:bg-slate-900/40 transition-colors">
-                      <td className="py-3.5 px-4 font-mono text-xs font-extrabold text-slate-400 text-center">
-                        {idx + 1}°
-                      </td>
-                      <td className="py-3.5 px-4 font-semibold text-white">
-                        <div>{b.definition.nome}</div>
-                        <div className="text-[10px] text-slate-400 font-normal mt-0.5 leading-relaxed">
-                          {b.definition.descrizione}
-                        </div>
-                      </td>
-                      <td className={`py-3.5 px-4 font-mono text-xs font-black ${ptsColor}`}>
-                        {ptsPrefix}{ptsVal} pt
-                      </td>
-                      <td className="py-3.5 px-4 text-center font-mono text-xs font-black text-white bg-slate-950/20">
-                        {b.totalCount} volte
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <div className="text-[11px] text-slate-300 font-bold space-x-1.5">
-                          {Object.entries(b.activatedBy).length === 0 ? (
-                            <span className="text-slate-500 font-semibold">-</span>
-                          ) : (
-                            Object.entries(b.activatedBy)
-                              .sort((a,b) => Number(b[1]) - Number(a[1]))
-                              .slice(0, 3)
-                              .map(([pName, pCnt]) => (
-                                <span key={pName} className="inline-block bg-slate-900 px-2 py-0.5 rounded text-[10px] whitespace-nowrap">
-                                  {pName} ({pCnt})
-                                </span>
-                              ))
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        )}
-
-      </div>
-
-      {/* 📱 SOCIAL-READY EXPORT COMPONENT */}
-      <div className="bg-slate-950/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-850 pb-3">
-          <div className="space-y-1">
-            <h3 className="text-sm font-black uppercase text-indigo-400 flex items-center gap-1.5">
-              <Share2 className="h-4 w-4 text-indigo-400" /> Esportatore Social (WhatsApp / IG Stories)
-            </h3>
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              Copia il testo sotto, formattato in colonne perfette con emoji per pubblicarlo sui gruppi di gioco o canali social!
-            </p>
+      {/* Post Submit Modal */}
+      {postSubmitState && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className={`bg-white rounded-2xl max-w-sm w-full overflow-hidden shadow-2xl border ${postSubmitState === 'provvisorio' ? 'border-indigo-100' : 'border-emerald-100'} animate-in fade-in zoom-in-95 duration-200 text-center`}>
+            <div className={`p-6 space-y-4 ${postSubmitState === 'provvisorio' ? 'bg-indigo-50' : 'bg-emerald-50'}`}>
+              <div className="mx-auto w-12 h-12 rounded-full flex items-center justify-center bg-white shadow-sm mb-2 text-2xl">
+                {postSubmitState === 'provvisorio' ? '⏳' : '✅'}
+              </div>
+              <h3 className={`font-black text-lg leading-tight ${postSubmitState === 'provvisorio' ? 'text-indigo-900' : 'text-emerald-900'}`}>
+                {postSubmitState === 'provvisorio' ? 'Referto Provvisorio Inviato' : 'Referto Definitivo Archiviato'}
+              </h3>
+              <p className={`text-sm font-medium leading-relaxed ${postSubmitState === 'provvisorio' ? 'text-indigo-800' : 'text-emerald-800'}`}>
+                {postSubmitState === 'provvisorio' 
+                  ? "Il referto è stato inviato come Provvisorio. Restiamo in attesa che vengano pubblicate le pagelle ufficiali di ATLeague per aggiornare bonus/malus e consolidare definitivamente le statistiche della partita."
+                  : "Referto aggiornato e reso Definitivo! Tutti i dati (compresi i bonus/malus delle pagelle) sono stati acquisiti con successo. Il referto ora è ufficialmente consolidato a sistema."}
+              </p>
+            </div>
+            <div className="p-4 bg-white">
+              <button
+                onClick={() => setPostSubmitState(null)}
+                className={`w-full py-3 font-extrabold text-sm rounded-xl shadow-sm transition-colors cursor-pointer ${postSubmitState === 'provvisorio' ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}`}
+              >
+                Chiudi Notifica
+              </button>
+            </div>
           </div>
-          <button
-            onClick={handleCopyClipboard}
-            className="bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-indigo-950 font-black text-xs uppercase px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
-          >
-            {copied ? (
-              <>
-                <Check className="h-4 w-4" /> Copiato! 🚀
-              </>
-            ) : (
-              <>
-                <Copy className="h-4 w-4" /> Copia Negli Appunti 📋
-              </>
-            )}
-          </button>
         </div>
-
-        {/* Plain-text display area using elegant monospace alignment */}
-        <pre className="bg-slate-900 border border-slate-850 rounded-xl p-4 text-[11px] leading-relaxed text-indigo-200 overflow-x-auto font-mono max-h-72 overflow-y-auto whitespace-pre-wrap select-all">
-          {socialExportText}
-        </pre>
-      </div>
-
+      )}
     </div>
   );
 }
