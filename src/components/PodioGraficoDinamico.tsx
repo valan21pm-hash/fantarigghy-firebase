@@ -54,7 +54,7 @@ export default function PodioGraficoDinamico({
     title = "MIGLIORI GIOCATORI";
     subtitle = "Classifica Assoluta Invididuale";
     const scoringPlayers = giocatori.map(g => {
-      const stats = calculatePlayerChampionshipStats(g.nome, partiteChiuse, bonuses);
+      const stats = calculatePlayerChampionshipStats(g.nome, partiteChiuse, bonuses, giocatori);
       return { nome: g.nome, score: stats.fantaScore };
     }).sort((a, b) => b.score - a.score);
     
@@ -70,7 +70,7 @@ export default function PodioGraficoDinamico({
       title = fq.nomeFantasquadra.toUpperCase();
       subtitle = "I Migliori della Rosa";
       const teamPlayers = fq.giocatoriSelezionati.map(nome => {
-        const stats = calculatePlayerChampionshipStats(nome, partiteChiuse, bonuses);
+        const stats = calculatePlayerChampionshipStats(nome, partiteChiuse, bonuses, giocatori);
         return { nome, score: stats.fantaScore };
       }).sort((a, b) => b.score - a.score);
 

@@ -629,6 +629,7 @@ export default function FantacalcettoV2({
         const rEsp = r ? Number(r.rossi) || 0 : 0;
         const rBonusAttivi = r ? r.bonusAttivi || [] : [];
 
+        const gInfoFallback = giocatori.find(g => g.nome.toLowerCase() === pName.toLowerCase());
         const bonusPts = r
           ? getPlayerBonusPointsForMatch(
               pName,
@@ -636,7 +637,7 @@ export default function FantacalcettoV2({
               rGol,
               rAssist,
               bonuses,
-              r.snapshotGiocatore?.ultimoRuolo
+              r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo
             )
           : 0;
 
@@ -648,7 +649,7 @@ export default function FantacalcettoV2({
             rGol,
             rAssist,
             bonuses,
-            r.snapshotGiocatore?.ultimoRuolo
+            r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo
           );
           if (breakdown.length > 0) {
             bonusBreakdownStr =
@@ -1268,13 +1269,14 @@ export default function FantacalcettoV2({
             const rEsp = Number(r.rossi) || 0;
             const rBonusAttivi = r.bonusAttivi || [];
 
+            const gInfo = giocatori.find(g => g.nome.toLowerCase() === nome.toLowerCase());
             const matchBonusPts = getPlayerBonusPointsForMatch(
               nome,
               rBonusAttivi,
               rGol,
               rAssist,
               bonuses,
-              r.snapshotGiocatore?.ultimoRuolo
+              r.snapshotGiocatore?.ultimoRuolo || gInfo?.ultimoRuolo
             );
 
             if (isAmichevole || m.inviatoFanta === true) {
@@ -1284,7 +1286,7 @@ export default function FantacalcettoV2({
                 rGol,
                 rAssist,
                 bonuses,
-                r.snapshotGiocatore?.ultimoRuolo
+                r.snapshotGiocatore?.ultimoRuolo || gInfo?.ultimoRuolo
               );
               breakdown.forEach(b => {
                 const foundBonusDef = bonuses.find(def => def.nome === b.nome);

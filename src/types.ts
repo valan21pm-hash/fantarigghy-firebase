@@ -112,12 +112,14 @@ export interface PlayerChampionshipStats {
   fantaScore: number;
 }
 
-export const calculatePlayerChampionshipStats = (nome: string, partiteChiuse: Partita[], allBonuses: CustomBonusDef[] = DEFAULT_BONUSES): PlayerChampionshipStats => {
+export const calculatePlayerChampionshipStats = (nome: string, partiteChiuse: Partita[], allBonuses: CustomBonusDef[] = DEFAULT_BONUSES, globalGiocatori: Giocatore[] = []): PlayerChampionshipStats => {
   let gol = 0;
   let assist = 0;
   let ammonizioni = 0;
   let espulsioni = 0;
   let bonusPts = 0;
+
+  const fallbackPlayerInfo = globalGiocatori.find(g => g.nome.toLowerCase() === nome.toLowerCase());
 
   for (const m of partiteChiuse || []) {
     const isAmichevole = m.dettagli ? m.dettagli.toLowerCase().includes("amichevole") : false;
@@ -136,7 +138,7 @@ export const calculatePlayerChampionshipStats = (nome: string, partiteChiuse: Pa
         const rBonusAttivi = r.bonusAttivi || [];
 
         // Always include bonuses, but filter for game stats if not present
-        const matchBonus = getPlayerBonusPointsForMatch(nome, rBonusAttivi, rGol, rAssist, allBonuses, r.snapshotGiocatore?.ultimoRuolo);
+        const matchBonus = getPlayerBonusPointsForMatch(nome, rBonusAttivi, rGol, rAssist, allBonuses, r.snapshotGiocatore?.ultimoRuolo || fallbackPlayerInfo?.ultimoRuolo);
 
         gol += rGol;
         assist += rAssist;
@@ -159,8 +161,8 @@ export const calculatePlayerChampionshipStats = (nome: string, partiteChiuse: Pa
   };
 };
 
-export const getPlayerPriceForRoster = (nome: string, partiteChiuse: Partita[], allBonuses: CustomBonusDef[] = DEFAULT_BONUSES): number => {
-  const stats = calculatePlayerChampionshipStats(nome, partiteChiuse, allBonuses);
+export const getPlayerPriceForRoster = (nome: string, partiteChiuse: Partita[], allBonuses: CustomBonusDef[] = DEFAULT_BONUSES, globalGiocatori: Giocatore[] = []): number => {
+  const stats = calculatePlayerChampionshipStats(nome, partiteChiuse, allBonuses, globalGiocatori);
   return getPlayerCurrentPrice(nome, stats.fantaScore);
 };
 
@@ -822,6 +824,17 @@ export const getPlayerBonusBreakdownForMatch = (
       let pts = b.punti || 0;
       if (b.moltiplicatoreGol !== undefined) pts += (b.moltiplicatoreGol * gol);
       if (b.moltiplicatoreAssist !== undefined) pts += (b.moltiplicatoreAssist * assist);
+
+      // Explicitly include base goal points (3) in the breakdown description for role-based goals
+      if (
+        b.id === "gen_gol_pivot" ||
+        b.id === "gen_gol_laterale" ||
+        b.id === "gen_gol_centrale" ||
+        b.id === "gen_gol_portiere"
+      ) {
+        pts += gol * 3;
+      }
+
       breakdown.push({ nome: b.nome, puntiVal: pts });
     }
   }
