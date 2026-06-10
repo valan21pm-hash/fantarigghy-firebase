@@ -559,7 +559,7 @@ export default function App() {
           </div>
 
           <p className="text-[9.5px] text-slate-500 font-semibold mt-4">
-            Easy Rigging © {new Date().getFullYear()} • Modulo protetto da Firebase Authentication
+            Manuel Palmas © {new Date().getFullYear()}
           </p>
         </div>
       </div>
