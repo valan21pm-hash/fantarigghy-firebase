@@ -682,20 +682,26 @@ async function getServiceAccountToken(): Promise<string | undefined> {
 
 async function getStoredGoogleToken(): Promise<string | undefined> {
   // Try to use the logged-in human user token first so their Sheet settings and permissions are fully respected
+  console.log("[server.ts] getStoredGoogleToken called");
   try {
     const raw = await fs.readFile(STORED_TOKEN_PATH, "utf-8");
     const parsed = JSON.parse(raw);
     if (parsed && parsed.token) {
+      console.log("[server.ts] Found human token");
       return parsed.token;
     }
   } catch {
+    console.log("[server.ts] No human token found");
     // If no human token exists, we can fall back to the Service Account token underneath
   }
 
+  console.log("[server.ts] Attempting to get Service Account token");
   const saToken = await getServiceAccountToken();
   if (saToken) {
+    console.log("[server.ts] Obtained SA token");
     return saToken;
   }
+  console.log("[server.ts] Failed to get SA token");
   return undefined;
 }
 
@@ -874,6 +880,7 @@ async function getDb(
   token?: string,
   bypassCache: boolean = false,
 ): Promise<DatabaseSchema> {
+  console.log("[server.ts] getDb called");
   const now = Date.now();
 
   // If memory cache exists and is fresh OR we have a newer local update pending sync,
@@ -883,10 +890,12 @@ async function getDb(
     !bypassCache &&
     (now - lastCacheFetchTime < CACHE_TTL_MS || pendingSyncTask !== null)
   ) {
+    console.log("[server.ts] Returning from cache");
     return memoryCache;
   }
 
   // 1. PRIMARY: Fetch from Firestore (24/7 availability)
+  console.log("[server.ts] Fetching from Firestore");
   let firestoreDb = await fetchFromFirestore();
   if (!firestoreDb) {
     console.warn(
@@ -1245,6 +1254,12 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
+  // Logging Middleware for debugging
+  app.use((req, res, next) => {
+    console.log(`[API] ${req.method} ${req.path}`);
+    next();
+  });
+
   // Helper to extract access token from Authorization header
   const getAuthToken = (req: express.Request): string | undefined => {
     const authHeader = req.headers.authorization;
@@ -1266,15 +1281,16 @@ async function startServer() {
   app.post("/api/save-token", async (req, res) => {
     try {
       const { token } = req.body;
+      console.log("[API/save-token] Ricevuto nuovo token");
       if (!token) return res.status(400).json({ err: "Token mancante" });
       await saveStoredGoogleToken(token);
-      console.log(
-        "[Server] Token Google Sheets globale aggiornato con successo dall'amministratore.",
-      );
+      console.log("[API/save-token] Token salvato, caricamento database...");
 
       const db = await getDb(token);
+      console.log("[API/save-token] Database caricato, invio risposta");
       sendDbResponse(res, db);
     } catch (err: any) {
+      console.error("[API/save-token] Errore critico:", err);
       res.status(500).json({ err: "Errore salvataggio token: " + err.message });
     }
   });
@@ -2845,6 +2861,7 @@ async function startServer() {
   app.post("/api/update_bonuses", async (req, res) => {
     try {
       const { bonuses } = req.body;
+      console.log("[API/update_bonuses] Ricevuto aggiornamento bonus");
       const token = getAuthToken(req);
       const db = await getDb(token);
       db.bonuses = bonuses;
@@ -2856,9 +2873,12 @@ async function startServer() {
         dettagli: "Aggiornato il regolamento dei Bonus e Malus nel Database.",
       });
 
+      console.log("[API/update_bonuses] Salvataggio database...");
       await saveDb(db, token);
+      console.log("[API/update_bonuses] Salvataggio completato!");
       sendDbResponse(res, db);
     } catch (error: any) {
+      console.error("[API/update_bonuses] Errore:", error);
       res.status(500).json({ erroreCritico: error.message });
     }
   });

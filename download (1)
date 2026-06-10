@@ -637,32 +637,28 @@ export const GENERIC_BONUSES: CustomBonusDef[] = [
     nome: "⚽ Gol Pivot 🎯",
     descrizione: "Il gol segnato in posizione di Pivot vale il punteggio base (+3 punti a gol)",
     punti: 0,
-    moltiplicatoreGol: 3,
-    isAutomatic: true
+    moltiplicatoreGol: 3
   },
   {
     id: "gen_gol_laterale",
     nome: "⚽ Gol Laterale 🚀",
     descrizione: "+1 punto extra per gol segnato dalla fascia laterale (+4 punti totali a gol)",
     punti: 0,
-    moltiplicatoreGol: 4,
-    isAutomatic: true
+    moltiplicatoreGol: 4
   },
   {
     id: "gen_gol_centrale",
     nome: "⚽ Gol Centrale 💣",
     descrizione: "+2 punti extra per gol segnato dalla zona centrale (+5 punti totali a gol)",
     punti: 0,
-    moltiplicatoreGol: 5,
-    isAutomatic: true
+    moltiplicatoreGol: 5
   },
   {
     id: "gen_gol_portiere",
     nome: "🧤 Gol Portiere 🥅🦅",
     descrizione: "+5 punti extra per gol segnato dal portiere (+8 punti totali a gol)",
     punti: 0,
-    moltiplicatoreGol: 8,
-    isAutomatic: true
+    moltiplicatoreGol: 8
   },
   {
     id: "gen_assist_extra",
@@ -683,16 +679,14 @@ export const GENERIC_BONUSES: CustomBonusDef[] = [
     nome: "🟨 Ammonizione Extra ⚠️",
     descrizione: "-1 punto per ammonizione (Malus addizionale/correttivo)",
     punti: 0,
-    moltiplicatoreAmm: -1,
-    isAutomatic: true
+    moltiplicatoreAmm: -1
   },
   {
     id: "gen_esp_extra",
     nome: "🟥 Espulsione Extra 🔴",
     descrizione: "-3 punti per cartellino rosso diretto o doppia ammonizione (Malus addizionale/correttivo)",
     punti: 0,
-    moltiplicatoreEsp: -3,
-    isAutomatic: true
+    moltiplicatoreEsp: -3
   },
   {
     id: "gen_imbattuto",
@@ -890,6 +884,7 @@ export const getPlayerBonusPointsForMatch = (
   // }
 
   // Inject automatic assist bonus if assist > 0
+  /*
   if (assist > 0 && !activeBonusIds.includes("gen_assist_merda") && !activeBonusIds.includes("gen_assist_extra")) {
     activeBonusIds.push("gen_assist_extra");
   }
@@ -901,8 +896,10 @@ export const getPlayerBonusPointsForMatch = (
   if (rossi > 0 && !activeBonusIds.includes("gen_esp_extra")) {
     activeBonusIds.push("gen_esp_extra");
   }
+  */
 
   // Inject Pinna/Orlandini personal bonuses automatically if they score or assist
+  /*
   const pKey = getPlayerBonusKey(nomeCompleto);
   if (pKey === "Pinna" && (gol > 0 || assist > 0) && !activeBonusIds.includes("pinna_presidenziale")) {
     activeBonusIds.push("pinna_presidenziale");
@@ -910,6 +907,7 @@ export const getPlayerBonusPointsForMatch = (
   if (pKey === "Orlandini" && (gol > 0 || assist > 0) && !activeBonusIds.includes("orlandini_leggenda")) {
     activeBonusIds.push("orlandini_leggenda");
   }
+  */
 
   const isPresidenzialeActive = activeBonusIds.includes("pinna_presidenziale");
   const isLeggendaActive = activeBonusIds.includes("orlandini_leggenda");
@@ -974,6 +972,7 @@ export const getPlayerBonusBreakdownForMatch = (
   if (!allBonuses) return breakdown;
 
   let activeBonusIds = [...bonusAttivi];
+  /*
   if (gol > 0 && ruolo) {
     const r = ruolo.toLowerCase();
     if (r === "pivot" && !activeBonusIds.includes("gen_gol_pivot")) activeBonusIds.push("gen_gol_pivot");
@@ -981,6 +980,7 @@ export const getPlayerBonusBreakdownForMatch = (
     else if (r === "centrale" && !activeBonusIds.includes("gen_gol_centrale")) activeBonusIds.push("gen_gol_centrale");
     else if (r === "portiere" && !activeBonusIds.includes("gen_gol_portiere")) activeBonusIds.push("gen_gol_portiere");
   }
+  */
 
   // Prevent double-counting: if a more specific role goal bonus satisfies the player's role, remove gen_gol_pivot
   const hasSpecificGoalBonus = activeBonusIds.includes("gen_gol_laterale") || 
@@ -991,19 +991,24 @@ export const getPlayerBonusBreakdownForMatch = (
   }
 
   // Inject automatic assist bonus if assist > 0
+  /*
   if (assist > 0 && !activeBonusIds.includes("gen_assist_merda") && !activeBonusIds.includes("gen_assist_extra")) {
     activeBonusIds.push("gen_assist_extra");
   }
+  */
 
   // Inject automatic card bonuses if amm > 0 or rossi > 0
+  /*
   if (amm > 0 && !activeBonusIds.includes("gen_amm_extra")) {
     activeBonusIds.push("gen_amm_extra");
   }
   if (rossi > 0 && !activeBonusIds.includes("gen_esp_extra")) {
     activeBonusIds.push("gen_esp_extra");
   }
+  */
 
   // Inject Pinna/Orlandini personal bonuses automatically if they score or assist
+  /*
   const pKey = getPlayerBonusKey(nomeCompleto);
   if (pKey === "Pinna" && (gol > 0 || assist > 0) && !activeBonusIds.includes("pinna_presidenziale")) {
     activeBonusIds.push("pinna_presidenziale");
@@ -1011,6 +1016,7 @@ export const getPlayerBonusBreakdownForMatch = (
   if (pKey === "Orlandini" && (gol > 0 || assist > 0) && !activeBonusIds.includes("orlandini_leggenda")) {
     activeBonusIds.push("orlandini_leggenda");
   }
+  */
 
   const isPresidenzialeActive = activeBonusIds.includes("pinna_presidenziale");
   const isLeggendaActive = activeBonusIds.includes("orlandini_leggenda");
