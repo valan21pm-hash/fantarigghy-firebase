@@ -261,7 +261,7 @@ async function ensureFantasquadreSheetExists(
 ): Promise<void> {
   try {
     // Try to check if the range exists
-    const checkUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Fantasquadre!A1:K1`;
+    const checkUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Fantasquadre!A1:J1`;
     const checkRes = await fetch(checkUrl, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -292,8 +292,8 @@ async function ensureFantasquadreSheetExists(
     });
 
     if (addRes.ok) {
-      // Write headers including PIN, Email, Credito Residuo, Valori Acquisto, Ultimo Cambio Match ID, and Rosa Originaria
-      const initUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Fantasquadre!A1:K1?valueInputOption=USER_ENTERED`;
+      // Write headers including PIN, Email, Credito Residuo, Valori Acquisto, and Ultimo Cambio Match ID
+      const initUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Fantasquadre!A1:J1?valueInputOption=USER_ENTERED`;
       await fetch(initUrl, {
         method: "PUT",
         headers: {
@@ -313,13 +313,12 @@ async function ensureFantasquadreSheetExists(
               "Credito Residuo",
               "Valori Acquisto",
               "Ultimo Cambio Match ID",
-              "Rosa Originaria",
             ],
           ],
         }),
       });
       console.log(
-        "[Google Sheets] Tab 'Fantasquadre' created and initialized with extended columns (H, I, J, K).",
+        "[Google Sheets] Tab 'Fantasquadre' created and initialized with extended columns (H, I, J).",
       );
     }
   } catch (err) {
@@ -333,7 +332,7 @@ async function fetchFantasquadreFromSheets(
 ): Promise<Fantasquadra[]> {
   try {
     await ensureFantasquadreSheetExists(token, spreadsheetId);
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Fantasquadre!A:K`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Fantasquadre!A:J`;
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -361,13 +360,6 @@ async function fetchFantasquadreFromSheets(
         valoriAcquisto = {};
       }
 
-      let rosaOriginaria: string[] = [];
-      try {
-        if (row[10]) rosaOriginaria = JSON.parse(row[10]);
-      } catch {
-        rosaOriginaria = [];
-      }
-
       return {
         id: String(row[0] || ""),
         nomePartecipante: String(row[1] || ""),
@@ -381,7 +373,6 @@ async function fetchFantasquadreFromSheets(
         creditoResiduo: row[7] !== undefined ? Number(row[7]) : undefined,
         valoriAcquisto: valoriAcquisto,
         ultimoCambioMatchId: String(row[9] || ""),
-        rosaOriginaria: rosaOriginaria,
       };
     });
   } catch (err: any) {
@@ -533,7 +524,7 @@ async function saveToSheetsInternal(
         "Campi!A2:A",
         "Partite!A2:K",
         "Log!A2:D",
-        "Fantasquadre!A2:K",
+        "Fantasquadre!A2:J",
         "Consigli!A2:E",
       ],
     }),
@@ -594,7 +585,6 @@ async function saveToSheetsInternal(
     fs.creditoResiduo ?? 50,
     JSON.stringify(fs.valoriAcquisto || {}),
     fs.ultimoCambioMatchId || "",
-    JSON.stringify(fs.rosaOriginaria || []),
   ]);
 
   const consigliRows = (db.consigli || []).map((c) => [
@@ -1612,6 +1602,7 @@ async function startServer() {
         email: trimmedEmail,
         creditoResiduo: MAX_BUDGET - totalInitialCost,
         valoriAcquisto: initialValoriAcquisto,
+        rosaOriginaria: [...targetRoster],
       };
 
       db.fantasquadre.push(nuovaIscrizione);
