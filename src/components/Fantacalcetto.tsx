@@ -122,8 +122,8 @@ interface FantacalcettoProps {
 // Fantasy Point Formula constants
 const GOAL_POINTS = 3;
 const ASSIST_POINTS = 1;
-const AMMO_POINTS = -0.5;
-const ESPU_POINTS = -1;
+const AMMO_POINTS = -1;
+const ESPU_POINTS = -3;
 
 export default function Fantacalcetto({
   giocatori,

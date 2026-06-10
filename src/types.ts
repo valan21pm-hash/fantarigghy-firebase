@@ -75,8 +75,8 @@ export interface Fantasquadra {
 // Fanta point formula coefficients
 export const GOAL_POINTS = 3;
 export const ASSIST_POINTS = 1;
-export const AMMO_POINTS = -0.5;
-export const ESPU_POINTS = -1;
+export const AMMO_POINTS = -1;
+export const ESPU_POINTS = -3;
 export const MAX_BUDGET = 60;
 
 export const getPlayerBasePrice = (nome: string): number => {
@@ -667,18 +667,6 @@ export const GENERIC_BONUSES: CustomBonusDef[] = [
     id: "gen_malus_tiro_libero_sbagliato",
     nome: "💥 Tiro Libero Sbagliato ❌",
     descrizione: "-3 punti per tiro libero fallito o parato (Malus)",
-    punti: -3
-  },
-  {
-    id: "gen_malus_ammonizione",
-    nome: "🟨 Ammonizione Extra ⚠️",
-    descrizione: "-1 punto per ammonizione (Malus addizionale/correttivo)",
-    punti: -1
-  },
-  {
-    id: "gen_malus_espulsione",
-    nome: "🟥 Espulsione Extra 🔴",
-    descrizione: "-3 punti per cartellino rosso diretto o doppia ammonizione (Malus addizionale/correttivo)",
     punti: -3
   },
   {
