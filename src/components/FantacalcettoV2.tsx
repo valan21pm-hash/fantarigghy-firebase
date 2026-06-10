@@ -36,7 +36,9 @@ import {
   Banknote,
   ClipboardList,
   Clock,
+  BarChart3,
 } from "lucide-react";
+import StatsHub from "./StatsHub";
 import {
   Giocatore,
   Fantasquadra,
@@ -251,7 +253,7 @@ export default function FantacalcettoV2({
   }, [sessioneMercatoLibero, scadenzaMercatoLibero]);
 
   const [activePublicTab, setActivePublicTab] = useState<
-    "home" | "rosa" | "mercato" | "classifica" | "regolamento"
+    "home" | "rosa" | "mercato" | "classifica" | "regolamento" | "statistiche"
   >("mercato");
   const allPartite = React.useMemo(() => {
     return [...partiteAperte, ...partiteChiuse].filter(
@@ -2544,6 +2546,19 @@ export default function FantacalcettoV2({
               <span className="hidden md:inline">Regolamento</span>
               <span className="md:hidden mt-0.5 tracking-tight">Regole</span>
             </button>
+            <button
+              type="button"
+              onClick={() => setActivePublicTab("statistiche")}
+              className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-1.5 rounded-xl text-[9px] md:text-[10.5px] font-bold md:font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+                activePublicTab === "statistiche"
+                  ? "text-yellow-400 md:bg-yellow-400 md:text-indigo-950 shadow-none md:shadow-md"
+                  : "text-indigo-400 hover:text-white hover:bg-indigo-900/30"
+              }`}
+            >
+              <BarChart3 className={`w-5 h-5 md:w-3.5 md:h-3.5 ${activePublicTab === "statistiche" ? "fill-yellow-400 md:fill-none" : ""}`} />
+              <span className="hidden md:inline">Statistiche</span>
+              <span className="md:hidden mt-0.5 tracking-tight">Stats</span>
+            </button>
           </div>
 
           {isMercatoLiberoValido && (
@@ -2750,11 +2765,11 @@ export default function FantacalcettoV2({
                     {rankedTeams.length > 0 && (
                       <button
                         type="button"
-                        onClick={() => setShowGeneralReportModal(true)}
+                        onClick={() => setActivePublicTab("statistiche")}
                         className="bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1 cursor-pointer transition-transform hover:-translate-y-0.5"
-                        title="Vedi referto con tutti i voti assegnati in tutte le partite"
+                        title="Vedi referto, statistiche avanzate ed esporta per i social"
                       >
-                        <span>📄 Filtra & Apri Referto</span>
+                        <span>📊 Filtra & Apri Statistiche</span>
                       </button>
                     )}
                     <span className="bg-indigo-900 text-indigo-200 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full font-mono shrink-0">
@@ -3094,20 +3109,14 @@ export default function FantacalcettoV2({
                                  </span>
                                </div>
 
-                               {/* Nuovi report / export buttons per singola partita */}
-                               <div className="flex flex-col gap-1.5 mt-2 border-t border-indigo-800/40 pt-2">
-                                 <span className="text-[8px] uppercase font-bold text-indigo-400">Esporta Report PDF:</span>
-                                 <button onClick={() => generatePartitaGiocatoriPdf(m)} className="w-full text-left bg-indigo-950/50 hover:bg-yellow-400 hover:text-indigo-900 border border-indigo-800/50 text-indigo-200 text-[9px] font-bold uppercase py-1 px-2 rounded flex justify-between transition-colors shadow-sm">
-                                   Giocatori
-                                   <Download className="w-3 h-3" />
-                                 </button>
-                                 <button onClick={() => setMatchForPlayerChoice(m)} className="w-full text-left bg-indigo-950/50 hover:bg-yellow-400 hover:text-indigo-900 border border-indigo-800/50 text-indigo-200 text-[9px] font-bold uppercase py-1 px-2 rounded flex justify-between transition-colors shadow-sm">
-                                   Singolo Giocatore
-                                   <Download className="w-3 h-3" />
-                                 </button>
-                                 <button onClick={() => setMatchForTeamChoice(m)} className="w-full text-left bg-indigo-950/50 hover:bg-yellow-400 hover:text-indigo-900 border border-indigo-800/50 text-indigo-200 text-[9px] font-bold uppercase py-1 px-2 rounded flex justify-between transition-colors shadow-sm">
-                                   Squadra
-                                   <Download className="w-3 h-3" />
+                               {/* Link unificato all'Hub Statistiche centralizzato */}
+                               <div className="mt-2 border-t border-indigo-800/40 pt-2 text-center">
+                                 <button
+                                   onClick={() => setActivePublicTab("statistiche")}
+                                   className="w-full bg-indigo-900/40 hover:bg-yellow-400 hover:text-indigo-950 text-indigo-300 text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-all cursor-pointer flex items-center justify-center gap-1"
+                                 >
+                                    <BarChart3 className="w-3.5 h-3.5" />
+                                    <span>Vedi su Hub Statistiche 📊</span>
                                  </button>
                                </div>
 
@@ -3130,11 +3139,11 @@ export default function FantacalcettoV2({
                         {rankedTeams.length > 0 && (
                           <button
                             type="button"
-                            onClick={() => setShowGeneralReportModal(true)}
+                            onClick={() => setActivePublicTab("statistiche")}
                             className="bg-indigo-900/50 hover:bg-yellow-400 hover:text-indigo-950 text-indigo-200 border border-indigo-800/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 transition-all group col-span-2 shadow-sm"
                           >
                             <ClipboardList className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                            <span className="text-[10px] font-black uppercase tracking-wider">Apri Referto Generale</span>
+                            <span className="text-[10px] font-black uppercase tracking-wider">Apri Hub Statistiche</span>
                           </button>
                         )}
                         <button
@@ -4313,6 +4322,16 @@ export default function FantacalcettoV2({
               <h2 className="text-xl font-black text-yellow-300 uppercase tracking-widest">Regolamento & Modificatori</h2>
               <p className="text-indigo-300 text-sm font-medium">Qui troverai presto il riepilogo della gestione bonus/malus personalizzati e il calcolo dei modificatori della fanta-lega.</p>
             </div>
+          ) : activePublicTab === "statistiche" ? (
+            <div className="mt-6 animate-fade-in">
+              <StatsHub
+                giocatori={giocatori}
+                fantasquadre={fantasquadre}
+                partiteChiuse={partiteChiuse || []}
+                bonuses={bonuses}
+                getTeamMatchBreakdownList={getTeamMatchBreakdownList}
+              />
+            </div>
           ) : null}
         </div>
 
@@ -5238,6 +5257,17 @@ export default function FantacalcettoV2({
           </div>
         </div>
       )}
+
+      {/* 📊 SEZIONE REPORT E STATISTICHE CENTRALIZZATA PER L'ADMIN */}
+      <div className="pt-8 border-t border-gray-200">
+        <StatsHub
+          giocatori={giocatori}
+          fantasquadre={fantasquadre}
+          partiteChiuse={partiteChiuse || []}
+          bonuses={bonuses}
+          getTeamMatchBreakdownList={getTeamMatchBreakdownList}
+        />
+      </div>
 
       {showGeneralReportModal && (
         <GeneralReportModal

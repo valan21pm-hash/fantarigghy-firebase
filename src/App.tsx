@@ -590,6 +590,12 @@ export default function App() {
             >
               🌐 Vai al Portale Fanta-Calcetto
             </button>
+            <button
+              onClick={() => setIsPublicPortalV2(true)}
+              className="w-full bg-slate-950 border border-indigo-900/50 hover:bg-slate-900 active:bg-slate-800 text-indigo-400 font-bold text-xs uppercase py-3.5 rounded-xl shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center gap-2 font-sans mt-2"
+            >
+              🚀 Vai al Portale V2 (Nuovo Layout)
+            </button>
           </div>
 
           <p className="text-[9.5px] text-slate-500 font-semibold mt-4">

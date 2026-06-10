@@ -31,7 +31,9 @@ import {
   Instagram,
   Share2,
   Pencil,
+  BarChart3,
 } from "lucide-react";
+import StatsHub from "./StatsHub";
 import {
   Giocatore,
   Fantasquadra,
@@ -164,7 +166,7 @@ export default function Fantacalcetto({
   }, [sessioneMercatoLibero, scadenzaMercatoLibero]);
 
   const [activePublicTab, setActivePublicTab] = useState<
-    "classifica" | "partite" | "iscrizione" | "convocazioni"
+    "classifica" | "partite" | "iscrizione" | "convocazioni" | "statistiche"
   >("classifica");
   const [showPodiumAnimation, setShowPodiumAnimation] = useState(false);
   const [podiumSquadraTarget, setPodiumSquadraTarget] = useState<string>("Tutte");
@@ -2423,6 +2425,17 @@ export default function Fantacalcetto({
             >
               📝 Iscrizione
             </button>
+            <button
+              type="button"
+              onClick={() => setActivePublicTab("statistiche")}
+              className={`flex-1 min-w-[30%] py-1.5 rounded-xl text-[10.5px] font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
+                activePublicTab === "statistiche"
+                  ? "bg-yellow-400 text-emerald-950 shadow-md font-extrabold"
+                  : "text-emerald-300 hover:text-white hover:bg-emerald-900/30 font-bold"
+              }`}
+            >
+              📊 Statistiche
+            </button>
           </div>
 
           {isMercatoLiberoValido && (
@@ -2628,11 +2641,11 @@ export default function Fantacalcetto({
                     {rankedTeams.length > 0 && (
                       <button
                         type="button"
-                        onClick={() => setShowGeneralReportModal(true)}
+                        onClick={() => setActivePublicTab("statistiche")}
                         className="bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1 cursor-pointer transition-transform hover:-translate-y-0.5"
-                        title="Vedi referto con tutti i voti assegnati in tutte le partite"
+                        title="Vedi referto, statistiche avanzate ed esporta per i social"
                       >
-                        <span>📄 Filtra & Apri Referto</span>
+                        <span>📊 Filtra & Apri Statistiche</span>
                       </button>
                     )}
                     <span className="bg-emerald-900 text-emerald-200 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full font-mono shrink-0">
@@ -2917,10 +2930,10 @@ export default function Fantacalcetto({
                   {rankedTeams.length > 0 && (
                     <button
                       type="button"
-                      onClick={() => setShowGeneralReportModal(true)}
+                      onClick={() => setActivePublicTab("statistiche")}
                       className="bg-yellow-400 hover:bg-yellow-500 text-emerald-950 text-[10px] font-black uppercase px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-1.5 cursor-pointer transition-all hover:scale-105 active:scale-95 duration-200"
                     >
-                      <span>📄 Apri Referto Generale</span>
+                      <span>📊 Apri Hub Statistiche</span>
                     </button>
                   )}
                 </div>
@@ -2940,10 +2953,10 @@ export default function Fantacalcetto({
                   {rankedTeams.length > 0 && (
                     <button
                       type="button"
-                      onClick={() => setShowGeneralReportModal(true)}
+                      onClick={() => setActivePublicTab("statistiche")}
                       className="text-yellow-400 hover:text-yellow-300 font-black text-[10.5px] uppercase underline underline-offset-4 shrink-0 transition-opacity hover:opacity-90 block"
                     >
-                      Vedi Referto Generale →
+                      Vedi Hub Statistiche →
                     </button>
                   )}
                 </div>
@@ -3291,6 +3304,16 @@ export default function Fantacalcetto({
                   </div>
                 );
               })()}
+            </div>
+          ) : activePublicTab === "statistiche" ? (
+            <div className="mt-6 animate-fade-in">
+              <StatsHub
+                giocatori={giocatori}
+                fantasquadre={fantasquadre}
+                partiteChiuse={partiteChiuse || []}
+                bonuses={bonuses}
+                getTeamMatchBreakdownList={getTeamMatchBreakdownList}
+              />
             </div>
           ) : (
             <form
@@ -4525,11 +4548,11 @@ export default function Fantacalcetto({
                 {rankedTeams.length > 0 && (
                   <button
                     type="button"
-                    onClick={() => setShowGeneralReportModal(true)}
+                    onClick={() => setActivePublicTab("statistiche")}
                     className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase px-3.5 py-1.5 rounded-lg shadow-sm flex items-center gap-1 cursor-pointer transition-transform hover:-translate-y-0.5"
-                    title="Vedi referto con tutti i voti assegnati in tutte le partite"
+                    title="Vedi referto, statistiche avanzate ed esporta per i social"
                   >
-                    <span>📄 Referto Generale (Tutti i Voti)</span>
+                    <span>📊 Hub Statistiche & Referti</span>
                   </button>
                 )}
                 <span className="bg-emerald-100 text-emerald-850 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shrink-0">
