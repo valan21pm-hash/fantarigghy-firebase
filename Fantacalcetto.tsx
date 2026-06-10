@@ -1,245 +1,169 @@
-import React, { useState } from "react";
-import { PlusCircle, Save, Trash2, Edit2, CheckCircle, XCircle } from "lucide-react";
-import { CustomBonusDef, Giocatore } from "../types";
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-interface BonusManagerProps {
-  bonuses: CustomBonusDef[];
-  giocatori: Giocatore[];
-  isEditor: boolean;
-  onUpdateBonuses?: (bonuses: CustomBonusDef[]) => Promise<any>;
+import { Lightbulb, Check, Trash2, Clock, User, MessageSquare } from "lucide-react";
+import { Consiglio } from "../types";
+import { useState } from "react";
+
+interface ConsigliRicevutiProps {
+  consigli: Consiglio[];
+  onSegnaLetto: (id: string) => Promise<any>;
+  onElimina: (id: string) => Promise<any>;
+  onClose: () => void;
 }
 
-export default function BonusManager({ bonuses, giocatori, isEditor, onUpdateBonuses }: BonusManagerProps) {
-  const [localBonuses, setLocalBonuses] = useState<CustomBonusDef[]>(bonuses);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
+export default function ConsigliRicevuti({
+  consigli,
+  onSegnaLetto,
+  onElimina,
+  onClose,
+}: ConsigliRicevutiProps) {
+  const [submittingId, setSubmittingId] = useState<string | null>(null);
 
-  // Sync state if the bonuses prop changes from the server
-  React.useEffect(() => {
-    setLocalBonuses(bonuses);
-  }, [bonuses]);
-
-  const handleAdd = () => {
-    const newBonus: CustomBonusDef = {
-      id: `bonus_${Date.now()}`,
-      nome: "Nuovo Bonus",
-      descrizione: "Descrizione del bonus",
-      punti: 1,
-      isPersonale: false
-    };
-    setLocalBonuses([...localBonuses, newBonus]);
-    setEditingId(newBonus.id);
-  };
-
-  const handleUpdate = (id: string, field: keyof CustomBonusDef, value: any) => {
-    setLocalBonuses(prev => prev.map(b => b.id === id ? { ...b, [field]: value } : b));
-  };
-
-  const handleDelete = (id: string) => {
-    if (window.confirm("Sei sicuro di voler eliminare questo bonus/malus?")) {
-      setLocalBonuses(prev => prev.filter(b => b.id !== id));
-    }
-  };
-
-  const saveToDb = async () => {
-    if (!onUpdateBonuses) return;
-    setIsSaving(true);
+  const handleAction = async (id: string, actionType: "letto" | "elimina") => {
+    setSubmittingId(id + actionType);
     try {
-      await onUpdateBonuses(localBonuses);
-      setSuccessMsg("Regolamento bonus aggiornato con successo!");
-      setTimeout(() => setSuccessMsg(""), 3000);
-      setEditingId(null);
-    } catch (e) {
-      alert("Errore durante il salvataggio.");
+      if (actionType === "letto") {
+        await onSegnaLetto(id);
+      } else {
+        await onElimina(id);
+      }
+    } catch (err: any) {
+      alert("Errore nell'operazione: " + err.message);
     } finally {
-      setIsSaving(false);
+      setSubmittingId(null);
     }
   };
+
+  // Sort newest first, with unread ones highlighted or at the top
+  const sortedConsigli = [...consigli].sort((a, b) => {
+    if (a.letto === b.letto) {
+      // Sort by timeline if same state
+      return new Date(b.data).getTime() - new Date(a.data).getTime();
+    }
+    return a.letto ? 1 : -1; // Unread first
+  });
 
   return (
-    <div className="bg-slate-900 rounded-3xl border border-slate-800 p-4 sm:p-6 shadow-xl w-full mx-auto">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span>⚖️</span> Regolamento Bonus e Malus
-          </h2>
-          <p className="text-sm text-slate-400 mt-1">
-            Gestisci tutti i modificatori punteggio.
-          </p>
-        </div>
-        {isEditor && (
-          <div className="flex gap-2">
-            <button
-              onClick={handleAdd}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors"
-            >
-              <PlusCircle className="w-4 h-4" /> Aggiungi
-            </button>
-            <button
-              onClick={saveToDb}
-              disabled={isSaving}
-              className="bg-yellow-500 hover:bg-yellow-400 text-emerald-950 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors disabled:opacity-50"
-            >
-              <Save className="w-4 h-4" /> {isSaving ? "Salvataggio..." : "Salva Tutto"}
-            </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 w-full max-w-2xl my-8 flex flex-col max-h-[90vh]">
+        {/* Header */}
+        <div className="flex justify-between items-center border-b pb-4 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-amber-100 p-2 rounded-xl text-amber-600 animate-pulse">
+              <Lightbulb className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">
+                Consigli & Miglioramenti Proposti
+              </h3>
+              <p className="text-[11px] text-gray-500 font-medium">
+                Idee e richieste inviate dai presidenti durante l'inserimento delle formazioni
+              </p>
+            </div>
           </div>
-        )}
-      </div>
-
-      {successMsg && (
-        <div className="mb-4 bg-emerald-900/40 border border-emerald-500/50 text-emerald-300 px-4 py-3 rounded-xl flex items-center justify-between text-sm transition-all shadow-md">
-           <div className="flex items-center gap-2">
-             <CheckCircle className="w-4 h-4 text-emerald-400" />
-             <span className="font-medium drop-shadow-sm">{successMsg}</span>
-           </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 font-bold text-sm cursor-pointer p-1"
+          >
+            Chiudi
+          </button>
         </div>
-      )}
 
-      <div className="space-y-4">
-        {[...localBonuses].sort((a, b) => (a.isAutomatic ? 1 : 0) - (b.isAutomatic ? 1 : 0)).map(bonus => {
-          const isEditing = editingId === bonus.id && !bonus.isAutomatic;
-          return (
-            <div key={bonus.id} className={`p-4 rounded-xl border ${isEditing ? 'bg-slate-800 border-indigo-500' : 'bg-slate-800/50 border-slate-700'}`}>
-              {isEditing && isEditor ? (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-400 mb-1">Titolo Bonus/Malus</label>
-                      <input
-                        type="text"
-                        value={bonus.nome}
-                        onChange={e => handleUpdate(bonus.id, "nome", e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm"
-                      />
+        {/* Suggestion List */}
+        <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+          {sortedConsigli.length > 0 ? (
+            sortedConsigli.map((consiglio) => {
+              const isUnread = !consiglio.letto;
+              return (
+                <div
+                  key={consiglio.id}
+                  className={`border rounded-2xl p-4.5 transition-all text-left flex flex-col sm:flex-row justify-between items-start gap-4 ${
+                    isUnread
+                      ? "bg-amber-50/50 border-amber-200/80 shadow-xs"
+                      : "bg-gray-50/50 border-gray-200/60"
+                  }`}
+                >
+                  <div className="space-y-2 flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="flex items-center gap-1 text-[11px] font-black uppercase text-gray-800 bg-white border px-2.5 py-1 rounded-lg shadow-2xs">
+                        <User className="h-3.5 w-3.5 text-emerald-600" />
+                        {consiglio.autore}
+                      </span>
+                      <span className="flex items-center gap-1 text-[9.5px] font-bold text-gray-400 font-mono">
+                        <Clock className="h-3 w-3" />
+                        {consiglio.data}
+                      </span>
+                      {isUnread && (
+                        <span className="text-[8.5px] font-black uppercase tracking-wider bg-amber-500 text-white px-2 py-0.5 rounded-md animate-pulse">
+                          Nuovo
+                        </span>
+                      )}
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-400 mb-1">Punti Fissi</label>
-                      <input
-                        type="number"
-                        step="0.5"
-                        value={bonus.punti || 0}
-                        onChange={e => handleUpdate(bonus.id, "punti", parseFloat(e.target.value))}
-                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm"
-                      />
+                    
+                    <div className="text-gray-700 text-xs font-semibold leading-relaxed break-words bg-white/70 border border-gray-150/50 rounded-xl p-3 flex gap-2.5">
+                      <MessageSquare className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <span>{consiglio.testo}</span>
                     </div>
                   </div>
-                  
-                  <div>
-                    <label className="block text-xs font-bold text-slate-400 mb-1">Descrizione</label>
-                    <input
-                      type="text"
-                      value={bonus.descrizione}
-                      onChange={e => handleUpdate(bonus.id, "descrizione", e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm"
-                    />
-                  </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-400 mb-1">Moltiplicatore Gol (Opz.)</label>
-                      <input
-                        type="number"
-                        step="0.5"
-                        value={bonus.moltiplicatoreGol || ""}
-                        placeholder="Es. 1 per +1 ogni gol"
-                        onChange={e => handleUpdate(bonus.id, "moltiplicatoreGol", e.target.value ? parseFloat(e.target.value) : undefined)}
-                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-400 mb-1">Moltiplicatore Assist (Opz.)</label>
-                      <input
-                        type="number"
-                        step="0.5"
-                        value={bonus.moltiplicatoreAssist || ""}
-                        placeholder="Es. 0.5 per +0.5 x assist"
-                        onChange={e => handleUpdate(bonus.id, "moltiplicatoreAssist", e.target.value ? parseFloat(e.target.value) : undefined)}
-                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="pt-2 border-t border-slate-700 flex items-center gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={bonus.isPersonale}
-                        onChange={e => handleUpdate(bonus.id, "isPersonale", e.target.checked)}
-                        className="w-4 h-4 text-indigo-600 rounded bg-slate-900 border-slate-700 focus:ring-indigo-500"
-                      />
-                      <span className="text-sm font-medium text-slate-300">Assegna Personale</span>
-                    </label>
-
-                    {bonus.isPersonale && (
-                      <select
-                        value={bonus.giocatoreId || ""}
-                        onChange={e => handleUpdate(bonus.id, "giocatoreId", e.target.value)}
-                        className="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-white text-xs"
+                  {/* Actions */}
+                  <div className="flex sm:flex-col items-center sm:items-stretch gap-1.5 self-end sm:self-center shrink-0 w-full sm:w-auto">
+                    {isUnread && (
+                      <button
+                        type="button"
+                        disabled={submittingId === consiglio.id + "letto"}
+                        onClick={() => handleAction(consiglio.id, "letto")}
+                        className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-[10.5px] font-black uppercase rounded-xl shadow-xs transition-all cursor-pointer disabled:opacity-50"
                       >
-                        <option value="">-- Seleziona Giocatore --</option>
-                        {giocatori.map(g => (
-                          <option key={g.nome} value={g.nome.toLowerCase().replace(/\s+/g, "_")}>{g.nome}</option>
-                        ))}
-                      </select>
+                        <Check className="h-3.5 w-3.5" />
+                        <span>Letto</span>
+                      </button>
                     )}
-                  </div>
-
-                  <div className="flex justify-end pt-2">
                     <button
-                      onClick={() => setEditingId(null)}
-                      className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2"
+                      type="button"
+                      disabled={submittingId === consiglio.id + "elimina"}
+                      onClick={() => handleAction(consiglio.id, "elimina")}
+                      className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-2 text-[10.5px] font-black uppercase rounded-xl transition-all cursor-pointer disabled:opacity-50 ${
+                        isUnread
+                          ? "bg-gray-100 hover:bg-gray-200 text-gray-600 border border-gray-200"
+                          : "bg-red-50 hover:bg-red-100 text-red-650 border border-red-200"
+                      }`}
                     >
-                      <CheckCircle className="w-4 h-4" /> Fatto
+                      <Trash2 className="h-3.5 w-3.5" />
+                      <span>Elimina</span>
                     </button>
                   </div>
                 </div>
-              ) : (
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                      {bonus.nome}
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${bonus.punti && bonus.punti > 0 ? "bg-emerald-500/20 text-emerald-300" : bonus.punti && bonus.punti < 0 ? "bg-red-500/20 text-red-300" : "bg-slate-500/20 text-slate-300"}`}>
-                        {bonus.punti != null && bonus.punti !== 0 ? (bonus.punti > 0 ? `+${bonus.punti}` : bonus.punti) : "Variabile"}
-                      </span>
-                      {bonus.isPersonale && <span className="bg-indigo-500/20 text-indigo-300 text-xs px-2 py-0.5 rounded-full">Personale</span>}
-                    </h3>
-                    <p className="text-sm text-slate-400 mt-1">{bonus.descrizione}</p>
-                    
-                    {(bonus.moltiplicatoreGol || bonus.moltiplicatoreAssist) && (
-                      <div className="mt-2 flex gap-2">
-                        {bonus.moltiplicatoreGol && <span className="bg-slate-900 border border-slate-700 text-slate-300 text-xs px-2 py-1 rounded">Moltiplicatore Gol: x{bonus.moltiplicatoreGol}</span>}
-                        {bonus.moltiplicatoreAssist && <span className="bg-slate-900 border border-slate-700 text-slate-300 text-xs px-2 py-1 rounded">Moltiplicatore Assist: x{bonus.moltiplicatoreAssist}</span>}
-                      </div>
-                    )}
-                    
-                    {bonus.isPersonale && bonus.giocatoreId && (
-                      <div className="mt-2 bg-slate-900 border border-slate-700 text-slate-300 text-xs px-2 py-1 rounded inline-block">
-                        Assegnato a: <strong>{bonus.giocatoreId.replace(/_/g, " ")}</strong>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {isEditor && !bonus.isAutomatic && (
-                    <div className="flex gap-2 shrink-0">
-                      <button onClick={() => setEditingId(bonus.id)} className="text-slate-400 hover:text-white p-2">
-                        <Edit2 className="w-5 h-5" />
-                      </button>
-                      <button onClick={() => handleDelete(bonus.id)} className="text-slate-400 hover:text-red-500 p-2">
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
-                  )}
-                  {bonus.isAutomatic && (
-                    <div className="flex shrink-0">
-                      <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Sistema (Automatico)</span>
-                    </div>
-                  )}
-                </div>
-              )}
+              );
+            })
+          ) : (
+            <div className="py-16 text-center text-gray-400 flex flex-col items-center justify-center gap-3">
+              <div className="bg-gray-100 p-3 rounded-2xl text-gray-400">
+                <Lightbulb className="h-8 w-8 text-gray-400" />
+              </div>
+              <p className="font-extrabold text-sm text-gray-500">Nessun consiglio o miglioramento proposto</p>
+              <p className="text-[11px] text-gray-400 font-medium">
+                Quando i presidenti salveranno il loro roster fantacalcetto, potranno inviare feedback qui!
+              </p>
             </div>
-          );
-        })}
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-between items-center pt-4 border-t mt-4">
+          <span className="text-[10px] text-gray-400 font-bold">
+            Totale proposte: {consigli.length} ({consigli.filter(c => !c.letto).length} nuove)
+          </span>
+          <button
+            onClick={onClose}
+            className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-xl font-bold transition-all cursor-pointer"
+          >
+            Chiudi
+          </button>
+        </div>
       </div>
     </div>
   );
