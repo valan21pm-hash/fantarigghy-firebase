@@ -423,6 +423,10 @@ export default function App() {
     return await executePostAction("/api/settings/mercato-libero", { attivo, scadenza });
   };
 
+  const handleTogglePortaleBlocco = async (bloccato: boolean) => {
+    return await executePostAction("/api/settings/portale1-blocco", { bloccato });
+  };
+
   // 6. Consigli/Miglioramenti callbacks
   const handleCreaConsiglio = async (autore: string, testo: string) => {
     return await executePostAction("/api/consigli/crea", { autore, testo });
@@ -476,6 +480,20 @@ export default function App() {
   }
 
   if (isPublicPortal) {
+    if (data?.portale1Bloccato && !isAdminAuthenticated) {
+      return (
+        <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
+          <Lock className="w-16 h-16 text-indigo-400 mb-6" />
+          <h1 className="text-3xl font-black text-white tracking-tight mb-3">
+            Sito in manutenzione
+          </h1>
+          <p className="text-slate-400 max-w-md antialiased leading-relaxed">
+            Il portale Fantacalcetto è momentaneamente in fase di aggiornamento. Torneremo online al più presto.
+          </p>
+        </div>
+      );
+    }
+
     const giocatori = data?.giocatori || [];
     const partiteChiuse = data?.partiteChiuse || [];
     const partiteAperte = data?.partiteAperte || [];
@@ -488,12 +506,14 @@ export default function App() {
         bonuses={data?.bonuses}
         sessioneMercatoLibero={data?.sessioneMercatoLibero}
         scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
+        portale1Bloccato={data?.portale1Bloccato}
         onIscriviFantasquadra={handleIscriviFantasquadra}
         onRinominaFantasquadra={handleRinominaFantasquadra}
         onEliminaFantasquadra={handleEliminaFantasquadra}
         onCreaConsiglio={handleCreaConsiglio}
         onUpdateBonuses={handleUpdateBonuses}
         onToggleMercatoLibero={handleToggleMercatoLibero}
+        onTogglePortaleBlocco={handleTogglePortaleBlocco}
         consigli={data?.consigli || []}
         isEditor={isEditor}
         isAdminMode={false}
@@ -859,12 +879,14 @@ export default function App() {
               bonuses={data?.bonuses}
               sessioneMercatoLibero={data?.sessioneMercatoLibero}
               scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
+              portale1Bloccato={data?.portale1Bloccato}
               onIscriviFantasquadra={handleIscriviFantasquadra}
               onRinominaFantasquadra={handleRinominaFantasquadra}
               onEliminaFantasquadra={handleEliminaFantasquadra}
               onCreaConsiglio={handleCreaConsiglio}
               onUpdateBonuses={handleUpdateBonuses}
               onToggleMercatoLibero={handleToggleMercatoLibero}
+              onTogglePortaleBlocco={handleTogglePortaleBlocco}
               onMigrate={handleMigrate}
               consigli={data?.consigli || []}
               isEditor={isEditor}

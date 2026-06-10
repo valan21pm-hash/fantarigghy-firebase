@@ -98,6 +98,7 @@ interface FantacalcettoProps {
   bonuses?: CustomBonusDef[];
   sessioneMercatoLibero?: boolean;
   scadenzaMercatoLibero?: string | null;
+  portale1Bloccato?: boolean;
   onIscriviFantasquadra: (
     nomePartecipante: string,
     nomeFantasquadra: string,
@@ -110,6 +111,7 @@ interface FantacalcettoProps {
   onCreaConsiglio?: (autore: string, testo: string) => Promise<any>;
   onUpdateBonuses?: (bonuses: CustomBonusDef[]) => Promise<any>;
   onToggleMercatoLibero?: (attivo: boolean, scadenza?: string | null) => Promise<any>;
+  onTogglePortaleBlocco?: (bloccato: boolean) => Promise<any>;
   onMigrate?: () => void;
   consigli?: any[];
   isEditor: boolean;
@@ -131,12 +133,14 @@ export default function Fantacalcetto({
   bonuses = DEFAULT_BONUSES,
   sessioneMercatoLibero = false,
   scadenzaMercatoLibero = null,
+  portale1Bloccato = false,
   onIscriviFantasquadra,
   onEliminaFantasquadra,
   onRinominaFantasquadra,
   onCreaConsiglio,
   onUpdateBonuses,
   onToggleMercatoLibero,
+  onTogglePortaleBlocco,
   consigli = [],
   isEditor,
   isAdminMode,
@@ -4375,6 +4379,19 @@ export default function Fantacalcetto({
                 <span>Apri Portale</span>
               </a>
             </div>
+            {isEditor && (
+              <button
+                onClick={() => onTogglePortaleBlocco && onTogglePortaleBlocco(!portale1Bloccato)}
+                className={`w-full mt-2 py-1.5 font-bold text-[10.5px] uppercase rounded-lg shadow-2xs cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0 ${
+                  portale1Bloccato
+                    ? "bg-red-100 text-red-800 border border-red-200 hover:bg-red-200"
+                    : "bg-slate-100 text-slate-800 border border-slate-200 hover:bg-slate-200"
+                }`}
+              >
+                {portale1Bloccato ? <Lock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5 opacity-50" />}
+                <span>{portale1Bloccato ? "Sblocca Portale" : "Blocca Portale"}</span>
+              </button>
+            )}
           </div>
 
           {/* Link Secondario: V2 */}

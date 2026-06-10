@@ -190,6 +190,7 @@ export interface DatabaseSchema {
   bonuses?: CustomBonusDef[];
   sessioneMercatoLibero?: boolean;
   scadenzaMercatoLibero?: string | null;
+  portale1Bloccato?: boolean;
   backupsBozze?: any[];
 }
 
@@ -236,7 +237,7 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
     {
       id: "pinna_presidenziale",
       nome: "Bonus presidenziali 👑",
-      descrizione: "I Gol (+3 pt extra) e gli Assist (+1 pt extra) dei Presidenti valgono il doppio!",
+      descrizione: "I Gol e gli Assist dei Presidenti valgono il doppio (punti gol in base al ruolo)!",
       punti: 0,
       moltiplicatoreGol: 3,
       moltiplicatoreAssist: 1,
@@ -256,7 +257,7 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
     {
       id: "orlandini_leggenda",
       nome: "Bonus Leggende 🌟",
-      descrizione: "Ogni Gol segnato da vere Leggende del calcetto vale il doppio (+3 pt extra)",
+      descrizione: "Ogni Gol segnato da vere Leggende del calcetto vale il doppio (punti in base al ruolo)!",
       punti: 0,
       moltiplicatoreGol: 3,
       isPersonale: true,
@@ -774,6 +775,11 @@ export const getPlayerBonusPointsForMatch = (
     else if (r === "centrale" && !activeBonusIds.includes("gen_gol_centrale")) activeBonusIds.push("gen_gol_centrale");
     else if (r === "portiere" && !activeBonusIds.includes("gen_gol_portiere")) activeBonusIds.push("gen_gol_portiere");
   }
+
+  // Inject automatic assist bonus if assist > 0
+  if (assist > 0 && !activeBonusIds.includes("gen_assist_merda") && !activeBonusIds.includes("gen_assist_extra")) {
+    activeBonusIds.push("gen_assist_extra");
+  }
   
   for (const bId of activeBonusIds) {
     const b = allBonuses.find(x => x.id === bId);
@@ -783,8 +789,26 @@ export const getPlayerBonusPointsForMatch = (
       }
       
       let pts = b.punti || 0;
-      if (b.moltiplicatoreGol !== undefined) pts += (b.moltiplicatoreGol * gol);
-      if (b.moltiplicatoreAssist !== undefined) pts += (b.moltiplicatoreAssist * assist);
+
+      if ((b.id === "pinna_presidenziale" || b.id === "orlandini_leggenda") && ruolo) {
+        const r = ruolo.toLowerCase();
+        let val = 3;
+        if (r === "laterale") val = 4;
+        else if (r === "centrale") val = 5;
+        else if (r === "portiere") val = 8;
+        pts += val * gol;
+      } else if (b.moltiplicatoreGol !== undefined) {
+        pts += (b.moltiplicatoreGol * gol);
+      }
+
+      if (b.moltiplicatoreAssist !== undefined) {
+        if (b.id === "pinna_presidenziale" && activeBonusIds.includes("gen_assist_merda")) {
+          // Normal base=1, merda=3 -> subtotal 4. Pinna wants total 6, so we add 2 extra points per assist.
+          pts += (2 * assist);
+        } else {
+          pts += (b.moltiplicatoreAssist * assist);
+        }
+      }
       
       tot += pts;
     }
@@ -814,6 +838,11 @@ export const getPlayerBonusBreakdownForMatch = (
     else if (r === "portiere" && !activeBonusIds.includes("gen_gol_portiere")) activeBonusIds.push("gen_gol_portiere");
   }
 
+  // Inject automatic assist bonus if assist > 0
+  if (assist > 0 && !activeBonusIds.includes("gen_assist_merda") && !activeBonusIds.includes("gen_assist_extra")) {
+    activeBonusIds.push("gen_assist_extra");
+  }
+
   for (const bId of activeBonusIds) {
     const b = allBonuses.find(x => x.id === bId);
     if (b) {
@@ -822,8 +851,25 @@ export const getPlayerBonusBreakdownForMatch = (
       }
       
       let pts = b.punti || 0;
-      if (b.moltiplicatoreGol !== undefined) pts += (b.moltiplicatoreGol * gol);
-      if (b.moltiplicatoreAssist !== undefined) pts += (b.moltiplicatoreAssist * assist);
+      
+      if ((b.id === "pinna_presidenziale" || b.id === "orlandini_leggenda") && ruolo) {
+        const r = ruolo.toLowerCase();
+        let val = 3;
+        if (r === "laterale") val = 4;
+        else if (r === "centrale") val = 5;
+        else if (r === "portiere") val = 8;
+        pts += val * gol;
+      } else if (b.moltiplicatoreGol !== undefined) {
+        pts += (b.moltiplicatoreGol * gol);
+      }
+
+      if (b.moltiplicatoreAssist !== undefined) {
+        if (b.id === "pinna_presidenziale" && activeBonusIds.includes("gen_assist_merda")) {
+          pts += (2 * assist);
+        } else {
+          pts += (b.moltiplicatoreAssist * assist);
+        }
+      }
 
       // Explicitly include base goal points (3) in the breakdown description for role-based goals
       if (

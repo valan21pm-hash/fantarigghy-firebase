@@ -1843,6 +1843,19 @@ async function startServer() {
     }
   });
 
+  app.post("/api/settings/portale1-blocco", async (req, res) => {
+    try {
+      const { bloccato } = req.body;
+      const token = getAuthToken(req);
+      const db = await getDb(token);
+      db.portale1Bloccato = !!bloccato;
+      await saveDb(db, token);
+      sendDbResponse(res, db);
+    } catch (err: any) {
+      res.status(500).json({ err: "Errore durante l'aggiornamento dell'impostazione" });
+    }
+  });
+
   // 2. AGGIUNGI GIOCATORE
   app.post("/api/giocatori", async (req, res) => {
     try {

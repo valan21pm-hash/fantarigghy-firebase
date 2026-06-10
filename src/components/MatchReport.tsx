@@ -1326,14 +1326,37 @@ export default function MatchReport({
                               </div>
                               <div>
                                 <span className="block text-[9px] font-bold text-center mb-1 text-gray-500">👟 Assist</span>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  placeholder="0"
-                                  value={assists[nome] || ""}
-                                  onChange={e => handleStatNumberInput(nome, e.target.value, setAssists)}
-                                  className="w-full text-xs p-2 text-center border rounded-lg font-bold bg-white"
-                                />
+                                <div className="flex gap-1">
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="0"
+                                    value={assists[nome] || ""}
+                                    onChange={e => handleStatNumberInput(nome, e.target.value, setAssists)}
+                                    className="w-full text-xs p-2 text-center border rounded-lg font-bold bg-white"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const current = selectedBonuses[nome] || [];
+                                      const hasMerda = current.includes("gen_assist_merda");
+                                      setSelectedBonuses(prev => ({
+                                        ...prev,
+                                        [nome]: hasMerda 
+                                          ? current.filter(b => b !== "gen_assist_merda") 
+                                          : [...current.filter(b => b !== "gen_assist_extra"), "gen_assist_merda"]
+                                      }));
+                                    }}
+                                    className={`w-9 flex items-center justify-center rounded-lg border text-base transition-colors shrink-0 ${
+                                      (selectedBonuses[nome] || []).includes("gen_assist_merda")
+                                        ? "bg-amber-100 border-amber-300 shadow-inner grayscale-0 opacity-100"
+                                        : "bg-slate-50 border-slate-200 opacity-50 grayscale hover:grayscale-0 hover:opacity-100"
+                                    }`}
+                                    title="Assist della merda (💩)"
+                                  >
+                                    💩
+                                  </button>
+                                </div>
                               </div>
                               <div>
                                 <span className="block text-[9px] font-bold text-center mb-1 text-yellow-650 font-mono">🟨 Gialli</span>
