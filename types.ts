@@ -19,6 +19,8 @@ const firebaseConfig = {
   authDomain: "project-88b687bc-f709-4722-bc0.firebaseapp.com",
   storageBucket: "project-88b687bc-f709-4722-bc0.firebasestorage.app",
   messagingSenderId: "904887295261",
+  measurementId: "",
+  firestoreDatabaseId: "ai-studio-6b857cde-5955-4f04-8c44-cddcc408b2df",
 };
 
 // Initialize Firebase

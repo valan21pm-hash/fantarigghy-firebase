@@ -1,11 +1,11 @@
-node_modules/
-build/
-dist/
-coverage/
-.DS_Store
-*.log
-.env*
-!.env.example
-firebase-applet-config.json
-src/google-token.json
-google-token.json
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /giocatori/{document} { allow read, write: if true; }
+    match /campi/{document} { allow read, write: if true; }
+    match /partite/{document} { allow read, write: if true; }
+    match /logs/{document} { allow read, write: if true; }
+    match /fantasquadre/{document} { allow read, write: if true; }
+    match /consigli/{document} { allow read, write: if true; }
+  }
+}
