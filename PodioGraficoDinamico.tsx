@@ -337,7 +337,7 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       id: "pinna_presidenziale",
       nome: "Bonus presidenziali 👑",
       descrizione: "I Gol e gli Assist dei Presidenti valgono il doppio (punti gol in base al ruolo)!",
-      punti: 2,
+      punti: 0,
       isPersonale: true,
       giocatoreId: "Pinna"
     },
@@ -356,7 +356,6 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       nome: "Bonus Leggende 🌟",
       descrizione: "Ogni Gol segnato da vere Leggende del calcetto vale il doppio (punti in base al ruolo)!",
       punti: 0,
-      moltiplicatoreGol: 3,
       isPersonale: true,
       giocatoreId: "Orlandini"
     },
@@ -872,26 +871,52 @@ export const getPlayerBonusPointsForMatch = (
   if (!allBonuses) return 0;
   
   // Inject automatic bonuses based on role if goals > 0
-  const activeBonusIds = [...bonusAttivi];
-  if (gol > 0 && ruolo) {
-    const r = ruolo.toLowerCase();
-    if (r === "pivot" && !activeBonusIds.includes("gen_gol_pivot")) activeBonusIds.push("gen_gol_pivot");
-    else if (r === "laterale" && !activeBonusIds.includes("gen_gol_laterale")) activeBonusIds.push("gen_gol_laterale");
-    else if (r === "centrale" && !activeBonusIds.includes("gen_gol_centrale")) activeBonusIds.push("gen_gol_centrale");
-    else if (r === "portiere" && !activeBonusIds.includes("gen_gol_portiere")) activeBonusIds.push("gen_gol_portiere");
+  let activeBonusIds = [...bonusAttivi];
+  if (gol > 0) {
+    const roleStr = (ruolo || "pivot").toLowerCase().trim();
+    // Clear all other role bonuses to prevent any possible double counting or leftovers
+    activeBonusIds = activeBonusIds.filter(
+      id => !["gen_gol_pivot", "gen_gol_laterale", "gen_gol_centrale", "gen_gol_portiere"].includes(id)
+    );
+    if (roleStr === "laterale") {
+      activeBonusIds.push("gen_gol_laterale");
+    } else if (roleStr === "centrale") {
+      activeBonusIds.push("gen_gol_centrale");
+    } else if (roleStr === "portiere") {
+      activeBonusIds.push("gen_gol_portiere");
+    } else {
+      activeBonusIds.push("gen_gol_pivot");
+    }
+  } else {
+    // If gol is 0, ensure no role goal bonuses are in active list
+    activeBonusIds = activeBonusIds.filter(
+      id => !["gen_gol_pivot", "gen_gol_laterale", "gen_gol_centrale", "gen_gol_portiere"].includes(id)
+    );
   }
 
   // Inject automatic assist bonus if assist > 0
-  if (assist > 0 && !activeBonusIds.includes("gen_assist_merda") && !activeBonusIds.includes("gen_assist_extra")) {
-    activeBonusIds.push("gen_assist_extra");
+  if (assist > 0) {
+    const hasMerda = activeBonusIds.includes("gen_assist_merda");
+    const hasExtra = activeBonusIds.includes("gen_assist_extra");
+    if (hasMerda && hasExtra) {
+      activeBonusIds = activeBonusIds.filter(id => id !== "gen_assist_extra");
+    } else if (!hasMerda && !hasExtra) {
+      activeBonusIds.push("gen_assist_extra");
+    }
+  } else {
+    activeBonusIds = activeBonusIds.filter(id => id !== "gen_assist_extra" && id !== "gen_assist_merda");
   }
 
   // Inject automatic card bonuses if amm > 0 or rossi > 0
-  if (amm > 0 && !activeBonusIds.includes("gen_amm_extra")) {
-    activeBonusIds.push("gen_amm_extra");
+  if (amm > 0) {
+    if (!activeBonusIds.includes("gen_amm_extra")) activeBonusIds.push("gen_amm_extra");
+  } else {
+    activeBonusIds = activeBonusIds.filter(id => id !== "gen_amm_extra");
   }
-  if (rossi > 0 && !activeBonusIds.includes("gen_esp_extra")) {
-    activeBonusIds.push("gen_esp_extra");
+  if (rossi > 0) {
+    if (!activeBonusIds.includes("gen_esp_extra")) activeBonusIds.push("gen_esp_extra");
+  } else {
+    activeBonusIds = activeBonusIds.filter(id => id !== "gen_esp_extra");
   }
 
   // Inject Pinna/Orlandini personal bonuses automatically if they score or assist
@@ -965,26 +990,52 @@ export const getPlayerBonusBreakdownForMatch = (
   
   if (!allBonuses) return breakdown;
 
-  const activeBonusIds = [...bonusAttivi];
-  if (gol > 0 && ruolo) {
-    const r = ruolo.toLowerCase();
-    if (r === "pivot" && !activeBonusIds.includes("gen_gol_pivot")) activeBonusIds.push("gen_gol_pivot");
-    else if (r === "laterale" && !activeBonusIds.includes("gen_gol_laterale")) activeBonusIds.push("gen_gol_laterale");
-    else if (r === "centrale" && !activeBonusIds.includes("gen_gol_centrale")) activeBonusIds.push("gen_gol_centrale");
-    else if (r === "portiere" && !activeBonusIds.includes("gen_gol_portiere")) activeBonusIds.push("gen_gol_portiere");
+  let activeBonusIds = [...bonusAttivi];
+  if (gol > 0) {
+    const roleStr = (ruolo || "pivot").toLowerCase().trim();
+    // Clear all other role bonuses to prevent any possible double counting or leftovers
+    activeBonusIds = activeBonusIds.filter(
+      id => !["gen_gol_pivot", "gen_gol_laterale", "gen_gol_centrale", "gen_gol_portiere"].includes(id)
+    );
+    if (roleStr === "laterale") {
+      activeBonusIds.push("gen_gol_laterale");
+    } else if (roleStr === "centrale") {
+      activeBonusIds.push("gen_gol_centrale");
+    } else if (roleStr === "portiere") {
+      activeBonusIds.push("gen_gol_portiere");
+    } else {
+      activeBonusIds.push("gen_gol_pivot");
+    }
+  } else {
+    // If gol is 0, ensure no role goal bonuses are in active list
+    activeBonusIds = activeBonusIds.filter(
+      id => !["gen_gol_pivot", "gen_gol_laterale", "gen_gol_centrale", "gen_gol_portiere"].includes(id)
+    );
   }
 
   // Inject automatic assist bonus if assist > 0
-  if (assist > 0 && !activeBonusIds.includes("gen_assist_merda") && !activeBonusIds.includes("gen_assist_extra")) {
-    activeBonusIds.push("gen_assist_extra");
+  if (assist > 0) {
+    const hasMerda = activeBonusIds.includes("gen_assist_merda");
+    const hasExtra = activeBonusIds.includes("gen_assist_extra");
+    if (hasMerda && hasExtra) {
+      activeBonusIds = activeBonusIds.filter(id => id !== "gen_assist_extra");
+    } else if (!hasMerda && !hasExtra) {
+      activeBonusIds.push("gen_assist_extra");
+    }
+  } else {
+    activeBonusIds = activeBonusIds.filter(id => id !== "gen_assist_extra" && id !== "gen_assist_merda");
   }
 
   // Inject automatic card bonuses if amm > 0 or rossi > 0
-  if (amm > 0 && !activeBonusIds.includes("gen_amm_extra")) {
-    activeBonusIds.push("gen_amm_extra");
+  if (amm > 0) {
+    if (!activeBonusIds.includes("gen_amm_extra")) activeBonusIds.push("gen_amm_extra");
+  } else {
+    activeBonusIds = activeBonusIds.filter(id => id !== "gen_amm_extra");
   }
-  if (rossi > 0 && !activeBonusIds.includes("gen_esp_extra")) {
-    activeBonusIds.push("gen_esp_extra");
+  if (rossi > 0) {
+    if (!activeBonusIds.includes("gen_esp_extra")) activeBonusIds.push("gen_esp_extra");
+  } else {
+    activeBonusIds = activeBonusIds.filter(id => id !== "gen_esp_extra");
   }
 
   // Inject Pinna/Orlandini personal bonuses automatically if they score or assist
