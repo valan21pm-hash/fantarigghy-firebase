@@ -121,6 +121,8 @@ export default function MatchReport({
 
   const [hasBackedUpDraft, setHasBackedUpDraft] = useState(false);
   const [showBackupsModal, setShowBackupsModal] = useState(false);
+  const [tipoInvio, setTipoInvio] = useState<"provvisorio" | "definitivo">("provvisorio");
+  const [postSubmitState, setPostSubmitState] = useState<"provvisorio" | "definitivo" | null>(null);
 
   // Initialize form state when match changes
 
@@ -571,6 +573,9 @@ export default function MatchReport({
       
       setSuccessMessage("Partita refertata con successo! I saldi dei conti sono stati aggiornati.");
       
+      // Store post submission state before clearing
+      setPostSubmitState(tipoInvio);
+
       // Clear states
       setSelectedMatchId("");
       setRisultato("");
@@ -1597,6 +1602,26 @@ export default function MatchReport({
                 ⚠️ I saldi personali di ciascun pagante saranno ridotti di {confirmModalData.quotaSingola.toFixed(2)}€. Questa operazione aggiornerà l'archivio {isAmichevole ? "delle amichevoli" : "delle classifiche e i punti Fantacalcetto"} in tempo reale.
               </p>
 
+              <div className="pt-2">
+                <p className="text-[11px] font-bold text-gray-800 mb-2">Tipologia Invio Referto:</p>
+                <div className="flex flex-col gap-2">
+                  <label className={`flex items-center gap-2 p-3 border rounded-xl cursor-pointer transition-colors ${tipoInvio === 'provvisorio' ? 'bg-indigo-50 border-indigo-500' : 'bg-white border-gray-200'}`}>
+                    <input type="radio" value="provvisorio" checked={tipoInvio === 'provvisorio'} onChange={() => setTipoInvio("provvisorio")} className="accent-indigo-600 w-4 h-4" />
+                    <div>
+                      <p className="font-bold text-xs text-indigo-900">Provvisorio</p>
+                      <p className="text-[10px] text-indigo-700">In attesa pagelle e bonus ATLeague.</p>
+                    </div>
+                  </label>
+                  <label className={`flex items-center gap-2 p-3 border rounded-xl cursor-pointer transition-colors ${tipoInvio === 'definitivo' ? 'bg-emerald-50 border-emerald-500' : 'bg-white border-gray-200'}`}>
+                    <input type="radio" value="definitivo" checked={tipoInvio === 'definitivo'} onChange={() => setTipoInvio("definitivo")} className="accent-emerald-600 w-4 h-4" />
+                    <div>
+                      <p className="font-bold text-xs text-emerald-900">Definitivo</p>
+                      <p className="text-[10px] text-emerald-700">Dati completi e pronti per l'archivio.</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
               <div className="flex gap-2.5 pt-1">
                 <button
                   type="button"
@@ -1693,6 +1718,35 @@ export default function MatchReport({
                >
                  Chiudi
                </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Post Submit Modal */}
+      {postSubmitState && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className={`bg-white rounded-2xl max-w-sm w-full overflow-hidden shadow-2xl border ${postSubmitState === 'provvisorio' ? 'border-indigo-100' : 'border-emerald-100'} animate-in fade-in zoom-in-95 duration-200 text-center`}>
+            <div className={`p-6 space-y-4 ${postSubmitState === 'provvisorio' ? 'bg-indigo-50' : 'bg-emerald-50'}`}>
+              <div className="mx-auto w-12 h-12 rounded-full flex items-center justify-center bg-white shadow-sm mb-2 text-2xl">
+                {postSubmitState === 'provvisorio' ? '⏳' : '✅'}
+              </div>
+              <h3 className={`font-black text-lg leading-tight ${postSubmitState === 'provvisorio' ? 'text-indigo-900' : 'text-emerald-900'}`}>
+                {postSubmitState === 'provvisorio' ? 'Referto Provvisorio Inviato' : 'Referto Definitivo Archiviato'}
+              </h3>
+              <p className={`text-sm font-medium leading-relaxed ${postSubmitState === 'provvisorio' ? 'text-indigo-800' : 'text-emerald-800'}`}>
+                {postSubmitState === 'provvisorio' 
+                  ? "Il referto è stato inviato come Provvisorio. Restiamo in attesa che vengano pubblicate le pagelle ufficiali di ATLeague per aggiornare bonus/malus e consolidare definitivamente le statistiche della partita."
+                  : "Referto aggiornato e reso Definitivo! Tutti i dati (compresi i bonus/malus delle pagelle) sono stati acquisiti con successo. Il referto ora è ufficialmente consolidato a sistema."}
+              </p>
+            </div>
+            <div className="p-4 bg-white">
+              <button
+                onClick={() => setPostSubmitState(null)}
+                className={`w-full py-3 font-extrabold text-sm rounded-xl shadow-sm transition-colors cursor-pointer ${postSubmitState === 'provvisorio' ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'}`}
+              >
+                Chiudi Notifica
+              </button>
             </div>
           </div>
         </div>

@@ -152,7 +152,7 @@ export default function App() {
       setLoading(true);
       const res = await googleSignIn();
       if (res) {
-        const authorizedEmails = ["valan21pm@gmail.com", "10roby1985@gmail.com"];
+        const authorizedEmails = ["valan21pm@gmail.com", "10roby1985@gmail.com", "lorenzo.pittiu@gmail.com"];
         const resEmail = (res.user.email || "").toLowerCase().trim();
         if (!authorizedEmails.includes(resEmail)) {
           await logout();
@@ -447,7 +447,7 @@ export default function App() {
     );
   }
 
-  const authorizedEmails = ["valan21pm@gmail.com", "10roby1985@gmail.com"];
+  const authorizedEmails = ["valan21pm@gmail.com", "10roby1985@gmail.com", "lorenzo.pittiu@gmail.com"];
   const userEmail = (user?.email || "").toLowerCase().trim();
   const isAdminAuthenticated = user && authorizedEmails.includes(userEmail);
 
