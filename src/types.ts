@@ -92,14 +92,97 @@ export const getPlayerBasePrice = (nome: string): number => {
   return 10;
 };
 
-export const getPlayerCurrentPrice = (nome: string, fantaScore: number): number => {
+export const getPlayerCurrentPrice = (
+  nome: string,
+  fantaScore: number,
+  partiteChiuse?: Partita[],
+  allBonuses: CustomBonusDef[] = DEFAULT_BONUSES,
+  globalGiocatori: Giocatore[] = []
+): number => {
   const base = getPlayerBasePrice(nome);
-  let change = 0;
-  if (fantaScore >= 4) {
-    change = Math.floor((fantaScore - 4) / 6) + 1;
-  } else if (fantaScore <= -4) {
-    change = -(Math.floor((-fantaScore - 4) / 6) + 1);
+  
+  if (!partiteChiuse || partiteChiuse.length === 0) {
+    // Fallback if no individual match data is passed (e.g. static/initial rendering)
+    let change = 0;
+    if (fantaScore >= 10) change = 1;
+    if (fantaScore >= 20) change = 2;
+    if (fantaScore <= -2) {
+      if (fantaScore <= -11) change = -3;
+      else if (fantaScore <= -6) change = -2;
+      else change = -1;
+    }
+    return Math.max(1, base + change);
   }
+
+  let change = 0;
+  const fallbackPlayerInfo = globalGiocatori.find(g => g.nome.toLowerCase() === nome.toLowerCase());
+
+  for (const m of partiteChiuse) {
+    const isAmichevole = m.dettagli ? m.dettagli.toLowerCase().includes("amichevole") : false;
+    const inviatoFanta = m.inviatoFanta === true;
+
+    if (!isAmichevole && inviatoFanta && m.referto) {
+      const r = m.referto.find(x => (x.snapshotGiocatore?.nome || x.nome).toLowerCase() === nome.toLowerCase());
+      const isPresente = r ? r.statoPresenza === "giocato" : false;
+      let matchScore = 0;
+
+      if (r) {
+        const rGol = isPresente ? (Number(r.gol) || 0) : 0;
+        const rAssist = isPresente ? (Number(r.assist) || 0) : 0;
+        const rAmm = isPresente ? (Number(r.amm) || 0) : 0;
+        const rEsp = isPresente ? (Number(r.rossi) || 0) : 0;
+        const rBonusAttivi = r.bonusAttivi || [];
+
+        const matchBonus = getPlayerBonusPointsForMatch(
+          nome,
+          rBonusAttivi,
+          rGol,
+          rAssist,
+          allBonuses,
+          r.snapshotGiocatore?.ultimoRuolo || fallbackPlayerInfo?.ultimoRuolo
+        );
+
+        matchScore = parseFloat(
+          (
+            rGol * GOAL_POINTS +
+            rAssist * ASSIST_POINTS +
+            rAmm * AMMO_POINTS +
+            rEsp * ESPU_POINTS +
+            matchBonus
+          ).toFixed(1)
+        );
+      }
+
+      if (isPresente) {
+        // Convocati (Presenti/Giocati)
+        if (matchScore >= 10 && matchScore <= 19) {
+          change += 1;
+        } else if (matchScore >= 20) {
+          change += 2;
+        } else if (matchScore >= -5 && matchScore <= -2) {
+          change -= 1;
+        } else if (matchScore >= -10 && matchScore <= -6) {
+          change -= 2;
+        } else if (matchScore <= -11) {
+          change -= 3;
+        }
+      } else {
+        // Non Convocati (Assenti, Sostituti o non a referto)
+        if (matchScore >= 7 && matchScore <= 13) {
+          change += 1;
+        } else if (matchScore >= 14) {
+          change += 2;
+        } else if (matchScore >= -5 && matchScore <= -2) {
+          change -= 1;
+        } else if (matchScore >= -10 && matchScore <= -6) {
+          change -= 2;
+        } else if (matchScore <= -11) {
+          change -= 3;
+        }
+      }
+    }
+  }
+
   return Math.max(1, base + change);
 };
 

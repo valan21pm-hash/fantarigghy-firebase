@@ -2726,6 +2726,9 @@ export default function Fantacalcetto({
                                         getPlayerCurrentPrice(
                                           name,
                                           stats.fantaScore,
+                                          partiteChiuse,
+                                          bonuses,
+                                          giocatori
                                         )
                                       );
                                     },
@@ -4059,6 +4062,9 @@ export default function Fantacalcetto({
                                       const pPrice = getPlayerCurrentPrice(
                                         p.nome,
                                         playerStats.fantaScore,
+                                        partiteChiuse,
+                                        bonuses,
+                                        giocatori
                                       );
                                       const basePrice = getPlayerBasePrice(
                                         p.nome,

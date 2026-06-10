@@ -2848,6 +2848,9 @@ export default function FantacalcettoV2({
                                         getPlayerCurrentPrice(
                                           name,
                                           stats.fantaScore,
+                                          partiteChiuse,
+                                          bonuses,
+                                          giocatori
                                         )
                                       );
                                     },
@@ -4192,7 +4195,7 @@ export default function FantacalcettoV2({
                                 <div className="flex items-center xl:items-end justify-between xl:justify-center border-t xl:border-t-0 border-indigo-900/50 pt-3 xl:pt-0 mt-3 xl:mt-0 gap-4">
                                   {(() => {
                                     const playerStats = getPlayerStatsObj(p.nome);
-                                    const pPrice = getPlayerCurrentPrice(p.nome, playerStats.fantaScore);
+                                    const pPrice = getPlayerCurrentPrice(p.nome, playerStats.fantaScore, partiteChiuse, bonuses, giocatori);
                                     const basePrice = getPlayerBasePrice(p.nome);
                                     const diff = pPrice - basePrice;
                                     return (

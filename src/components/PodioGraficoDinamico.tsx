@@ -48,7 +48,7 @@ export default function PodioGraficoDinamico({
     podiumData = top3.map((t, idx) => ({
       rank: idx + 1,
       name: t.nomeFantasquadra,
-      score: Number(t.score).toFixed(1)
+      score: Number(Number(t.score).toFixed(1))
     }));
   } else if (targetId === "GiocatoriAssoluti") {
     title = "MIGLIORI GIOCATORI";
@@ -61,7 +61,7 @@ export default function PodioGraficoDinamico({
     podiumData = scoringPlayers.slice(0, 3).map((p, idx) => ({
       rank: idx + 1,
       name: p.nome,
-      score: p.score.toFixed(1)
+      score: Number(p.score.toFixed(1))
     }));
   } else {
     // Specific Fantasquadra
@@ -77,14 +77,14 @@ export default function PodioGraficoDinamico({
       podiumData = teamPlayers.slice(0, 3).map((p, idx) => ({
         rank: idx + 1,
         name: p.nome,
-        score: p.score.toFixed(1)
+        score: Number(p.score.toFixed(1))
       }));
     }
   }
 
   // Se ci sono meno di 3, riempiamo per evitare crash
   while(podiumData.length < 3) {
-      podiumData.push({ rank: podiumData.length + 1, name: "-", score: "0" });
+      podiumData.push({ rank: podiumData.length + 1, name: "-", score: 0 });
   }
 
   const p1 = podiumData[0];
