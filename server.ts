@@ -1197,6 +1197,7 @@ function sendDbResponse(res: express.Response, db: DatabaseSchema) {
     bonuses: db.bonuses,
     sessioneMercatoLibero: db.sessioneMercatoLibero,
     scadenzaMercatoLibero: db.scadenzaMercatoLibero,
+    backupsBozze: db.backupsBozze || [],
   });
 }
 
