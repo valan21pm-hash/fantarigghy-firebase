@@ -337,3 +337,53 @@ export const generateGeneralReportPdf = (
   
   doc.save("Referto_Generale_Easy_Rigging.pdf");
 };
+
+export const generatePartitaGiocatoriPdf = (match: any) => {
+  const doc = new jsPDF();
+  doc.setFontSize(18);
+  doc.setTextColor(0, 50, 0);
+  doc.text(`Report Giocatori - ${match.dettagli}`, 14, 20);
+
+  const tableData = (match.referto || []).map((r: any) => {
+    return [
+      r.nome,
+      r.gol || 0,
+      r.assist || 0,
+      (r.amm ? "Si" : "No"),
+      (r.rossi ? "Si" : "No")
+    ];
+  });
+
+  autoTable(doc, {
+    startY: 30,
+    head: [["Giocatore", "Gol", "Assist", "Gialli", "Rossi"]],
+    body: tableData,
+    theme: "grid"
+  });
+
+  doc.save(`Report_Giocatori_${match.id}.pdf`);
+};
+
+export const generatePartitaSingoloGiocatorePdf = (match: any, playerName: string) => {
+  const doc = new jsPDF();
+  doc.setFontSize(18);
+  doc.text(`Report Giocatore: ${playerName}`, 14, 20);
+  doc.setFontSize(12);
+  doc.text(`Partita: ${match.dettagli}`, 14, 28);
+
+  const r = (match.referto || []).find((x: any) => x.nome === playerName);
+  if (!r) {
+    doc.text("Giocatore non trovato a referto.", 14, 40);
+  } else {
+    doc.text(`Gol: ${r.gol || 0}`, 14, 40);
+    doc.text(`Assist: ${r.assist || 0}`, 14, 48);
+    doc.text(`Ammonizioni: ${r.amm || 0}`, 14, 56);
+    doc.text(`Espulsioni: ${r.rossi || 0}`, 14, 64);
+  }
+
+  doc.save(`Report_${playerName.replace(/\s+/g, '_')}_${match.id}.pdf`);
+};
+
+export const generatePartitaSquadraPdf = (match: any, teamName: string, mb: any) => {
+  generateMatchPdf(teamName, mb);
+};

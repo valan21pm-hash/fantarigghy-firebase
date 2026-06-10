@@ -56,7 +56,7 @@ import {
 // (Keep everything else mostly the same)
 // I will place the computation variables inside the component.
 
-import { generateMatchPdf, generateGeneralReportPdf } from "../lib/pdfHelper";
+import { generateMatchPdf, generateGeneralReportPdf, generatePartitaGiocatoriPdf, generatePartitaSingoloGiocatorePdf, generatePartitaSquadraPdf } from "../lib/pdfHelper";
 import BonusManager from "./BonusManager";
 
 const MercatoCountdown = ({ targetDate, className }: { targetDate: string, className?: string }) => {
@@ -342,6 +342,8 @@ export default function FantacalcettoV2({
   const [nuovoNomeSquadra, setNuovoNomeSquadra] = useState("");
   const [mercatoDateString, setMercatoDateString] = useState("");
   const [showGeneralReportModal, setShowGeneralReportModal] = useState(false);
+  const [matchForPlayerChoice, setMatchForPlayerChoice] = useState<Partita | null>(null);
+  const [matchForTeamChoice, setMatchForTeamChoice] = useState<Partita | null>(null);
 
   // Auto-login all'avvio se già registrati in localStorage
   useEffect(() => {
@@ -3085,6 +3087,24 @@ export default function FantacalcettoV2({
                                    <Users className="w-3 h-3" /> {m.referto?.length || 0}
                                  </span>
                                </div>
+
+                               {/* Nuovi report / export buttons per singola partita */}
+                               <div className="flex flex-col gap-1.5 mt-2 border-t border-indigo-800/40 pt-2">
+                                 <span className="text-[8px] uppercase font-bold text-indigo-400">Esporta Report PDF:</span>
+                                 <button onClick={() => generatePartitaGiocatoriPdf(m)} className="w-full text-left bg-indigo-950/50 hover:bg-yellow-400 hover:text-indigo-900 border border-indigo-800/50 text-indigo-200 text-[9px] font-bold uppercase py-1 px-2 rounded flex justify-between transition-colors shadow-sm">
+                                   Giocatori
+                                   <Download className="w-3 h-3" />
+                                 </button>
+                                 <button onClick={() => setMatchForPlayerChoice(m)} className="w-full text-left bg-indigo-950/50 hover:bg-yellow-400 hover:text-indigo-900 border border-indigo-800/50 text-indigo-200 text-[9px] font-bold uppercase py-1 px-2 rounded flex justify-between transition-colors shadow-sm">
+                                   Singolo Giocatore
+                                   <Download className="w-3 h-3" />
+                                 </button>
+                                 <button onClick={() => setMatchForTeamChoice(m)} className="w-full text-left bg-indigo-950/50 hover:bg-yellow-400 hover:text-indigo-900 border border-indigo-800/50 text-indigo-200 text-[9px] font-bold uppercase py-1 px-2 rounded flex justify-between transition-colors shadow-sm">
+                                   Squadra
+                                   <Download className="w-3 h-3" />
+                                 </button>
+                               </div>
+
                              </div>
                            )
                          })}
@@ -5208,6 +5228,65 @@ export default function FantacalcettoV2({
           onClose={() => setShowGeneralReportModal(false)}
           generateGeneralReportPdf={generateGeneralReportPdf}
         />
+      )}
+
+      {matchForPlayerChoice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-indigo-950/80 backdrop-blur-sm">
+          <div className="bg-white border-2 border-indigo-900 rounded-2xl w-full max-w-sm p-5 shadow-2xl relative">
+            <button onClick={() => setMatchForPlayerChoice(null)} className="absolute top-3 right-3 text-indigo-900 hover:text-red-600 bg-indigo-100 hover:bg-indigo-200 p-1.5 rounded-full transition-colors z-10"><X className="w-4 h-4" /></button>
+            <h3 className="font-extrabold text-indigo-900 text-lg mb-3">Seleziona Giocatore</h3>
+            <p className="text-xs text-gray-600 mb-4">Scegli per quale giocatore generare il report individuale in questa partita.</p>
+            <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
+              {(matchForPlayerChoice.referto || []).map((r: any) => (
+                <button
+                  key={r.nome}
+                  onClick={() => {
+                    generatePartitaSingoloGiocatorePdf(matchForPlayerChoice, r.nome);
+                    setMatchForPlayerChoice(null);
+                  }}
+                  className="w-full text-left bg-gray-50 hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 p-3 rounded-xl font-bold text-sm text-indigo-900 flex justify-between items-center transition-colors"
+                >
+                  {r.nome}
+                  <Download className="w-4 h-4 text-indigo-500" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {matchForTeamChoice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-indigo-950/80 backdrop-blur-sm">
+          <div className="bg-white border-2 border-indigo-900 rounded-2xl w-full max-w-sm p-5 shadow-2xl relative">
+            <button onClick={() => setMatchForTeamChoice(null)} className="absolute top-3 right-3 text-indigo-900 hover:text-red-600 bg-indigo-100 hover:bg-indigo-200 p-1.5 rounded-full transition-colors z-10"><X className="w-4 h-4" /></button>
+            <h3 className="font-extrabold text-indigo-900 text-lg mb-3">Seleziona Fantasquadra</h3>
+            <p className="text-xs text-gray-600 mb-4">Scegli per quale fantasquadra generare il dettaglio punti di questa partita.</p>
+            <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
+              {rankedTeams.map((team: any) => {
+                const matchBreakdowns = getTeamMatchBreakdownList(team);
+                const breakdown = matchBreakdowns.find((b: any) => b.matchId === matchForTeamChoice.id);
+                if (!breakdown) return null;
+
+                return (
+                  <button
+                    key={team.id}
+                    onClick={() => {
+                       generatePartitaSquadraPdf(matchForTeamChoice, team.nomeFantasquadra, breakdown);
+                       setMatchForTeamChoice(null);
+                    }}
+                    className="w-full text-left bg-gray-50 hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 p-3 rounded-xl font-bold text-sm text-indigo-900 flex justify-between items-center transition-colors"
+                  >
+                    <div>
+                      <span className="block truncate max-w-[220px]">{team.nomeFantasquadra}</span>
+                      <span className="block text-[10px] text-gray-500 font-medium">({team.nomePartecipante})</span>
+                    </div>
+                    <Download className="w-4 h-4 text-indigo-500 shrink-0" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

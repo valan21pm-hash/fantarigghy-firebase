@@ -51,7 +51,7 @@ import {
 // (Keep everything else mostly the same)
 // I will place the computation variables inside the component.
 
-import { generateMatchPdf, generateGeneralReportPdf } from "../lib/pdfHelper";
+import { generateMatchPdf, generateGeneralReportPdf, generatePartitaGiocatoriPdf, generatePartitaSingoloGiocatorePdf, generatePartitaSquadraPdf } from "../lib/pdfHelper";
 import BonusManager from "./BonusManager";
 import PodioGraficoDinamico from "./PodioGraficoDinamico";
 
@@ -249,6 +249,8 @@ export default function Fantacalcetto({
   const [nuovoNomeSquadra, setNuovoNomeSquadra] = useState("");
   const [mercatoDateString, setMercatoDateString] = useState("");
   const [showGeneralReportModal, setShowGeneralReportModal] = useState(false);
+  const [matchForPlayerChoice, setMatchForPlayerChoice] = useState<Partita | null>(null);
+  const [matchForTeamChoice, setMatchForTeamChoice] = useState<Partita | null>(null);
 
   // Auto-login all'avvio se già registrati in localStorage
   useEffect(() => {
@@ -2996,15 +2998,29 @@ export default function Fantacalcetto({
                             )}
                           </div>
 
-                          <div className="flex items-center gap-3 self-start md:self-center shrink-0">
+                          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 self-start md:self-center shrink-0">
                             {m.referto && m.referto.length > 0 ? (
-                              <div className="text-right hidden sm:block">
-                                <p className="text-[10.5px] text-emerald-300 font-bold">
-                                  ✓ {m.referto.length} Voti Presenti
-                                </p>
-                                <p className="text-[8.5px] text-emerald-500/80 uppercase tracking-wider font-semibold">
-                                  Dati refertati
-                                </p>
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                <div className="text-right hidden sm:block">
+                                  <p className="text-[10.5px] text-emerald-300 font-bold">
+                                    ✓ {m.referto.length} Voti Presenti
+                                  </p>
+                                  <p className="text-[8.5px] text-emerald-500/80 uppercase tracking-wider font-semibold">
+                                    Dati refertati
+                                  </p>
+                                </div>
+                                <div className="flex flex-col gap-1.5 border-t sm:border-t-0 sm:border-l border-emerald-800/40 pt-2 sm:pt-0 sm:pl-4">
+                                  <span className="text-[8px] uppercase font-bold text-emerald-400 mb-0.5">Esporta PDF:</span>
+                                  <button onClick={() => generatePartitaGiocatoriPdf(m)} className="text-left bg-emerald-950/50 hover:bg-yellow-400 hover:text-emerald-900 border border-emerald-800/50 text-emerald-200 text-[9px] font-bold uppercase py-1 px-2 rounded flex items-center justify-between gap-2 transition-colors shadow-sm w-36">
+                                    Giocatori <Download className="w-3 h-3 shrink-0" />
+                                  </button>
+                                  <button onClick={() => setMatchForPlayerChoice(m)} className="text-left bg-emerald-950/50 hover:bg-yellow-400 hover:text-emerald-900 border border-emerald-800/50 text-emerald-200 text-[9px] font-bold uppercase py-1 px-2 rounded flex items-center justify-between gap-2 transition-colors shadow-sm w-36">
+                                    Singolo <Download className="w-3 h-3 shrink-0" />
+                                  </button>
+                                  <button onClick={() => setMatchForTeamChoice(m)} className="text-left bg-emerald-950/50 hover:bg-yellow-400 hover:text-emerald-900 border border-emerald-800/50 text-emerald-200 text-[9px] font-bold uppercase py-1 px-2 rounded flex items-center justify-between gap-2 transition-colors shadow-sm w-36">
+                                    Squadra <Download className="w-3 h-3 shrink-0" />
+                                  </button>
+                                </div>
                               </div>
                             ) : (
                               <p className="text-[10px] text-emerald-500/60 italic hidden sm:block">
@@ -5130,6 +5146,65 @@ export default function Fantacalcetto({
           onClose={() => setShowGeneralReportModal(false)}
           generateGeneralReportPdf={generateGeneralReportPdf}
         />
+      )}
+
+      {matchForPlayerChoice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-950/80 backdrop-blur-sm">
+          <div className="bg-white border-2 border-emerald-900 rounded-2xl w-full max-w-sm p-5 shadow-2xl relative">
+            <button onClick={() => setMatchForPlayerChoice(null)} className="absolute top-3 right-3 text-emerald-900 hover:text-red-600 bg-emerald-100 hover:bg-emerald-200 p-1.5 rounded-full transition-colors z-10"><X className="w-4 h-4" /></button>
+            <h3 className="font-extrabold text-emerald-900 text-lg mb-3">Seleziona Giocatore</h3>
+            <p className="text-xs text-gray-600 mb-4">Scegli per quale giocatore generare il report individuale in questa partita.</p>
+            <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
+              {(matchForPlayerChoice.referto || []).map((r: any) => (
+                <button
+                  key={r.nome}
+                  onClick={() => {
+                    generatePartitaSingoloGiocatorePdf(matchForPlayerChoice, r.nome);
+                    setMatchForPlayerChoice(null);
+                  }}
+                  className="w-full text-left bg-gray-50 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 p-3 rounded-xl font-bold text-sm text-emerald-900 flex justify-between items-center transition-colors"
+                >
+                  {r.nome}
+                  <Download className="w-4 h-4 text-emerald-500" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {matchForTeamChoice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-emerald-950/80 backdrop-blur-sm">
+          <div className="bg-white border-2 border-emerald-900 rounded-2xl w-full max-w-sm p-5 shadow-2xl relative">
+            <button onClick={() => setMatchForTeamChoice(null)} className="absolute top-3 right-3 text-emerald-900 hover:text-red-600 bg-emerald-100 hover:bg-emerald-200 p-1.5 rounded-full transition-colors z-10"><X className="w-4 h-4" /></button>
+            <h3 className="font-extrabold text-emerald-900 text-lg mb-3">Seleziona Fantasquadra</h3>
+            <p className="text-xs text-gray-600 mb-4">Scegli per quale fantasquadra generare il dettaglio punti di questa partita.</p>
+            <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
+              {rankedTeams.map((team: any) => {
+                const matchBreakdowns = getTeamMatchBreakdownList(team);
+                const breakdown = matchBreakdowns.find((b: any) => b.matchId === matchForTeamChoice.id);
+                if (!breakdown) return null;
+
+                return (
+                  <button
+                    key={team.id}
+                    onClick={() => {
+                       generatePartitaSquadraPdf(matchForTeamChoice, team.nomeFantasquadra, breakdown);
+                       setMatchForTeamChoice(null);
+                    }}
+                    className="w-full text-left bg-gray-50 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 p-3 rounded-xl font-bold text-sm text-emerald-900 flex justify-between items-center transition-colors"
+                  >
+                    <div>
+                      <span className="block truncate max-w-[220px]">{team.nomeFantasquadra}</span>
+                      <span className="block text-[10px] text-gray-500 font-medium">({team.nomePartecipante})</span>
+                    </div>
+                    <Download className="w-4 h-4 text-emerald-500 shrink-0" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       )}
 
       {showPodiumAnimation && (
