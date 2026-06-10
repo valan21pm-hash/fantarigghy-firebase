@@ -74,10 +74,10 @@ export interface Fantasquadra {
 }
 
 // Fanta point formula coefficients
-export const GOAL_POINTS = 0;
-export const ASSIST_POINTS = 0;
-export const AMMO_POINTS = 0;
-export const ESPU_POINTS = 0;
+export const GOAL_POINTS = 3;
+export const ASSIST_POINTS = 1;
+export const AMMO_POINTS = -1;
+export const ESPU_POINTS = -3;
 export const MAX_BUDGET = 60;
 
 export const getPlayerBasePrice = (nome: string): number => {
@@ -872,22 +872,22 @@ export const getPlayerBonusPointsForMatch = (
   if (!allBonuses) return 0;
   
   // Inject automatic bonuses based on role if goals > 0
+  // let activeBonusIds = [...bonusAttivi];
+  // if (gol > 0 && ruolo) {
+  //   const r = ruolo.toLowerCase();
+  //   if (r === "pivot" && !activeBonusIds.includes("gen_gol_pivot")) activeBonusIds.push("gen_gol_pivot");
+  //   else if (r === "laterale" && !activeBonusIds.includes("gen_gol_laterale")) activeBonusIds.push("gen_gol_laterale");
+  //   else if (r === "centrale" && !activeBonusIds.includes("gen_gol_centrale")) activeBonusIds.push("gen_gol_centrale");
+  //   else if (r === "portiere" && !activeBonusIds.includes("gen_gol_portiere")) activeBonusIds.push("gen_gol_portiere");
+  // }
   let activeBonusIds = [...bonusAttivi];
-  if (gol > 0 && ruolo) {
-    const r = ruolo.toLowerCase();
-    if (r === "pivot" && !activeBonusIds.includes("gen_gol_pivot")) activeBonusIds.push("gen_gol_pivot");
-    else if (r === "laterale" && !activeBonusIds.includes("gen_gol_laterale")) activeBonusIds.push("gen_gol_laterale");
-    else if (r === "centrale" && !activeBonusIds.includes("gen_gol_centrale")) activeBonusIds.push("gen_gol_centrale");
-    else if (r === "portiere" && !activeBonusIds.includes("gen_gol_portiere")) activeBonusIds.push("gen_gol_portiere");
-  }
-
   // Prevent double-counting: if a more specific role goal bonus satisfies the player's role, remove gen_gol_pivot
-  const hasSpecificGoalBonus = activeBonusIds.includes("gen_gol_laterale") || 
-                               activeBonusIds.includes("gen_gol_centrale") || 
-                               activeBonusIds.includes("gen_gol_portiere");
-  if (hasSpecificGoalBonus) {
-    activeBonusIds = activeBonusIds.filter(id => id !== "gen_gol_pivot");
-  }
+  // const hasSpecificGoalBonus = activeBonusIds.includes("gen_gol_laterale") || 
+  //                              activeBonusIds.includes("gen_gol_centrale") || 
+  //                              activeBonusIds.includes("gen_gol_portiere");
+  // if (hasSpecificGoalBonus) {
+  //   activeBonusIds = activeBonusIds.filter(id => id !== "gen_gol_pivot");
+  // }
 
   // Inject automatic assist bonus if assist > 0
   if (assist > 0 && !activeBonusIds.includes("gen_assist_merda") && !activeBonusIds.includes("gen_assist_extra")) {
