@@ -2165,6 +2165,28 @@ async function startServer() {
     }
   });
 
+  // 11a-bis. AGGIUNGI CONVOCATO EXTRA
+  app.post("/api/partite/aggiungi-convocato", async (req, res) => {
+    try {
+      const { idPartita, nomeGiocatore } = req.body;
+      const token = getAuthToken(req);
+      const db = await getDb(token);
+
+      const p = db.partite.find((x) => x.id === idPartita);
+      if (!p) return res.status(404).json({ err: "Partita non trovata" });
+      if (p.stato !== "Aperta") return res.status(400).json({ err: "Solo partite aperte" });
+      
+      if (!p.convocati.includes(nomeGiocatore)) {
+        p.convocati.push(nomeGiocatore);
+        await saveDatabase(token, db);
+      }
+      
+      res.json({ success: true, partita: p });
+    } catch (error: any) {
+      res.status(500).json({ err: error.message });
+    }
+  });
+
   // 11b. SALVA BOZZA REFERTO PARTITA APERTA
   app.post("/api/partite/salva-bozza", async (req, res) => {
     try {

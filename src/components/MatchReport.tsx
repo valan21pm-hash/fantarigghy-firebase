@@ -26,6 +26,7 @@ interface MatchReportProps {
     referto: RefertoGiocatore[],
     note?: string
   ) => Promise<void>;
+  onAggiungiConvocato?: (idPartita: string, nomeGiocatore: string) => Promise<void>;
   onAnnullaPartita: (idPartita: string) => Promise<void>;
   isEditor?: boolean;
   selectedMatchId?: string;
@@ -38,6 +39,7 @@ export default function MatchReport({
   partiteAperte,
   onChiudiPartita,
   onSalvaBozza,
+  onAggiungiConvocato,
   onAnnullaPartita,
   isEditor = false,
   selectedMatchId: externalSelectedMatchId,
@@ -108,6 +110,8 @@ export default function MatchReport({
   const [sostitutoDa, setSostitutoDa] = useState<Record<string, string>>({});
   const [editingPlayerName, setEditingPlayerName] = useState<string | null>(null);
   const [noEventsPlayers, setNoEventsPlayers] = useState<Record<string, boolean>>({});
+  const [extraConvocato, setExtraConvocato] = useState<string>("");
+  const [isAddingExtra, setIsAddingExtra] = useState(false);
 
   // Initialize form state when match changes
   const handleSelectMatch = (id: string) => {
@@ -713,9 +717,64 @@ export default function MatchReport({
                     <>
                       {/* GRUPPO A: CONVOCATI IN CAMPO E ASSENTI */}
                       <div>
-                        <div className="flex items-center gap-1.5 pb-2 mb-2.5 border-b border-gray-200">
-                          <span className="text-[11px] font-black text-slate-800 uppercase tracking-wider">👕 Giocatori Convocati ({activeMatch.convocati.length})</span>
+                        <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-gray-200">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-black text-slate-800 uppercase tracking-wider">👕 Giocatori Convocati ({activeMatch.convocati.length})</span>
+                          </div>
+                          {onAggiungiConvocato && !isAddingExtra && (
+                            <button
+                              type="button"
+                              onClick={() => setIsAddingExtra(true)}
+                              className="text-[10px] font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 px-2 py-1 rounded border border-orange-200 transition-colors"
+                            >
+                              + Aggiungi
+                            </button>
+                          )}
                         </div>
+                        {isAddingExtra && (
+                          <div className="mb-4 bg-orange-50/50 p-3 rounded-lg border border-orange-100 flex items-center gap-2">
+                            <select
+                              value={extraConvocato}
+                              onChange={(e) => setExtraConvocato(e.target.value)}
+                              className="flex-1 text-xs p-2 bg-white border border-gray-200 rounded focus:ring-2 focus:ring-orange-500 font-bold outline-none"
+                            >
+                              <option value="">-- Seleziona Giocatore Extra --</option>
+                              {giocatori
+                                .filter(gj => gj.attivo && !activeMatch.convocati.includes(gj.nome))
+                                .map(nc => (
+                                  <option key={nc.nome} value={nc.nome}>{nc.nome}</option>
+                                ))}
+                            </select>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (!extraConvocato) return;
+                                try {
+                                  await onAggiungiConvocato?.(activeMatch.id, extraConvocato);
+                                  setIsAddingExtra(false);
+                                  setExtraConvocato("");
+                                  // The match array updates automatically as the component rerenders or data refetches 
+                                  // through App.tsx -> useApp(). In case it needs specific sync, onAggiungiConvocato should trigger it.
+                                } catch (e) {
+                                  alert("Errore");
+                                }
+                              }}
+                              className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-3 py-2 rounded transition-colors"
+                            >
+                              Conferma
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsAddingExtra(false);
+                                setExtraConvocato("");
+                              }}
+                              className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-xs px-3 py-2 rounded transition-colors"
+                            >
+                              Annulla
+                            </button>
+                          </div>
+                        )}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                           {convocatiAndSubs.map((item, idx) => {
                             const { nome, parentConvocato, isSubstitute } = item;

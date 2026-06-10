@@ -304,6 +304,13 @@ export default function App() {
     });
   };
 
+  const handleAggiungiConvocato = async (idPartita: string, nomeGiocatore: string) => {
+    await executePostAction("/api/partite/aggiungi-convocato", {
+      idPartita,
+      nomeGiocatore,
+    });
+  };
+
   const handleChiudiPartita = async (
     idPartita: string,
     costoFinale: number,
@@ -800,6 +807,7 @@ export default function App() {
               partiteAperte={partiteAperte}
               onChiudiPartita={handleChiudiPartita}
               onSalvaBozza={handleSalvaBozza}
+              onAggiungiConvocato={handleAggiungiConvocato}
               onAnnullaPartita={handleAnnullaPartita}
               isEditor={isEditor}
               selectedMatchId={selectedRefertoMatchId}
