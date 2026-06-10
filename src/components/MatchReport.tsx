@@ -232,6 +232,8 @@ export default function MatchReport({
         const statoPresMap: Record<string, "giocato" | "assente" | "sostituito"> = {};
         const sostDaMap: Record<string, string> = {};
         const noEventsMap: Record<string, boolean> = {};
+        const vGenMap: Record<string, boolean> = {};
+        const vPerMap: Record<string, boolean> = {};
 
         m.referto.forEach(r => {
           if (r.gol > 0) gMap[r.nome] = r.gol.toString();
@@ -246,6 +248,9 @@ export default function MatchReport({
           }
           statoPresMap[r.nome] = r.statoPresenza || (presentsList.includes(r.nome) ? "giocato" : "assente");
           sostDaMap[r.nome] = r.sostitutoDa || "";
+          
+          if (r.verifiedGeneric) vGenMap[r.nome] = true;
+          if (r.verifiedPersonal) vPerMap[r.nome] = true;
 
           // Auto-mark Nessun Evento if they played but have zero stats
           const isPresent = statoPresMap[r.nome] === "giocato";
@@ -267,8 +272,8 @@ export default function MatchReport({
         setSostitutoDa(sostDaMap);
         setNoEventsPlayers(noEventsMap);
         
-        setVerifiedGeneric({});
-        setVerifiedPersonal({});
+        setVerifiedGeneric(vGenMap);
+        setVerifiedPersonal(vPerMap);
       } else {
         setPresents(m.convocati);
         setPayers(m.convocati);
@@ -395,6 +400,8 @@ export default function MatchReport({
         bonusAttivi: pres !== "sostituito" ? (selectedBonuses[nome] || []) : [],
         statoPresenza: pres,
         sostitutoDa: isConvocato ? (sostitutoDa[nome] || "") : "",
+        verifiedGeneric: !!verifiedGeneric[nome],
+        verifiedPersonal: !!verifiedPersonal[nome],
         snapshotGiocatore: giocatori.find(x => x.nome === nome),
       };
     });
