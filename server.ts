@@ -1211,7 +1211,8 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  app.use(express.json({ limit: "50mb" }));
+  app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
   // API routes FIRST
   app.get("/api/health", (req, res) => {
@@ -2225,6 +2226,11 @@ async function startServer() {
 
       if (!db.backupsBozze) db.backupsBozze = [];
       db.backupsBozze.unshift(backup);
+      
+      // Limit to max 20 backups to prevent document size explosion
+      if (db.backupsBozze.length > 20) {
+        db.backupsBozze = db.backupsBozze.slice(0, 20);
+      }
 
       await saveDb(db, token);
       sendDbResponse(res, db);

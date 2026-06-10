@@ -128,38 +128,42 @@ export default function MatchReport({
 
   const handleBackupBozza = async () => {
     if (!activeMatch) return;
-    const newBackup = {
-      id: "backup_" + Date.now(),
-      createdAt: new Date().toLocaleString(),
-      idPartita: activeMatch.id,
-      dettagliPartita: activeMatch.dettagli,
-      presents,
-      payers,
-      costo,
-      risultato,
-      note,
-      goals,
-      assists,
-      yellows,
-      reds,
-      subAzione,
-      subRigore,
-      subPiazzato,
-      selectedBonuses,
-      statoPresenza,
-      sostitutoDa,
-      noEventsPlayers,
-      verifiedGeneric,
-      verifiedPersonal,
-    };
-    if (onCreaBackupBozza) {
-      await onCreaBackupBozza(newBackup);
+    try {
+      const newBackup = {
+        id: "backup_" + Date.now(),
+        createdAt: new Date().toLocaleString(),
+        idPartita: activeMatch.id,
+        dettagliPartita: activeMatch.dettagli,
+        presents,
+        payers,
+        costo,
+        risultato,
+        note,
+        goals,
+        assists,
+        yellows,
+        reds,
+        subAzione,
+        subRigore,
+        subPiazzato,
+        selectedBonuses,
+        statoPresenza,
+        sostitutoDa,
+        noEventsPlayers,
+        verifiedGeneric,
+        verifiedPersonal,
+      };
+      if (onCreaBackupBozza) {
+        await onCreaBackupBozza(newBackup);
+      }
+      setHasBackedUpDraft(true);
+      setSuccessMessage("Backup bozza creato e salvato con successo.");
+      setTimeout(() => {
+         setSuccessMessage(null);
+      }, 4000);
+    } catch (e: any) {
+      setValidationError("Failed to create backup: " + e.message);
     }
-    setHasBackedUpDraft(true);
-    setSuccessMessage("Backup bozza creato e salvato con successo.");
-    setTimeout(() => {
-       setSuccessMessage(null);
-    }, 4000);
   };
 
   const handleRestoreBackup = (b: any) => {
@@ -486,7 +490,13 @@ export default function MatchReport({
       const pSubPiazzato = Number(subPiazzato[nome]) || 0;
       
       const hasStatsEvent = pGoals > 0 || pAssists > 0 || pYellows > 0 || pReds > 0 || (isPortiere && (pSubAzione > 0 || pSubRigore > 0 || pSubPiazzato > 0));
-      const hasNessunEvento = !!noEventsPlayers[nome];
+      let hasNessunEvento = !!noEventsPlayers[nome];
+
+      // If the user already clicked "Assegna Nessun Bonus/Malus" for this player, 
+      // automatically assume "Nessun Evento" to avoid blocking them twice
+      if (!hasStatsEvent && !hasNessunEvento && verifiedGeneric[nome]) {
+        hasNessunEvento = true;
+      }
 
       if (!hasStatsEvent && !hasNessunEvento) {
         invalidPlayersInReferto.push(nome);
@@ -501,46 +511,48 @@ export default function MatchReport({
     }
 
     // --- Strict Bonus Verification Flow ---
-    const allBonuses = bonuses || DEFAULT_BONUSES;
-    const genericBonusIds = allBonuses.filter(b => !b.isPersonale).map(b => b.id);
-    const personalBonusIds = allBonuses.filter(b => b.isPersonale).map(b => b.id);
+    if (!isAmichevole) {
+      const allBonuses = bonuses || DEFAULT_BONUSES;
+      const genericBonusIds = allBonuses.filter(b => !b.isPersonale).map(b => b.id);
+      const personalBonusIds = allBonuses.filter(b => b.isPersonale).map(b => b.id);
 
-    const activeGiocatori = giocatori.filter(g => g.attivo);
+      const activeGiocatori = giocatori.filter(g => g.attivo);
 
-    const giocatoriMancantiGenerico = activeGiocatori.filter(g => {
-      const pBonuses = selectedBonuses[g.nome] || [];
-      const hasGeneric = pBonuses.some(bId => genericBonusIds.includes(bId));
-      if (hasGeneric) return false;
-      return !verifiedGeneric[g.nome];
-    });
+      const giocatoriMancantiGenerico = activeGiocatori.filter(g => {
+        const pBonuses = selectedBonuses[g.nome] || [];
+        const hasGeneric = pBonuses.some(bId => genericBonusIds.includes(bId));
+        if (hasGeneric) return false;
+        return !verifiedGeneric[g.nome];
+      });
 
-    const giocatoriMancantiPersonali = activeGiocatori.filter(g => {
-      const pBonuses = selectedBonuses[g.nome] || [];
-      const hasPersonal = pBonuses.some(bId => personalBonusIds.includes(bId));
-      if (hasPersonal) return false;
-      return !verifiedPersonal[g.nome];
-    });
+      const giocatoriMancantiPersonali = activeGiocatori.filter(g => {
+        const pBonuses = selectedBonuses[g.nome] || [];
+        const hasPersonal = pBonuses.some(bId => personalBonusIds.includes(bId));
+        if (hasPersonal) return false;
+        return !verifiedPersonal[g.nome];
+      });
 
-    if (giocatoriMancantiGenerico.length > 0 || giocatoriMancantiPersonali.length > 0) {
-      let errorMsg = "Attenzione / Errore Azione bloccata: è obbligatorio verificare tutti i giocatori per i bonus generici e personali.\n";
-      
-      if (giocatoriMancantiGenerico.length > 0) {
-        const nomiGenerico = giocatoriMancantiGenerico.map(g => g.nome).join(", ");
-        errorMsg += `\nRiassunto giocatori mancanti nella sezione Bonus Generici:
-• Mancano all'appello i seguenti giocatori: ${nomiGenerico}.`;
+      if (giocatoriMancantiGenerico.length > 0 || giocatoriMancantiPersonali.length > 0) {
+        let errorMsg = "Attenzione / Errore Azione bloccata: è obbligatorio verificare tutti i giocatori per i bonus generici e personali.\n";
+        
+        if (giocatoriMancantiGenerico.length > 0) {
+          const nomiGenerico = giocatoriMancantiGenerico.map(g => g.nome).join(", ");
+          errorMsg += `\nRiassunto giocatori mancanti nella sezione Bonus Generici:
+  • Mancano all'appello i seguenti giocatori: ${nomiGenerico}.`;
+        }
+        
+        if (giocatoriMancantiPersonali.length > 0) {
+          const nomiPersonali = giocatoriMancantiPersonali.map(g => g.nome).join(", ");
+          errorMsg += `\nRiassunto giocatori mancanti nella sezione Bonus Personali:
+  • Mancano all'appello i seguenti giocatori: ${nomiPersonali}.`;
+        }
+        
+        errorMsg += `\n\nAttenzione: usa il tasto 'Assegna Nessun Bonus/Malus a tutti i rimanenti' in fondo alla tab corrispondente per velocizzare la procedura.`;
+        setValidationError(errorMsg);
+        return;
       }
-      
-      if (giocatoriMancantiPersonali.length > 0) {
-        const nomiPersonali = giocatoriMancantiPersonali.map(g => g.nome).join(", ");
-        errorMsg += `\nRiassunto giocatori mancanti nella sezione Bonus Personali:
-• Mancano all'appello i seguenti giocatori: ${nomiPersonali}.`;
-      }
-      
-      errorMsg += `\n\nAttenzione: usa il tasto 'Assegna Nessun Bonus/Malus a tutti i rimanenti' in fondo alla tab corrispondente per velocizzare la procedura.`;
-      setValidationError(errorMsg);
-      return;
     }
-    // ----------------------------------------
+    // ------------------------------------------------------
 
     // Form accurate dynamic list of players to save in the report
     const refertoCompleto = buildReferto();
@@ -1028,6 +1040,61 @@ export default function MatchReport({
                     </>
                   );
                 })()}
+              </div>
+
+              {/* ACTION QUICK FIX ALL NO EVENTS */}
+              <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4">
+                 <p className="text-xs text-amber-800 font-bold mb-3">Tutti i giocatori presenti che non hanno né gol, né assist, né cartellini devono obbligatoriamente avere la spunta "Nessun Evento". Se hai fretta, usa questo pulsante:</p>
+                 <button
+                   type="button"
+                   onClick={() => {
+                     const newNoEvents = { ...noEventsPlayers };
+                     const activeSubstitutes = (activeMatch?.convocati || [])
+                       .filter(nome => statoPresenza[nome] === "sostituito" && sostitutoDa[nome])
+                       .map(nome => sostitutoDa[nome]);
+                     
+                     const unconvokedPlayers = giocatori
+                       .filter(g => g.attivo)
+                       .filter(g => !(activeMatch?.convocati || []).includes(g.nome))
+                       .filter(g => !activeSubstitutes.includes(g.nome));
+                 
+                     const allPlayersInReport = [...(activeMatch?.convocati || []), ...activeSubstitutes, ...unconvokedPlayers.map(g => g.nome)];
+                     
+                     allPlayersInReport.forEach(nome => {
+                       const isConvocato = (activeMatch?.convocati || []).includes(nome);
+                       const isSubstitute = activeSubstitutes.includes(nome);
+                       let pres = "giocato";
+                       if (isConvocato) {
+                         pres = statoPresenza[nome] || "giocato";
+                       } else if (isSubstitute) {
+                         pres = "giocato";
+                       } else {
+                         pres = "assente";
+                       }
+                       const isPresent = pres === "giocato";
+                 
+                       const g = giocatori.find(x => x.nome === nome);
+                       const isPortiere = g?.ultimoRuolo === "Portiere";
+                       const pGoals = Number(goals[nome]) || 0;
+                       const pAssists = Number(assists[nome]) || 0;
+                       const pYellows = Number(yellows[nome]) || 0;
+                       const pReds = Number(reds[nome]) || 0;
+                       const pSubAzione = Number(subAzione[nome]) || 0;
+                       const pSubRigore = Number(subRigore[nome]) || 0;
+                       const pSubPiazzato = Number(subPiazzato[nome]) || 0;
+                       
+                       const hasStatsEvent = pGoals > 0 || pAssists > 0 || pYellows > 0 || pReds > 0 || (isPortiere && (pSubAzione > 0 || pSubRigore > 0 || pSubPiazzato > 0));
+                       
+                       if (isPresent && !hasStatsEvent) {
+                         newNoEvents[nome] = true;
+                       }
+                     });
+                     setNoEventsPlayers(newNoEvents);
+                   }}
+                   className="w-full py-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs uppercase tracking-wider rounded-lg shadow-sm cursor-pointer"
+                 >
+                   ✨ Imposta "Nessun Evento" ai restanti giocatori
+                 </button>
               </div>
             </div>
 

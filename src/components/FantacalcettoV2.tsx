@@ -2667,6 +2667,7 @@ export default function FantacalcettoV2({
                   <strong className="text-indigo-400">ℹ️ Punto Informativo:</strong> Qui puoi monitorare l'andamento del campionato. Clicca su ciascun team per vedere nel dettaglio il valore attuale della rosa, il tesoretto residuo e le scelte dei giocatori fatte dagli altri partecipanti!
                 </p>
               </div>
+
               {/* Podium View if any */}
               {rankedTeams.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">

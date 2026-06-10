@@ -53,6 +53,7 @@ import {
 
 import { generateMatchPdf, generateGeneralReportPdf } from "../lib/pdfHelper";
 import BonusManager from "./BonusManager";
+import PodioGraficoDinamico from "./PodioGraficoDinamico";
 
 const MercatoCountdown = ({ targetDate }: { targetDate: string }) => {
   const [timeLeft, setTimeLeft] = useState("");
@@ -161,6 +162,8 @@ export default function Fantacalcetto({
   const [activePublicTab, setActivePublicTab] = useState<
     "classifica" | "partite" | "iscrizione" | "convocazioni"
   >("classifica");
+  const [showPodiumAnimation, setShowPodiumAnimation] = useState(false);
+  const [podiumSquadraTarget, setPodiumSquadraTarget] = useState<string>("Tutte");
   const allPartite = React.useMemo(() => {
     return [...partiteAperte, ...partiteChiuse].filter(
       (m) => !(m.dettagli || "").toLowerCase().includes("amichevole"),
@@ -4441,6 +4444,34 @@ export default function Fantacalcetto({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Leaderboard classifications column */}
         <div className="lg:col-span-7 space-y-4">
+          
+          {/* Condivisore Animato */}
+          <div className="bg-indigo-950/80 border border-indigo-700/50 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl mb-2">
+            <div>
+              <h3 className="text-white font-black text-sm flex items-center gap-2 mb-1"><Trophy className="w-5 h-5 text-yellow-400" /> Generatore Grafiche Podio</h3>
+              <p className="text-indigo-200 text-xs font-medium leading-relaxed max-w-sm">Crea l'animazione del podio da condividere: scegli se calcolarla per il campionato o per i migliori giocatori di un singolo team.</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 shrink-0 w-full sm:w-auto">
+              <select 
+                value={podiumSquadraTarget}
+                onChange={(e) => setPodiumSquadraTarget(e.target.value)}
+                className="bg-indigo-900 text-white text-xs border border-indigo-700 rounded-xl p-2.5 font-bold outline-none flex-1 sm:w-48 appearance-none"
+              >
+                <option value="Tutte">Tutte (Classifica FantaSquadre)</option>
+                <option value="GiocatoriAssoluti">Tutti i Giocatori Fanta</option>
+                {fantasquadre.map(f => (
+                  <option key={f.id} value={f.id}>{f.nomeFantasquadra}</option>
+                ))}
+              </select>
+              <button 
+                onClick={() => setShowPodiumAnimation(true)}
+                className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-lg transition-all transform active:scale-95 whitespace-nowrap outline-none cursor-pointer"
+              >
+                PLAY ANIMAZIONE
+              </button>
+            </div>
+          </div>
+
           <div className="bg-white border border-gray-150 rounded-2xl shadow-2xs overflow-hidden">
             <div className="bg-gray-50 border-b border-gray-150 px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
@@ -5098,6 +5129,18 @@ export default function Fantacalcetto({
           getTeamMatchBreakdownList={getTeamMatchBreakdownList}
           onClose={() => setShowGeneralReportModal(false)}
           generateGeneralReportPdf={generateGeneralReportPdf}
+        />
+      )}
+
+      {showPodiumAnimation && (
+        <PodioGraficoDinamico
+          giocatori={giocatori}
+          fantasquadre={fantasquadre}
+          partiteChiuse={partiteChiuse}
+          bonuses={bonuses}
+          rankedTeams={rankedTeams}
+          targetId={podiumSquadraTarget}
+          onClose={() => setShowPodiumAnimation(false)}
         />
       )}
     </div>

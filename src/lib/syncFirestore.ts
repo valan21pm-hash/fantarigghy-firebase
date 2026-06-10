@@ -33,7 +33,8 @@ export async function fetchFromFirestore(): Promise<DatabaseSchema | null> {
       consigli,
       sessioneMercatoLibero: settingsData.sessioneMercatoLibero ?? false,
       scadenzaMercatoLibero: settingsData.scadenzaMercatoLibero || null,
-      bonuses: settingsData.bonuses || undefined
+      bonuses: settingsData.bonuses || undefined,
+      backupsBozze: settingsData.backupsBozze || []
     };
   } catch (err) {
     console.error("[Firestore] Error fetching from Firestore:", err);
@@ -148,7 +149,8 @@ export async function saveToFirestore(db: DatabaseSchema): Promise<void> {
     batch.set(settingsRef, {
       sessioneMercatoLibero: db.sessioneMercatoLibero ?? false,
       scadenzaMercatoLibero: db.scadenzaMercatoLibero || null,
-      bonuses: db.bonuses || null
+      bonuses: db.bonuses || null,
+      backupsBozze: db.backupsBozze || []
     }, { merge: true });
     count++; await commitBatchIfNeeded();
 
