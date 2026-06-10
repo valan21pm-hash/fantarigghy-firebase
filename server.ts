@@ -2216,6 +2216,40 @@ async function startServer() {
     }
   });
 
+  // 11c. BACKUP BOZZA 
+  app.post("/api/partite/backup-bozza", async (req, res) => {
+    try {
+      const { backup } = req.body;
+      const token = getAuthToken(req);
+      const db = await getDb(token);
+
+      if (!db.backupsBozze) db.backupsBozze = [];
+      db.backupsBozze.unshift(backup);
+
+      await saveDb(db, token);
+      sendDbResponse(res, db);
+    } catch (error: any) {
+      res.status(500).json({ err: error.message });
+    }
+  });
+
+  // 11d. ELIMINA BACKUP BOZZA
+  app.post("/api/partite/elimina-backup-bozza", async (req, res) => {
+    try {
+      const { backupId } = req.body;
+      const token = getAuthToken(req);
+      const db = await getDb(token);
+
+      if (!db.backupsBozze) db.backupsBozze = [];
+      db.backupsBozze = db.backupsBozze.filter((b: any) => b.id !== backupId);
+
+      await saveDb(db, token);
+      sendDbResponse(res, db);
+    } catch (error: any) {
+      res.status(500).json({ err: error.message });
+    }
+  });
+
   // 12. SALVA MODIFICHE PARTITA CHIUSA (ROLLBACK AND APPLY)
   app.post("/api/partite/modifica-chiusa", async (req, res) => {
     try {

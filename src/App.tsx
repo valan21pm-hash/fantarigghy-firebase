@@ -311,6 +311,14 @@ export default function App() {
     });
   };
 
+  const handleCreaBackupBozza = async (backup: any) => {
+    await executePostAction("/api/partite/backup-bozza", { backup });
+  };
+
+  const handleEliminaBackupBozza = async (backupId: string) => {
+    await executePostAction("/api/partite/elimina-backup-bozza", { backupId });
+  };
+
   const handleChiudiPartita = async (
     idPartita: string,
     costoFinale: number,
@@ -808,6 +816,9 @@ export default function App() {
               onChiudiPartita={handleChiudiPartita}
               onSalvaBozza={handleSalvaBozza}
               onAggiungiConvocato={handleAggiungiConvocato}
+              onCreaBackupBozza={handleCreaBackupBozza}
+              onEliminaBackupBozza={handleEliminaBackupBozza}
+              savedBackups={data?.backupsBozze || []}
               onAnnullaPartita={handleAnnullaPartita}
               isEditor={isEditor}
               selectedMatchId={selectedRefertoMatchId}

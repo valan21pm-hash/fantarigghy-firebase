@@ -186,6 +186,7 @@ export interface DatabaseSchema {
   bonuses?: CustomBonusDef[];
   sessioneMercatoLibero?: boolean;
   scadenzaMercatoLibero?: string | null;
+  backupsBozze?: any[];
 }
 
 export interface CustomBonusDef {

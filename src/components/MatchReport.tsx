@@ -27,6 +27,9 @@ interface MatchReportProps {
     note?: string
   ) => Promise<void>;
   onAggiungiConvocato?: (idPartita: string, nomeGiocatore: string) => Promise<void>;
+  onCreaBackupBozza?: (backup: any) => Promise<void>;
+  onEliminaBackupBozza?: (backupId: string) => Promise<void>;
+  savedBackups?: any[];
   onAnnullaPartita: (idPartita: string) => Promise<void>;
   isEditor?: boolean;
   selectedMatchId?: string;
@@ -40,6 +43,9 @@ export default function MatchReport({
   onChiudiPartita,
   onSalvaBozza,
   onAggiungiConvocato,
+  onCreaBackupBozza,
+  onEliminaBackupBozza,
+  savedBackups = [],
   onAnnullaPartita,
   isEditor = false,
   selectedMatchId: externalSelectedMatchId,
@@ -113,12 +119,88 @@ export default function MatchReport({
   const [extraConvocato, setExtraConvocato] = useState<string>("");
   const [isAddingExtra, setIsAddingExtra] = useState(false);
 
+  const [hasBackedUpDraft, setHasBackedUpDraft] = useState(false);
+  const [showBackupsModal, setShowBackupsModal] = useState(false);
+
+  // Initialize form state when match changes
+
+  const handleBackupBozza = async () => {
+    if (!activeMatch) return;
+    const newBackup = {
+      id: "backup_" + Date.now(),
+      createdAt: new Date().toLocaleString(),
+      idPartita: activeMatch.id,
+      dettagliPartita: activeMatch.dettagli,
+      presents,
+      payers,
+      costo,
+      risultato,
+      note,
+      goals,
+      assists,
+      yellows,
+      reds,
+      subAzione,
+      subRigore,
+      subPiazzato,
+      selectedBonuses,
+      statoPresenza,
+      sostitutoDa,
+      noEventsPlayers,
+      verifiedGeneric,
+      verifiedPersonal,
+    };
+    if (onCreaBackupBozza) {
+      await onCreaBackupBozza(newBackup);
+    }
+    setHasBackedUpDraft(true);
+    setSuccessMessage("Backup bozza creato e salvato con successo.");
+    setTimeout(() => {
+       setSuccessMessage(null);
+    }, 4000);
+  };
+
+  const handleRestoreBackup = (b: any) => {
+    if (!window.confirm("Sei sicuro di voler ripristinare questo backup? I dati attualmente inseriti nel referto andranno persi.")) return;
+    if (b.idPartita !== activeMatch?.id) {
+       if (!window.confirm(`Attenzione! Questo backup fa riferimento a un'altra partita ("${b.dettagliPartita}"). Vuoi procedere comunque?`)) return;
+    }
+    setPresents(b.presents || []);
+    setPayers(b.payers || []);
+    setCosto(b.costo || "");
+    setRisultato(b.risultato || "");
+    setNote(b.note || "");
+    setGoals(b.goals || {});
+    setAssists(b.assists || {});
+    setYellows(b.yellows || {});
+    setReds(b.reds || {});
+    setSubAzione(b.subAzione || {});
+    setSubRigore(b.subRigore || {});
+    setSubPiazzato(b.subPiazzato || {});
+    setSelectedBonuses(b.selectedBonuses || {});
+    setStatoPresenza(b.statoPresenza || {});
+    setSostitutoDa(b.sostitutoDa || {});
+    setNoEventsPlayers(b.noEventsPlayers || {});
+    setVerifiedGeneric(b.verifiedGeneric || {});
+    setVerifiedPersonal(b.verifiedPersonal || {});
+    setHasBackedUpDraft(true);
+    setShowBackupsModal(false);
+  };
+
+  const handleDeleteBackup = async (id: string) => {
+    if (!window.confirm("Vuoi davvero eliminare definitivamente questo backup della bozza?")) return;
+    if (onEliminaBackupBozza) {
+      await onEliminaBackupBozza(id);
+    }
+  };
+
   // Initialize form state when match changes
   const handleSelectMatch = (id: string) => {
     setSelectedMatchId(id);
     if (onSelectMatchId) onSelectMatchId(id);
     setValidationError(null);
     setSuccessMessage(null);
+    setHasBackedUpDraft(false);
     setActiveTab("referto");
     const m = partiteAperte.find(p => p.id === id);
     if (m) {
@@ -352,6 +434,12 @@ export default function MatchReport({
     setSuccessMessage(null);
     if (!selectedMatchId || !activeMatch) return;
     
+    if (!hasBackedUpDraft) {
+      setValidationError("E' obbligatorio effettuare il backup della bozza sul dispositivo prima di procedere all'invio o alla chiusura del referto. Trovi il pulsante 'Backup Bozza di Sicurezza' a fine pagina.");
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      return;
+    }
+
     if (!risultato.trim()) {
       setValidationError("Si prega di inserire il risultato finale (es. 5-3).");
       return;
@@ -1422,8 +1510,26 @@ export default function MatchReport({
               </div>
             )}
 
+            {/* Backup actions */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+              <button
+                type="button"
+                onClick={handleBackupBozza}
+                className="flex-1 py-3 bg-orange-100 hover:bg-orange-200 text-orange-900 border border-orange-200 font-extrabold text-sm uppercase tracking-wider rounded-xl shadow-sm transition-colors cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>💾</span> Backup Bozza di Sicurezza
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowBackupsModal(true)}
+                className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-200 font-extrabold text-sm uppercase tracking-wider rounded-xl shadow-sm transition-colors cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>📂</span> Recupera un Backup ({savedBackups.length})
+              </button>
+            </div>
+
             {/* Actions Bar */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-3 border-t">
+            <div className="flex flex-col sm:flex-row gap-3 pt-3">
               <button
                 type="submit"
                 className="flex-1 py-3 bg-slate-800 hover:bg-slate-750 rounded-xl text-white text-sm shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer font-bold"
@@ -1541,6 +1647,52 @@ export default function MatchReport({
                   Annulla
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Backups List Modal */}
+      {showBackupsModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-gray-100 flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-slate-800 p-4 font-bold text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span>📂</span>
+                <span>Recupero Backup Bozza</span>
+              </div>
+              <button onClick={() => setShowBackupsModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <div className="p-4 overflow-y-auto space-y-3 flex-1 bg-gray-50">
+              {savedBackups.length === 0 ? (
+                <p className="text-sm text-gray-500 italic text-center py-6">Non ci sono backup salvati su questo dispositivo.</p>
+              ) : (
+                savedBackups.map((bak: any) => (
+                  <div key={bak.id} className="bg-white border text-left border-gray-200 rounded-xl p-3 shadow-sm flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                    <div>
+                      <p className="text-xs font-black text-gray-900 leading-tight mb-1">{bak.dettagliPartita}</p>
+                      <p className="text-[10px] text-gray-500 font-medium">Salvato il: {bak.createdAt}</p>
+                      <p className="text-[10px] text-indigo-600 font-bold mt-1">Risultato inserito: {bak.risultato || "N/D"}</p>
+                    </div>
+                    <div className="flex gap-2 w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
+                       <button onClick={() => handleRestoreBackup(bak)} className="flex-1 sm:flex-none text-[10px] font-bold px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 rounded transition-colors">
+                         Ripristina
+                       </button>
+                       <button onClick={() => handleDeleteBackup(bak.id)} className="flex-1 sm:flex-none text-[10px] font-bold px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-800 rounded transition-colors">
+                         Elimina
+                       </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="p-4 bg-white border-t border-gray-100">
+               <button
+                 type="button"
+                 onClick={() => setShowBackupsModal(false)}
+                 className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 font-extrabold text-xs rounded-xl transition-colors cursor-pointer"
+               >
+                 Chiudi
+               </button>
             </div>
           </div>
         </div>
