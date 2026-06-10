@@ -36,6 +36,7 @@ export interface RefertoGiocatore {
   verifiedGeneric?: boolean;
   verifiedPersonal?: boolean;
   snapshotGiocatore?: Giocatore; // Data snapshot at match time
+  malusBrt?: boolean; // Supplementar -1 Izycoin malus
 }
 
 export interface Formazione {
@@ -104,13 +105,12 @@ export const getPlayerCurrentPrice = (
   if (!partiteChiuse || partiteChiuse.length === 0) {
     // Fallback if no individual match data is passed (e.g. static/initial rendering)
     let change = 0;
-    if (fantaScore >= 10) change = 1;
     if (fantaScore >= 20) change = 2;
-    if (fantaScore <= -2) {
-      if (fantaScore <= -11) change = -3;
-      else if (fantaScore <= -6) change = -2;
-      else change = -1;
-    }
+    else if (fantaScore >= 16) change = 1;
+    else if (fantaScore >= 10) change = 0;
+    else if (fantaScore >= -5) change = -1;
+    else if (fantaScore >= -10) change = -2;
+    else change = -3;
     return Math.max(1, base + change);
   }
 
@@ -153,33 +153,45 @@ export const getPlayerCurrentPrice = (
         );
       }
 
+      let matchChange = 0;
       if (isPresente) {
         // Convocati (Presenti/Giocati)
-        if (matchScore >= 10 && matchScore <= 19) {
-          change += 1;
-        } else if (matchScore >= 20) {
-          change += 2;
-        } else if (matchScore >= -5 && matchScore <= -2) {
-          change -= 1;
+        if (matchScore >= 20) {
+          matchChange = 2;
+        } else if (matchScore >= 16 && matchScore <= 19) {
+          matchChange = 1;
+        } else if (matchScore >= 10 && matchScore <= 15) {
+          matchChange = 0;
+        } else if (matchScore >= -5 && matchScore <= 9) {
+          matchChange = -1;
         } else if (matchScore >= -10 && matchScore <= -6) {
-          change -= 2;
+          matchChange = -2;
         } else if (matchScore <= -11) {
-          change -= 3;
+          matchChange = -3;
         }
       } else {
         // Non Convocati (Assenti, Sostituti o non a referto)
-        if (matchScore >= 7 && matchScore <= 13) {
-          change += 1;
-        } else if (matchScore >= 14) {
-          change += 2;
+        if (matchScore >= 15) {
+          matchChange = 2;
+        } else if (matchScore >= 7 && matchScore <= 14) {
+          matchChange = 1;
+        } else if (matchScore >= -1 && matchScore <= 6) {
+          matchChange = 0;
         } else if (matchScore >= -5 && matchScore <= -2) {
-          change -= 1;
+          matchChange = -1;
         } else if (matchScore >= -10 && matchScore <= -6) {
-          change -= 2;
+          matchChange = -2;
         } else if (matchScore <= -11) {
-          change -= 3;
+          matchChange = -3;
         }
       }
+
+      // Variazione supplementare di -1 Izycoin se Malus BRT e' spuntato
+      if (r && r.malusBrt === true) {
+        matchChange -= 1;
+      }
+
+      change += matchChange;
     }
   }
 

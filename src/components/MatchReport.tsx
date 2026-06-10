@@ -112,6 +112,7 @@ export default function MatchReport({
   const [subRigore, setSubRigore] = useState<Record<string, string>>({});
   const [subPiazzato, setSubPiazzato] = useState<Record<string, string>>({});
   const [selectedBonuses, setSelectedBonuses] = useState<Record<string, string[]>>({});
+  const [malusBrtPlayers, setMalusBrtPlayers] = useState<Record<string, boolean>>({});
   const [statoPresenza, setStatoPresenza] = useState<Record<string, "giocato" | "assente" | "sostituito">>({});
   const [sostitutoDa, setSostitutoDa] = useState<Record<string, string>>({});
   const [editingPlayerName, setEditingPlayerName] = useState<string | null>(null);
@@ -147,6 +148,7 @@ export default function MatchReport({
         subRigore,
         subPiazzato,
         selectedBonuses,
+        malusBrtPlayers,
         statoPresenza,
         sostitutoDa,
         noEventsPlayers,
@@ -169,7 +171,7 @@ export default function MatchReport({
   const handleRestoreBackup = (b: any) => {
     if (!window.confirm("Sei sicuro di voler ripristinare questo backup? I dati attualmente inseriti nel referto andranno persi.")) return;
     if (b.idPartita !== activeMatch?.id) {
-       if (!window.confirm(`Attenzione! Questo backup fa riferimento a un'altra partita ("${b.dettagliPartita}"). Vuoi procedere comunque?`)) return;
+       if (!window.confirm(`Attenzione! This backup refers to another match ("${b.dettagliPartita}"). Do you want to proceed anyway?`)) return;
     }
     setPresents(b.presents || []);
     setPayers(b.payers || []);
@@ -184,6 +186,7 @@ export default function MatchReport({
     setSubRigore(b.subRigore || {});
     setSubPiazzato(b.subPiazzato || {});
     setSelectedBonuses(b.selectedBonuses || {});
+    setMalusBrtPlayers(b.malusBrtPlayers || {});
     setStatoPresenza(b.statoPresenza || {});
     setSostitutoDa(b.sostitutoDa || {});
     setNoEventsPlayers(b.noEventsPlayers || {});
@@ -234,6 +237,7 @@ export default function MatchReport({
         const noEventsMap: Record<string, boolean> = {};
         const vGenMap: Record<string, boolean> = {};
         const vPerMap: Record<string, boolean> = {};
+        const brtoMap: Record<string, boolean> = {};
 
         m.referto.forEach(r => {
           if (r.gol > 0) gMap[r.nome] = r.gol.toString();
@@ -245,6 +249,9 @@ export default function MatchReport({
           if (r.subitiPiazzato > 0) spMap[r.nome] = r.subitiPiazzato.toString();
           if (r.bonusAttivi && r.bonusAttivi.length > 0) {
             bMap[r.nome] = r.bonusAttivi;
+          }
+          if (r.malusBrt) {
+            brtoMap[r.nome] = true;
           }
           statoPresMap[r.nome] = r.statoPresenza || (presentsList.includes(r.nome) ? "giocato" : "assente");
           sostDaMap[r.nome] = r.sostitutoDa || "";
@@ -268,6 +275,7 @@ export default function MatchReport({
         setSubRigore(srMap);
         setSubPiazzato(spMap);
         setSelectedBonuses(bMap);
+        setMalusBrtPlayers(brtoMap);
         setStatoPresenza(statoPresMap);
         setSostitutoDa(sostDaMap);
         setNoEventsPlayers(noEventsMap);
@@ -277,6 +285,7 @@ export default function MatchReport({
       } else {
         setPresents(m.convocati);
         setPayers(m.convocati);
+        setMalusBrtPlayers({});
         // Empty stats maps
         setGoals({});
         setAssists({});
@@ -304,6 +313,7 @@ export default function MatchReport({
       setPayers([]);
       setNote("");
       setSelectedBonuses({});
+      setMalusBrtPlayers({});
       setStatoPresenza({});
       setSostitutoDa({});
       setVerifiedGeneric({});
@@ -403,6 +413,7 @@ export default function MatchReport({
         verifiedGeneric: !!verifiedGeneric[nome],
         verifiedPersonal: !!verifiedPersonal[nome],
         snapshotGiocatore: giocatori.find(x => x.nome === nome),
+        malusBrt: !!malusBrtPlayers[nome],
       };
     });
   };
@@ -1278,6 +1289,29 @@ export default function MatchReport({
                           </label>
                         </div>
                       )}
+
+                      {/* CONTROLLO MALUS BRT (SEMPRE SELEZIONABILE PER QUALSIASI GIOCATORE CORRENTE) */}
+                      <div className="bg-rose-50/70 p-3 rounded-xl border border-rose-200">
+                        <label className="flex items-center gap-2 cursor-pointer font-bold text-xs select-none">
+                          <input
+                            type="checkbox"
+                            checked={!!malusBrtPlayers[nome]}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setMalusBrtPlayers(prev => ({ ...prev, [nome]: checked }));
+                            }}
+                            className="w-4 h-4 text-rose-600 focus:ring-rose-500 rounded cursor-pointer border-rose-350"
+                          />
+                          <div className="flex flex-col">
+                            <span className="font-extrabold text-rose-950 text-sm flex items-center gap-1.5 leading-none">
+                              <span>📦</span> Malus BRT Attivo
+                            </span>
+                            <span className="text-[10.5px] text-rose-800/80 font-medium font-sans mt-1">
+                              Applica una variazione supplementare di <strong>-1 Izycoin 🪙</strong> al valore di questo giocatore.
+                            </span>
+                          </div>
+                        </label>
+                      </div>
 
                       {isCurrentlyPlaying && (
                         <>

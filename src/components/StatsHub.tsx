@@ -54,6 +54,9 @@ export default function StatsHub({
   const [sortOrder, setSortOrder] = useState<"crescente" | "decrescente">("crescente");
   const [searchQuery, setSearchQuery] = useState("");
   const [copied, setCopied] = useState(false);
+  const [selectedTeamFilter, setSelectedTeamFilter] = useState<string>("Tutte");
+  const [selectedPlayerFilter, setSelectedPlayerFilter] = useState<string>("Tutti");
+  const [selectedBonusFilter, setSelectedBonusFilter] = useState<string>("Tutti");
 
   // Available valid Closed Matches for calculations (non-friendly)
   const validMatches = useMemo(() => {
@@ -145,17 +148,40 @@ export default function StatsHub({
 
         let change = 0;
         if (isPresente) {
-          if (matchScore >= 10 && matchScore <= 19) change = 1;
-          else if (matchScore >= 20) change = 2;
-          else if (matchScore >= -5 && matchScore <= -2) change = -1;
-          else if (matchScore >= -10 && matchScore <= -6) change = -2;
-          else if (matchScore <= -11) change = -3;
+          // Convocati (Presenti/Giocati)
+          if (matchScore >= 20) {
+            change = 2;
+          } else if (matchScore >= 16 && matchScore <= 19) {
+            change = 1;
+          } else if (matchScore >= 10 && matchScore <= 15) {
+            change = 0;
+          } else if (matchScore >= -5 && matchScore <= 9) {
+            change = -1;
+          } else if (matchScore >= -10 && matchScore <= -6) {
+            change = -2;
+          } else if (matchScore <= -11) {
+            change = -3;
+          }
         } else {
-          if (matchScore >= 7 && matchScore <= 13) change = 1;
-          else if (matchScore >= 14) change = 2;
-          else if (matchScore >= -5 && matchScore <= -2) change = -1;
-          else if (matchScore >= -10 && matchScore <= -6) change = -2;
-          else if (matchScore <= -11) change = -3;
+          // Non Convocati (Assenti, Sostituti o non a referto)
+          if (matchScore >= 15) {
+            change = 2;
+          } else if (matchScore >= 7 && matchScore <= 14) {
+            change = 1;
+          } else if (matchScore >= -1 && matchScore <= 6) {
+            change = 0;
+          } else if (matchScore >= -5 && matchScore <= -2) {
+            change = -1;
+          } else if (matchScore >= -10 && matchScore <= -6) {
+            change = -2;
+          } else if (matchScore <= -11) {
+            change = -3;
+          }
+        }
+
+        // Variazione supplementare di -1 Izycoin se Malus BRT e' spuntato
+        if (r && r.malusBrt === true) {
+          change -= 1;
         }
 
         // Apply accumulation if calculating values chronologically
@@ -240,9 +266,32 @@ export default function StatsHub({
 
   // Sorted & Filtered Player list
   const filteredPlayerStats = useMemo(() => {
-    let list = playerStatsList.filter((p) =>
-      p.nome.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    let list = playerStatsList;
+
+    // Apply Team filter
+    if (selectedTeamFilter !== "Tutte") {
+      const targetTeam = fantasquadre.find(t => t.id === selectedTeamFilter);
+      if (targetTeam) {
+        list = list.filter(p => targetTeam.giocatoriSelezionati.includes(p.nome));
+      }
+    }
+
+    // Apply Player name search
+    if (searchQuery.trim() !== "") {
+      list = list.filter((p) =>
+        p.nome.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply Player filter
+    if (selectedPlayerFilter !== "Tutti") {
+      list = list.filter(p => p.nome === selectedPlayerFilter);
+    }
+
+    // Apply Bonus/Malus filter
+    if (selectedBonusFilter !== "Tutti") {
+      list = list.filter(p => p.bonusCounts[selectedBonusFilter] > 0);
+    }
 
     list.sort((a, b) => {
       if (sortOrder === "crescente") {
@@ -253,7 +302,7 @@ export default function StatsHub({
     });
 
     return list;
-  }, [playerStatsList, searchQuery, sortOrder]);
+  }, [playerStatsList, searchQuery, sortOrder, selectedTeamFilter, selectedPlayerFilter, selectedBonusFilter, fantasquadre]);
 
 
   // 2. ADVANCED FANTASQUADRA STATISTICS CALCULATION
@@ -311,7 +360,10 @@ export default function StatsHub({
 
   // Sorted team stats
   const sortedTeamStats = useMemo(() => {
-    const list = [...teamStatsList];
+    let list = [...teamStatsList];
+    if (selectedTeamFilter !== "Tutte") {
+      list = list.filter(t => t.id === selectedTeamFilter);
+    }
     list.sort((a, b) => {
       if (sortOrder === "crescente") {
         return a.score - b.score || a.nomeFantasquadra.localeCompare(b.nomeFantasquadra);
@@ -320,7 +372,7 @@ export default function StatsHub({
       }
     });
     return list;
-  }, [teamStatsList, sortOrder]);
+  }, [teamStatsList, sortOrder, selectedTeamFilter]);
 
 
   // 3. THEMATIC BONUS/MALUS CLASSIFY
@@ -374,8 +426,24 @@ export default function StatsHub({
     });
 
     const list = Object.values(counts);
+    let filteredList = list;
 
-    list.sort((a, b) => {
+    if (selectedBonusFilter !== "Tutti") {
+      filteredList = filteredList.filter(b => b.definition.nome === selectedBonusFilter);
+    }
+
+    if (selectedPlayerFilter !== "Tutti") {
+      filteredList = filteredList.map(b => {
+        const pCnt = b.activatedBy[selectedPlayerFilter] || 0;
+        return {
+          ...b,
+          totalCount: pCnt,
+          activatedBy: pCnt > 0 ? { [selectedPlayerFilter]: pCnt } : {}
+        };
+      }).filter(b => b.totalCount > 0);
+    }
+
+    filteredList.sort((a, b) => {
       if (sortOrder === "crescente") {
         return a.totalCount - b.totalCount || a.definition.nome.localeCompare(b.definition.nome);
       } else {
@@ -383,8 +451,85 @@ export default function StatsHub({
       }
     });
 
-    return list;
-  }, [bonuses, validMatches, timeframe, selectedGiornataId, selectedGiornataObj]);
+    return filteredList;
+  }, [bonuses, validMatches, timeframe, selectedGiornataId, selectedGiornataObj, sortOrder, selectedBonusFilter, selectedPlayerFilter]);
+
+
+  // If a single player is selected, let's assemble their match history breakdown
+  const selectedPlayerMatchHistory = useMemo(() => {
+    if (selectedPlayerFilter === "Tutti") return [];
+    
+    const history: any[] = [];
+    validMatches.forEach((m) => {
+      if (!m.referto) return;
+      const r = m.referto.find((x) => x.nome.toLowerCase() === selectedPlayerFilter.toLowerCase());
+      if (!r) return;
+
+      const isPresente = r.statoPresenza === "giocato";
+      const rGol = isPresente ? (Number(r.gol) || 0) : 0;
+      const rAssist = isPresente ? (Number(r.assist) || 0) : 0;
+      const rAmm = isPresente ? (Number(r.amm) || 0) : 0;
+      const rEsp = isPresente ? (Number(r.rossi) || 0) : 0;
+      const rBonusAttivi = r.bonusAttivi || [];
+
+      const breakdown = getPlayerBonusBreakdownForMatch(
+        selectedPlayerFilter,
+        rBonusAttivi,
+        rGol,
+        rAssist,
+        bonuses,
+        r.snapshotGiocatore?.ultimoRuolo
+      );
+
+      let matchBonusVal = breakdown.reduce((acc, curr) => acc + curr.puntiVal, 0);
+      let matchScore = parseFloat(
+        (
+          rGol * 3 +
+          rAssist * 1 +
+          rAmm * -1 +
+          rEsp * -3 +
+          matchBonusVal
+        ).toFixed(1)
+      );
+
+      let change = 0;
+      if (isPresente) {
+        if (matchScore >= 20) change = 2;
+        else if (matchScore >= 16 && matchScore <= 19) change = 1;
+        else if (matchScore >= 10 && matchScore <= 15) change = 0;
+        else if (matchScore >= -5 && matchScore <= 9) change = -1;
+        else if (matchScore >= -10 && matchScore <= -6) change = -2;
+        else change = -3;
+      } else {
+        if (matchScore >= 15) change = 2;
+        else if (matchScore >= 7 && matchScore <= 14) change = 1;
+        else if (matchScore >= -1 && matchScore <= 6) change = 0;
+        else if (matchScore >= -5 && matchScore <= -2) change = -1;
+        else if (matchScore >= -10 && matchScore <= -6) change = -2;
+        else change = -3;
+      }
+
+      if (r.malusBrt === true) {
+        change -= 1;
+      }
+
+      history.push({
+        matchId: m.id,
+        matchNome: m.nome || m.dettagli || m.id,
+        statoPresenza: r.statoPresenza,
+        score: matchScore,
+        priceChange: change,
+        gol: rGol,
+        assist: rAssist,
+        amm: rAmm,
+        esp: rEsp,
+        bonuses: breakdown,
+        malusBrt: r.malusBrt === true
+      });
+    });
+
+    return history;
+  }, [selectedPlayerFilter, validMatches, bonuses]);
 
 
   // 4. GENERATING COPYABLE SOCIAL EXPORT TEXT (formatted, beautiful, rich of emojis)
@@ -587,6 +732,199 @@ export default function StatsHub({
         </div>
 
       </div>
+
+      {/* 🔮 FILTRI MULTI-LIVELLO AVANZATI */}
+      <div className="bg-slate-950/45 p-4 rounded-2xl border border-slate-800/80 flex flex-col md:flex-row gap-4 items-stretch md:items-end justify-between">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1">
+          {/* A. Filtra per Squadra */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400 flex items-center gap-1.5">
+              <Trophy className="h-3 w-3 text-indigo-400" /> Filtra Squadra
+            </label>
+            <select
+              value={selectedTeamFilter}
+              onChange={(e) => {
+                setSelectedTeamFilter(e.target.value);
+                // Reset player filter if changing team
+                setSelectedPlayerFilter("Tutti");
+              }}
+              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+            >
+              <option value="Tutte">⚽ Tutte le Squadre</option>
+              {fantasquadre.map((team) => (
+                <option key={team.id} value={team.id}>
+                  {team.nomeFantasquadra}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* B. Filtra per Giocatore */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400 flex items-center gap-1.5">
+              <User className="h-3 w-3 text-indigo-400" /> Filtra Giocatore
+            </label>
+            <select
+              value={selectedPlayerFilter}
+              onChange={(e) => setSelectedPlayerFilter(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+            >
+              <option value="Tutti">🏃 Tutti i Giocatori</option>
+              {giocatori
+                .filter((g) => {
+                  if (selectedTeamFilter === "Tutte") return true;
+                  const t = fantasquadre.find((x) => x.id === selectedTeamFilter);
+                  return t?.giocatoriSelezionati.includes(g.nome);
+                })
+                .sort((a,b) => a.nome.localeCompare(b.nome))
+                .map((g) => (
+                  <option key={g.nome} value={g.nome}>
+                    {g.nome} ({g.ultimoRuolo})
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          {/* C. Filtra per Bonus / Malus */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400 flex items-center gap-1.5">
+              <Sparkles className="h-3 w-3 text-indigo-400" /> Filtra Bonus/Malus
+            </label>
+            <select
+              value={selectedBonusFilter}
+              onChange={(e) => setSelectedBonusFilter(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+            >
+              <option value="Tutti">✨ Tutti i Bonus/Malus</option>
+              {bonuses.map((b) => (
+                <option key={b.nome} value={b.nome}>
+                  {b.nome} ({b.punti > 0 ? `+${b.punti}` : b.punti} pt)
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Bottone Reset Filtri */}
+        {(selectedTeamFilter !== "Tutte" || selectedPlayerFilter !== "Tutti" || selectedBonusFilter !== "Tutti") && (
+          <button
+            onClick={() => {
+              setSelectedTeamFilter("Tutte");
+              setSelectedPlayerFilter("Tutti");
+              setSelectedBonusFilter("Tutti");
+            }}
+            className="text-[10px] uppercase font-black bg-slate-800 hover:bg-slate-750 text-red-400 hover:text-red-300 border border-slate-700 px-4 py-2.5 rounded-xl transition-colors shrink-0 cursor-pointer"
+          >
+            Reset Filtri ❌
+          </button>
+        )}
+      </div>
+
+      {/* 🔴 PANNELLO DETTAGLIO TIMELINE SINGOLO GIOCATORE */}
+      {selectedPlayerFilter !== "Tutti" && selectedPlayerMatchHistory.length > 0 && (
+        <div className="bg-slate-950/60 p-5 rounded-2xl border border-slate-800 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-850 pb-3">
+            <div>
+              <h3 className="text-sm font-black uppercase text-yellow-400 flex items-center gap-1.5">
+                <Activity className="h-4 w-4 text-yellow-400 animate-pulse" /> Zoom Prestazioni: {selectedPlayerFilter}
+              </h3>
+              <p className="text-[10px] text-slate-400 mt-0.5">
+                Rapporto cronologico dettagliato partita per partita (Fasce Izycoin, Voto, Bonus e Malus BRT).
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+            {/* Statistiche Totali del Giocatore Filtered */}
+            {filteredPlayerStats.slice(0, 1).map((p) => (
+              <div key={p.nome} className="md:col-span-4 bg-slate-900/80 p-4 rounded-xl border border-indigo-950 flex flex-col justify-between space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-900/40 font-black px-2 py-0.5 rounded uppercase">
+                      {p.ruolo}
+                    </span>
+                    <span className="text-xs font-bold text-slate-400">Total Score:</span>
+                  </div>
+                  <h4 className="text-2xl font-black text-white">{p.nome}</h4>
+                  <div className="text-3xl font-black text-yellow-400 font-mono">
+                    {p.score} <span className="text-sm font-bold text-slate-400">punti fanta</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-center pt-2 border-t border-slate-850">
+                  <div className="bg-slate-950/40 p-2 rounded">
+                    <div className="text-[10px] font-bold text-slate-450 uppercase">Prezzo Base</div>
+                    <div className="text-sm font-mono font-black text-slate-300">{p.basePrice} 🪙</div>
+                  </div>
+                  <div className="bg-slate-950/40 p-2 rounded">
+                    <div className="text-[10px] font-bold text-slate-450 uppercase">Valore Attuale</div>
+                    <div className="text-sm font-mono font-black text-emerald-400">{p.currentPrice} 🪙</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* Timeline dei Match */}
+            <div className="md:col-span-8 bg-slate-900/60 rounded-xl border border-slate-800 p-4 max-h-[280px] overflow-y-auto space-y-2">
+              {selectedPlayerMatchHistory.map((h, i) => {
+                const diffColor = h.priceChange > 0 ? "text-green-400" : h.priceChange < 0 ? "text-red-400" : "text-slate-400";
+                const diffPrefix = h.priceChange > 0 ? "+" : "";
+
+                return (
+                  <div key={i} className="bg-slate-950/50 p-3 rounded-lg border border-slate-850 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div className="space-y-0.5">
+                      <div className="text-xs font-black text-white flex items-center gap-1.5">
+                        <span className="text-[9px] bg-slate-805 text-slate-400 px-1.5 py-0.5 rounded font-mono">
+                          {i+1}° Incontro
+                        </span>
+                        {h.matchNome}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-400 font-medium font-sans">
+                        <span>Presenza:</span>
+                        <span className={`font-bold uppercase ${h.statoPresenza === "giocato" ? "text-emerald-400" : "text-slate-500"}`}>
+                          {h.statoPresenza}
+                        </span>
+                        <span>• Score:</span>
+                        <span className="font-extrabold text-yellow-400 font-mono">{h.score} pts</span>
+                        {h.malusBrt && (
+                          <span className="bg-rose-955 text-rose-300 px-1.5 rounded font-black text-[8.5px]">
+                            📦 MALUS BRT ATTIVO
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      {/* Event details */}
+                      <div className="flex items-center gap-1.5 text-[10px] bg-slate-900 border border-slate-800 px-2 py-1 rounded">
+                        {h.gol > 0 && <span className="text-white font-extrabold">⚽ {h.gol}</span>}
+                        {h.assist > 0 && <span className="text-cyan-400 font-extrabold">🎯 {h.assist}</span>}
+                        {h.amm > 0 && <span className="text-yellow-400 font-bold">🟨 {h.amm}</span>}
+                        {h.esp > 0 && <span className="text-red-500 font-bold">🟥 {h.esp}</span>}
+                        {h.bonuses.length > 0 && (
+                          <span className="text-indigo-400 font-extrabold">
+                            ⚡ {h.bonuses.length} bonus
+                          </span>
+                        )}
+                        {h.gol === 0 && h.assist === 0 && h.amm === 0 && h.esp === 0 && h.bonuses.length === 0 && (
+                          <span className="text-slate-550 italic font-bold">Invariato</span>
+                        )}
+                      </div>
+
+                      <div className="text-right font-mono text-xs w-20">
+                        <div className="text-[9px] font-bold text-slate-500 uppercase leading-none">Variazione</div>
+                        <div className={`${diffColor} font-black mt-0.5`}>
+                          {diffPrefix}{h.priceChange} Izycoin 🪙
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 🔍 BARRA DI RICERCA GIOCATORI */}
       {activeTab === "giocatori" && (

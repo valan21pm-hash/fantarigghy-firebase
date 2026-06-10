@@ -2322,59 +2322,38 @@ export default function FantacalcettoV2({
                           <p className="font-extrabold text-yellow-300 uppercase tracking-wider text-[10.5px] mb-1.5 border-b border-indigo-800/20 pb-1">
                             📋 Riepilogo Completo delle Fasce di Valore:
                           </p>
-                          <ul className="space-y-2 mt-2">
-                            <li className="flex items-start gap-1.5">
-                              <span className="text-gray-400">⚖️</span>
-                              <div>
-                                <strong className="text-white">
-                                  Fascia Neutra (da -3 a +3 punti):
-                                </strong>
-                                <span className="block text-gray-300 text-[10px] mt-0.5">
-                                  Variazione di <strong>0 Izycoin</strong> (il
-                                  prezzo resta quello base).
-                                </span>
-                              </div>
-                            </li>
-                            <li className="flex items-start gap-1.5 border-t border-indigo-900/40 pt-2">
-                              <span className="text-indigo-400">✨</span>
-                              <div>
-                                <strong className="text-indigo-350">
-                                  Fascia 1 (da +4 a +9 punti / da -4 a -9
-                                  punti):
-                                </strong>
-                                <span className="block text-indigo-200 text-[10px] mt-0.5">
-                                  Variazione di <strong>+1 Izycoin 🪙</strong> o{" "}
-                                  <strong>-1 Izycoin 🪙</strong>.
-                                </span>
-                              </div>
-                            </li>
-                            <li className="flex items-start gap-1.5 border-t border-indigo-900/40 pt-2">
-                              <span className="text-indigo-400">🚀</span>
-                              <div>
-                                <strong className="text-indigo-350">
-                                  Fascia 2 (da +10 a +15 punti / da -10 a -15
-                                  punti):
-                                </strong>
-                                <span className="block text-indigo-250 text-[10px] mt-0.5 font-bold">
-                                  Variazione di <strong>+2 Izycoin 🪙</strong> o{" "}
-                                  <strong>-2 Izycoin 🪙</strong>.
-                                </span>
-                              </div>
-                            </li>
-                            <li className="flex items-start gap-1.5 border-t border-indigo-900/40 pt-2">
-                              <span className="text-yellow-400">🔥</span>
-                              <div>
-                                <strong className="text-yellow-300">
-                                  Successive (ogni scaglione di 6 punti):
-                                </strong>
-                                <span className="block text-yellow-100 text-[10px] mt-0.5">
-                                  Variazione incrementale di ulteriori{" "}
-                                  <strong>+1 / -1 Izycoin</strong> per ciascuna
-                                  fascia.
-                                </span>
-                              </div>
-                            </li>
-                          </ul>
+                          <div className="space-y-4 mt-2">
+                            <div>
+                              <span className="text-yellow-400 font-extrabold text-xs uppercase block mb-1">🏃 Calciatori Convocati (In Campo/Giocato):</span>
+                              <ul className="space-y-1.5 list-disc pl-4 text-emerald-200 text-[11px]">
+                                <li><strong>Fascia Neutra (da +10 a +15 punti):</strong> Invariato 🪙 (0)</li>
+                                <li><strong>Fascia Positiva (da +16 a +19 punti):</strong> Variazione di <strong>+1 Izycoin 🪙</strong></li>
+                                <li><strong>Fascia Positiva (da +20 punti in poi):</strong> Variazione di <strong>+2 Izycoin 🪙</strong></li>
+                                <li><strong>Fascia Negativa (da -5 a +9 punti):</strong> Variazione di <strong>-1 Izycoin 🪙</strong></li>
+                                <li><strong>Fascia Negativa (da -6 a -10 punti):</strong> Variazione di <strong>-2 Izycoin 🪙</strong></li>
+                                <li><strong>Fascia Negativa (da -11 punti in poi):</strong> Variazione di <strong>-3 Izycoin 🪙</strong></li>
+                              </ul>
+                            </div>
+                            
+                            <div className="border-t border-indigo-950/40 pt-2.5">
+                              <span className="text-cyan-400 font-extrabold text-xs uppercase block mb-1">📢 Calciatori Non Convocati/Assenti:</span>
+                              <ul className="space-y-1.5 list-disc pl-4 text-cyan-200 text-[11px]">
+                                <li><strong>Fascia Neutra (da -1 a +6 punti):</strong> Invariato 🪙 (0)</li>
+                                <li><strong>Fascia Positiva (da +7 a +14 punti):</strong> Variazione di <strong>+1 Izycoin 🪙</strong></li>
+                                <li><strong>Fascia Positiva (da +15 punti in poi):</strong> Variazione di <strong>+2 Izycoin 🪙</strong></li>
+                                <li><strong>Fascia Negativa (da -5 a -2 punti):</strong> Variazione di <strong>-1 Izycoin 🪙</strong></li>
+                                <li><strong>Fascia Negativa (da -6 a -10 punti):</strong> Variazione di <strong>-2 Izycoin 🪙</strong></li>
+                                <li><strong>Fascia Negativa (da -11 punti in poi):</strong> Variazione di <strong>-3 Izycoin 🪙</strong></li>
+                              </ul>
+                            </div>
+
+                            <div className="border-t border-indigo-950/40 pt-2.5 bg-rose-955/20 p-2 rounded-lg border border-rose-900/30 text-[11px]">
+                              <span className="text-rose-455 font-extrabold text-xs uppercase block mb-0.5">📦 Malus BRT:</span>
+                              <span className="text-rose-200 leading-relaxed block">
+                                Se attivo risulta spuntato <strong>Malus BRT</strong>: applica una variazione supplementare di <strong>-1 Izycoin 🪙</strong> per quella partita.
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
