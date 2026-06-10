@@ -136,7 +136,7 @@ export const calculatePlayerChampionshipStats = (nome: string, partiteChiuse: Pa
         const rBonusAttivi = r.bonusAttivi || [];
 
         // Always include bonuses, but filter for game stats if not present
-        const matchBonus = getPlayerBonusPointsForMatch(nome, rBonusAttivi, rGol, rAssist, allBonuses);
+        const matchBonus = getPlayerBonusPointsForMatch(nome, rBonusAttivi, rGol, rAssist, allBonuses, r.snapshotGiocatore?.ultimoRuolo);
 
         gol += rGol;
         assist += rAssist;
@@ -200,6 +200,7 @@ export interface CustomBonusDef {
   moltiplicatoreAssist?: number;
   isPersonale?: boolean;
   giocatoreId?: string;
+  isAutomatic?: boolean;
 }
 
 export const getPlayerBonusKey = (nomeCompleto: string): string | null => {
@@ -534,26 +535,34 @@ export const GENERIC_BONUSES: CustomBonusDef[] = [
   {
     id: "gen_gol_pivot",
     nome: "⚽ Gol Pivot 🎯",
-    descrizione: "+3 punti per gol segnato in posizione di Pivot",
-    punti: 3
+    descrizione: "Il gol segnato in posizione di Pivot vale il punteggio base (+3 punti a gol)",
+    punti: 0,
+    moltiplicatoreGol: 0,
+    isAutomatic: true
   },
   {
     id: "gen_gol_laterale",
     nome: "⚽ Gol Laterale 🚀",
-    descrizione: "+4 punti per gol segnato dalla fascia laterale",
-    punti: 4
+    descrizione: "+1 punto extra per gol segnato dalla fascia laterale (+4 punti totali a gol)",
+    punti: 0,
+    moltiplicatoreGol: 1,
+    isAutomatic: true
   },
   {
     id: "gen_gol_centrale",
     nome: "⚽ Gol Centrale 💣",
-    descrizione: "+5 punti per gol segnato dalla zona centrale",
-    punti: 5
+    descrizione: "+2 punti extra per gol segnato dalla zona centrale (+5 punti totali a gol)",
+    punti: 0,
+    moltiplicatoreGol: 2,
+    isAutomatic: true
   },
   {
     id: "gen_gol_portiere",
     nome: "🧤 Gol Portiere 🥅🦅",
-    descrizione: "+8 punti per gol segnato dal portiere",
-    punti: 8
+    descrizione: "+5 punti extra per gol segnato dal portiere (+8 punti totali a gol)",
+    punti: 0,
+    moltiplicatoreGol: 5,
+    isAutomatic: true
   },
   {
     id: "gen_assist_extra",
@@ -747,13 +756,24 @@ export const getPlayerBonusPointsForMatch = (
   bonusAttivi: string[],
   gol: number,
   assist: number,
-  allBonuses: CustomBonusDef[] = DEFAULT_BONUSES
+  allBonuses: CustomBonusDef[] = DEFAULT_BONUSES,
+  ruolo?: string
 ): number => {
   let tot = 0;
   
   if (!allBonuses) return 0;
   
-  for (const bId of bonusAttivi) {
+  // Inject automatic bonuses based on role if goals > 0
+  const activeBonusIds = [...bonusAttivi];
+  if (gol > 0 && ruolo) {
+    const r = ruolo.toLowerCase();
+    if (r === "pivot" && !activeBonusIds.includes("gen_gol_pivot")) activeBonusIds.push("gen_gol_pivot");
+    else if (r === "laterale" && !activeBonusIds.includes("gen_gol_laterale")) activeBonusIds.push("gen_gol_laterale");
+    else if (r === "centrale" && !activeBonusIds.includes("gen_gol_centrale")) activeBonusIds.push("gen_gol_centrale");
+    else if (r === "portiere" && !activeBonusIds.includes("gen_gol_portiere")) activeBonusIds.push("gen_gol_portiere");
+  }
+  
+  for (const bId of activeBonusIds) {
     const b = allBonuses.find(x => x.id === bId);
     if (b) {
       if (b.isPersonale && b.giocatoreId && getPlayerBonusKey(nomeCompleto) !== b.giocatoreId) {
@@ -761,8 +781,8 @@ export const getPlayerBonusPointsForMatch = (
       }
       
       let pts = b.punti || 0;
-      if (b.moltiplicatoreGol) pts += (b.moltiplicatoreGol * gol);
-      if (b.moltiplicatoreAssist) pts += (b.moltiplicatoreAssist * assist);
+      if (b.moltiplicatoreGol !== undefined) pts += (b.moltiplicatoreGol * gol);
+      if (b.moltiplicatoreAssist !== undefined) pts += (b.moltiplicatoreAssist * assist);
       
       tot += pts;
     }
@@ -776,13 +796,23 @@ export const getPlayerBonusBreakdownForMatch = (
   bonusAttivi: string[],
   gol: number,
   assist: number,
-  allBonuses: CustomBonusDef[] = DEFAULT_BONUSES
+  allBonuses: CustomBonusDef[] = DEFAULT_BONUSES,
+  ruolo?: string
 ): { nome: string, puntiVal: number }[] => {
   const breakdown: { nome: string, puntiVal: number }[] = [];
   
   if (!allBonuses) return breakdown;
-  
-  for (const bId of bonusAttivi) {
+
+  const activeBonusIds = [...bonusAttivi];
+  if (gol > 0 && ruolo) {
+    const r = ruolo.toLowerCase();
+    if (r === "pivot" && !activeBonusIds.includes("gen_gol_pivot")) activeBonusIds.push("gen_gol_pivot");
+    else if (r === "laterale" && !activeBonusIds.includes("gen_gol_laterale")) activeBonusIds.push("gen_gol_laterale");
+    else if (r === "centrale" && !activeBonusIds.includes("gen_gol_centrale")) activeBonusIds.push("gen_gol_centrale");
+    else if (r === "portiere" && !activeBonusIds.includes("gen_gol_portiere")) activeBonusIds.push("gen_gol_portiere");
+  }
+
+  for (const bId of activeBonusIds) {
     const b = allBonuses.find(x => x.id === bId);
     if (b) {
       if (b.isPersonale && b.giocatoreId && getPlayerBonusKey(nomeCompleto) !== b.giocatoreId) {
@@ -790,8 +820,8 @@ export const getPlayerBonusBreakdownForMatch = (
       }
       
       let pts = b.punti || 0;
-      if (b.moltiplicatoreGol) pts += (b.moltiplicatoreGol * gol);
-      if (b.moltiplicatoreAssist) pts += (b.moltiplicatoreAssist * assist);
+      if (b.moltiplicatoreGol !== undefined) pts += (b.moltiplicatoreGol * gol);
+      if (b.moltiplicatoreAssist !== undefined) pts += (b.moltiplicatoreAssist * assist);
       breakdown.push({ nome: b.nome, puntiVal: pts });
     }
   }

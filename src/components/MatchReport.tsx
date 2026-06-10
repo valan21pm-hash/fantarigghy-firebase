@@ -1430,7 +1430,7 @@ export default function MatchReport({
                     🛡️ Assegnazione Bonus Generici
                   </h3>
                   <div className="space-y-2">
-                    {(bonuses || DEFAULT_BONUSES).filter(b => !b.isPersonale).map(b => (
+                    {(bonuses || DEFAULT_BONUSES).filter(b => !b.isPersonale && !b.isAutomatic).map(b => (
                       <details key={b.id} className="bg-white border text-sm border-gray-200 rounded-lg group">
                         <summary className="p-3 cursor-pointer font-bold text-slate-800 group-open:border-b border-gray-100 flex items-center justify-between">
                           <div className="flex flex-col">
@@ -1467,7 +1467,7 @@ export default function MatchReport({
                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-4 max-h-[160px] overflow-y-auto">
                      {giocatori.filter(g => g.attivo).map(g => {
                        const pBonuses = selectedBonuses[g.nome] || [];
-                       const hasGeneric = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && !b.isPersonale));
+                       const hasGeneric = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && !b.isPersonale && !b.isAutomatic));
                        if (hasGeneric) return null;
                        
                        return (
@@ -1490,7 +1490,7 @@ export default function MatchReport({
                        const newVer = { ...verifiedGeneric };
                        giocatori.filter(g => g.attivo).forEach(g => {
                          const pBonuses = selectedBonuses[g.nome] || [];
-                         const hasGeneric = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && !b.isPersonale));
+                         const hasGeneric = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && !b.isPersonale && !b.isAutomatic));
                          if (!hasGeneric) newVer[g.nome] = true;
                        });
                        setVerifiedGeneric(newVer);

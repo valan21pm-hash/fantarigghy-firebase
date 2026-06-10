@@ -543,17 +543,19 @@ export default function Fantacalcetto({
               rGol,
               rAssist,
               bonuses,
+              r.snapshotGiocatore?.ultimoRuolo
             )
           : 0;
 
         let bonusBreakdownStr = "";
-        if (r && rBonusAttivi.length > 0) {
+        if (r) {
           const breakdown = getPlayerBonusBreakdownForMatch(
             pName,
             rBonusAttivi,
             rGol,
             rAssist,
             bonuses,
+            r.snapshotGiocatore?.ultimoRuolo
           );
           if (breakdown.length > 0) {
             bonusBreakdownStr =
@@ -1179,32 +1181,27 @@ export default function Fantacalcetto({
               rGol,
               rAssist,
               bonuses,
+              r.snapshotGiocatore?.ultimoRuolo
             );
 
             if (isAmichevole || m.inviatoFanta === true) {
-              if (rBonusAttivi.length > 0) {
-                const bonusKey = getPlayerBonusKey(nome);
-                rBonusAttivi.forEach((bId) => {
-                  let foundBonus = null;
-
-                  // Cerca nei bonus personali del giocatore
-                  foundBonus = bonuses.find((b) => b.id === bId);
-
-                  if (foundBonus) {
-                    let ptsValue = foundBonus.punti || 0;
-                    if (foundBonus.moltiplicatoreGol)
-                      ptsValue += foundBonus.moltiplicatoreGol * rGol;
-                    if (foundBonus.moltiplicatoreAssist)
-                      ptsValue += foundBonus.moltiplicatoreAssist * rAssist;
-                    activeBonusDetails.push({
-                      bName: foundBonus.nome,
-                      bDesc: foundBonus.descrizione,
-                      pts: ptsValue,
-                      matchDettagli: m.dettagli,
-                    });
-                  }
+              const breakdown = getPlayerBonusBreakdownForMatch(
+                nome,
+                rBonusAttivi,
+                rGol,
+                rAssist,
+                bonuses,
+                r.snapshotGiocatore?.ultimoRuolo
+              );
+              breakdown.forEach(b => {
+                const foundBonusDef = bonuses.find(def => def.nome === b.nome);
+                activeBonusDetails.push({
+                   bName: b.nome,
+                   bDesc: foundBonusDef ? foundBonusDef.descrizione : "",
+                   pts: b.puntiVal,
+                   matchDettagli: m.dettagli
                 });
-              }
+              });
             }
 
             if (isAmichevole) {
