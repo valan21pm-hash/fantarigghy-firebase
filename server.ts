@@ -637,7 +637,7 @@ async function saveToSheetsInternal(
   }
 }
 
-const STORED_TOKEN_PATH = path.join(process.cwd(), "src", "google-token.json");
+const STORED_TOKEN_PATH = "/tmp/google-token.json";
 
 let cachedSaToken: string | null = null;
 let cachedSaTokenExpiry: number = 0;
@@ -1242,14 +1242,18 @@ async function startServer() {
     try {
       const { token } = req.body;
       if (!token) return res.status(400).json({ err: "Token mancante" });
+      console.log("[Server] Tentativo di salvataggio token...");
       await saveStoredGoogleToken(token);
       console.log(
         "[Server] Token Google Sheets globale aggiornato con successo dall'amministratore.",
       );
 
+      console.log("[Server] Tentativo di ottenere il DB con il token...");
       const db = await getDb(token);
+      console.log("[Server] DB ottenuto con successo.");
       sendDbResponse(res, db);
     } catch (err: any) {
+      console.error("[Server] Errore salvataggio token:", err);
       res.status(500).json({ err: "Errore salvataggio token: " + err.message });
     }
   });

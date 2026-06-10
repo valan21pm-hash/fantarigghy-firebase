@@ -35,7 +35,7 @@ export default function PodioGraficoDinamico({
   // Compute the podium
   let title = "PODIO FANTACALCETTO";
   let subtitle = "Classifica Ufficiale";
-  let podiumData = [
+  let podiumData: { rank: number; name: string; score: number | string }[] = [
     { rank: 1, name: "N/A", score: 0 },
     { rank: 2, name: "N/A", score: 0 },
     { rank: 3, name: "N/A", score: 0 },
@@ -84,7 +84,7 @@ export default function PodioGraficoDinamico({
 
   // Se ci sono meno di 3, riempiamo per evitare crash
   while(podiumData.length < 3) {
-      podiumData.push({ rank: podiumData.length + 1, name: "-", score: "0" });
+      podiumData.push({ rank: podiumData.length + 1, name: "-", score: 0 });
   }
 
   const p1 = podiumData[0];
