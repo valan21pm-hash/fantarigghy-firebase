@@ -2178,7 +2178,7 @@ async function startServer() {
       
       if (!p.convocati.includes(nomeGiocatore)) {
         p.convocati.push(nomeGiocatore);
-        await saveDatabase(token, db);
+        await saveDb(db, token);
       }
       
       res.json({ success: true, partita: p });
