@@ -4,1298 +4,782 @@
  */
 
 import React, { useState } from "react";
-import {
-  Coins,
-  Copy,
-  Plus,
-  Receipt,
-  Search,
-  Trash2,
-  Edit3,
-  UserMinus,
-  UserPlus,
-} from "lucide-react";
-import { Giocatore, Partita } from "../types";
+import { Calendar, CheckSquare, ClipboardCheck, Plus, Users, Trash2, Shuffle, Check, ArrowLeft } from "lucide-react";
+import { Giocatore, getLastName } from "../types";
 
-interface PlayerListProps {
+interface ConvocationsProps {
   giocatori: Giocatore[];
-  partiteAperte?: any[];
-  partiteChiuse?: Partita[];
-  logs?: any[];
-  onAddPlayer: (nome: string) => Promise<void>;
-  onDeletePlayer: (nome: string) => Promise<void>;
-  onVersaQuota: (nome: string, importo: number) => Promise<void>;
-  onVersaQuotaMassivo: (ricariche: { nome: string; importo: number }[]) => Promise<void>;
-  onDividiSpesa: (
-    importo: number,
-    causale: string,
-    giocatori: string[]
+  campi: string[];
+  onCreaPartita: (
+    costo: number,
+    convocati: string[],
+    dettagli: string,
+    campo: string,
+    mappaRuoli: Record<string, string>
   ) => Promise<void>;
-  onEditPlayer: (nomeOriginale: string, dati: Partial<Giocatore>) => Promise<void>;
-  onMigrate: () => Promise<void>;
-  onEmergencyReset: () => Promise<void>;
   isEditor?: boolean;
 }
 
-export default function PlayerList({
+const RUOLI = ["Portiere", "Centrale", "Laterale", "Pivot", "Allenatore", "Tifoso"];
+
+export default function Convocations({
   giocatori,
-  partiteAperte = [],
-  partiteChiuse = [],
-  logs = [],
-  onAddPlayer,
-  onDeletePlayer,
-  onVersaQuota,
-  onVersaQuotaMassivo,
-  onDividiSpesa,
-  onEditPlayer,
-  onMigrate,
-  onEmergencyReset,
+  campi,
+  onCreaPartita,
   isEditor = false,
-}: PlayerListProps) {
-  // Filter and Search States
-  const [search, setSearch] = useState("");
-  const [showOnlyActive, setShowOnlyActive] = useState(false);
-  const [sortBy, setSortBy] = useState<"maglia" | "nome" | "saldo" | "gol">("maglia");
+}: ConvocationsProps) {
+  // Mode switcher: "campionato" (standard convocations) vs "amichevole" (friendly match with lineups)
+  const [activeMode, setActiveMode] = useState<"campionato" | "amichevole">("campionato");
 
-  // Add player form
-  const [newPlayerName, setNewPlayerName] = useState("");
-  const [isAdding, setIsAdding] = useState(false);
+  // Core fields
+  const [data, setData] = useState("");
+  const [ora, setOra] = useState("");
+  const [campo, setCampo] = useState("");
+  const [nuovoCampo, setNuovoCampo] = useState("");
+  const [costo, setCosto] = useState("");
+  const [avversario, setAvversario] = useState("");
 
-  // Quick Recharge state
-  const [isRecharging, setIsRecharging] = useState(false);
-  const [selectedRechargePlayers, setSelectedRechargePlayers] = useState<string[]>([]);
-  const [rechargeAmounts, setRechargeAmounts] = useState<Record<string, string>>({});
-  const [rechargeSearch, setRechargeSearch] = useState("");
+  // Convocati checklist state (default we check all active players)
+  const [selezionati, setSelezionati] = useState<string[]>(
+    giocatori.filter(g => g.attivo).map(g => g.nome)
+  );
 
-  // Split Expense state
-  const [expenseAmt, setExpenseAmt] = useState("");
-  const [expenseLabel, setExpenseLabel] = useState("");
-  const [expensePlayers, setExpensePlayers] = useState<string[]>([]);
-  const [isSplitting, setIsSplitting] = useState(false);
+  // Mappa ruoli convocati
+  const [ruoliConvocati, setRuoliConvocati] = useState<Record<string, string>>(
+    giocatori.reduce((acc, curr) => {
+      acc[curr.nome] = curr.ultimoRuolo || "";
+      return acc;
+    }, {} as Record<string, string>)
+  );
 
-  // Edit Player State
-  const [editingPlayer, setEditingPlayer] = useState<Giocatore | null>(null);
-  const [modalTab, setModalTab] = useState<"profilo" | "finanze">("profilo");
+  // Friendly match specific fields
+  const [squadraA, setSquadraA] = useState("Noi");
+  const [squadraB, setSquadraB] = useState("Avversari");
+  const [esterni, setEsterni] = useState<string[]>([]);
+  const [nuovoEsterno, setNuovoEsterno] = useState("");
+  const [lineupStep, setLineupStep] = useState(false);
+  const [lineupAssignments, setLineupAssignments] = useState<Record<string, "A" | "B">>({});
 
-  const getPlayerTransactions = (playerName: string) => {
-    const list: { date: string; type: string; amount: number; details: string; rawDate: string }[] = [];
-
-    // 1. Parse from logs
-    if (logs && Array.isArray(logs)) {
-      logs.forEach((log) => {
-        const detailsLower = (log.dettagli || "").toLowerCase();
-        const playerLower = playerName.toLowerCase();
-
-        if (log.operazione === "Ricarica" && detailsLower.includes(playerLower)) {
-          const amt = parseFloat(log.importo) || 0;
-          list.push({
-            date: log.data,
-            rawDate: log.data,
-            type: "Ricarica Saldo",
-            amount: amt,
-            details: log.dettagli,
-          });
-        } else if (log.operazione === "Quota Iscrizione" && detailsLower.includes(playerLower)) {
-          const amt = parseFloat(log.importo) || 0;
-          list.push({
-            date: log.data,
-            rawDate: log.data,
-            type: "Quota Iscrizione",
-            amount: amt,
-            details: log.dettagli,
-          });
-        } else if (log.operazione === "Ricarica Massiva" && detailsLower.includes(playerLower)) {
-          let foundAmount = 0;
-          try {
-            const escapedName = playerName.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-            const regexStr = escapedName + "\\s*\\(\\s*([0-9.,]+)\\s*(?:€|euro)\\s*\\)";
-            const rx = new RegExp(regexStr, "i");
-            const match = (log.dettagli || "").match(rx);
-            if (match && match[1]) {
-              foundAmount = parseFloat(match[1].replace(",", "."));
-            }
-          } catch (e) {
-            console.error("Error matching name in bulk recharge", e);
-          }
-
-          if (foundAmount === 0 && log.importo) {
-            if (!log.dettagli.includes(",")) {
-              foundAmount = parseFloat(log.importo) || 0;
-            }
-          }
-
-          list.push({
-            date: log.data,
-            rawDate: log.data,
-            type: "Ricarica Massiva",
-            amount: foundAmount || 0,
-            details: `Ricarica di gruppo al campo: ${playerName}`,
-          });
-        } else if (log.operazione === "Spesa Condivisa" && detailsLower.includes(playerLower)) {
-          let foundAmount = 0;
-          try {
-            const match = (log.dettagli || "").match(/addebitati ~?([0-9.,]+)\s*€/i);
-            if (match && match[1]) {
-              foundAmount = parseFloat(match[1].replace(",", "."));
-            }
-          } catch(e) {}
-          
-          list.push({
-            date: log.data,
-            rawDate: log.data,
-            type: "Spesa Condivisa",
-            amount: -foundAmount,
-            details: log.dettagli,
-          });
-        }
-      });
-    }
-
-    // 2. Parse from partiteChiuse
-    if (partiteChiuse && Array.isArray(partiteChiuse)) {
-      partiteChiuse.forEach(match => {
-        const rGioc = match.referto?.find(r => r.nome.toLowerCase() === playerName.toLowerCase());
-        if (rGioc && rGioc.pagaQuota) {
-          const amt = rGioc.quotaMaturata !== undefined ? rGioc.quotaMaturata : (match.costo / (match.referto.filter(x => x.pagaQuota).length || 1));
-          const matchDate = match.dataInserimento || (match.dettagli ? match.dettagli.split(",")[0] : "") || "Gara Chiusa";
-          list.push({
-            date: matchDate,
-            rawDate: match.dataInserimento || "",
-            type: "Addebito Quota Gara",
-            amount: -amt,
-            details: `Presenza in gara: ${match.dettagli}`,
-          });
-        }
-      });
-    }
-
-    const parseDate = (dStr: string) => {
-      try {
-        const parts = dStr.split(", ");
-        if (parts.length >= 1) {
-          const dateParts = parts[0].split("/");
-          if (dateParts.length === 3) {
-            const day = parseInt(dateParts[0]);
-            const month = parseInt(dateParts[1]) - 1;
-            const year = parseInt(dateParts[2]);
-            if (parts[1]) {
-              const timeParts = parts[1].split(":");
-              if (timeParts.length === 3) {
-                return new Date(year, month, day, parseInt(timeParts[0]), parseInt(timeParts[1]), parseInt(timeParts[2])).getTime();
-              }
-            }
-            return new Date(year, month, day).getTime();
-          }
-        }
-      } catch(e) {}
-      const t = Date.parse(dStr);
-      return isNaN(t) ? 0 : t;
-    };
-
-    return list.sort((a, b) => {
-      const timeA = parseDate(a.rawDate || a.date);
-      const timeB = parseDate(b.rawDate || b.date);
-      return timeB - timeA;
-    });
-  };
-
-  // Sort & Filter
-  const filtered = giocatori
-    .filter(g => {
-      const matchSearch = g.nome.toLowerCase().includes(search.toLowerCase());
-      const matchActive = !showOnlyActive || g.attivo;
-      return matchSearch && matchActive;
-    })
-    .sort((a, b) => {
-      if (sortBy === "maglia") return a.numeroMaglia - b.numeroMaglia;
-      if (sortBy === "nome") return a.nome.localeCompare(b.nome);
-      if (sortBy === "saldo") return b.saldo - a.saldo;
-      if (sortBy === "gol") return b.gol - a.gol;
-      return 0;
-    });
-
-  // Actions
-  const handleAddNewPlayer = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPlayerName.trim()) return;
-    await onAddPlayer(newPlayerName.trim());
-    setNewPlayerName("");
-    setIsAdding(false);
-  };
-
-  const handleUpdateRechargeAmount = (nome: string, val: string) => {
-    setRechargeAmounts(prev => ({ ...prev, [nome]: val }));
-  };
-
-  const handleFastAmount = (nome: string, val: number) => {
-    setRechargeAmounts(prev => ({ ...prev, [nome]: val.toString() }));
-  };
-
-  const handleToggleRechargePlayer = (nome: string) => {
-    if (selectedRechargePlayers.includes(nome)) {
-      setSelectedRechargePlayers(prev => prev.filter(n => n !== nome));
+  const handleToggleSelectAll = () => {
+    const activeOnes = giocatori.filter(g => g.attivo).map(g => g.nome);
+    if (selezionati.length === activeOnes.length) {
+      setSelezionati([]);
     } else {
-      setSelectedRechargePlayers(prev => [...prev, nome]);
+      setSelezionati(activeOnes);
     }
   };
 
-  const handleSelectAllActiveRecharge = () => {
-    const list = giocatori.filter(g => g.attivo).map(g => g.nome);
-    setSelectedRechargePlayers(list);
+  const handleTogglePlayer = (nome: string) => {
+    if (selezionati.includes(nome)) {
+      setSelezionati(selezionati.filter(x => x !== nome));
+    } else {
+      setSelezionati([...selezionati, nome]);
+    }
   };
 
-  const handleSelectConvocatiRecharge = (convocatiList: string[]) => {
-    setSelectedRechargePlayers(convocatiList);
+  const handleRoleChange = (nome: string, ruolo: string) => {
+    setRuoliConvocati({
+      ...ruoliConvocati,
+      [nome]: ruolo,
+    });
   };
 
-  const handleSelectNoneRecharge = () => {
-    setSelectedRechargePlayers([]);
-    setRechargeAmounts({});
-    setRechargeSearch("");
+  // Add a temporary external player name
+  const handleAddEsterno = () => {
+    const nomeLibero = nuovoEsterno.trim();
+    if (!nomeLibero) return;
+    const nomeCompleto = `${nomeLibero} (Esterno)`;
+    if (esterni.includes(nomeCompleto) || giocatori.some(g => g.nome.toLowerCase() === nomeLibero.toLowerCase())) {
+      alert("Questo nome è già presente in lista!");
+      return;
+    }
+    setEsterni([...esterni, nomeCompleto]);
+    setNuovoEsterno("");
   };
 
-  const handleSaveRecharges = async () => {
-    const ricaricheDaSalvare = selectedRechargePlayers
-      .map(nome => {
-        const val = rechargeAmounts[nome] || "0";
-        const amt = parseFloat(val);
-        return { nome, importo: isNaN(amt) ? 0 : amt };
-      })
-      .filter(r => r.importo > 0);
+  const handleRemoveEsterno = (nome: string) => {
+    setEsterni(esterni.filter(e => e !== nome));
+  };
 
-    if (ricaricheDaSalvare.length === 0) {
-      alert("Nessun importo valido (> 0€) inserito per i giocatori selezionati.");
+  // Stagger/Alternating setup for line-ups
+  const handleRandomizeLineup = () => {
+    const tutteUnite = [...selezionati, ...esterni];
+    const nState: Record<string, "A" | "B"> = {};
+    tutteUnite.forEach((nome, i) => {
+      nState[nome] = i % 2 === 0 ? "A" : "B";
+    });
+    setLineupAssignments(nState);
+  };
+
+  // Advance to Friendly match squad composing step
+  const handleProcediFormazione = () => {
+    let finalData = data;
+    let finalOra = ora;
+    let finalCampo = campo;
+
+    if (!finalData) {
+      finalData = new Date().toISOString().split("T")[0];
+    }
+    if (!finalOra) {
+      finalOra = "21:00";
+    }
+    if (!finalCampo) {
+      finalCampo = campi[0] || "Campo Amichevole";
+    }
+
+    // Force values so they are defined when saving
+    setData(finalData);
+    setOra(finalOra);
+    setCampo(finalCampo);
+
+    const tutteConvocati = [...selezionati, ...esterni];
+    if (tutteConvocati.length < 2) {
+      alert("Si prega di includere almeno due calciatori (interni o esterni) per comporre le squadre.");
       return;
     }
 
-    await onVersaQuotaMassivo(ricaricheDaSalvare);
-    setSelectedRechargePlayers([]);
-    setRechargeAmounts({});
-    setRechargeSearch("");
-    setIsRecharging(false);
-    alert("I versamenti dei giocatori selezionati sono stati salvati e i saldi aggiornati!");
-  };
-
-  const handleSplitExpense = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const amt = parseFloat(expenseAmt);
-    if (!expenseLabel.trim() || isNaN(amt) || amt <= 0 || expensePlayers.length === 0) return;
-    await onDividiSpesa(amt, expenseLabel.trim(), expensePlayers);
-    setExpenseAmt("");
-    setExpenseLabel("");
-    setExpensePlayers([]);
-    setIsSplitting(false);
-  };
-
-  const handleToggleSelectAllExpense = () => {
-    const list = giocatori.filter(g => g.attivo).map(g => g.nome);
-    if (expensePlayers.length === list.length) {
-      setExpensePlayers([]);
-    } else {
-      setExpensePlayers(list);
-    }
-  };
-
-  const handleTogglePlayerExpenseSelection = (nome: string) => {
-    if (expensePlayers.includes(nome)) {
-      setExpensePlayers(expensePlayers.filter(x => x !== nome));
-    } else {
-      setExpensePlayers([...expensePlayers, nome]);
-    }
-  };
-
-  const handleSaveEditProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingPlayer) return;
-    await onEditPlayer(editingPlayer.nome, editingPlayer);
-    setEditingPlayer(null);
-  };
-
-  const handleCopyRepForWhatsApp = () => {
-    const sortedBalances = [...giocatori].sort((a, b) => b.saldo - a.saldo);
-    let msg = `🏦 *SITUAZIONE CASSA SQUADRA* 🏦\n\n`;
-    sortedBalances.forEach(g => {
-      const icon = g.saldo > 0 ? "🟢 +" : g.saldo < 0 ? "🔴 " : "⚪ ";
-      msg += `${icon}${g.saldo.toFixed(2)}€ - ${g.nome} (#${g.numeroMaglia})\n`;
+    // Prepare initial step state (even indices to A, odd to B)
+    const nState: Record<string, "A" | "B"> = {};
+    tutteConvocati.forEach((nome, i) => {
+      nState[nome] = i % 2 === 0 ? "A" : "B";
     });
-    const cassaTot = giocatori.reduce((acc, curr) => acc + curr.saldo, 0);
-    msg += `\n💰 *Fondo Totale:* ${cassaTot.toFixed(2)}€`;
-
-    navigator.clipboard.writeText(msg);
-    alert("Modulo di riepilogo saldi copiato negli appunti!");
+    setLineupAssignments(nState);
+    setLineupStep(true);
   };
 
-  return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" id="sezione-rosa">
-      {/* Roster Header */}
-      <div className="bg-slate-900 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
+  // Save friendly match
+  const handleSalvaAmichevole = async () => {
+    const campoScelto = campo === "NUOVO" ? nuovoCampo.trim() : (campo || campi[0] || "Campo Amichevole");
+    const costoTotale = parseFloat(costo) || 0;
+
+    let localData = data || new Date().toISOString().split("T")[0];
+    // Format Date to long Italian string
+    const [year, month, day] = localData.split("-");
+    const dateObj = new Date(Number(year), Number(month) - 1, Number(day), 12, 0, 0);
+    const formatter = new Intl.DateTimeFormat("it-IT", { weekday: "long", day: "numeric", month: "long" });
+    let dataLeggibile = formatter.format(dateObj);
+    dataLeggibile = dataLeggibile.charAt(0).toUpperCase() + dataLeggibile.slice(1);
+
+    const tutteLeSquadre = [...selezionati, ...esterni];
+    const formatiA = tutteLeSquadre.filter(name => lineupAssignments[name] === "A");
+    const formatiB = tutteLeSquadre.filter(name => lineupAssignments[name] === "B");
+
+    const formazioniStr = `\n\n👕 *${squadraA}*:\n${formatiA.map(n => n.replace(" (Esterno)", "")).join(", ")}\n\n👕 *${squadraB}*:\n${formatiB.map(n => n.replace(" (Esterno)", "")).join(", ")}`;
+    const dettagliDatabase = `${dataLeggibile} ore ${ora || "21:00"} - ${campoScelto} (${squadraA} vs ${squadraB}) [Amichevole]` + formazioniStr;
+
+    // Create the match row in backend!
+    await onCreaPartita(costoTotale, tutteLeSquadre, dettagliDatabase, campoScelto, {});
+
+    // Prepare share text containing ONLY those items! (squads and players)
+    let msg = `👕 *${squadraA}*\n`;
+    formatiA.forEach(n => {
+      const cleanName = n.replace(" (Esterno)", "");
+      msg += `- ${cleanName}\n`;
+    });
+    msg += `\n👕 *${squadraB}*\n`;
+    formatiB.forEach(n => {
+      const cleanName = n.replace(" (Esterno)", "");
+      msg += `- ${cleanName}\n`;
+    });
+
+    navigator.clipboard.writeText(msg.trim());
+    alert("Partita Amichevole creata con successo nel sistema! ⚠️ Fai SUBITO la formazione nella sezione 'Lavagna' (Formazione). La formazione del match è pronta negli appunti!");
+
+    // Reset forms and exit step
+    setData("");
+    setOra("");
+    setCampo("");
+    setNuovoCampo("");
+    setCosto("");
+    setEsterni([]);
+    setLineupStep(false);
+  };
+
+  // Submit standard convocations (Campionato / Interna)
+  const handleSubmitCampionato = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!data || !ora || !campo) {
+      alert("Si prega di inserire data, ora e campo da gioco.");
+      return;
+    }
+
+    if (selezionati.length === 0) {
+      alert("Si prega di selezionare almeno un convocato.");
+      return;
+    }
+
+    const campoScelto = campo === "NUOVO" ? nuovoCampo.trim() : campo;
+    if (!campoScelto) {
+      alert("Inserire un nome valido per il nuovo campo.");
+      return;
+    }
+
+    // Format Date from YYYY-MM-DD to DD/MM/YYYY
+    const [year, month, day] = data.split("-");
+    const formattedDate = `${day}/${month}/${year}`;
+
+    const dettagliDatabase = `${formattedDate} ${ora}, ${campoScelto}` + (avversario ? ` vs ${avversario}` : "");
+    const costoTotale = parseFloat(costo) || 0;
+
+    // Structure WhatsApp message
+    const rigaAvversario = avversario ? `🆚 *Avversario:* ${avversario}\n` : "";
+    let msg = `⚽ *NUOVA CONVOCAZIONE* ⚽\n\n📅 ${formattedDate} *${ora}*\n📍 ${campoScelto}\n${rigaAvversario}💰 Costo: ${costoTotale}€\n\n`;
+
+    // Grouping players by role
+    RUOLI.forEach(role => {
+      const playersInRole = selezionati.filter(name => ruoliConvocati[name] === role);
+      if (playersInRole.length > 0) {
+        msg += `*${role.toUpperCase()}*\n`;
+        playersInRole.forEach(name => {
+          const gInfo = giocatori.find(x => x.nome === name);
+          msg += `- ${name} (#${gInfo?.numeroMaglia || "99"})\n`;
+        });
+        msg += `\n`;
+      }
+    });
+
+    // Handle players without role
+    const withoutRole = selezionati.filter(name => !ruoliConvocati[name] || !RUOLI.includes(ruoliConvocati[name]));
+    if (withoutRole.length > 0) {
+      msg += `*SENZA RUOLO*\n`;
+      withoutRole.forEach(name => {
+        const gInfo = giocatori.find(x => x.nome === name);
+        msg += `- ${name} (#${gInfo?.numeroMaglia || "99"})\n`;
+      });
+      msg += `\n`;
+    }
+
+    // Create standard game in backend
+    await onCreaPartita(costoTotale, selezionati, dettagliDatabase, campoScelto, ruoliConvocati);
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(msg.trim());
+    alert("Evento Convocazione creato con successo nel sistema! ⚠️ Fai SUBITO la formazione nella sezione 'Lavagna' (Formazione). Il testo per WhatsApp è pronto per essere incollato!");
+
+    // Reset forms
+    setData("");
+    setOra("");
+    setCampo("");
+    setNuovoCampo("");
+    setCosto("");
+    setAvversario("");
+  };
+
+  if (!isEditor) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" id="sezione-convocazioni">
+        <div className="bg-slate-900 px-6 py-4">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <span>👥</span> Rosa dei Giocatori
+            <span>⚽</span> Convocazioni & Gare
           </h2>
           <p className="text-xs text-slate-300">
-            {giocatori.filter(g => g.attivo).length} attivi su {giocatori.length} registrati
+            Punto di coordinamento partite
           </p>
         </div>
-
-        {/* Header Roster Operations */}
-        <div className="flex flex-wrap gap-2">
-          {isEditor && (
-            <>
-              {/* Pulsante Importa Sheets disattivato su richiesta utente */}
-              {/* Pulsante di emergenza disattivato in stand-by fino a nuova richiesta */}
-              <button
-                disabled={true}
-                className="px-3 py-1.5 bg-red-800 opacity-50 rounded-lg text-xs font-bold text-white flex items-center gap-1 cursor-not-allowed shadow-sm"
-                title="Funzione disattivata"
-              >
-                <Trash2 className="h-3.5 w-3.5" /> Emergenza Ripristino
-              </button>
-              <button
-                onClick={() => {
-                  setIsAdding(!isAdding);
-                  setIsRecharging(false);
-                  setIsSplitting(false);
-                }}
-                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-white flex items-center gap-1 cursor-pointer shadow-sm transition-colors"
-              >
-                <Plus className="h-3.5 w-3.5" /> Aggiungi
-              </button>
-              <button
-                onClick={() => {
-                  setIsRecharging(!isRecharging);
-                  setIsAdding(false);
-                  setIsSplitting(false);
-                }}
-                className="px-3 py-1.5 bg-slate-700 hover:bg-slate-650 rounded-lg text-xs font-bold text-white flex items-center gap-1 cursor-pointer shadow-sm transition-colors"
-              >
-                <Coins className="h-3.5 w-3.5" /> Ricarica
-              </button>
-              <button
-                onClick={() => {
-                  setIsSplitting(!isSplitting);
-                  setIsAdding(false);
-                  setIsRecharging(false);
-                  // Default to selecting all active players
-                  setExpensePlayers(giocatori.filter(g => g.attivo).map(g => g.nome));
-                }}
-                className="px-3 py-1.5 bg-slate-600 hover:bg-slate-550 rounded-lg text-xs font-bold text-white flex items-center gap-1 cursor-pointer shadow-sm transition-colors"
-              >
-                <Receipt className="h-3.5 w-3.5" /> Dividi Spesa
-              </button>
-            </>
-          )}
-          {isEditor && (
-            <button
-              onClick={handleCopyRepForWhatsApp}
-              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 flex items-center gap-1 cursor-pointer shadow-2xs transition-colors"
-              title="Copia WhatsApp"
-            >
-              <Copy className="h-3.5 w-3.5" /> Copia Saldi
-            </button>
-          )}
+        <div className="p-12 text-center max-w-sm mx-auto space-y-4">
+          <div className="text-4xl font-semibold">🔒</div>
+          <h3 className="text-lg font-bold text-gray-800 tracking-tight">Area riservata agli amministratori</h3>
         </div>
       </div>
+    );
+  }
 
-      {/* Expandable Panel: Add Player */}
-      {isAdding && (
-        <form onSubmit={handleAddNewPlayer} className="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row gap-3">
-          <div className="flex-1">
-            <input
-              type="text"
-              required
-              placeholder="Nome e Cognome nuovo giocatore"
-              value={newPlayerName}
-              onChange={e => setNewPlayerName(e.target.value)}
-              className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-slate-500 outline-none"
-            />
+  // Visual layout for dividing players to Team A and Team B (Step 2 of Amichevole)
+  if (lineupStep) {
+    const tutteUnite = [...selezionati, ...esterni];
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-slate-900 px-6 py-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <span>👕</span> Componi le Formazioni Amichevole
+            </h2>
+            <p className="text-xs text-slate-300">
+              Assegna ciascun partecipante selezionato a una delle due squadre
+            </p>
           </div>
-          <div className="flex gap-2">
+          <button
+            onClick={() => setLineupStep(false)}
+            className="text-slate-300 hover:text-white flex items-center gap-1 text-xs cursor-pointer font-extrabold"
+          >
+            <ArrowLeft className="h-4 w-4" /> Indietro
+          </button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center justify-between flex-wrap gap-4">
+            <div className="text-sm text-slate-800 font-medium">
+              Hai <b className="font-extrabold">{tutteUnite.length} convocati totali</b>. Puoi dividerli equamente o personalizzarli a mano!
+            </div>
             <button
-              type="submit"
-              className="px-4 py-2.5 bg-slate-800 hover:bg-slate-750 text-white font-bold text-xs rounded-lg shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+              type="button"
+              onClick={handleRandomizeLineup}
+              className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-4 py-2 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
             >
-              <UserPlus className="h-4 w-4" /> Registra in Rosa
+              <Shuffle className="h-3.5 w-3.5" /> Alterna Automatico
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[50vh] overflow-y-auto border border-gray-100 rounded-xl p-4 bg-gray-50/50">
+            {tutteUnite.map(nome => {
+              const teamSelected = lineupAssignments[nome] || "A";
+              const isEst = nome.includes("(Esterno)");
+              return (
+                <div
+                  key={nome}
+                  className={`p-3.5 rounded-xl border flex items-center justify-between gap-4 bg-white transition-all shadow-xs ${
+                    teamSelected === "A" ? "border-l-4 border-l-blue-500" : "border-l-4 border-l-orange-500"
+                  }`}
+                >
+                  <div className="flex flex-col truncate">
+                    <span className="font-bold text-gray-800 text-sm truncate">{getLastName(nome)}</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-400">
+                      {isEst ? "Giocatore Esterno" : "Rosa Interna"}
+                    </span>
+                  </div>
+
+                  <div className="flex bg-gray-100 p-0.5 rounded-lg shrink-0 select-none">
+                    <button
+                      type="button"
+                      onClick={() => setLineupAssignments({ ...lineupAssignments, [nome]: "A" })}
+                      className={`px-3 py-1.5 rounded-md text-xs font-black transition-all cursor-pointer ${
+                        teamSelected === "A"
+                          ? "bg-blue-600 text-white shadow-xs"
+                          : "text-gray-500 hover:text-gray-800"
+                      }`}
+                    >
+                      {squadraA}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLineupAssignments({ ...lineupAssignments, [nome]: "B" })}
+                      className={`px-3 py-1.5 rounded-md text-xs font-black transition-all cursor-pointer ${
+                        teamSelected === "B"
+                          ? "bg-orange-600 text-white shadow-xs"
+                          : "text-gray-500 hover:text-gray-800"
+                      }`}
+                    >
+                      {squadraB}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Formations preview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+              <h4 className="font-extrabold text-blue-900 border-b border-blue-200 pb-1.5 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <span>👕</span> {squadraA} ({tutteUnite.filter(n => lineupAssignments[n] === "A").length})
+              </h4>
+              <ul className="space-y-1 text-slate-700 text-xs">
+                {tutteUnite.filter(n => lineupAssignments[n] === "A").map(n => <li key={n}>- {n}</li>)}
+              </ul>
+            </div>
+
+            <div className="p-4 bg-orange-50 border border-orange-100 rounded-xl">
+              <h4 className="font-extrabold text-orange-950 border-b border-orange-200 pb-1.5 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <span>👕</span> {squadraB} ({tutteUnite.filter(n => lineupAssignments[n] === "B").length})
+              </h4>
+              <ul className="space-y-1 text-slate-700 text-xs">
+                {tutteUnite.filter(n => lineupAssignments[n] === "B").map(n => <li key={n}>- {n}</li>)}
+              </ul>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-3 border-t">
+            <button
+              type="button"
+              onClick={() => setLineupStep(false)}
+              className="px-5 py-3 bg-gray-150 hover:bg-gray-200 rounded-xl text-gray-700 font-extrabold text-sm transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              <ArrowLeft className="h-4 w-4" /> Modifica Invito
             </button>
             <button
               type="button"
-              onClick={() => setIsAdding(false)}
-              className="px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs rounded-lg transition-all cursor-pointer"
+              onClick={handleSalvaAmichevole}
+              className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
-              Annulla
+              <Check className="h-5 w-5" /> Salva Amichevole & Copia Formazioni WhatsApp
             </button>
           </div>
-        </form>
-      )}
-
-      {/* Expandable Panel: Quick Recharge */}
-      {isRecharging && (
-        <div className="p-5 bg-green-50/70 border-b border-green-100 space-y-4 shadow-inner">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-green-150 pb-3 gap-3">
-            <div>
-              <h3 className="font-extrabold text-sm text-green-950 flex items-center gap-1.5">
-                <span>💰</span> Gestione Versamenti & Ricariche Saldi
-              </h3>
-              <p className="text-[11px] text-green-850">
-                Seleziona i giocatori, inserisci le quote versate al campo e salva in un'unica soluzione.
-              </p>
-            </div>
-
-            {/* Quick action controls for selection */}
-            <div className="flex flex-wrap gap-1.5">
-              <button
-                type="button"
-                onClick={handleSelectAllActiveRecharge}
-                className="px-2.5 py-1.5 bg-green-150 hover:bg-green-200 text-green-950 font-extrabold text-[10px] uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
-              >
-                👥 Spunta Tutti Attivi
-              </button>
-
-              {(() => {
-                const firstOpenMatch = partiteAperte?.find(p => p.stato === "Aperta");
-                if (!firstOpenMatch || !firstOpenMatch.convocati || firstOpenMatch.convocati.length === 0) return null;
-                return (
-                  <button
-                    type="button"
-                    onClick={() => handleSelectConvocatiRecharge(firstOpenMatch.convocati)}
-                    className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-[10px] uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
-                    title={firstOpenMatch.dettagli}
-                  >
-                    ⚽ Spunta Convocati Gara ({firstOpenMatch.convocati.length})
-                  </button>
-                );
-              })()}
-
-              <button
-                type="button"
-                onClick={handleSelectNoneRecharge}
-                className="px-2.5 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-extrabold text-[10px] uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
-              >
-                🧹 Deseleziona Tutti
-              </button>
-            </div>
-          </div>
-
-          {/* Search box within recharge panel */}
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-green-600" />
-            </div>
-            <input
-              type="text"
-              placeholder="Cerca un giocatore da ricaricare..."
-              value={rechargeSearch}
-              onChange={e => setRechargeSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 bg-white border border-green-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500 outline-none text-green-950 placeholder-green-700/50"
-            />
-          </div>
-
-          {/* Scrollable list/grid of players */}
-          <div className="max-h-80 overflow-y-auto border border-green-150 bg-white rounded-xl p-3.5 space-y-2">
-            {(() => {
-              const listToRender = giocatori.filter(g => {
-                if (!rechargeSearch.trim()) return true;
-                return g.nome.toLowerCase().includes(rechargeSearch.toLowerCase());
-              });
-
-              if (listToRender.length === 0) {
-                return (
-                  <div className="text-center py-6 text-xs text-gray-400 italic font-semibold">
-                    Nessun giocatore corrisponde alla ricerca.
-                  </div>
-                );
-              }
-
-              return listToRender.map(g => {
-                const isSelected = selectedRechargePlayers.includes(g.nome);
-                const currentVal = rechargeAmounts[g.nome] || "";
-
-                return (
-                  <div
-                    key={g.nome}
-                    className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 border transition-all rounded-xl ${
-                      isSelected
-                        ? "bg-green-50/45 border-green-300"
-                        : "bg-slate-50/30 border-slate-200/60 hover:bg-slate-50/70 hover:border-slate-300"
-                    }`}
-                  >
-                    {/* Left: Checkbox + Name & Current Balance */}
-                    <label className="flex items-center gap-3 cursor-pointer min-w-0 select-none flex-1">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => handleToggleRechargePlayer(g.nome)}
-                        className="w-5 h-5 text-green-700 focus:ring-green-500 rounded-lg border-green-300 cursor-pointer transition-all shrink-0 scale-105"
-                      />
-                      <div className="truncate flex flex-col">
-                        <span className="font-extrabold text-sm text-slate-900 truncate flex items-center gap-1.5">
-                          <span className="text-[10px] font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-150/40 px-1.5 py-0.5 rounded">
-                            {g.numeroMaglia ?? 99}
-                          </span>
-                          {g.nome}
-                        </span>
-                        <span className="text-[10px] text-gray-400 font-bold block mt-0.5">
-                          Saldo Corrente: <b className={`font-black ${g.saldo < 0 ? "text-red-650" : "text-green-800"}`}>{g.saldo.toFixed(2)}€</b>
-                        </span>
-                      </div>
-                    </label>
-
-                    {/* Right: Dynamic Recharge inputs (Only displayed when selected/checked) */}
-                    {isSelected ? (
-                      <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0 justify-end animate-fade-in animate-duration-200">
-                        {/* Quick Flat Quote Shortcuts (5, 10, 15) */}
-                        <div className="flex p-0.5 bg-white border border-green-200 rounded-lg text-[10px] font-extrabold select-none shadow-2xs">
-                          <button
-                            type="button"
-                            onClick={() => handleFastAmount(g.nome, 5)}
-                            className={`px-2 py-1 rounded-md transition-all cursor-pointer font-black ${
-                              parseFloat(currentVal) === 5 ? "bg-green-600 text-white font-black" : "hover:bg-green-50 text-green-900"
-                            }`}
-                          >
-                            5€
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleFastAmount(g.nome, 10)}
-                            className={`px-2 py-1 rounded-md transition-all cursor-pointer font-black ${
-                              parseFloat(currentVal) === 10 ? "bg-green-600 text-white font-black" : "hover:bg-green-50 text-green-900"
-                            }`}
-                          >
-                            10€
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleFastAmount(g.nome, 15)}
-                            className={`px-2 py-1 rounded-md transition-all cursor-pointer font-black ${
-                              parseFloat(currentVal) === 15 ? "bg-green-600 text-white font-black" : "hover:bg-green-50 text-green-900"
-                            }`}
-                          >
-                            15€
-                          </button>
-                          {g.saldo < 0 && (
-                            <button
-                              type="button"
-                              onClick={() => handleFastAmount(g.nome, Math.abs(g.saldo))}
-                              className={`px-2 py-1 rounded-md transition-all cursor-pointer font-extrabold text-[9px] uppercase tracking-tight ${
-                                parseFloat(currentVal) === Math.abs(g.saldo) ? "bg-red-600 text-white font-black animate-pulse" : "hover:bg-red-550 text-red-650 font-black font-sans"
-                              }`}
-                              title="Inserisci l'importo necessario per saldare il debito corrente"
-                            >
-                              Salda
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Numeric input field */}
-                        <div className="relative">
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            placeholder="0.00"
-                            value={currentVal}
-                            onChange={e => handleUpdateRechargeAmount(g.nome, e.target.value)}
-                            className="w-20 p-2 text-xs text-right font-black bg-white border border-green-250 rounded-lg outline-none text-green-950 focus:ring-2 focus:ring-green-500 shadow-2xs"
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-[11px] text-gray-400 italic pr-3 font-semibold self-center">
-                        Non versante
-                      </div>
-                    )}
-                  </div>
-                );
-              });
-            })()}
-          </div>
-
-          {/* Subtotals & Main Submit actions */}
-          <div className="flex flex-wrap items-center justify-between gap-4 pt-3.5 border-t border-green-150">
-            <div className="text-left">
-              <span className="block text-[10px] uppercase font-bold text-green-800">Totale Versamenti Ricevuti</span>
-              <strong className="text-lg text-green-950 font-black">
-                {(() => {
-                  const tot = selectedRechargePlayers.reduce((acc, curr) => {
-                    const val = rechargeAmounts[curr] || "0";
-                    const amt = parseFloat(val);
-                    return acc + (isNaN(amt) ? 0 : amt);
-                  }, 0);
-                  return tot.toFixed(2);
-                })()}€
-              </strong>
-              <span className="text-[10px] text-green-800 font-bold block mt-0.5">
-                ({selectedRechargePlayers.filter(nome => {
-                  const val = rechargeAmounts[nome] || "0";
-                  return parseFloat(val) > 0;
-                }).length} ricariche compilate)
-              </span>
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={handleSelectNoneRecharge}
-                className="px-4 py-2.5 bg-gray-250 hover:bg-gray-300 text-gray-700 font-bold text-xs rounded-xl cursor-pointer"
-              >
-                Reset
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedRechargePlayers([]);
-                  setRechargeAmounts({});
-                  setRechargeSearch("");
-                  setIsRecharging(false);
-                }}
-                className="px-4 py-2.5 bg-gray-200 hover:bg-gray-250 text-gray-700 font-bold text-xs rounded-xl cursor-pointer"
-              >
-                Annulla
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveRecharges}
-                className="px-5 py-2.5 bg-green-700 hover:bg-green-650 text-white font-black text-xs rounded-xl shadow-md transition-colors cursor-pointer flex items-center gap-1.5"
-              >
-                Salva Ricariche Selezionate 💾
-              </button>
-            </div>
-          </div>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* Expandable Panel: Split Shared Expense */}
-      {isSplitting && (
-        <form onSubmit={handleSplitExpense} className="p-4 bg-yellow-50 border-b border-yellow-100 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="sm:col-span-2">
-              <label className="block text-[10px] font-bold uppercase text-yellow-800 mb-1">Causale della Spesa</label>
-              <input
-                type="text"
-                required
-                placeholder="es. Acquisto nuovo pallone da gioco, affitto casacche"
-                value={expenseLabel}
-                onChange={e => setExpenseLabel(e.target.value)}
-                className="w-full p-2.5 bg-white border border-yellow-200 rounded-lg text-sm focus:ring-2 focus:ring-yellow-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold uppercase text-yellow-800 mb-1">Costo Totale (€)</label>
-              <input
-                type="number"
-                step="0.01"
-                required
-                min="0.01"
-                placeholder="0.00"
-                value={expenseAmt}
-                onChange={e => setExpenseAmt(e.target.value)}
-                className="w-full p-2.5 bg-white border border-yellow-200 rounded-lg text-sm focus:ring-2 focus:ring-yellow-500 outline-none"
-              />
-            </div>
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" id="sezione-convocazioni">
+      <div className="bg-slate-900 px-6 py-4">
+        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <span>⚽</span> Gestione Convocazioni & Gare
+        </h2>
+        <p className="text-xs text-slate-300">
+          Programma una partita e genera la convocazione. Puoi scegliere tra Campionato Interno o Match Amichevole.
+        </p>
+      </div>
+
+      {/* Tabs Selector for Game Modes */}
+      <div className="flex border-b border-slate-200 bg-slate-50 p-2 gap-1.5">
+        <button
+          onClick={() => setActiveMode("campionato")}
+          className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            activeMode === "campionato"
+              ? "bg-white border border-slate-200 text-slate-800 shadow-xs"
+              : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/50"
+          }`}
+        >
+          🏆 Campionato / Interna
+        </button>
+        <button
+          onClick={() => setActiveMode("amichevole")}
+          className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            activeMode === "amichevole"
+              ? "bg-white border border-slate-200 text-slate-800 shadow-xs"
+              : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/50"
+          }`}
+        >
+          🤝 Partita Amichevole
+        </button>
+      </div>
+
+      <div className="p-6 space-y-6">
+        {/* Date, Hour and Field Options (Common fields - shown for both types of matches) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Data Gara</label>
+            <input
+              type="date"
+              required
+              value={data}
+              onChange={e => setData(e.target.value)}
+              className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
+            />
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="block text-[10px] font-bold uppercase text-yellow-800">
-                Seleziona i partecipanti alla divisione ({expensePlayers.length})
-              </label>
-              <button
-                type="button"
-                onClick={handleToggleSelectAllExpense}
-                className="text-xs text-yellow-700 font-extrabold cursor-pointer hover:underline"
-              >
-                {expensePlayers.length === giocatori.filter(g => g.attivo).length ? "Deseleziona Tutti" : "Seleziona Tutti Attivi"}
-              </button>
-            </div>
-            
-            <div className="max-h-32 overflow-y-auto bg-white border border-yellow-200 rounded-lg p-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-              {giocatori.map(g => (
-                <label
-                  key={g.nome}
-                  className={`flex items-center gap-1.5 p-1.5 rounded border text-xs cursor-pointer transition-colors ${
-                    expensePlayers.includes(g.nome)
-                      ? "bg-yellow-100 border-yellow-300 text-yellow-900"
-                      : "bg-gray-50 border-gray-100 text-gray-500"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    className="w-3.5 h-3.5 text-yellow-600 rounded"
-                    checked={expensePlayers.includes(g.nome)}
-                    onChange={() => handleTogglePlayerExpenseSelection(g.nome)}
-                  />
-                  <span className="truncate font-semibold">{g.nome}</span>
-                </label>
-              ))}
-            </div>
-            {expensePlayers.length > 0 && !isNaN(parseFloat(expenseAmt)) && parseFloat(expenseAmt) > 0 && (
-              <p className="text-xs text-yellow-800 font-bold mt-2">
-                Quota individuale: {(parseFloat(expenseAmt) / expensePlayers.length).toFixed(2)}€ a testa ({expensePlayers.length} giocatori).
-              </p>
-            )}
-          </div>
-
-          <div className="flex justify-end gap-2 pt-2">
-            <button
-              type="submit"
-              disabled={expensePlayers.length === 0}
-              className="px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-white font-bold text-xs rounded-lg shadow-sm transition-all disabled:opacity-50 cursor-pointer"
-            >
-              Esegui Divisione & Addebita
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsSplitting(false)}
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs rounded-lg cursor-pointer"
-            >
-              Annulla
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Filters Bench */}
-      <div className="p-4 border-b border-gray-100 bg-gray-50 flex flex-col md:flex-row gap-3 justify-between items-center">
-        {/* Search */}
-        <div className="relative w-full md:w-64">
-          <input
-            type="text"
-            placeholder="Cerca giocatore..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-slate-500 outline-none"
-          />
-          <Search className="h-4 w-4 text-gray-400 absolute left-3 top-3" />
-        </div>
-
-        {/* Sorting & Status Filters */}
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          <label className="flex items-center gap-1.5 text-xs text-gray-600 font-semibold cursor-pointer">
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Ora Calcio d'Inizio</label>
             <input
-              type="checkbox"
-              className="w-4 h-4 rounded text-slate-800 focus:ring-slate-500"
-              checked={showOnlyActive}
-              onChange={e => setShowOnlyActive(e.target.checked)}
+              type="time"
+              required
+              value={ora}
+              onChange={e => setOra(e.target.value)}
+              className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
             />
-            Solo Attivi/Convocabili
-          </label>
+          </div>
 
-          <div className="flex items-center gap-1 text-xs text-gray-500 ml-auto md:ml-0">
-            <span className="font-semibold text-gray-600">Ordina:</span>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Campo da Gioco</label>
             <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value as any)}
-              className="border border-gray-200 bg-white p-1 rounded font-medium text-gray-700 focus:outline-none focus:ring-1 focus:ring-slate-500"
+              required
+              value={campo}
+              onChange={e => setCampo(e.target.value)}
+              className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
             >
-              <option value="maglia">Jersey #</option>
-              <option value="nome">Nome</option>
-              {isEditor && <option value="saldo">Saldo</option>}
-              <option value="gol">Gol</option>
+              <option value="">Seleziona Campo...</option>
+              {campi.map(c => (
+                <option key={c} value={c}>
+                  {c                }
+                </option>
+              ))}
+              <option value="NUOVO" className="font-bold text-slate-755">
+                + Nuovo Campo...
+              </option>
             </select>
           </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Costo Totale Campo (€)</label>
+            <input
+              type="number"
+              step="0.01"
+              placeholder="es. 60"
+              value={costo}
+              onChange={e => setCosto(e.target.value)}
+              className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Players Visual Grid */}
-      <div className="p-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filtered.map(g => {
-          const subConceded = (g.golSubitiAzione || 0) + (g.golSubitiRigore || 0) + (g.golSubitiPiazzato || 0);
-          const isDebtor = g.saldo < 0;
-          const isCreditor = g.saldo > 0;
+        {/* Conditional text input for new field */}
+        {campo === "NUOVO" && (
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <label className="block text-xs font-bold text-slate-800 uppercase mb-1">Nome Nuovo Campo</label>
+            <input
+              type="text"
+              required
+              placeholder="es. Impianto Sportivo San Siro"
+              value={nuovoCampo}
+              onChange={e => setNuovoCampo(e.target.value)}
+              className="w-full text-sm p-3 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
+            />
+          </div>
+        )}
 
-          // Calculate Amichevoli stats for player 'g' by scanning 'partiteChiuse'
-          let amichevoleGol = 0;
-          let amichevoleAssist = 0;
-          let amichevoleAmm = 0;
-          let amichevoleEsp = 0;
+        {/* Mode Dependent: Campionato vs Amichevole Form */}
+        {activeMode === "campionato" ? (
+          <form onSubmit={handleSubmitCampionato} className="space-y-6">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                Squadra Avversaria <span className="text-gray-400 font-normal">(lasciare vuoto se interna)</span>
+              </label>
+              <input
+                type="text"
+                placeholder="es. Scapoli FC"
+                value={avversario}
+                onChange={e => setAvversario(e.target.value)}
+                className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
+              />
+            </div>
 
-          if (partiteChiuse && partiteChiuse.length > 0) {
-            for (const m of partiteChiuse) {
-              const isFriendly = m.dettagli ? m.dettagli.toLowerCase().includes("amichevole") : false;
-              if (isFriendly && m.referto) {
-                const r = m.referto.find(x => x.nome.toLowerCase() === g.nome.toLowerCase());
-                if (r) {
-                  amichevoleGol += Number(r.gol) || 0;
-                  amichevoleAssist += Number(r.assist) || 0;
-                  amichevoleAmm += Number(r.amm) || 0;
-                  amichevoleEsp += Number(r.rossi) || 0;
-                }
-              }
-            }
-          }
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
+                  <Users className="h-4 w-4" /> Seleziona Giocatori & Ruoli ({selezionati.length} scelti)
+                </h3>
+                <button
+                  type="button"
+                  onClick={handleToggleSelectAll}
+                  className="text-xs text-slate-700 font-bold cursor-pointer hover:underline"
+                >
+                  Invita/Deseleziona Tutti Attivi
+                </button>
+              </div>
 
-          // Campionato stats = Total stats - Amichevoli stats
-          const campionatoGol = Math.max(0, (g.gol || 0) - amichevoleGol);
-          const campionatoAssist = Math.max(0, (g.assist || 0) - amichevoleAssist);
-          const campionatoAmm = Math.max(0, (g.ammonizioni || 0) - amichevoleAmm);
-          const campionatoEsp = Math.max(0, (g.espulsioni || 0) - amichevoleEsp);
-          
-          return (
-            <div
-              key={g.nome}
-              className={`border rounded-xl p-4 shadow-sm flex flex-col justify-between transition-all hover:shadow-md relative overflow-hidden ${
-                !g.attivo ? "bg-gray-50 border-gray-200 opacity-65" : "bg-white border-gray-100"
-              }`}
-            >
-              {/* Top Banner Ribbon for inactive */}
-              {!g.attivo && (
-                <div className="absolute top-0 right-0 bg-red-100 text-red-700 text-[9px] uppercase font-extrabold px-2 py-0.5 rounded-bl">
-                  Inattivo
-                </div>
-              )}
-
-              {/* Player Row Header */}
-              <div className="flex justify-between items-start gap-2 mb-3">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-xs font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 px-2 py-0.5 rounded-full flex items-center justify-center min-w-[1.75rem]">
-                    {g.numeroMaglia}
-                  </span>
-                  <div>
-                    <h4 className="font-bold text-gray-800 text-sm">{g.nome}</h4>
-                    <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
-                      {g.ultimoRuolo || "Nessun ruolo prioritario"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Account balance bubble */}
-                {isEditor && (
-                  <div className="text-right">
-                    <span
-                      className={`inline-block px-2 py-1 rounded-full text-xs font-extrabold ${
-                        isCreditor
-                          ? "bg-green-100 text-green-800"
-                          : isDebtor
-                          ? "bg-red-100 text-red-800 animate-pulse-slow"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto border border-gray-100 rounded-xl p-4 bg-gray-50">
+                {giocatori.map(g => {
+                  const checked = selezionati.includes(g.nome);
+                  return (
+                    <div
+                      key={g.nome}
+                      className={`p-3 rounded-lg border flex flex-col justify-between gap-2.5 transition-all ${
+                        checked
+                          ? "bg-slate-50 border-slate-200 text-slate-800 shadow-xs"
+                          : "bg-white border-gray-200 text-gray-400 opacity-60"
+                      } ${!g.attivo ? "bg-red-50/20 border-red-100" : ""}`}
                     >
-                      {isCreditor ? "+" : ""}
-                      {g.saldo.toFixed(2)} €
-                    </span>
-                  </div>
-                )}
+                      <label className="flex items-center gap-2 cursor-pointer w-full">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => handleTogglePlayer(g.nome)}
+                          className="w-4 h-4 rounded text-slate-800 focus:ring-slate-500"
+                        />
+                        <span className="font-bold text-sm truncate flex-1">
+                          {g.nome}{" "}
+                          <span className="text-[10px] font-mono font-semibold text-indigo-600 bg-indigo-50/50 px-1 py-0.2 rounded border border-indigo-150/40 ml-1">
+                            {g.numeroMaglia}
+                          </span>
+                        </span>
+                        {!g.attivo && (
+                          <span className="text-[9px] bg-red-150 text-red-700 px-1 py-0.2 rounded font-extrabold uppercase ml-1">
+                            Inattivo
+                          </span>
+                        )}
+                      </label>
+
+                      {/* Position role selector */}
+                      <div className="flex items-center gap-1.5 border-t border-dashed border-slate-200 pt-2 shrink-0">
+                        <span className="text-[10px] uppercase font-semibold text-gray-400">Ruolo:</span>
+                        <select
+                          disabled={!checked}
+                          value={ruoliConvocati[g.nome] || ""}
+                          onChange={e => handleRoleChange(g.nome, e.target.value)}
+                          className="text-xs p-1 border rounded bg-white font-medium text-gray-700 disabled:bg-gray-100 disabled:text-gray-400 focus:outline-none flex-1"
+                        >
+                          <option value="">Seleziona...</option>
+                          {RUOLI.map(r => (
+                            <option key={r} value={r}>
+                              {r}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4 border-t border-gray-100">
+              <button
+                type="submit"
+                className="w-full sm:w-auto px-6 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <ClipboardCheck className="h-5 w-5" /> Crea Evento & Copia Testo WhatsApp
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-6">
+            {/* Friendly match custom team names */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nome Squadra A</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Noi"
+                  value={squadraA}
+                  onChange={e => setSquadraA(e.target.value)}
+                  className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none font-bold"
+                />
               </div>
 
-              {/* Statistics strip with 2 distinct rows */}
-              <div className="bg-gray-50 border border-gray-100/55 rounded-xl p-2.5 mb-3 text-xs space-y-2 shadow-2xs">
-                {/* Header labels */}
-                <div className="grid grid-cols-5 gap-1 text-[8.5px] text-gray-400 font-extrabold uppercase text-center border-b border-gray-100/70 pb-1">
-                  <div>REGISTRO</div>
-                  <div>GOL</div>
-                  <div>ASSIST</div>
-                  <div>AMMON.</div>
-                  <div>ESPUL.</div>
-                </div>
-                {/* CAMPIONATO ROW */}
-                <div className="grid grid-cols-5 gap-1 text-center items-center py-0.5 text-[11px] font-sans">
-                  <div className="text-[8.5px] font-black text-slate-800 uppercase tracking-wide text-left pl-1">🏆 CAMP.</div>
-                  <div className="font-extrabold text-blue-900">{campionatoGol}</div>
-                  <div className="font-extrabold text-sky-800">{campionatoAssist}</div>
-                  <div className="font-extrabold text-yellow-600">{campionatoAmm}</div>
-                  <div className="font-extrabold text-red-650">{campionatoEsp}</div>
-                </div>
-                {/* AMICHEVOLE ROW */}
-                <div className="grid grid-cols-5 gap-1 text-center items-center pt-1 border-t border-gray-100/60 text-[11px] font-sans">
-                  <div className="text-[8.5px] font-black text-amber-600 uppercase tracking-wide text-left pl-1">🤝 AMICH.</div>
-                  <div className="font-extrabold text-gray-700/80">{amichevoleGol}</div>
-                  <div className="font-extrabold text-gray-700/80">{amichevoleAssist}</div>
-                  <div className="font-extrabold text-yellow-600/70">{amichevoleAmm}</div>
-                  <div className="font-extrabold text-red-600/70">{amichevoleEsp}</div>
-                </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nome Squadra B</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Avversari"
+                  value={squadraB}
+                  onChange={e => setSquadraB(e.target.value)}
+                  className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none font-bold"
+                />
               </div>
+            </div>
 
-              {/* Additional Goalkeeper feedback */}
-              {subConceded > 0 && (
-                <p className="text-[10px] text-slate-800 bg-slate-50 px-2 py-1 rounded border border-slate-200 mb-3 text-center font-medium">
-                  🧤 Gol subiti come portiere: <strong className="font-bold">{subConceded}</strong> (Azione {g.golSubitiAzione}, Rigore {g.golSubitiRigore}, Puniz {g.golSubitiPiazzato})
-                </p>
-              )}
-
-               {/* Footer row options */}
-              <div className="flex justify-between items-center border-t border-gray-100 pt-3 mt-1 text-xs">
-                {isEditor ? (
-                  <span className="text-[10px] text-gray-400 font-medium">
-                    Quota Iscrizione: <strong className="text-slate-800">{g.quotaIscrizione.toFixed(2)}€</strong>
+            {/* Total Players Counter for Amichevole */}
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-2xs">
+              <div>
+                <span className="text-xs font-bold text-slate-800 uppercase tracking-wider block">Giocatori Scelti per l'Amichevole</span>
+                <span className="text-xs text-slate-600">
+                  Consigliato: esattamente <strong>10 giocatori</strong> (rosa interna + esterni)
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={`text-base font-black px-3 py-1.5 rounded-lg border transition-colors ${
+                  (selezionati.length + esterni.length) === 10
+                    ? "bg-slate-800 border-slate-900 text-white"
+                    : "bg-amber-100 border-amber-200 text-amber-800"
+                }`}>
+                  {selezionati.length + esterni.length} / 10 scelti
+                </span>
+                {(selezionati.length + esterni.length) !== 10 ? (
+                  <span className="text-[11px] font-bold text-amber-700">
+                    ⚠️ {selezionati.length + esterni.length < 10 ? "Seleziona altri!" : "Troppi giocatori!"}
                   </span>
                 ) : (
-                  <div />
-                )}
-
-                {isEditor && (
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => {
-                        setEditingPlayer(g);
-                        setModalTab("profilo");
-                      }}
-                      className="p-1 text-gray-500 hover:text-slate-800 bg-gray-100 hover:bg-slate-200/60 rounded transition-colors cursor-pointer"
-                      title="Modifica Giocatore"
-                    >
-                      <Edit3 className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (
-                          confirm(
-                            `Sei sicuro di voler eliminare definitivamente ${g.nome} dalla rosa?`
-                          )
-                        ) {
-                          onDeletePlayer(g.nome);
-                        }
-                      }}
-                      className="p-1 text-gray-400 hover:text-red-600 bg-gray-100 hover:bg-red-50 rounded transition-colors cursor-pointer"
-                      title="Inabilita / Rimuovi"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
+                  <span className="text-[11px] font-bold text-slate-700 block">
+                    ✅ Perfetto!
+                  </span>
                 )}
               </div>
             </div>
-          );
-        })}
-        {filtered.length === 0 && (
-          <div className="col-span-full py-8 text-center text-gray-400 italic">
-            Nessun giocatore corrisponde ai criteri impostati
+
+            {/* Players Checklist (Roster) */}
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
+                  <span className="font-bold text-gray-700">1. Seleziona Convocati Interni ({selezionati.length} scelti)</span>
+                </h3>
+                <button
+                  type="button"
+                  onClick={handleToggleSelectAll}
+                  className="text-xs text-slate-700 font-bold cursor-pointer hover:underline"
+                >
+                  Deseleziona/Seleziona Tutti Attivi
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-48 overflow-y-auto border border-gray-150 rounded-xl p-3 bg-gray-50">
+                {giocatori.map(g => {
+                  const checked = selezionati.includes(g.nome);
+                  return (
+                    <label
+                      key={g.nome}
+                      className={`p-2.5 rounded-lg border text-xs font-bold flex items-center gap-2.5 cursor-pointer truncate transition-all ${
+                        checked
+                          ? "bg-white border-slate-305 text-slate-900 shadow-xs"
+                          : "bg-gray-100/55 border-gray-200 text-gray-400"
+                      } ${!g.attivo ? "bg-red-50/20 border-red-100 cursor-not-allowed opacity-50" : ""}`}
+                    >
+                      <input
+                        type="checkbox"
+                        disabled={!g.attivo}
+                        checked={checked}
+                        onChange={() => handleTogglePlayer(g.nome)}
+                        className="w-3.5 h-3.5 rounded text-slate-800 focus:ring-slate-500"
+                      />
+                      <span className="truncate flex-1">{g.nome}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* External players registry */}
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+              <h4 className="font-bold text-xs text-slate-900 uppercase tracking-wider">
+                2. Aggiungi Giocatori Esterni (Opzionale)
+              </h4>
+              <p className="text-[10px] text-slate-600 font-medium">
+                I giocatori esterni non appartengono alla rosa interna e non subiranno addebiti personali diretti sui saldi, ma influiranno sul conteggio paganti riducendo la quota campo.
+              </p>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="es. Cristiano"
+                  value={nuovoEsterno}
+                  onChange={e => setNuovoEsterno(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddEsterno();
+                    }
+                  }}
+                  className="flex-1 text-sm p-3 bg-white border border-slate-205 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddEsterno}
+                  className="px-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg text-sm shrink-0 shadow-sm transition-colors cursor-pointer"
+                >
+                  Aggiungi +
+                </button>
+              </div>
+
+              {/* Badges of added external players */}
+              <div className="flex flex-wrap gap-1.5 p-2 bg-white/70 border border-slate-200 rounded-lg min-h-[44px]">
+                {esterni.length === 0 ? (
+                  <span className="text-[11px] text-gray-400 italic font-medium m-auto">
+                    Nessun giocatore esterno aggiunto.
+                  </span>
+                ) : (
+                  esterni.map(n => (
+                    <span
+                      key={n}
+                      className="bg-slate-50 text-slate-800 border border-slate-150 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-2xs"
+                    >
+                      {n.replace(" (Esterno)", "")}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveEsterno(n)}
+                        className="text-red-600 font-bold text-xs hover:text-red-800"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Advance Button */}
+            <div className="flex justify-end pt-4 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={handleProcediFormazione}
+                className="w-full sm:w-auto px-6 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              >
+                Procedi alla Formazione 📋
+              </button>
+            </div>
           </div>
         )}
       </div>
-
-      {/* Dialog Edit Profile Profile */}
-      {editingPlayer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs transition-opacity overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 w-full max-w-lg my-8">
-            <h3 className="text-lg font-bold text-gray-900 border-b pb-2 mb-4">
-              Dettagli Giocatore: {editingPlayer.nome}
-            </h3>
-
-            {/* Modal Tab Headers */}
-            <div className="flex border-b border-gray-100 mb-5 text-xs font-bold uppercase tracking-wider">
-              <button
-                type="button"
-                onClick={() => setModalTab("profilo")}
-                className={`flex-1 pb-2.5 border-b-2 text-center transition-all cursor-pointer ${
-                  modalTab === "profilo"
-                    ? "border-slate-800 text-slate-800 font-extrabold"
-                    : "border-transparent text-gray-400 hover:text-gray-600"
-                }`}
-              >
-                👤 Dati Profilo & Statistiche
-              </button>
-              <button
-                type="button"
-                onClick={() => setModalTab("finanze")}
-                className={`flex-1 pb-2.5 border-b-2 text-center transition-all cursor-pointer ${
-                  modalTab === "finanze"
-                    ? "border-slate-800 text-slate-800 font-extrabold"
-                    : "border-transparent text-gray-400 hover:text-gray-600"
-                }`}
-              >
-                💸 Storico Transazioni
-              </button>
-            </div>
-
-            {modalTab === "profilo" ? (
-              <form onSubmit={handleSaveEditProfile} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2">
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nome e Cognome</label>
-                    <input
-                      type="text"
-                      required
-                      value={editingPlayer.nome}
-                      onChange={e => setEditingPlayer({ ...editingPlayer, nome: e.target.value })}
-                      className="w-full text-sm p-2 border rounded-lg focus:ring-2 focus:ring-slate-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Numero Maglia</label>
-                    <input
-                      type="number"
-                      required
-                      value={editingPlayer.numeroMaglia}
-                      onChange={e =>
-                        setEditingPlayer({ ...editingPlayer, numeroMaglia: parseInt(e.target.value) || 99 })
-                      }
-                      className="w-full text-sm p-2 border rounded-lg"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Saldo (€)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      required
-                      value={editingPlayer.saldo}
-                      onChange={e =>
-                        setEditingPlayer({ ...editingPlayer, saldo: parseFloat(e.target.value) || 0 })
-                      }
-                      className="w-full text-sm p-2 border rounded-lg"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Quota Iscrizione (€)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      required
-                      value={editingPlayer.quotaIscrizione}
-                      onChange={e =>
-                        setEditingPlayer({
-                          ...editingPlayer,
-                          quotaIscrizione: parseFloat(e.target.value) || 0,
-                        })
-                      }
-                      className="w-full text-sm p-2 border rounded-lg"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Ruolo Preferito</label>
-                    <select
-                      value={editingPlayer.ultimoRuolo}
-                      onChange={e => setEditingPlayer({ ...editingPlayer, ultimoRuolo: e.target.value })}
-                      className="w-full text-sm p-2 border bg-white rounded-lg focus:ring-2 focus:ring-slate-500"
-                    >
-                      <option value="">Nessuno</option>
-                      <option value="Portiere">Portiere</option>
-                      <option value="Centrale">Centrale</option>
-                      <option value="Laterale">Laterale</option>
-                      <option value="Pivot">Pivot</option>
-                      <option value="Allenatore">Allenatore</option>
-                      <option value="Tifoso">Tifoso</option>
-                    </select>
-                  </div>
-
-                  <div className="flex items-center gap-2 mt-4">
-                    <input
-                      type="checkbox"
-                      id="edit-attivo"
-                      className="w-4 h-4 rounded text-slate-800 focus:ring-slate-500"
-                      checked={editingPlayer.attivo}
-                      onChange={e => setEditingPlayer({ ...editingPlayer, attivo: e.target.checked })}
-                    />
-                    <label htmlFor="edit-attivo" className="text-xs font-bold text-gray-700 uppercase cursor-pointer">
-                      Giocatore Attivo
-                    </label>
-                  </div>
-                </div>
-
-                {/* Statistics Panel in Edit */}
-                <div className="bg-gray-50 p-4 rounded-xl space-y-3">
-                  <h4 className="text-xs font-extrabold text-gray-600 uppercase border-b pb-1">Statistiche Carriera</h4>
-
-                  <div className="grid grid-cols-4 gap-2">
-                    <div>
-                      <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">GOL</label>
-                      <input
-                        type="number"
-                        value={editingPlayer.gol}
-                        onChange={e =>
-                          setEditingPlayer({ ...editingPlayer, gol: parseInt(e.target.value) || 0 })
-                        }
-                        className="w-full text-xs p-1 text-center border bg-white rounded"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">ASSIST</label>
-                      <input
-                        type="number"
-                        value={editingPlayer.assist}
-                        onChange={e =>
-                          setEditingPlayer({ ...editingPlayer, assist: parseInt(e.target.value) || 0 })
-                        }
-                        className="w-full text-xs p-1 text-center border bg-white rounded"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">AMM (🟨)</label>
-                      <input
-                        type="number"
-                        value={editingPlayer.ammonizioni}
-                        onChange={e =>
-                          setEditingPlayer({ ...editingPlayer, ammonizioni: parseInt(e.target.value) || 0 })
-                        }
-                        className="w-full text-xs p-1 text-center border bg-white rounded"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">ESP (🟥)</label>
-                      <input
-                        type="number"
-                        value={editingPlayer.espulsioni}
-                        onChange={e =>
-                          setEditingPlayer({ ...editingPlayer, espulsioni: parseInt(e.target.value) || 0 })
-                        }
-                        className="w-full text-xs p-1 text-center border bg-white rounded"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Conceded details */}
-                  <div className="grid grid-cols-3 gap-2">
-                    <div>
-                      <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">SUB (Az)</label>
-                      <input
-                        type="number"
-                        value={editingPlayer.golSubitiAzione}
-                        onChange={e =>
-                          setEditingPlayer({
-                            ...editingPlayer,
-                            golSubitiAzione: parseInt(e.target.value) || 0,
-                          })
-                        }
-                        className="w-full text-xs p-1 text-center border bg-white rounded"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">SUB (Rig)</label>
-                      <input
-                        type="number"
-                        value={editingPlayer.golSubitiRigore}
-                        onChange={e =>
-                          setEditingPlayer({
-                            ...editingPlayer,
-                            golSubitiRigore: parseInt(e.target.value) || 0,
-                          })
-                        }
-                        className="w-full text-xs p-1 text-center border bg-white rounded"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[8px] font-bold text-gray-400 uppercase text-center">SUB (Pia)</label>
-                      <input
-                        type="number"
-                        value={editingPlayer.golSubitiPiazzato}
-                        onChange={e =>
-                          setEditingPlayer({
-                            ...editingPlayer,
-                            golSubitiPiazzato: parseInt(e.target.value) || 0,
-                          })
-                        }
-                        className="w-full text-xs p-1 text-center border bg-white rounded"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-2 pt-2 border-t font-semibold">
-                  <button
-                    type="button"
-                    onClick={() => setEditingPlayer(null)}
-                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg cursor-pointer font-bold"
-                  >
-                    Annulla
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-lg cursor-pointer font-bold"
-                  >
-                    Salva Modifiche
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <div className="space-y-4">
-                {/* Financial history content & Summary */}
-                <div className="grid grid-cols-2 gap-3 mb-2">
-                  <div className="bg-slate-50 p-3 rounded-xl border border-gray-100 text-center">
-                    <span className="block text-[10px] uppercase font-black tracking-wider text-gray-400 mb-0.5">
-                      Saldo Corrente
-                    </span>
-                    <span className={`text-lg font-black font-mono ${editingPlayer.saldo >= 0 ? "text-emerald-700" : "text-amber-600"}`}>
-                      {editingPlayer.saldo >= 0 ? "+" : ""}{editingPlayer.saldo.toFixed(2)}€
-                    </span>
-                  </div>
-                  <div className="bg-slate-50 p-3 rounded-xl border border-gray-100 text-center">
-                    <span className="block text-[10px] uppercase font-black tracking-wider text-gray-400 mb-0.5">
-                      Sponsor / Quota Iscr.
-                    </span>
-                    <span className="text-lg font-black text-slate-800 font-mono">
-                      {editingPlayer.quotaIscrizione.toFixed(2)}€
-                    </span>
-                  </div>
-                </div>
-
-                <h4 className="text-xs font-black text-gray-400 uppercase tracking-wider border-b pb-1 flex items-center justify-between">
-                  <span>Movimenti & Storico Pagamenti</span>
-                  <span className="font-mono text-[10px] text-gray-500 font-medium">
-                    {getPlayerTransactions(editingPlayer.nome).length} operazioni
-                  </span>
-                </h4>
-
-                <div className="max-h-[350px] overflow-y-auto pr-1 space-y-2">
-                  {getPlayerTransactions(editingPlayer.nome).length === 0 ? (
-                    <div className="py-12 text-center text-gray-400 font-medium italic text-xs">
-                      Nessun movimento finanziario registrato per questo giocatore.
-                    </div>
-                  ) : (
-                    getPlayerTransactions(editingPlayer.nome).map((tx, idx) => {
-                      const isPositive = tx.amount > 0;
-                      const isNegative = tx.amount < 0;
-                      return (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-white hover:bg-gray-50/55 transition-colors"
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div className={`p-2 rounded-lg shrink-0 ${
-                              isPositive 
-                                ? "bg-emerald-50 text-emerald-700 border border-emerald-100" 
-                                : isNegative 
-                                  ? "bg-amber-50 text-amber-700 border border-amber-100" 
-                                  : "bg-gray-50 text-gray-500 border border-gray-100"
-                            }`}>
-                              {tx.type.includes("Ricarica") ? (
-                                <Coins className="h-4 w-4" />
-                              ) : (
-                                <Receipt className="h-4 w-4" />
-                              )}
-                            </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2 mb-0.5">
-                                <span className="font-extrabold text-xs text-gray-950 truncate max-w-[130px] sm:max-w-none">
-                                  {tx.type}
-                                </span>
-                                <span className="text-[9px] font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded font-mono shrink-0">
-                                  {tx.date}
-                                </span>
-                              </div>
-                              <p className="text-[10px] text-gray-500 font-medium tracking-tight line-clamp-1" title={tx.details}>
-                                {tx.details}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <div className={`font-mono text-xs font-black shrink-0 pl-2 ${
-                            isPositive ? "text-emerald-700" : isNegative ? "text-amber-600" : "text-gray-500"
-                          }`}>
-                            {isPositive ? "+" : ""}{tx.amount === 0 ? "-" : `${tx.amount.toFixed(2)}€`}
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-
-                <div className="flex justify-end pt-2 border-t font-semibold">
-                  <button
-                    type="button"
-                    onClick={() => setEditingPlayer(null)}
-                    className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-lg cursor-pointer font-bold transition-colors"
-                  >
-                    Chiudi Dettagli
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

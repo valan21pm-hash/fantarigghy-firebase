@@ -3,353 +3,207 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Check, ClipboardCopy, ToggleLeft, ToggleRight, XCircle } from "lucide-react";
 import { useState } from "react";
-import { Award, Shield, Sparkles, Trophy } from "lucide-react";
-import { Giocatore, Partita } from "../types";
+import { Giocatore } from "../types";
 
-interface StatsDashboardProps {
+interface IscrizioniProps {
   giocatori: Giocatore[];
-  partiteChiuse?: Partita[];
+  onVersaIscrizione: (nome: string, importo: number) => Promise<void>;
+  onCambiaStatoGiocatore: (nome: string, nuovoStato: boolean) => Promise<void>;
+  onDisattivaTutti: () => Promise<void>;
+  isEditor?: boolean;
 }
 
-export default function StatsDashboard({ giocatori, partiteChiuse = [] }: StatsDashboardProps) {
-  const [activeType, setActiveType] = useState<"campionato" | "amichevole" | "totale">("campionato");
+export default function Iscrizioni({
+  giocatori,
+  onVersaIscrizione,
+  onCambiaStatoGiocatore,
+  onDisattivaTutti,
+  isEditor = false,
+}: IscrizioniProps) {
+  if (!isEditor) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" id="sezione-iscrizioni">
+        <div className="bg-slate-900 px-6 py-4">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <span>🎟️</span> Tessere & Iscrizioni
+          </h2>
+          <p className="text-xs text-slate-300">
+            Controlla iscrizioni e stato giocatori
+          </p>
+        </div>
+        <div className="p-12 text-center max-w-sm mx-auto space-y-4">
+          <div className="text-4xl font-semibold">🔒</div>
+          <h3 className="text-lg font-bold text-gray-800 tracking-tight">Area riservata agli amministratori</h3>
+        </div>
+      </div>
+    );
+  }
 
-  // Compute stats separated by match type
-  const computedPlayers = giocatori.map(g => {
-    // 1. Start with overall totals
-    const totalGol = g.gol || 0;
-    const totalAssist = g.assist || 0;
-    const totalAmm = g.ammonizioni || 0;
-    const totalEsp = g.espulsioni || 0;
-    const totalSubiti = (g.golSubitiAzione || 0) + (g.golSubitiRigore || 0) + (g.golSubitiPiazzato || 0);
-    const totalMalus = totalAmm + totalEsp * 3;
+  const [depositi, setDepositi] = useState<Record<string, string>>({});
 
-    // 2. Count amichevole matches from database
-    let amichevoleGol = 0;
-    let amichevoleAssist = 0;
-    let amichevoleAmm = 0;
-    let amichevoleEsp = 0;
-    let amichevoleSubitiAzione = 0;
-    let amichevoleSubitiRigore = 0;
-    let amichevoleSubitiPiazzato = 0;
+  const handleDepositChange = (nome: string, val: string) => {
+    setDepositi(prev => ({ ...prev, [nome]: val }));
+  };
 
-    if (partiteChiuse && partiteChiuse.length > 0) {
-      for (const m of partiteChiuse) {
-        const isFriendly = m.dettagli ? m.dettagli.toLowerCase().includes("amichevole") : false;
-        if (isFriendly && m.referto) {
-          const r = m.referto.find(x => x.nome.toLowerCase() === g.nome.toLowerCase());
-          if (r) {
-            amichevoleGol += Number(r.gol) || 0;
-            amichevoleAssist += Number(r.assist) || 0;
-            amichevoleAmm += Number(r.amm) || 0;
-            amichevoleEsp += Number(r.rossi) || 0;
-            amichevoleSubitiAzione += Number(r.subitiAzione) || 0;
-            amichevoleSubitiRigore += Number(r.subitiRigore) || 0;
-            amichevoleSubitiPiazzato += Number(r.subitiPiazzato) || 0;
-          }
-        }
-      }
+  const handleVersaSubmit = async (nome: string) => {
+    const amt = parseFloat(depositi[nome] || "0");
+    if (isNaN(amt) || amt <= 0) {
+      alert("Si prega di inserire una cifra valida maggiore di zero.");
+      return;
     }
+    await onVersaIscrizione(nome, amt);
+    setDepositi(prev => ({ ...prev, [nome]: "" })); // Clear
+    alert(`Quota d'iscrizione di ${amt.toFixed(2)}€ registrata con successo per ${nome}!`);
+  };
 
-    const amichevoleSubiti = amichevoleSubitiAzione + amichevoleSubitiRigore + amichevoleSubitiPiazzato;
-    const amichevoleMalus = amichevoleAmm + amichevoleEsp * 3;
+  const handleDisattivaClicca = async () => {
+    if (
+      confirm(
+        "Sei sicuro di voler disattivare TUTTA la rosa? Questo impedirà le convocazioni finché non verranno riattivati singolarmente (utile all'inizio di nuove stagioni)."
+      )
+    ) {
+      await onDisattivaTutti();
+      alert("Tutti i giocatori sono stati impostati como Inattivi!");
+    }
+  };
 
-    // 3. Campionato = Totale - Amichevole
-    const campionatoGol = Math.max(0, totalGol - amichevoleGol);
-    const campionatoAssist = Math.max(0, totalAssist - amichevoleAssist);
-    const campionatoAmm = Math.max(0, totalAmm - amichevoleAmm);
-    const campionatoEsp = Math.max(0, totalEsp - amichevoleEsp);
-    const campionatoSubitiAzione = Math.max(0, (g.golSubitiAzione || 0) - amichevoleSubitiAzione);
-    const campionatoSubitiRigore = Math.max(0, (g.golSubitiRigore || 0) - amichevoleSubitiRigore);
-    const campionatoSubitiPiazzato = Math.max(0, (g.golSubitiPiazzato || 0) - amichevoleSubitiPiazzato);
-    const campionatoSubiti = campionatoSubitiAzione + campionatoSubitiRigore + campionatoSubitiPiazzato;
-    const campionatoMalus = campionatoAmm + campionatoEsp * 3;
+  const handleCopyReportConvocazioni = () => {
+    let txt = `🎟️ *REPORT ISCRIZIONI SQUADRA* 🎟️\n\n`;
+    const ordinati = [...giocatori].sort((a, b) => (b.quotaIscrizione || 0) - (a.quotaIscrizione || 0));
+    ordinati.forEach(g => {
+      const quota = g.quotaIscrizione || 0;
+      const spuntato = quota > 0 ? "✅" : "❌";
+      const attivoBadge = g.attivo ? " (Attivo/Convocabile)" : " (Inattivo)";
+      txt += `${spuntato} *${g.nome}*: ${quota.toFixed(2)}€${attivoBadge}\n`;
+    });
+    const totaleIscrizioni = giocatori.reduce((acc, curr) => acc + (curr.quotaIscrizione || 0), 0);
+    txt += `\n💰 *Totale Fondi Iscrizioni Raccolti:* ${totaleIscrizioni.toFixed(2)}€`;
 
-    return {
-      nome: g.nome,
-      numeroMaglia: g.numeroMaglia,
-      ultimoRuolo: g.ultimoRuolo,
-      campionato: {
-        gol: campionatoGol,
-        assist: campionatoAssist,
-        ammonizioni: campionatoAmm,
-        espulsioni: campionatoEsp,
-        subitiAzione: campionatoSubitiAzione,
-        subitiRigore: campionatoSubitiRigore,
-        subitiPiazzato: campionatoSubitiPiazzato,
-        subiti: campionatoSubiti,
-        malus: campionatoMalus
-      },
-      amichevole: {
-        gol: amichevoleGol,
-        assist: amichevoleAssist,
-        ammonizioni: amichevoleAmm,
-        espulsioni: amichevoleEsp,
-        subitiAzione: amichevoleSubitiAzione,
-        subitiRigore: amichevoleSubitiRigore,
-        subitiPiazzato: amichevoleSubitiPiazzato,
-        subiti: amichevoleSubiti,
-        malus: amichevoleMalus
-      },
-      totale: {
-        gol: totalGol,
-        assist: totalAssist,
-        ammonizioni: totalAmm,
-        espulsioni: totalEsp,
-        subitiAzione: g.golSubitiAzione || 0,
-        subitiRigore: g.golSubitiRigore || 0,
-        subitiPiazzato: g.golSubitiPiazzato || 0,
-        subiti: totalSubiti,
-        malus: totalMalus
-      }
-    };
-  });
-
-  // Project active selection type
-  const mappedPlayers = computedPlayers.map(p => {
-    const activeStats = p[activeType];
-    return {
-      nome: p.nome,
-      numeroMaglia: p.numeroMaglia,
-      ultimoRuolo: p.ultimoRuolo,
-      gol: activeStats.gol,
-      assist: activeStats.assist,
-      ammonizioni: activeStats.ammonizioni,
-      espulsioni: activeStats.espulsioni,
-      subiti: activeStats.subiti,
-      golSubitiAzione: activeStats.subitiAzione,
-      golSubitiRigore: activeStats.subitiRigore,
-      golSubitiPiazzato: activeStats.subitiPiazzato,
-      malus: activeStats.malus
-    };
-  });
-
-  // Compute Top Scorer
-  const topScorers = [...mappedPlayers]
-    .filter(g => g.gol > 0)
-    .sort((a, b) => b.gol - a.gol || b.nome.localeCompare(a.nome));
-
-  // Compute Top Assists
-  const topAssists = [...mappedPlayers]
-    .filter(g => g.assist > 0)
-    .sort((a, b) => b.assist - a.assist || b.nome.localeCompare(a.nome));
-
-  // Compute Bad Boys
-  const badBoys = [...mappedPlayers]
-    .filter(g => g.malus > 0)
-    .sort((a, b) => b.malus - a.malus || b.nome.localeCompare(a.nome));
-
-  // Compute Goalkeepers
-  const gks = [...mappedPlayers]
-    .filter(g => g.subiti > 0 || g.ultimoRuolo === "Portiere")
-    .sort((a, b) => a.subiti - b.subiti || b.nome.localeCompare(a.nome));
+    navigator.clipboard.writeText(txt);
+    alert("Report iscrizioni copiato negli appunti! Condividi sul tuo gruppo WhatsApp.");
+  };
 
   return (
-    <div className="space-y-4 mb-6">
-      {/* Selector Row */}
-      <div className="bg-white border border-slate-200 p-2.5 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-xs">
-        <div className="flex items-center gap-2 pl-1.5 pt-0.5">
-          <Trophy className="h-5 w-5 text-slate-700" />
-          <div>
-            <h2 className="text-xs font-bold uppercase text-slate-700 tracking-wider">Podio Statistiche</h2>
-            <p className="text-xs text-slate-500">Filtra per tipologia di partita</p>
-          </div>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" id="sezione-iscrizioni">
+      <div className="bg-slate-900 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <span>🎟️</span> Gestione Iscrizioni & Quote Annuali
+          </h2>
+          <p className="text-xs text-slate-300">
+            Controlla chi è attivo e regola le quote di iscrizione stagionali o quote tessera
+          </p>
         </div>
-        <div className="flex bg-slate-150 p-1 rounded-xl items-center gap-1 self-start sm:self-auto shadow-sm border border-slate-200">
+
+        <div className="flex gap-2 shrink-0">
           <button
-            type="button"
-            onClick={() => setActiveType("campionato")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeType === "campionato"
-                ? "bg-white text-slate-900 shadow-2xs border border-slate-250"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
+            onClick={handleCopyReportConvocazioni}
+            className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-bold text-white flex items-center gap-1 cursor-pointer transition-colors"
           >
-            <span>🏆</span> <span>Campionato</span>
+            <ClipboardCopy className="h-4 w-4" /> Esporta Report
           </button>
-          <button
-            type="button"
-            onClick={() => setActiveType("amichevole")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeType === "amichevole"
-                ? "bg-white text-slate-900 shadow-2xs border border-slate-250"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            <span>🤝</span> <span>Amichevoli</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveType("totale")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              activeType === "totale"
-                ? "bg-white text-slate-900 shadow-2xs border border-slate-250"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            <span>🌍</span> <span>Tutte</span>
-          </button>
+          {isEditor && (
+            <button
+              onClick={handleDisattivaClicca}
+              className="px-3.5 py-1.5 bg-red-650 hover:bg-red-750 rounded-lg text-xs font-bold text-white flex items-center gap-1 cursor-pointer transition-colors"
+            >
+              <XCircle className="h-4 w-4" /> Disattiva Tutti
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Grid of 4 categories */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* 1. Bomber (Top Scorer) */}
-        <div className="bg-white border-t-4 border-t-amber-500 border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-2">
-            <div>
-              <span className="text-xs uppercase font-bold text-amber-800 tracking-wider">
-                Capocannoniere
-              </span>
-              <h3 className="text-sm font-semibold text-slate-900">Pichichi</h3>
-            </div>
-            <div className="bg-amber-50 p-1.5 rounded-lg text-amber-700">
-              <Trophy className="h-4.5 w-4.5" />
-            </div>
-          </div>
-          {topScorers.length > 0 ? (
-            <div className="mt-2">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-slate-900 font-mono">
-                  {topScorers[0].gol}
-                </span>
-                <span className="text-xs font-semibold text-slate-600 uppercase">
-                  Gol Fatti
-                </span>
-              </div>
-              <p className="text-sm font-semibold text-slate-800 mt-1 truncate flex items-center gap-1.5">
-                <span className="text-xs font-mono font-bold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-250">
-                  {topScorers[0].numeroMaglia}
-                </span>
-                <span>{topScorers[0].nome}</span>
-              </p>
-              {topScorers.length > 1 && (
-                <p className="text-xs text-slate-500 mt-1 truncate">
-                  Inseguono: {topScorers[1].nome} ({topScorers[1].gol})
-                </p>
-              )}
-            </div>
-          ) : (
-            <p className="text-xs text-slate-500 italic mt-4">Nessun gol segnato</p>
-          )}
-        </div>
+      <div className="p-6">
+        <p className="text-xs text-gray-500 mb-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+          ℹ️ I giocatori contrassegnati come <strong>Inattivi</strong> rimangono salvati in rosa e mantengono il proprio storico statistiche/saldo, ma <strong>non appariranno più</strong> nella lista delle nuove convocazioni partitelle settimanali.
+        </p>
 
-        {/* 2. Assistman */}
-        <div className="bg-white border-t-4 border-t-sky-500 border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-2">
-            <div>
-              <span className="text-xs uppercase font-bold text-sky-800 tracking-wider">
-                Miglior Assistman
-              </span>
-              <h3 className="text-sm font-semibold text-slate-900">Rifinitore</h3>
-            </div>
-            <div className="bg-sky-50 p-1.5 rounded-lg text-sky-700">
-              <Sparkles className="h-4.5 w-4.5" />
-            </div>
-          </div>
-          {topAssists.length > 0 ? (
-            <div className="mt-2">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-slate-900 font-mono">
-                  {topAssists[0].assist}
-                </span>
-                <span className="text-xs font-semibold text-slate-600 uppercase">
-                  Assist
-                </span>
-              </div>
-              <p className="text-sm font-semibold text-slate-800 mt-1 truncate flex items-center gap-1.5">
-                <span className="text-xs font-mono font-bold text-sky-800 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-250">
-                  {topAssists[0].numeroMaglia}
-                </span>
-                <span>{topAssists[0].nome}</span>
-              </p>
-              {topAssists.length > 1 && (
-                <p className="text-xs text-slate-500 mt-1 truncate">
-                  Inseguono: {topAssists[1].nome} ({topAssists[1].assist})
-                </p>
-              )}
-            </div>
-          ) : (
-            <p className="text-xs text-slate-500 italic mt-4">Nessun assist registrato</p>
-          )}
-        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto pr-1">
+          {giocatori.map(g => {
+            const quota = g.quotaIscrizione || 0;
+            const hasPaid = quota > 0;
+            return (
+              <div
+                key={g.nome}
+                className={`p-4 rounded-xl border flex flex-col justify-between gap-3 shadow-xs transition-shadow hover:shadow-sm ${
+                  hasPaid ? "bg-green-50/50 border-green-200" : "bg-white border-gray-150"
+                }`}
+              >
+                {/* Header Row of Single Profile */}
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <h4 className="font-extrabold text-gray-800 text-sm">{g.nome}</h4>
+                    <span className="inline-block text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-150/40 uppercase">
+                      Maglia {g.numeroMaglia}
+                    </span>
+                  </div>
 
-        {/* 3. Goalkeepers (Zamora) */}
-        <div className="bg-white border-t-4 border-t-teal-500 border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-2">
-            <div>
-              <span className="text-xs uppercase font-bold text-teal-800 tracking-wider">
-                Gol Subiti
-              </span>
-              <h3 className="text-sm font-semibold text-slate-900">Saracinesca</h3>
-            </div>
-            <div className="bg-teal-50 p-1.5 rounded-lg text-teal-700">
-              <Shield className="h-4.5 w-4.5" />
-            </div>
-          </div>
-          {gks.length > 0 ? (
-            <div className="mt-2">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-slate-900 font-mono">
-                  {gks[0].subiti}
-                </span>
-                <span className="text-xs font-semibold text-slate-600 uppercase">
-                  Subiti Tot
-                </span>
-              </div>
-              <p className="text-sm font-semibold text-slate-800 mt-1 truncate flex items-center gap-1.5">
-                <span className="text-xs font-mono font-bold text-teal-800 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-250">
-                  {gks[0].numeroMaglia}
-                </span>
-                <span>{gks[0].nome}</span>
-              </p>
-              <p className="text-xs text-slate-500 mt-1 truncate">
-                Az: {gks[0].golSubitiAzione} | Rig: {gks[0].golSubitiRigore} | Pun:{" "}
-                {gks[0].golSubitiPiazzato}
-              </p>
-            </div>
-          ) : (
-            <p className="text-xs text-slate-500 italic mt-4">Nessun portiere registrato</p>
-          )}
-        </div>
+                  {/* Active status switcher */}
+                  {isEditor ? (
+                    <button
+                      onClick={() => onCambiaStatoGiocatore(g.nome, !g.attivo)}
+                      className={`cursor-pointer transition-colors p-1.5 rounded-lg flex items-center gap-1 text-[10px] font-bold uppercase leading-none border ${
+                        g.attivo
+                          ? "bg-green-150 text-green-800 border-green-200"
+                          : "bg-red-100 text-red-800 border-red-200"
+                      }`}
+                      title={g.attivo ? "Disattiva Giocatore" : "Attiva Giocatore"}
+                    >
+                      {g.attivo ? (
+                        <>
+                          <ToggleRight className="h-4 w-4 text-green-700" /> Attivo
+                        </>
+                      ) : (
+                        <>
+                          <ToggleLeft className="h-4 w-4 text-red-700" /> Inattivo
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <div
+                      className={`p-1.5 rounded-lg flex items-center gap-1 text-[10px] font-bold uppercase leading-none border ${
+                        g.attivo
+                          ? "bg-green-150 text-green-800 border-green-200"
+                          : "bg-red-100 text-red-800 border-red-200"
+                      }`}
+                    >
+                      {g.attivo ? "Attivo" : "Inattivo"}
+                    </div>
+                  )}
+                </div>
 
-        {/* 4. Bad Boy / Cartellini */}
-        <div className="bg-white border-t-4 border-t-red-500 border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-2">
-            <div>
-              <span className="text-xs uppercase font-bold text-red-00 tracking-wider">
-                Sanzioni
-              </span>
-              <h3 className="text-sm font-semibold text-slate-900">Cartellini</h3>
-            </div>
-            <div className="bg-red-50 p-1.5 rounded-lg text-red-700">
-              <Award className="h-4.5 w-4.5" />
-            </div>
-          </div>
-          {badBoys.length > 0 ? (
-            <div className="mt-2">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-slate-900 font-mono">
-                  {badBoys[0].malus}
-                </span>
-                <span className="text-xs font-semibold text-slate-600 uppercase">
-                  Punti (🟨1, 🟥3)
-                </span>
+                {/* Accounting box */}
+                <div className="bg-white/80 border border-gray-100 p-2.5 rounded-lg flex justify-between items-center text-xs">
+                  <span className="text-gray-500 font-medium">Fondo iscrizione versato:</span>
+                  <strong className={hasPaid ? "text-green-700 font-extrabold" : "text-gray-400 font-bold"}>
+                    {(g.quotaIscrizione || 0).toFixed(2)} €
+                  </strong>
+                </div>
+
+                {/* Interactive Deposit form */}
+                {isEditor && (
+                  <div className="flex gap-1.5 mt-1">
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="€"
+                      value={depositi[g.nome] || ""}
+                      onChange={e => handleDepositChange(g.nome, e.target.value)}
+                      className="w-16 sm:w-20 text-xs p-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-slate-500"
+                    />
+                    <button
+                      onClick={() => handleVersaSubmit(g.nome)}
+                      className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-xs rounded-lg shadow-xs transition-colors cursor-pointer"
+                    >
+                      Registra Versamento
+                    </button>
+                  </div>
+                )}
               </div>
-              <p className="text-sm font-semibold text-slate-800 mt-1 truncate flex items-center gap-1.5">
-                <span className="text-xs font-mono font-bold text-red-800 bg-red-50 px-1.5 py-0.5 rounded border border-red-250">
-                  {badBoys[0].numeroMaglia}
-                </span>
-                <span>{badBoys[0].nome}</span>
-              </p>
-              <p className="text-xs text-slate-500 mt-1 truncate">
-                🟨 {badBoys[0].ammonizioni} gialli | 🟥 {badBoys[0].espulsioni} rossi
-              </p>
-            </div>
-          ) : (
-            <p className="text-xs text-slate-500 italic mt-4">Nessuna sanzione disciplinare</p>
-          )}
+            );
+          })}
         </div>
       </div>
     </div>
