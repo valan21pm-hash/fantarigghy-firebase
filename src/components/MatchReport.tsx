@@ -16,7 +16,8 @@ interface MatchReportProps {
     presenti: string[],
     risultato: string,
     referto: RefertoGiocatore[],
-    note?: string
+    note?: string,
+    tipoInvio?: string
   ) => Promise<void>;
   onSalvaBozza?: (
     idPartita: string,
@@ -598,7 +599,8 @@ export default function MatchReport({
         confirmModalData.presentsList,
         confirmModalData.risultato,
         confirmModalData.refertoCompleto,
-        note.trim()
+        note.trim(),
+        tipoInvio
       );
       
       setSuccessMessage("Partita refertata con successo! I saldi dei conti sono stati aggiornati.");

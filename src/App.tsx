@@ -325,7 +325,8 @@ export default function App() {
     presenti: string[],
     risultato: string,
     referto: RefertoGiocatore[],
-    note?: string
+    note?: string,
+    tipoInvio?: string
   ) => {
     await executePostAction("/api/partite/chiudi", {
       idPartita,
@@ -334,6 +335,7 @@ export default function App() {
       risultato,
       referto,
       note,
+      tipoInvio: tipoInvio || "provvisorio",
     });
     // Move immediately to archive panel
     setMainSection("gare");

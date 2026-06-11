@@ -51,47 +51,48 @@ async function getAuthClient() {
   return await auth.getClient();
 }
 
+async function getValidGoogleToken(token?: string): Promise<string> {
+  const targetSpreadsheetId = "1Bt6RZkR0Qmn6_8TBl4xBqLtc7qxk_NMR2uehVQe1V2o";
+  const checkUrl = `https://sheets.googleapis.com/v4/spreadsheets/${targetSpreadsheetId}`;
+
+  const testToken = async (t: string) => {
+    try {
+      const res = await fetch(checkUrl, { headers: { Authorization: `Bearer ${t}` } });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+
+  if (token && !token.startsWith("local-admin-")) {
+    if (await testToken(token)) return token;
+    console.warn("[Token Check] Provided user token failed 401, trying SA token...");
+  }
+
+  const saToken = await getServiceAccountToken();
+  if (saToken && saToken !== token) {
+    if (await testToken(saToken)) return saToken;
+  }
+
+  const storedToken = await getStoredGoogleToken();
+  if (storedToken && storedToken !== token && storedToken !== saToken) {
+    if (await testToken(storedToken)) return storedToken;
+  }
+
+  throw new Error("Google Sheets access failed: 401. No valid tokens available.");
+}
+
 // Update functions to use getAuthClient inside to get an access token
 async function getOrUpdateSpreadsheetId(token?: string): Promise<string> {
-  let activeToken = token;
-  if (!activeToken) {
-    activeToken = await getStoredGoogleToken();
-  }
-  if (!activeToken) {
-    const client = await getAuthClient();
-    const tokenResponse = await client.getAccessToken();
-    activeToken = tokenResponse.token!;
-  }
+  const activeToken = await getValidGoogleToken(token);
 
   const cached = spreadsheetIdCache.get(activeToken);
   if (cached) return cached;
 
   const targetSpreadsheetId = "1Bt6RZkR0Qmn6_8TBl4xBqLtc7qxk_NMR2uehVQe1V2o";
-
-  try {
-    // 2. Controllo diretto accesso al foglio
-    console.log(
-      `[Google Sheets] Controllo diretto accesso al foglio ${targetSpreadsheetId}...`,
-    );
-    const checkUrl = `https://sheets.googleapis.com/v4/spreadsheets/${targetSpreadsheetId}`;
-    const checkRes = await fetch(checkUrl, {
-      headers: { Authorization: `Bearer ${activeToken}` },
-    });
-
-    if (checkRes.ok) {
-      console.log(
-        `[Google Sheets] Foglio esistente '${targetSpreadsheetId}' accessibile con successo!`,
-      );
-      spreadsheetIdCache.set(activeToken, targetSpreadsheetId);
-      return targetSpreadsheetId;
-    }
-
-    // ... (rest of implementation adapted to not rely on 'userEmail' from OAuth userInfo)
-    throw new Error(`Google Sheets access failed: ${checkRes.status}`);
-  } catch (err: any) {
-    console.error("Error in getOrUpdateSpreadsheetId:", err);
-    throw err;
-  }
+  
+  spreadsheetIdCache.set(activeToken, targetSpreadsheetId);
+  return targetSpreadsheetId;
 }
 
 import { Formazione } from "./src/types";
@@ -497,8 +498,9 @@ async function fetchFromSheets(
 }
 
 async function saveToSheets(token: string, db: DatabaseSchema): Promise<void> {
-  const spreadsheetId = await getOrUpdateSpreadsheetId(token);
-  await saveToSheetsInternal(token, spreadsheetId, db);
+  const activeToken = await getValidGoogleToken(token);
+  const spreadsheetId = await getOrUpdateSpreadsheetId(activeToken);
+  await saveToSheetsInternal(activeToken, spreadsheetId, db);
 }
 
 async function saveToSheetsInternal(
@@ -759,11 +761,11 @@ function triggerBackgroundSaveToFirestore(db: DatabaseSchema) {
     clearTimeout(firestoreSyncTimeout);
   }
 
-  // Schedule background write in 60 seconds to accumulate consecutive client operations
+  // Schedule background write in 3 seconds to accumulate consecutive client operations
   firestoreSyncTimeout = setTimeout(async () => {
     firestoreSyncTimeout = null;
     await processPendingFirestoreSync();
-  }, 60000);
+  }, 3000);
 }
 
 async function processPendingSync() {
@@ -997,6 +999,7 @@ async function getDb(
     !sheetsSyncInProgress
   ) {
     try {
+      activeToken = await getValidGoogleToken(activeToken);
       const spreadsheetId = await getOrUpdateSpreadsheetId(activeToken);
       let sheetsDb = await fetchFromSheets(activeToken, spreadsheetId);
 
@@ -1237,7 +1240,7 @@ async function saveDb(db: DatabaseSchema, token?: string): Promise<void> {
   await safeWriteDb(JSON.stringify(db, null, 2));
 
   // 3. Persist instantly to Firestore (24/7 availability)
-  // triggerBackgroundSaveToFirestore(db);
+  triggerBackgroundSaveToFirestore(db);
 
   let activeToken = token;
   if (!activeToken || activeToken.startsWith("local-admin-")) {
@@ -1331,9 +1334,10 @@ async function startServer() {
   // Migrazione temporanea da Sheets a Firestore
   app.post("/api/migrate-sheets-to-firestore", async (req, res) => {
     try {
-      const token = getAuthToken(req);
+      let token = getAuthToken(req);
       if (!token) return res.status(401).json({ err: "Token mancante" });
 
+      token = await getValidGoogleToken(token);
       const spreadsheetId = await getOrUpdateSpreadsheetId(token);
       console.log("[Migration] Inizio migrazione da Sheets a Firestore...");
 
@@ -2725,7 +2729,7 @@ async function startServer() {
   // 15. CHIUDI PARTITA (DEBIT BALANCES AND APPLY FINAL REPORT STATES)
   app.post("/api/partite/chiudi", async (req, res) => {
     try {
-      const { idPartita, costoFinale, presenti, risultato, referto, note } =
+      const { idPartita, costoFinale, presenti, risultato, referto, note, tipoInvio } =
         req.body;
       const token = getAuthToken(req);
       const db = await getDb(token);
@@ -2742,7 +2746,7 @@ async function startServer() {
           ? parseFloat(costoFinale)
           : Number(costoFinale || 0);
       rigaPartita.note = note || "";
-      rigaPartita.inviatoFanta = false;
+      rigaPartita.inviatoFanta = tipoInvio === "definitivo";
 
       // Take a snapshot of all current fantasquadre rosters at the point of closing this match report
       // Also update the baseline (rosaOriginaria) for each team so the next market phase uses the newly locked roster
