@@ -635,6 +635,10 @@ export default function FantacalcettoV2({
         const rEsp = r ? Number(r.rossi) || 0 : 0;
         const rBonusAttivi = r ? r.bonusAttivi || [] : [];
 
+        const rSubitiAzione = r ? Number(r.subitiAzione) || 0 : 0;
+        const rSubitiRigore = r ? Number(r.subitiRigore) || 0 : 0;
+        const rSubitiPiazzato = r ? Number(r.subitiPiazzato) || 0 : 0;
+
         const gInfoFallback = giocatori.find(g => g.nome.toLowerCase() === pName.toLowerCase());
         const bonusPts = r
           ? getPlayerBonusPointsForMatch(
@@ -684,16 +688,42 @@ export default function FantacalcettoV2({
             )
           : 0;
 
+        let matchChange = 0;
+        if (played) {
+          if (fantaScore >= 20) matchChange = 2;
+          else if (fantaScore >= 16) matchChange = 1;
+          else if (fantaScore >= 10) matchChange = 0;
+          else if (fantaScore >= -5) matchChange = -1;
+          else if (fantaScore >= -10) matchChange = -2;
+          else matchChange = -3;
+        } else {
+          if (fantaScore >= 15) matchChange = 2;
+          else if (fantaScore >= 7) matchChange = 1;
+          else if (fantaScore >= -1) matchChange = 0;
+          else if (fantaScore >= -5) matchChange = -1;
+          else if (fantaScore >= -10) matchChange = -2;
+          else matchChange = -3;
+        }
+
+        if (r && r.malusBrt === true) {
+          matchChange -= 1;
+        }
+
         return {
           nome: pName,
           gol: rGol,
           assist: rAssist,
           amm: rAmm,
           rossi: rEsp,
+          subitiAzione: rSubitiAzione,
+          subitiRigore: rSubitiRigore,
+          subitiPiazzato: rSubitiPiazzato,
           bonusPts,
           bonusBreakdownStr,
           fantaScore,
+          matchChange,
           played: !!played,
+          malusBrt: r ? !!r.malusBrt : false,
         };
       };
 
@@ -5488,6 +5518,13 @@ function MatchBreakdownModal({
                   `🎒 ${kpi.bonusPts > 0 ? "+" : ""}${kpi.bonusPts} Bonus`,
                 );
               }
+              if (kpi.malusBrt) {
+                highlights.push(`📦 Malus BRT (-1 Izycoin)`);
+              }
+              const malusSubiti = kpi.subitiAzione + kpi.subitiPiazzato + kpi.subitiRigore;
+              if (malusSubiti > 0) {
+                highlights.push(`🥅 ${malusSubiti} Gol Subiti`);
+              }
 
               const isSostituito = kpi.stato === "Sostituito";
               const isSubentrato = kpi.stato === "Subentrato";
@@ -5517,11 +5554,18 @@ function MatchBreakdownModal({
                         </span>
                       )}
                     </span>
-                    <span
-                      className={`font-mono font-black text-sm ${isSubentrato ? "text-sky-700" : isSostituito || isAssente ? "text-red-700" : "text-indigo-700"}`}
-                    >
-                      {displayPoints} pt
-                    </span>
+                    <div className="flex items-center gap-2">
+                       {!(isSostituito || isAssente) && kpi.matchChange !== undefined && (
+                          <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md border ${kpi.matchChange > 0 ? "bg-green-100 text-green-700 border-green-300" : kpi.matchChange < 0 ? "bg-red-100 text-red-700 border-red-300" : "bg-gray-100 text-gray-600 border-gray-300"}`}>
+                            {kpi.matchChange > 0 ? `📈 +${kpi.matchChange}` : kpi.matchChange < 0 ? `📉 ${kpi.matchChange}` : `➖ ${kpi.matchChange}`} Valore
+                          </span>
+                       )}
+                      <span
+                        className={`font-mono font-black text-sm ${isSubentrato ? "text-sky-700" : isSostituito || isAssente ? "text-red-700" : "text-indigo-700"}`}
+                      >
+                        {displayPoints} pt
+                      </span>
+                    </div>
                   </div>
 
                   {highlights.length > 0 ? (
@@ -5543,6 +5587,12 @@ function MatchBreakdownModal({
                         if (h.includes("🎒"))
                           colorClass =
                             "bg-purple-100 text-purple-800 border-purple-300";
+                        if (h.includes("📦"))
+                          colorClass =
+                            "bg-amber-100 text-amber-800 border-amber-300";
+                        if (h.includes("🥅"))
+                          colorClass =
+                            "bg-orange-100 text-orange-800 border-orange-300";
 
                         return (
                           <span

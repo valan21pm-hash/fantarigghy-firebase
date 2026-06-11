@@ -145,30 +145,30 @@ export default function StatsHub({
           // Convocati (Presenti/Giocati)
           if (matchScore >= 20) {
             change = 2;
-          } else if (matchScore >= 16 && matchScore <= 19) {
+          } else if (matchScore >= 16) {
             change = 1;
-          } else if (matchScore >= 10 && matchScore <= 15) {
+          } else if (matchScore >= 10) {
             change = 0;
-          } else if (matchScore >= -5 && matchScore <= 9) {
+          } else if (matchScore >= -5) {
             change = -1;
-          } else if (matchScore >= -10 && matchScore <= -6) {
+          } else if (matchScore >= -10) {
             change = -2;
-          } else if (matchScore <= -11) {
+          } else {
             change = -3;
           }
         } else {
           // Non Convocati (Assenti, Sostituti o non a referto)
           if (matchScore >= 15) {
             change = 2;
-          } else if (matchScore >= 7 && matchScore <= 14) {
+          } else if (matchScore >= 7) {
             change = 1;
-          } else if (matchScore >= -1 && matchScore <= 6) {
+          } else if (matchScore >= -1) {
             change = 0;
-          } else if (matchScore >= -5 && matchScore <= -2) {
+          } else if (matchScore >= -5) {
             change = -1;
-          } else if (matchScore >= -10 && matchScore <= -6) {
+          } else if (matchScore >= -10) {
             change = -2;
-          } else if (matchScore <= -11) {
+          } else {
             change = -3;
           }
         }
@@ -485,17 +485,17 @@ export default function StatsHub({
       let change = 0;
       if (isPresente) {
         if (matchScore >= 20) change = 2;
-        else if (matchScore >= 16 && matchScore <= 19) change = 1;
-        else if (matchScore >= 10 && matchScore <= 15) change = 0;
-        else if (matchScore >= -5 && matchScore <= 9) change = -1;
-        else if (matchScore >= -10 && matchScore <= -6) change = -2;
+        else if (matchScore >= 16) change = 1;
+        else if (matchScore >= 10) change = 0;
+        else if (matchScore >= -5) change = -1;
+        else if (matchScore >= -10) change = -2;
         else change = -3;
       } else {
         if (matchScore >= 15) change = 2;
-        else if (matchScore >= 7 && matchScore <= 14) change = 1;
-        else if (matchScore >= -1 && matchScore <= 6) change = 0;
-        else if (matchScore >= -5 && matchScore <= -2) change = -1;
-        else if (matchScore >= -10 && matchScore <= -6) change = -2;
+        else if (matchScore >= 7) change = 1;
+        else if (matchScore >= -1) change = 0;
+        else if (matchScore >= -5) change = -1;
+        else if (matchScore >= -10) change = -2;
         else change = -3;
       }
 

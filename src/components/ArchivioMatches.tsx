@@ -103,6 +103,10 @@ export default function ArchivioMatches({
         if (r.subitiPiazzato > 0) dSub.push(`${r.subitiPiazzato} Punizione`);
         statsList.push(`${subTot} Subiti (${dSub.join(", ")})`);
       }
+      if (r.malusBrt) statsList.push(`📦 Malus BRT (-1)`);
+      if (r.bonusAttivi && r.bonusAttivi.length > 0) {
+        statsList.push(`✨ ${r.bonusAttivi.length} Bonus`);
+      }
 
       if (statsList.length > 0) {
         txt += `- *${r.nome}*: ${statsList.join(", ")}\n`;
@@ -438,6 +442,8 @@ export default function ArchivioMatches({
                 if (r.amm > 0) statsList.push(`🟨 ${r.amm}`);
                 if (r.rossi > 0) statsList.push(`🟥 ${r.rossi}`);
                 if (subTot > 0) statsList.push(`🧤 Concessi: -${subTot}`);
+                if (r.malusBrt) statsList.push(`📦 Malus BRT (-1pt)`);
+                if (r.bonusAttivi && r.bonusAttivi.length > 0) statsList.push(`✨ ${r.bonusAttivi.length} Bonus`);
 
                 return (
                   <div key={r.nome} className="p-2.5 bg-gray-50 border border-gray-100 rounded-lg flex justify-between items-center text-xs">

@@ -220,7 +220,7 @@ export default function MatchReport({
       setNote(hasReferto ? (m.note || "") : "");
       
       if (hasReferto) {
-        const presentsList = m.referto.map(r => r.nome);
+        const presentsList = m.referto.filter(r => r.statoPresenza === "giocato" || !r.statoPresenza).map(r => r.nome);
         const payersList = m.referto.filter(r => r.pagaQuota).map(r => r.nome);
         setPresents(presentsList);
         setPayers(payersList);

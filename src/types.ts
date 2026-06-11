@@ -160,30 +160,30 @@ export const getPlayerCurrentPrice = (
         // Convocati (Presenti/Giocati)
         if (matchScore >= 20) {
           matchChange = 2;
-        } else if (matchScore >= 16 && matchScore <= 19) {
+        } else if (matchScore >= 16) {
           matchChange = 1;
-        } else if (matchScore >= 10 && matchScore <= 15) {
+        } else if (matchScore >= 10) {
           matchChange = 0;
-        } else if (matchScore >= -5 && matchScore <= 9) {
+        } else if (matchScore >= -5) {
           matchChange = -1;
-        } else if (matchScore >= -10 && matchScore <= -6) {
+        } else if (matchScore >= -10) {
           matchChange = -2;
-        } else if (matchScore <= -11) {
+        } else {
           matchChange = -3;
         }
       } else {
         // Non Convocati (Assenti, Sostituti o non a referto)
         if (matchScore >= 15) {
           matchChange = 2;
-        } else if (matchScore >= 7 && matchScore <= 14) {
+        } else if (matchScore >= 7) {
           matchChange = 1;
-        } else if (matchScore >= -1 && matchScore <= 6) {
+        } else if (matchScore >= -1) {
           matchChange = 0;
-        } else if (matchScore >= -5 && matchScore <= -2) {
+        } else if (matchScore >= -5) {
           matchChange = -1;
-        } else if (matchScore >= -10 && matchScore <= -6) {
+        } else if (matchScore >= -10) {
           matchChange = -2;
-        } else if (matchScore <= -11) {
+        } else {
           matchChange = -3;
         }
       }

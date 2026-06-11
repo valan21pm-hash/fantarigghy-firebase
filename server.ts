@@ -2486,7 +2486,7 @@ async function startServer() {
       db.logs.push({
         data: new Date().toLocaleString("it-IT"),
         operazione: "Partite",
-        importo: costo.toString(),
+        importo: "-",
         dettagli: `Modificato referto partita chiusa: ${dettagli}`,
       });
 
