@@ -1,20 +1,83 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
-
-# Run and deploy your AI Studio app
-
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/7b1c63e0-a515-4121-b54b-d85b0cb4653d
-
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+362-  };
+363-
+364-  const slots = getSlots(modulo);
+365-
+366-  if (!isEditor) {
+367:    return (
+368-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" id="sezione-formazione">
+369-        <div className="bg-slate-900 px-6 py-4">
+370-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+371-            <span>📋</span> Componi Formazione Gara
+372-          </h2>
+--
+380-        </div>
+381-      </div>
+382-    );
+383-  }
+384-
+385:  return (
+386-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-fade-in" id="sezione-formazione">
+387-      <div className="bg-slate-900 px-6 py-4">
+388-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+389-          <span>📋</span> Componi Formazione Gara
+390-        </h2>
+--
+466-                {slots.map((slot, index) => {
+467-                  const assignedPlayerName = titolari[index];
+468-                  const details = giocatori.find(x => x.nome === assignedPlayerName);
+469-                  const isSlotActive = activeSlotIdx === index;
+470-
+471:                  return (
+472-                    <div
+473-                      key={slot.id}
+474-                      style={{
+475-                        position: "absolute",
+476-                        left: `${slot.x}%`,
+--
+572-                    {activeMatch.convocati.map(nome => {
+573-                      const g = giocatori.find(x => x.nome === nome);
+574-                      const isAlreadyStarter = titolari.includes(nome);
+575-                      const currentIdx = titolari.indexOf(nome);
+576-
+577:                      return (
+578-                        <button
+579-                          key={nome}
+580-                          onClick={() => handleSelectPlayerForSlot(nome, activeSlotIdx)}
+581-                          className={`p-2.5 rounded-lg text-left text-xs transition-all flex flex-col justify-between cursor-pointer border ${
+582-                            isAlreadyStarter
+--
+621-                      <Star className="h-3 w-3 fill-amber-500 text-amber-500" /> Titolari (TIT)
+622-                    </h4>
+623-                    <div className="space-y-1.5 font-sans">
+624-                      {slots.map((slot, index) => {
+625-                        const name = titolari[index];
+626:                        return (
+627-                          <div key={slot.id} className="text-xs flex items-center justify-between gap-1 py-1 px-1.5 rounded bg-gray-50/50 hover:bg-gray-50 border border-gray-100/70">
+628-                            <span className="font-mono text-[9px] text-slate-400 uppercase font-black">{slot.label}:</span>
+629-                            <span className="font-extrabold text-slate-800 truncate text-right flex-1">{name || "Libero"}</span>
+630-                          </div>
+631-                        );
+--
+640-                    </h4>
+641-                    <div className="space-y-1 overflow-y-auto max-h-44 pr-1">
+642-                      {panchina.length > 0 ? (
+643-                        panchina.map(name => {
+644-                          const g = giocatori.find(x => x.nome === name);
+645:                          return (
+646-                            <div key={name} className="text-xs bg-slate-55/60 p-1 px-2 rounded flex justify-between items-center text-slate-700 truncate font-semibold">
+647-                              <span className="truncate">{name}</span>
+648-                              <span className="text-[9px] font-semibold text-slate-400 capitalize">{g?.ultimoRuolo || "G"}</span>
+649-                            </div>
+650-                          );
+--
+667-                  {activeMatch.convocati.map(nome => {
+668-                    const g = giocatori.find(x => x.nome === nome);
+669-                    const isTit = titolari.includes(nome);
+670-                    const isPan = panchina.includes(nome);
+671-
+672:                    return (
+673-                      <div key={nome} className="p-2.2 px-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 hover:bg-gray-50">
+674-                        <div>
+675-                          <span className="font-extrabold text-sm text-gray-800">
+676-                            {getLastName(nome)}
+677-                            {g?.numeroMaglia && (

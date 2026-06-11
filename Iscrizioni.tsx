@@ -3,899 +3,783 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  Calendar,
-  ClipboardCheck,
-  ClipboardList,
-  Coins,
-  FileText,
-  Loader2,
-  Sparkles,
-  Trophy,
-  Users,
-  Lock,
-  User,
-  X,
-  Shield,
-} from "lucide-react";
-import React, { useEffect, useState } from "react";
-import ActivityLog from "./components/ActivityLog";
-import ArchivioMatches from "./components/ArchivioMatches";
-import Convocations from "./components/Convocations";
-import LineupEditor from "./components/LineupEditor";
-import MatchReport from "./components/MatchReport";
-import Navbar from "./components/Navbar";
-import PlayerList from "./components/PlayerList";
-import StatsDashboard from "./components/StatsDashboard";
-import Iscrizioni from "./components/Iscrizioni";
-import Fantacalcetto from "./components/Fantacalcetto";
-import FantacalcettoV2 from "./components/FantacalcettoV2";
-import ConsigliRicevuti from "./components/ConsigliRicevuti";
-import BonusManager from "./components/BonusManager";
-import { DatabaseSchema, Formazione, Giocatore, RefertoGiocatore, CustomBonusDef, DEFAULT_BONUSES } from "./types";
-import { initAuth, googleSignIn, logout } from "./lib/firebase";
+import React, { useState } from "react";
+import { Calendar, CheckSquare, ClipboardCheck, Plus, Users, Trash2, Shuffle, Check, ArrowLeft } from "lucide-react";
+import { Giocatore, getLastName } from "../types";
 
-export default function App() {
-  const [data, setData] = useState<DatabaseSchema | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [mainSection, setMainSection] = useState<"gare" | "club">("club");
-  const [activeTab, setActiveTab] = useState<
-    "rosa" | "convocazioni" | "formazione" | "referto" | "archivio" | "iscrizioni" | "fantacalcetto" | "bonus"
-  >("rosa");
-  const [isPublicPortal, setIsPublicPortal] = useState(() => {
-    return typeof window !== "undefined" && window.location.search.includes("portal=true");
-  });
-  const [isPublicPortalV2, setIsPublicPortalV2] = useState(() => {
-    return typeof window !== "undefined" && window.location.search.includes("portal=v2");
-  });
-  const [showLogsMenu, setShowLogsMenu] = useState(false);
-  const [showConsigliMenu, setShowConsigliMenu] = useState(false);
-  const [selectedRefertoMatchId, setSelectedRefertoMatchId] = useState<string>("");
-  const [systemSA, setSystemSA] = useState<string | null>(null);
-  const [dismissedSABanner, setDismissedSABanner] = useState(() => {
-    return typeof window !== "undefined" && localStorage.getItem("dismissedSABanner") === "true";
-  });
-  const [dismissedSyncErrorBanner, setDismissedSyncErrorBanner] = useState(() => {
-    return typeof window !== "undefined" && localStorage.getItem("dismissedSyncErrorBanner") === "true";
-  });
-
-  // Authentication State
-  const [user, setUser] = useState<any>(null);
-  const [token, setToken] = useState<string | null>(null);
-
-  // Load initial database records
-  const fetchDatabase = async (currentToken?: string | null, bypassCache: boolean = false) => {
-    try {
-      const activeToken = currentToken === undefined ? token : currentToken;
-      const headers: Record<string, string> = {};
-      if (activeToken) {
-        headers["Authorization"] = `Bearer ${activeToken}`;
-      }
-      const url = bypassCache ? "/api/dati?bypassCache=true" : "/api/dati";
-      const response = await fetch(url, { headers });
-      if (!response.ok) throw new Error("Connessione di rete fallita.");
-      const json = await response.json();
-      setData(json);
-      
-      // Also fetch service account email in background
-      fetch("/api/system-info").then(r => r.json()).then(data => {
-        if(data.serviceAccountEmail) setSystemSA(data.serviceAccountEmail);
-      }).catch(() => {});
-      
-    } catch (err: any) {
-      console.error("Errore caricamento dati:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    // Ricarica automaticamente l'app ogni 58 minuti per prevenire la scadenza del token Google (1 ora)
-    // Usiamo anche visibilitychange per gestire il caso in cui il browser metta in sleep il tab
-    const loadTime = Date.now();
-    const intervalTime = 58 * 60 * 1000;
-
-    const checkAndReload = () => {
-      if (Date.now() - loadTime >= intervalTime) {
-        window.location.reload();
-      }
-    };
-
-    const interval = setInterval(checkAndReload, 60 * 1000); // Check ogni minuto invece di un timer lungo soggetto a throttling
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        checkAndReload();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = initAuth(
-      async (currentUser, currentToken) => {
-        setUser(currentUser);
-        setToken(currentToken);
-        
-        if (currentUser && currentToken) {
-          try {
-            await fetch("/api/save-token", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ token: currentToken })
-            });
-          } catch (e) {
-            console.error("Errore salvataggio token automatico sul server:", e);
-          }
-        }
-        await fetchDatabase(currentToken);
-      },
-      () => {
-        setUser(null);
-        setToken(null);
-        fetchDatabase(null); // Fallback to local DB on server
-      }
-    );
-    return () => unsubscribe();
-  }, []);
-
-  const isEditor = true; // Chiunque ha il link privato dell'app è amministratore e può modificare!
-
-  const handleLogin = async () => {
-    try {
-      setLoading(true);
-      const res = await googleSignIn();
-      if (res) {
-        const authorizedEmails = ["valan21pm@gmail.com", "10roby1985@gmail.com", "lorenzo.pittiu@gmail.com"];
-        const resEmail = (res.user.email || "").toLowerCase().trim();
-        if (!authorizedEmails.includes(resEmail)) {
-          await logout();
-          alert(`L'account Google selezionato (${resEmail}) non è autorizzato.`);
-          return;
-        }
-
-        // Imposta subito lo stato utente locale così l'app si sblocca all'istante
-        setUser(res.user);
-        setToken(res.accessToken);
-
-        // Salva il token a livello globale sul server
-        const saveRes = await fetch("/api/save-token", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: res.accessToken })
-        });
-        if (!saveRes.ok) {
-          throw new Error("Impossibile salvare il token sul server.");
-        }
-        
-        const freshData = await saveRes.json();
-        setData(freshData);
-        alert("Collegamento Google Sheets attivato con successo! Sincronizzazione automatica attiva su tutti i dispositivi.");
-      }
-    } catch (err: any) {
-      console.error("Errore collegamento Google Sheets:", err);
-      alert(`Errore di collegamento: ${err.message || err.toString()}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      setLoading(true);
-      await logout();
-      setUser(null);
-      setToken(null);
-      await fetchDatabase(null);
-    } catch (err: any) {
-      console.error("Logout fallito:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // API Call Wrapper mapping to express endpoints
-  const executePostAction = async (endpoint: string, payload: Record<string, any>) => {
-    payload.utente = user?.email || "anonimo";
-    setLoading(true);
-    try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      const activeToken = token;
-      if (activeToken) {
-        headers["Authorization"] = `Bearer ${activeToken}`;
-      }
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const errJson = await res.json();
-        throw new Error(errJson.err || "Si è verificato un errore.");
-      }
-      const updatedData = await res.json();
-      setData(updatedData);
-      return updatedData;
-    } catch (error: any) {
-      alert(`Errore: ${error.message}`);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 1. Rosa Operations
-  const handleAddPlayer = async (nome: string) => {
-    await executePostAction("/api/giocatori", { nome });
-  };
-
-  const handleDeletePlayer = async (nome: string) => {
-    await executePostAction("/api/giocatori/delete", { nome });
-  };
-
-  const handleVersaQuota = async (nome: string, importo: number) => {
-    await executePostAction("/api/giocatori/versa", { nome, importo });
-  };
-
-  const handleVersaQuotaMassivo = async (ricariche: { nome: string; importo: number }[]) => {
-    await executePostAction("/api/giocatori/versa-massivo", { ricariche });
-  };
-
-  const handleVersaIscrizione = async (nome: string, importo: number) => {
-    await executePostAction("/api/giocatori/versa-iscrizione", { nome, importo });
-  };
-
-  const handleCambiaStatoGiocatore = async (nome: string, nuovoStato: boolean) => {
-    await executePostAction("/api/giocatori/stato", { nome, nuovoStato });
-  };
-
-  const handleDisattivaTutti = async () => {
-    await executePostAction("/api/giocatori/disattiva-tutti", {});
-  };
-
-  const handleEditPlayer = async (nomeOriginale: string, dati: Partial<Giocatore>) => {
-    await executePostAction("/api/giocatori/modifica", { nomeOriginale, datiAggiornati: dati });
-  };
-
-  // 2. Convocazioni & Matches Operations
-  const handleCreaPartita = async (
+interface ConvocationsProps {
+  giocatori: Giocatore[];
+  campi: string[];
+  onCreaPartita: (
     costo: number,
     convocati: string[],
     dettagli: string,
     campo: string,
     mappaRuoli: Record<string, string>
-  ) => {
-    await executePostAction("/api/partite/crea", {
-      costo,
-      convocati,
-      dettagli,
-      campo,
-      mappaRuoli,
-    });
-    // Move immediately to lineup panel
-    setMainSection("gare");
-    setActiveTab("formazione");
+  ) => Promise<void>;
+  isEditor?: boolean;
+}
+
+const RUOLI = ["Portiere", "Centrale", "Laterale", "Pivot", "Allenatore", "Tifoso"];
+
+export default function Convocations({
+  giocatori,
+  campi,
+  onCreaPartita,
+  isEditor = false,
+}: ConvocationsProps) {
+  // Mode switcher: "campionato" (standard convocations) vs "amichevole" (friendly match with lineups)
+  const [activeMode, setActiveMode] = useState<"campionato" | "amichevole">("campionato");
+
+  // Core fields
+  const [data, setData] = useState("");
+  const [ora, setOra] = useState("");
+  const [campo, setCampo] = useState("");
+  const [nuovoCampo, setNuovoCampo] = useState("");
+  const [costo, setCosto] = useState("");
+  const [avversario, setAvversario] = useState("");
+
+  // Convocati checklist state (default we check all active players)
+  const [selezionati, setSelezionati] = useState<string[]>(
+    giocatori.filter(g => g.attivo).map(g => g.nome)
+  );
+
+  // Mappa ruoli convocati
+  const [ruoliConvocati, setRuoliConvocati] = useState<Record<string, string>>(
+    giocatori.reduce((acc, curr) => {
+      acc[curr.nome] = curr.ultimoRuolo || "";
+      return acc;
+    }, {} as Record<string, string>)
+  );
+
+  // Friendly match specific fields
+  const [squadraA, setSquadraA] = useState("Noi");
+  const [squadraB, setSquadraB] = useState("Avversari");
+  const [esterni, setEsterni] = useState<string[]>([]);
+  const [nuovoEsterno, setNuovoEsterno] = useState("");
+  const [lineupStep, setLineupStep] = useState(false);
+  const [lineupAssignments, setLineupAssignments] = useState<Record<string, "A" | "B">>({});
+
+  const handleToggleSelectAll = () => {
+    const activeOnes = giocatori.filter(g => g.attivo).map(g => g.nome);
+    if (selezionati.length === activeOnes.length) {
+      setSelezionati([]);
+    } else {
+      setSelezionati(activeOnes);
+    }
   };
 
-  const handleSalvaFormazione = async (idPartita: string, formazione: Formazione) => {
-    await executePostAction("/api/partite/formazione", { idPartita, formazione });
+  const handleTogglePlayer = (nome: string) => {
+    if (selezionati.includes(nome)) {
+      setSelezionati(selezionati.filter(x => x !== nome));
+    } else {
+      setSelezionati([...selezionati, nome]);
+    }
   };
 
-  const handleSalvaBozza = async (
-    idPartita: string,
-    costoFinale: number,
-    presenti: string[],
-    risultato: string,
-    referto: RefertoGiocatore[],
-    note?: string
-  ) => {
-    await executePostAction("/api/partite/salva-bozza", {
-      idPartita,
-      costo: costoFinale,
-      risultato,
-      referto,
-      note,
-    });
-  };
-
-  const handleAggiungiConvocato = async (idPartita: string, nomeGiocatore: string) => {
-    await executePostAction("/api/partite/aggiungi-convocato", {
-      idPartita,
-      nomeGiocatore,
-    });
-  };
-
-  const handleCreaBackupBozza = async (backup: any) => {
-    await executePostAction("/api/partite/backup-bozza", { backup });
-  };
-
-  const handleEliminaBackupBozza = async (backupId: string) => {
-    await executePostAction("/api/partite/elimina-backup-bozza", { backupId });
-  };
-
-  const handleChiudiPartita = async (
-    idPartita: string,
-    costoFinale: number,
-    presenti: string[],
-    risultato: string,
-    referto: RefertoGiocatore[],
-    note?: string
-  ) => {
-    await executePostAction("/api/partite/chiudi", {
-      idPartita,
-      costoFinale,
-      presenti,
-      risultato,
-      referto,
-      note,
-    });
-    // Move immediately to archive panel
-    setMainSection("gare");
-    setActiveTab("archivio");
-  };
-
-  const handleAnnullaPartita = async (idPartita: string) => {
-    await executePostAction("/api/partite/annulla", { idPartita });
-  };
-
-  // 3. Historical report modifications (including proper stats rollbacks)
-  const handleModificaChiusa = async (
-    idPartita: string,
-    dettagli: string,
-    costo: number,
-    risultato: string,
-    referto: RefertoGiocatore[],
-    note?: string
-  ) => {
-    await executePostAction("/api/partite/modifica-chiusa", {
-      idPartita,
-      dettagli,
-      costo,
-      risultato,
-      referto,
-      note,
+  const handleRoleChange = (nome: string, ruolo: string) => {
+    setRuoliConvocati({
+      ...ruoliConvocati,
+      [nome]: ruolo,
     });
   };
 
-  const handleRiapriPartita = async (idPartita: string, conservaDati?: boolean) => {
-    await executePostAction("/api/partite/riapri", { idPartita, conservaDati });
-    setSelectedRefertoMatchId(idPartita);
-    setMainSection("gare");
-    setActiveTab("referto");
+  // Add a temporary external player name
+  const handleAddEsterno = () => {
+    const nomeLibero = nuovoEsterno.trim();
+    if (!nomeLibero) return;
+    const nomeCompleto = `${nomeLibero} (Esterno)`;
+    if (esterni.includes(nomeCompleto) || giocatori.some(g => g.nome.toLowerCase() === nomeLibero.toLowerCase())) {
+      alert("Questo nome è già presente in lista!");
+      return;
+    }
+    setEsterni([...esterni, nomeCompleto]);
+    setNuovoEsterno("");
   };
 
-  const handleEliminaChiusa = async (idPartita: string) => {
-    await executePostAction("/api/partite/elimina-chiusa", { idPartita });
+  const handleRemoveEsterno = (nome: string) => {
+    setEsterni(esterni.filter(e => e !== nome));
   };
 
-  const handleInviaFanta = async (idPartita: string) => {
-    await executePostAction("/api/partite/invia-fanta", { idPartita });
-  };
-
-  // 4. Shared Expenses
-  const handleDividiSpesa = async (importoTotale: number, causale: string, giocatoriSelezionati: string[]) => {
-    await executePostAction("/api/finanze/spesa-condivisa", {
-      importoTotale,
-      causale,
-      giocatoriSelezionati,
+  // Stagger/Alternating setup for line-ups
+  const handleRandomizeLineup = () => {
+    const tutteUnite = [...selezionati, ...esterni];
+    const nState: Record<string, "A" | "B"> = {};
+    tutteUnite.forEach((nome, i) => {
+      nState[nome] = i % 2 === 0 ? "A" : "B";
     });
+    setLineupAssignments(nState);
   };
 
-  // 5. Fantacalcetto callbacks
-  const handleIscriviFantasquadra = async (nomePartecipante: string, nomeFantasquadra: string, giocatoriSelezionati: string[], pin: string, email?: string) => {
-    return await executePostAction("/api/fantasquadre/iscrivi", {
-      nomePartecipante,
-      nomeFantasquadra,
-      giocatoriSelezionati,
-      pin,
-      email
+  // Advance to Friendly match squad composing step
+  const handleProcediFormazione = () => {
+    let finalData = data;
+    let finalOra = ora;
+    let finalCampo = campo;
+
+    if (!finalData) {
+      finalData = new Date().toISOString().split("T")[0];
+    }
+    if (!finalOra) {
+      finalOra = "21:00";
+    }
+    if (!finalCampo) {
+      finalCampo = campi[0] || "Campo Amichevole";
+    }
+
+    // Force values so they are defined when saving
+    setData(finalData);
+    setOra(finalOra);
+    setCampo(finalCampo);
+
+    const tutteConvocati = [...selezionati, ...esterni];
+    if (tutteConvocati.length < 2) {
+      alert("Si prega di includere almeno due calciatori (interni o esterni) per comporre le squadre.");
+      return;
+    }
+
+    // Prepare initial step state (even indices to A, odd to B)
+    const nState: Record<string, "A" | "B"> = {};
+    tutteConvocati.forEach((nome, i) => {
+      nState[nome] = i % 2 === 0 ? "A" : "B";
     });
+    setLineupAssignments(nState);
+    setLineupStep(true);
   };
 
-  const handleEliminaFantasquadra = async (id: string) => {
-    return await executePostAction("/api/fantasquadre/elimina", { id });
+  // Save friendly match
+  const handleSalvaAmichevole = async () => {
+    const campoScelto = campo === "NUOVO" ? nuovoCampo.trim() : (campo || campi[0] || "Campo Amichevole");
+    const costoTotale = parseFloat(costo) || 0;
+
+    let localData = data || new Date().toISOString().split("T")[0];
+    // Format Date to long Italian string
+    const [year, month, day] = localData.split("-");
+    const dateObj = new Date(Number(year), Number(month) - 1, Number(day), 12, 0, 0);
+    const formatter = new Intl.DateTimeFormat("it-IT", { weekday: "long", day: "numeric", month: "long" });
+    let dataLeggibile = formatter.format(dateObj);
+    dataLeggibile = dataLeggibile.charAt(0).toUpperCase() + dataLeggibile.slice(1);
+
+    const tutteLeSquadre = [...selezionati, ...esterni];
+    const formatiA = tutteLeSquadre.filter(name => lineupAssignments[name] === "A");
+    const formatiB = tutteLeSquadre.filter(name => lineupAssignments[name] === "B");
+
+    const formazioniStr = `\n\n👕 *${squadraA}*:\n${formatiA.map(n => n.replace(" (Esterno)", "")).join(", ")}\n\n👕 *${squadraB}*:\n${formatiB.map(n => n.replace(" (Esterno)", "")).join(", ")}`;
+    const dettagliDatabase = `${dataLeggibile} ore ${ora || "21:00"} - ${campoScelto} (${squadraA} vs ${squadraB}) [Amichevole]` + formazioniStr;
+
+    // Create the match row in backend!
+    await onCreaPartita(costoTotale, tutteLeSquadre, dettagliDatabase, campoScelto, {});
+
+    // Prepare share text containing ONLY those items! (squads and players)
+    let msg = `👕 *${squadraA}*\n`;
+    formatiA.forEach(n => {
+      const cleanName = n.replace(" (Esterno)", "");
+      msg += `- ${cleanName}\n`;
+    });
+    msg += `\n👕 *${squadraB}*\n`;
+    formatiB.forEach(n => {
+      const cleanName = n.replace(" (Esterno)", "");
+      msg += `- ${cleanName}\n`;
+    });
+
+    navigator.clipboard.writeText(msg.trim());
+    alert("Partita Amichevole creata con successo nel sistema! ⚠️ Fai SUBITO la formazione nella sezione 'Lavagna' (Formazione). La formazione del match è pronta negli appunti!");
+
+    // Reset forms and exit step
+    setData("");
+    setOra("");
+    setCampo("");
+    setNuovoCampo("");
+    setCosto("");
+    setEsterni([]);
+    setLineupStep(false);
   };
 
-  const handleRinominaFantasquadra = async (id: string, nuovoNome: string) => {
-    return await executePostAction("/api/fantasquadre/rinomina", { id, nuovoNome });
+  // Submit standard convocations (Campionato / Interna)
+  const handleSubmitCampionato = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!data || !ora || !campo) {
+      alert("Si prega di inserire data, ora e campo da gioco.");
+      return;
+    }
+
+    if (selezionati.length === 0) {
+      alert("Si prega di selezionare almeno un convocato.");
+      return;
+    }
+
+    const campoScelto = campo === "NUOVO" ? nuovoCampo.trim() : campo;
+    if (!campoScelto) {
+      alert("Inserire un nome valido per il nuovo campo.");
+      return;
+    }
+
+    // Format Date from YYYY-MM-DD to DD/MM/YYYY
+    const [year, month, day] = data.split("-");
+    const formattedDate = `${day}/${month}/${year}`;
+
+    const dettagliDatabase = `${formattedDate} ${ora}, ${campoScelto}` + (avversario ? ` vs ${avversario}` : "");
+    const costoTotale = parseFloat(costo) || 0;
+
+    // Structure WhatsApp message
+    const rigaAvversario = avversario ? `🆚 *Avversario:* ${avversario}\n` : "";
+    let msg = `⚽ *NUOVA CONVOCAZIONE* ⚽\n\n📅 ${formattedDate} *${ora}*\n📍 ${campoScelto}\n${rigaAvversario}💰 Costo: ${costoTotale}€\n\n`;
+
+    // Grouping players by role
+    RUOLI.forEach(role => {
+      const playersInRole = selezionati.filter(name => ruoliConvocati[name] === role);
+      if (playersInRole.length > 0) {
+        msg += `*${role.toUpperCase()}*\n`;
+        playersInRole.forEach(name => {
+          const gInfo = giocatori.find(x => x.nome === name);
+          msg += `- ${name} (#${gInfo?.numeroMaglia || "99"})\n`;
+        });
+        msg += `\n`;
+      }
+    });
+
+    // Handle players without role
+    const withoutRole = selezionati.filter(name => !ruoliConvocati[name] || !RUOLI.includes(ruoliConvocati[name]));
+    if (withoutRole.length > 0) {
+      msg += `*SENZA RUOLO*\n`;
+      withoutRole.forEach(name => {
+        const gInfo = giocatori.find(x => x.nome === name);
+        msg += `- ${name} (#${gInfo?.numeroMaglia || "99"})\n`;
+      });
+      msg += `\n`;
+    }
+
+    // Create standard game in backend
+    await onCreaPartita(costoTotale, selezionati, dettagliDatabase, campoScelto, ruoliConvocati);
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(msg.trim());
+    alert("Evento Convocazione creato con successo nel sistema! ⚠️ Fai SUBITO la formazione nella sezione 'Lavagna' (Formazione). Il testo per WhatsApp è pronto per essere incollato!");
+
+    // Reset forms
+    setData("");
+    setOra("");
+    setCampo("");
+    setNuovoCampo("");
+    setCosto("");
+    setAvversario("");
   };
 
-  const handleUpdateBonuses = async (bonuses: CustomBonusDef[]) => {
-    return await executePostAction("/api/update_bonuses", { bonuses });
-  };
-
-  const handleMigrate = async () => {
-    return await executePostAction("/api/migrate-sheets-to-firestore", {});
-  };
-
-  const handleEmergencyReset = async () => {
-    // TBD: Placeholder for actual implementation when enabled
-    console.warn("Emergency reset requested");
-  };
-
-  const handleToggleMercatoLibero = async (attivo: boolean, scadenza?: string | null) => {
-    return await executePostAction("/api/settings/mercato-libero", { attivo, scadenza });
-  };
-
-  // 6. Consigli/Miglioramenti callbacks
-  const handleCreaConsiglio = async (autore: string, testo: string) => {
-    return await executePostAction("/api/consigli/crea", { autore, testo });
-  };
-
-  const handleSegnaLettoConsiglio = async (id: string) => {
-    return await executePostAction("/api/consigli/segna-letto", { id });
-  };
-
-  const handleEliminaConsiglio = async (id: string) => {
-    return await executePostAction("/api/consigli/elimina", { id });
-  };
-
-  if (!data && loading) {
+  if (!isEditor) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-        <Loader2 className="h-10 w-10 text-slate-700 animate-spin mb-4" />
-        <p className="text-gray-600 font-bold text-sm animate-pulse">
-          Sincronizzazione dei dati con il server di gioco...
-        </p>
-      </div>
-    );
-  }
-
-  const authorizedEmails = ["valan21pm@gmail.com", "10roby1985@gmail.com", "lorenzo.pittiu@gmail.com"];
-  const userEmail = (user?.email || "").toLowerCase().trim();
-  const isAdminAuthenticated = user && authorizedEmails.includes(userEmail);
-
-  if (isPublicPortalV2) {
-    const giocatori = data?.giocatori || [];
-    const partiteChiuse = data?.partiteChiuse || [];
-    const partiteAperte = data?.partiteAperte || [];
-    return (
-      <FantacalcettoV2
-        giocatori={giocatori}
-        fantasquadre={data?.fantasquadre || []}
-        partiteChiuse={partiteChiuse}
-        partiteAperte={partiteAperte}
-        bonuses={data?.bonuses}
-        sessioneMercatoLibero={data?.sessioneMercatoLibero}
-        scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
-        onIscriviFantasquadra={handleIscriviFantasquadra}
-        onRinominaFantasquadra={handleRinominaFantasquadra}
-        onEliminaFantasquadra={handleEliminaFantasquadra}
-        onCreaConsiglio={handleCreaConsiglio}
-        onUpdateBonuses={handleUpdateBonuses}
-        onToggleMercatoLibero={handleToggleMercatoLibero}
-        consigli={data?.consigli || []}
-      />
-    );
-  }
-
-  if (isPublicPortal) {
-    const giocatori = data?.giocatori || [];
-    const partiteChiuse = data?.partiteChiuse || [];
-    const partiteAperte = data?.partiteAperte || [];
-    return (
-      <Fantacalcetto
-        giocatori={giocatori}
-        fantasquadre={data?.fantasquadre || []}
-        partiteChiuse={partiteChiuse}
-        partiteAperte={partiteAperte}
-        bonuses={data?.bonuses}
-        sessioneMercatoLibero={data?.sessioneMercatoLibero}
-        scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
-        onIscriviFantasquadra={handleIscriviFantasquadra}
-        onRinominaFantasquadra={handleRinominaFantasquadra}
-        onEliminaFantasquadra={handleEliminaFantasquadra}
-        onCreaConsiglio={handleCreaConsiglio}
-        onUpdateBonuses={handleUpdateBonuses}
-        onToggleMercatoLibero={handleToggleMercatoLibero}
-        consigli={data?.consigli || []}
-        isEditor={isEditor}
-        isAdminMode={false}
-        onRefreshData={() => fetchDatabase(undefined, true)}
-      />
-    );
-  }
-
-  // ====================================================================================
-  // ⚠️ ATTENZIONE: BLOCCO LOGIN PRINCIPALE INTOCCABILE
-  // NON DEVE ESSERE MAI RIMOSSO O TOCCATO SENZA ESPLICITA RICHIESTA DELL'UTENTE.
-  // Protegge l'accesso al gestionale tramite Google Auth (solo email autorizzate).
-  // ====================================================================================
-  if (!isAdminAuthenticated) {
-    return (
-      <div className="min-h-screen bg-slate-950 text-white flex flex-col justify-center items-center p-4 sm:p-6 font-sans relative overflow-hidden">
-        {/* Elementi di sfondo decorativi */}
-        <div className="absolute inset-0 select-none pointer-events-none overflow-hidden opacity-20">
-          <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-blue-500/10 blur-3xl"></div>
-          <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl"></div>
-        </div>
-
-        <div className="max-w-md w-full relative z-10 bg-slate-900/95 border border-slate-800 rounded-3xl p-8 text-center space-y-6 shadow-2xl backdrop-blur-xl">
-          <div className="relative inline-block">
-            <div className="absolute inset-0 bg-yellow-400/10 rounded-full blur-xl animate-pulse"></div>
-            <div className="bg-slate-950 border border-slate-850 p-5 rounded-3xl inline-block relative">
-              <Shield className="h-12 w-12 text-yellow-400 animate-pulse" />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <span className="bg-slate-850 border border-slate-800 text-yellow-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full animate-pulse">
-              ACCESSO RISERVATO SQUADRA
-            </span>
-            <h3 className="font-extrabold text-2xl text-white uppercase tracking-tight">
-              Autenticazione Richiesta
-            </h3>
-            <p className="text-xs text-slate-400 leading-relaxed max-w-sm mx-auto">
-              Per accedere alla pagina principale del portale gestionale e alle sue sotto-sezioni, è necessario effettuare prima l'accesso con un account Google autorizzato.
-            </p>
-          </div>
-
-          {user && (
-            <div className="p-4 bg-red-950/45 border border-red-900/40 text-red-300 rounded-2xl text-[11px] leading-relaxed text-left space-y-1">
-              <span className="font-black text-red-200 block">🛑 ACCESSO NEGATO</span>
-              L'account collegato <strong className="font-bold text-red-200">{user.email}</strong> non risulta abilitato nell'elenco di sicurezza. Riprova con una casella email autorizzata.
-            </div>
-          )}
-
-          <div className="space-y-3 pt-2">
-            <button
-              onClick={handleLogin}
-              className="w-full bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-slate-950 font-black text-xs uppercase py-3.5 rounded-xl shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center gap-2 font-sans"
-            >
-              🔑 Accedi con Google
-            </button>
-            <button
-              onClick={() => setIsPublicPortal(true)}
-              className="w-full bg-slate-950 border border-emerald-900/50 hover:bg-slate-900 active:bg-slate-800 text-emerald-400 font-bold text-xs uppercase py-3.5 rounded-xl shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center gap-2 font-sans mt-2"
-            >
-              🌐 Vai al Portale Fanta-Calcetto
-            </button>
-          </div>
-
-          <p className="text-[9.5px] text-slate-500 font-semibold mt-4">
-            Manuel Palmas © {new Date().getFullYear()}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" id="sezione-convocazioni">
+        <div className="bg-slate-900 px-6 py-4">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <span>⚽</span> Convocazioni & Gare
+          </h2>
+          <p className="text-xs text-slate-300">
+            Punto di coordinamento partite
           </p>
         </div>
+        <div className="p-12 text-center max-w-sm mx-auto space-y-4">
+          <div className="text-4xl font-semibold">🔒</div>
+          <h3 className="text-lg font-bold text-gray-800 tracking-tight">Area riservata agli amministratori</h3>
+        </div>
       </div>
     );
   }
-  // ====================================================================================
 
+  // Visual layout for dividing players to Team A and Team B (Step 2 of Amichevole)
+  if (lineupStep) {
+    const tutteUnite = [...selezionati, ...esterni];
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-slate-900 px-6 py-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <span>👕</span> Componi le Formazioni Amichevole
+            </h2>
+            <p className="text-xs text-slate-300">
+              Assegna ciascun partecipante selezionato a una delle due squadre
+            </p>
+          </div>
+          <button
+            onClick={() => setLineupStep(false)}
+            className="text-slate-300 hover:text-white flex items-center gap-1 text-xs cursor-pointer font-extrabold"
+          >
+            <ArrowLeft className="h-4 w-4" /> Indietro
+          </button>
+        </div>
 
-  const giocatori = data?.giocatori || [];
-  const fondoCassa = data?.fondoCassa || 0;
-  const partiteAperte = data?.partiteAperte || [];
-  const partiteChiuse = data?.partiteChiuse || [];
-  const campi = data?.campi || [];
-  const logs = data?.logs || [];
+        <div className="p-6 space-y-6">
+          <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-center justify-between flex-wrap gap-4">
+            <div className="text-sm text-slate-800 font-medium">
+              Hai <b className="font-extrabold">{tutteUnite.length} convocati totali</b>. Puoi dividerli equamente o personalizzarli a mano!
+            </div>
+            <button
+              type="button"
+              onClick={handleRandomizeLineup}
+              className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-4 py-2 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Shuffle className="h-3.5 w-3.5" /> Alterna Automatico
+            </button>
+          </div>
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      {/* Sync Backdrop spinner during background writes */}
-      {loading && (
-        <div className="fixed inset-0 bg-black/10 select-none pointer-events-none z-50 flex items-start justify-end p-4">
-          <div className="bg-slate-900 text-white rounded-lg shadow-lg py-2 px-3 flex items-center gap-2 border border-slate-700 pointer-events-auto">
-            <Loader2 className="h-4 w-4 text-slate-400 animate-spin" />
-            <span className="text-[11px] font-bold uppercase tracking-wider">Applicazione in scrittura...</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[50vh] overflow-y-auto border border-gray-100 rounded-xl p-4 bg-gray-50/50">
+            {tutteUnite.map(nome => {
+              const teamSelected = lineupAssignments[nome] || "A";
+              const isEst = nome.includes("(Esterno)");
+              return (
+                <div
+                  key={nome}
+                  className={`p-3.5 rounded-xl border flex items-center justify-between gap-4 bg-white transition-all shadow-xs ${
+                    teamSelected === "A" ? "border-l-4 border-l-blue-500" : "border-l-4 border-l-orange-500"
+                  }`}
+                >
+                  <div className="flex flex-col truncate">
+                    <span className="font-bold text-gray-800 text-sm truncate">{getLastName(nome)}</span>
+                    <span className="text-[10px] uppercase font-bold text-gray-400">
+                      {isEst ? "Giocatore Esterno" : "Rosa Interna"}
+                    </span>
+                  </div>
+
+                  <div className="flex bg-gray-100 p-0.5 rounded-lg shrink-0 select-none">
+                    <button
+                      type="button"
+                      onClick={() => setLineupAssignments({ ...lineupAssignments, [nome]: "A" })}
+                      className={`px-3 py-1.5 rounded-md text-xs font-black transition-all cursor-pointer ${
+                        teamSelected === "A"
+                          ? "bg-blue-600 text-white shadow-xs"
+                          : "text-gray-500 hover:text-gray-800"
+                      }`}
+                    >
+                      {squadraA}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLineupAssignments({ ...lineupAssignments, [nome]: "B" })}
+                      className={`px-3 py-1.5 rounded-md text-xs font-black transition-all cursor-pointer ${
+                        teamSelected === "B"
+                          ? "bg-orange-600 text-white shadow-xs"
+                          : "text-gray-500 hover:text-gray-800"
+                      }`}
+                    >
+                      {squadraB}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Formations preview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+              <h4 className="font-extrabold text-blue-900 border-b border-blue-200 pb-1.5 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <span>👕</span> {squadraA} ({tutteUnite.filter(n => lineupAssignments[n] === "A").length})
+              </h4>
+              <ul className="space-y-1 text-slate-700 text-xs">
+                {tutteUnite.filter(n => lineupAssignments[n] === "A").map(n => <li key={n}>- {n}</li>)}
+              </ul>
+            </div>
+
+            <div className="p-4 bg-orange-50 border border-orange-100 rounded-xl">
+              <h4 className="font-extrabold text-orange-950 border-b border-orange-200 pb-1.5 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <span>👕</span> {squadraB} ({tutteUnite.filter(n => lineupAssignments[n] === "B").length})
+              </h4>
+              <ul className="space-y-1 text-slate-700 text-xs">
+                {tutteUnite.filter(n => lineupAssignments[n] === "B").map(n => <li key={n}>- {n}</li>)}
+              </ul>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-3 border-t">
+            <button
+              type="button"
+              onClick={() => setLineupStep(false)}
+              className="px-5 py-3 bg-gray-150 hover:bg-gray-200 rounded-xl text-gray-700 font-extrabold text-sm transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              <ArrowLeft className="h-4 w-4" /> Modifica Invito
+            </button>
+            <button
+              type="button"
+              onClick={handleSalvaAmichevole}
+              className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <Check className="h-5 w-5" /> Salva Amichevole & Copia Formazioni WhatsApp
+            </button>
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {/* Main Navbar */}
-      <Navbar
-        fondoCassa={fondoCassa}
-        onOpenLogs={() => setShowLogsMenu(true)}
-        user={user}
-        onLogin={handleLogin}
-        onLogout={handleLogout}
-        unreadConsigliCount={data?.consigli?.filter(c => !c.letto).length || 0}
-        onOpenConsigli={() => setShowConsigliMenu(true)}
-      />
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" id="sezione-convocazioni">
+      <div className="bg-slate-900 px-6 py-4">
+        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <span>⚽</span> Gestione Convocazioni & Gare
+        </h2>
+        <p className="text-xs text-slate-300">
+          Programma una partita e genera la convocazione. Puoi scegliere tra Campionato Interno o Match Amichevole.
+        </p>
+      </div>
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+      {/* Tabs Selector for Game Modes */}
+      <div className="flex border-b border-slate-200 bg-slate-50 p-2 gap-1.5">
+        <button
+          onClick={() => setActiveMode("campionato")}
+          className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            activeMode === "campionato"
+              ? "bg-white border border-slate-200 text-slate-800 shadow-xs"
+              : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/50"
+          }`}
+        >
+          🏆 Campionato / Interna
+        </button>
+        <button
+          onClick={() => setActiveMode("amichevole")}
+          className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            activeMode === "amichevole"
+              ? "bg-white border border-slate-200 text-slate-800 shadow-xs"
+              : "text-slate-500 hover:text-slate-700 hover:bg-slate-100/50"
+          }`}
+        >
+          🤝 Partita Amichevole
+        </button>
+      </div>
 
-        {/* Informazione Servizio in background */}
-        {user && systemSA && !dismissedSABanner && (
-          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 shadow-sm text-blue-900 text-sm relative">
-            <button 
-              onClick={() => {
-                setDismissedSABanner(true);
-                localStorage.setItem("dismissedSABanner", "true");
-              }}
-              className="absolute top-4 right-4 text-blue-500 hover:text-blue-700 hover:bg-blue-100 p-1.5 rounded-full transition-colors cursor-pointer"
-              title="Nascondi questa notifica permanentemente"
+      <div className="p-6 space-y-6">
+        {/* Date, Hour and Field Options (Common fields - shown for both types of matches) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Data Gara</label>
+            <input
+              type="date"
+              required
+              value={data}
+              onChange={e => setData(e.target.value)}
+              className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Ora Calcio d'Inizio</label>
+            <input
+              type="time"
+              required
+              value={ora}
+              onChange={e => setOra(e.target.value)}
+              className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Campo da Gioco</label>
+            <select
+              required
+              value={campo}
+              onChange={e => setCampo(e.target.value)}
+              className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
             >
-              <X className="w-4 h-4" />
-            </button>
-            <h3 className="font-bold flex items-center gap-2 text-blue-950 mb-1">
-              <span className="text-lg">ℹ️</span> Sincronizzazione Permanente
-            </h3>
-            <p>
-              Per garantire che il Fantacalcetto funzioni e comunichi con Google Sheets 24 ore su 24 (anche quando questo pannello amministrativo è chiuso o il login cade), condividi il documento Sheets ("Gestione Calcetto") con questa email di sistema come <strong className="font-bold whitespace-nowrap">Editor</strong>:
-            </p>
-            <div className="bg-white mt-2 p-3 font-mono text-xs border border-blue-100 rounded-lg select-all bg-white/80">
-              {systemSA}
-            </div>
-            <p className="mt-2 text-xs opacity-90">
-              Fino a quando non inserisci questo indirizzo nei permessi del foglio Google, l'app continuerà a usare la sessione passeggera del tuo account admin, che purtroppo scade ogni ora.
-            </p>
+              <option value="">Seleziona Campo...</option>
+              {campi.map(c => (
+                <option key={c} value={c}>
+                  {c                }
+                </option>
+              ))}
+              <option value="NUOVO" className="font-bold text-slate-755">
+                + Nuovo Campo...
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Costo Totale Campo (€)</label>
+            <input
+              type="number"
+              step="0.01"
+              placeholder="es. 60"
+              value={costo}
+              onChange={e => setCosto(e.target.value)}
+              className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
+            />
+          </div>
+        </div>
+
+        {/* Conditional text input for new field */}
+        {campo === "NUOVO" && (
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <label className="block text-xs font-bold text-slate-800 uppercase mb-1">Nome Nuovo Campo</label>
+            <input
+              type="text"
+              required
+              placeholder="es. Impianto Sportivo San Siro"
+              value={nuovoCampo}
+              onChange={e => setNuovoCampo(e.target.value)}
+              className="w-full text-sm p-3 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
+            />
           </div>
         )}
 
-        {/* Google Sync Error Educational Banner -> Removed since data is now 24/7 on Firestore */}
+        {/* Mode Dependent: Campionato vs Amichevole Form */}
+        {activeMode === "campionato" ? (
+          <form onSubmit={handleSubmitCampionato} className="space-y-6">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                Squadra Avversaria <span className="text-gray-400 font-normal">(lasciare vuoto se interna)</span>
+              </label>
+              <input
+                type="text"
+                placeholder="es. Scapoli FC"
+                value={avversario}
+                onChange={e => setAvversario(e.target.value)}
+                className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
+              />
+            </div>
 
-        {/* Quick Podiums */}
-        <StatsDashboard giocatori={giocatori} partiteChiuse={partiteChiuse} />
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
+                  <Users className="h-4 w-4" /> Seleziona Giocatori & Ruoli ({selezionati.length} scelti)
+                </h3>
+                <button
+                  type="button"
+                  onClick={handleToggleSelectAll}
+                  className="text-xs text-slate-700 font-bold cursor-pointer hover:underline"
+                >
+                  Invita/Deseleziona Tutti Attivi
+                </button>
+              </div>
 
-        {/* Segmented Control: Macro Area Toggle */}
-        <div className="bg-slate-100 p-1 rounded-xl border border-slate-200 grid grid-cols-2 max-w-xl mx-auto shadow-sm">
-          <button
-            onClick={() => {
-              setMainSection("gare");
-              setActiveTab("convocazioni");
-            }}
-            className={`py-2 rounded-lg font-bold text-xs uppercase tracking-wider text-center flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer ${
-              mainSection === "gare"
-                ? "bg-slate-800 text-white shadow-sm font-black"
-                : "text-slate-650 hover:text-slate-900 hover:bg-slate-50"
-            }`}
-          >
-            <Calendar className={`h-4.5 w-4.5 ${mainSection === "gare" ? "text-amber-400" : "text-slate-500"}`} />
-            <span>⚽ Gare e Calendario</span>
-          </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto border border-gray-100 rounded-xl p-4 bg-gray-50">
+                {giocatori.map(g => {
+                  const checked = selezionati.includes(g.nome);
+                  return (
+                    <div
+                      key={g.nome}
+                      className={`p-3 rounded-lg border flex flex-col justify-between gap-2.5 transition-all ${
+                        checked
+                          ? "bg-slate-50 border-slate-200 text-slate-800 shadow-xs"
+                          : "bg-white border-gray-200 text-gray-400 opacity-60"
+                      } ${!g.attivo ? "bg-red-50/20 border-red-100" : ""}`}
+                    >
+                      <label className="flex items-center gap-2 cursor-pointer w-full">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => handleTogglePlayer(g.nome)}
+                          className="w-4 h-4 rounded text-slate-800 focus:ring-slate-500"
+                        />
+                        <span className="font-bold text-sm truncate flex-1">
+                          {g.nome}{" "}
+                          <span className="text-[10px] font-mono font-semibold text-indigo-600 bg-indigo-50/50 px-1 py-0.2 rounded border border-indigo-150/40 ml-1">
+                            {g.numeroMaglia}
+                          </span>
+                        </span>
+                        {!g.attivo && (
+                          <span className="text-[9px] bg-red-150 text-red-700 px-1 py-0.2 rounded font-extrabold uppercase ml-1">
+                            Inattivo
+                          </span>
+                        )}
+                      </label>
 
-          <button
-            onClick={() => {
-              setMainSection("club");
-              setActiveTab("rosa");
-            }}
-            className={`py-2 rounded-lg font-bold text-xs uppercase tracking-wider text-center flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer ${
-              mainSection === "club"
-                ? "bg-slate-800 text-white shadow-sm font-black"
-                : "text-slate-650 hover:text-slate-900 hover:bg-slate-50"
-            }`}
-          >
-            <Users className={`h-4.5 w-4.5 ${mainSection === "club" ? "text-amber-400" : "text-slate-500"}`} />
-            <span>👥 Club e Fantacalcetto</span>
-          </button>
-        </div>
+                      {/* Position role selector */}
+                      <div className="flex items-center gap-1.5 border-t border-dashed border-slate-200 pt-2 shrink-0">
+                        <span className="text-[10px] uppercase font-semibold text-gray-400">Ruolo:</span>
+                        <select
+                          disabled={!checked}
+                          value={ruoliConvocati[g.nome] || ""}
+                          onChange={e => handleRoleChange(g.nome, e.target.value)}
+                          className="text-xs p-1 border rounded bg-white font-medium text-gray-700 disabled:bg-gray-100 disabled:text-gray-400 focus:outline-none flex-1"
+                        >
+                          <option value="">Seleziona...</option>
+                          {RUOLI.map(r => (
+                            <option key={r} value={r}>
+                              {r}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
-        {/* Tab Selection Row - Conditionally render sub-tabs based on active macro navigation */}
-        <div className="bg-white border border-slate-200 p-2 rounded-xl flex flex-wrap gap-1.5 shadow-xs shrink-0 justify-center">
-          {mainSection === "gare" ? (
-            <>
+            <div className="flex justify-end pt-4 border-t border-gray-100">
               <button
-                onClick={() => setActiveTab("convocazioni")}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  activeTab === "convocazioni"
-                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
+                type="submit"
+                className="w-full sm:w-auto px-6 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Calendar className="h-4 w-4 text-slate-700" /> <span>Convocazioni</span>
+                <ClipboardCheck className="h-5 w-5" /> Crea Evento & Copia Testo WhatsApp
               </button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-6">
+            {/* Friendly match custom team names */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nome Squadra A</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Noi"
+                  value={squadraA}
+                  onChange={e => setSquadraA(e.target.value)}
+                  className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none font-bold"
+                />
+              </div>
 
-              <button
-                onClick={() => setActiveTab("formazione")}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  activeTab === "formazione"
-                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <ClipboardCheck className="h-4 w-4 text-slate-700" /> <span>Formazioni</span>
-              </button>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nome Squadra B</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Avversari"
+                  value={squadraB}
+                  onChange={e => setSquadraB(e.target.value)}
+                  className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none font-bold"
+                />
+              </div>
+            </div>
 
-              <button
-                onClick={() => setActiveTab("referto")}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer relative ${
-                  activeTab === "referto"
-                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <ClipboardList className="h-4 w-4 text-slate-700" /> <span>Inserisci Referto</span>
-                {partiteAperte.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] font-black h-4.5 w-4.5 rounded-full flex items-center justify-center border-2 border-white animate-pulse">
-                    {partiteAperte.length}
+            {/* Total Players Counter for Amichevole */}
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-2xs">
+              <div>
+                <span className="text-xs font-bold text-slate-800 uppercase tracking-wider block">Giocatori Scelti per l'Amichevole</span>
+                <span className="text-xs text-slate-600">
+                  Consigliato: esattamente <strong>10 giocatori</strong> (rosa interna + esterni)
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={`text-base font-black px-3 py-1.5 rounded-lg border transition-colors ${
+                  (selezionati.length + esterni.length) === 10
+                    ? "bg-slate-800 border-slate-900 text-white"
+                    : "bg-amber-100 border-amber-200 text-amber-800"
+                }`}>
+                  {selezionati.length + esterni.length} / 10 scelti
+                </span>
+                {(selezionati.length + esterni.length) !== 10 ? (
+                  <span className="text-[11px] font-bold text-amber-700">
+                    ⚠️ {selezionati.length + esterni.length < 10 ? "Seleziona altri!" : "Troppi giocatori!"}
+                  </span>
+                ) : (
+                  <span className="text-[11px] font-bold text-slate-700 block">
+                    ✅ Perfetto!
                   </span>
                 )}
-              </button>
+              </div>
+            </div>
 
+            {/* Players Checklist (Roster) */}
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
+                  <span className="font-bold text-gray-700">1. Seleziona Convocati Interni ({selezionati.length} scelti)</span>
+                </h3>
+                <button
+                  type="button"
+                  onClick={handleToggleSelectAll}
+                  className="text-xs text-slate-700 font-bold cursor-pointer hover:underline"
+                >
+                  Deseleziona/Seleziona Tutti Attivi
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-h-48 overflow-y-auto border border-gray-150 rounded-xl p-3 bg-gray-50">
+                {giocatori.map(g => {
+                  const checked = selezionati.includes(g.nome);
+                  return (
+                    <label
+                      key={g.nome}
+                      className={`p-2.5 rounded-lg border text-xs font-bold flex items-center gap-2.5 cursor-pointer truncate transition-all ${
+                        checked
+                          ? "bg-white border-slate-305 text-slate-900 shadow-xs"
+                          : "bg-gray-100/55 border-gray-200 text-gray-400"
+                      } ${!g.attivo ? "bg-red-50/20 border-red-100 cursor-not-allowed opacity-50" : ""}`}
+                    >
+                      <input
+                        type="checkbox"
+                        disabled={!g.attivo}
+                        checked={checked}
+                        onChange={() => handleTogglePlayer(g.nome)}
+                        className="w-3.5 h-3.5 rounded text-slate-800 focus:ring-slate-500"
+                      />
+                      <span className="truncate flex-1">{g.nome}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* External players registry */}
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+              <h4 className="font-bold text-xs text-slate-900 uppercase tracking-wider">
+                2. Aggiungi Giocatori Esterni (Opzionale)
+              </h4>
+              <p className="text-[10px] text-slate-600 font-medium">
+                I giocatori esterni non appartengono alla rosa interna e non subiranno addebiti personali diretti sui saldi, ma influiranno sul conteggio paganti riducendo la quota campo.
+              </p>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="es. Cristiano"
+                  value={nuovoEsterno}
+                  onChange={e => setNuovoEsterno(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddEsterno();
+                    }
+                  }}
+                  className="flex-1 text-sm p-3 bg-white border border-slate-205 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddEsterno}
+                  className="px-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg text-sm shrink-0 shadow-sm transition-colors cursor-pointer"
+                >
+                  Aggiungi +
+                </button>
+              </div>
+
+              {/* Badges of added external players */}
+              <div className="flex flex-wrap gap-1.5 p-2 bg-white/70 border border-slate-200 rounded-lg min-h-[44px]">
+                {esterni.length === 0 ? (
+                  <span className="text-[11px] text-gray-400 italic font-medium m-auto">
+                    Nessun giocatore esterno aggiunto.
+                  </span>
+                ) : (
+                  esterni.map(n => (
+                    <span
+                      key={n}
+                      className="bg-slate-50 text-slate-800 border border-slate-150 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-2xs"
+                    >
+                      {n.replace(" (Esterno)", "")}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveEsterno(n)}
+                        className="text-red-600 font-bold text-xs hover:text-red-800"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Advance Button */}
+            <div className="flex justify-end pt-4 border-t border-gray-100">
               <button
-                onClick={() => setActiveTab("archivio")}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  activeTab === "archivio"
-                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
+                type="button"
+                onClick={handleProcediFormazione}
+                className="w-full sm:w-auto px-6 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
-                <FileText className="h-4 w-4 text-slate-700" /> <span>Archivio</span>
+                Procedi alla Formazione 📋
               </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => setActiveTab("rosa")}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  activeTab === "rosa"
-                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <Users className="h-4 w-4 text-slate-700" /> <span>Rosa & Cassa</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("iscrizioni")}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  activeTab === "iscrizioni"
-                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <Trophy className="h-4 w-4 text-slate-700" /> <span>Tessere & Iscrizioni</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("fantacalcetto")}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  activeTab === "fantacalcetto"
-                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <Sparkles className="h-4 w-4 text-amber-500" />
-                <span>Fantacalcetto</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("bonus")}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  activeTab === "bonus"
-                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <Sparkles className="h-4 w-4 text-indigo-500" />
-                <span>Bonus & Malus</span>
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* Dynamic Tab Pane Render */}
-        <div className="focus-outline-none transition-all duration-300">
-          {activeTab === "rosa" && (
-            <PlayerList
-              giocatori={giocatori}
-              partiteAperte={partiteAperte}
-              partiteChiuse={partiteChiuse}
-              logs={logs}
-              onAddPlayer={handleAddPlayer}
-              onDeletePlayer={handleDeletePlayer}
-              onVersaQuota={handleVersaQuota}
-              onVersaQuotaMassivo={handleVersaQuotaMassivo}
-              onDividiSpesa={handleDividiSpesa}
-              onEditPlayer={handleEditPlayer}
-              onMigrate={handleMigrate}
-              onEmergencyReset={handleEmergencyReset}
-              isEditor={isEditor}
-            />
-          )}
-
-          {activeTab === "convocazioni" && (
-            <Convocations
-              giocatori={giocatori}
-              campi={campi}
-              onCreaPartita={handleCreaPartita}
-              isEditor={isEditor}
-            />
-          )}
-
-          {activeTab === "formazione" && (
-            <LineupEditor
-              giocatori={giocatori}
-              partiteAperte={partiteAperte}
-              onSalvaFormazione={handleSalvaFormazione}
-              isEditor={isEditor}
-            />
-          )}
-
-          {activeTab === "referto" && (
-            <MatchReport
-              giocatori={giocatori}
-              partiteAperte={partiteAperte}
-              onChiudiPartita={handleChiudiPartita}
-              onSalvaBozza={handleSalvaBozza}
-              onAggiungiConvocato={handleAggiungiConvocato}
-              onCreaBackupBozza={handleCreaBackupBozza}
-              onEliminaBackupBozza={handleEliminaBackupBozza}
-              savedBackups={data?.backupsBozze || []}
-              onAnnullaPartita={handleAnnullaPartita}
-              isEditor={isEditor}
-              selectedMatchId={selectedRefertoMatchId}
-              onSelectMatchId={setSelectedRefertoMatchId}
-              bonuses={data?.bonuses || DEFAULT_BONUSES}
-            />
-          )}
-
-          {activeTab === "archivio" && (
-            <ArchivioMatches
-              giocatori={giocatori}
-              partiteChiuse={partiteChiuse}
-              onModificaChiusa={handleModificaChiusa}
-              onRiapriPartita={handleRiapriPartita}
-              onEliminaChiusa={handleEliminaChiusa}
-              isEditor={isEditor}
-              onInviaFanta={handleInviaFanta}
-              bonuses={data?.bonuses || DEFAULT_BONUSES}
-            />
-          )}
-
-          {activeTab === "iscrizioni" && (
-            <Iscrizioni
-              giocatori={giocatori}
-              onVersaIscrizione={handleVersaIscrizione}
-              onCambiaStatoGiocatore={handleCambiaStatoGiocatore}
-              onDisattivaTutti={handleDisattivaTutti}
-              isEditor={isEditor}
-            />
-          )}
-
-          {activeTab === "fantacalcetto" && (
-            <Fantacalcetto
-              giocatori={giocatori}
-              fantasquadre={data?.fantasquadre || []}
-              partiteChiuse={partiteChiuse}
-              partiteAperte={partiteAperte}
-              bonuses={data?.bonuses}
-              sessioneMercatoLibero={data?.sessioneMercatoLibero}
-              scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
-              onIscriviFantasquadra={handleIscriviFantasquadra}
-              onRinominaFantasquadra={handleRinominaFantasquadra}
-              onEliminaFantasquadra={handleEliminaFantasquadra}
-              onCreaConsiglio={handleCreaConsiglio}
-              onUpdateBonuses={handleUpdateBonuses}
-              onToggleMercatoLibero={handleToggleMercatoLibero}
-              onMigrate={handleMigrate}
-              consigli={data?.consigli || []}
-              isEditor={isEditor}
-              isAdminMode={true}
-              onRefreshData={() => fetchDatabase(undefined, true)}
-            />
-          )}
-
-          {activeTab === "bonus" && (
-            <BonusManager
-              bonuses={data?.bonuses || DEFAULT_BONUSES}
-              giocatori={giocatori}
-              isEditor={isEditor}
-              onUpdateBonuses={handleUpdateBonuses}
-            />
-          )}
-        </div>
-      </main>
-
-      {/* Pop-up: System logs auditor */}
-      {showLogsMenu && <ActivityLog logs={logs} onClose={() => setShowLogsMenu(false)} />}
-
-      {/* Pop-up: Consigli / Miglioramenti */}
-      {showConsigliMenu && (
-        <ConsigliRicevuti
-          consigli={data?.consigli || []}
-          onSegnaLetto={handleSegnaLettoConsiglio}
-          onElimina={handleEliminaConsiglio}
-          onClose={() => setShowConsigliMenu(false)}
-        />
-      )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
