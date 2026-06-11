@@ -97,8 +97,8 @@ export default function BonusManager({ bonuses, giocatori, isEditor, onUpdateBon
       )}
 
       <div className="space-y-4">
-        {[...localBonuses].sort((a, b) => (a.isAutomatic ? 1 : 0) - (b.isAutomatic ? 1 : 0)).map(bonus => {
-          const isEditing = editingId === bonus.id && !bonus.isAutomatic;
+        {localBonuses.map(bonus => {
+          const isEditing = editingId === bonus.id;
           return (
             <div key={bonus.id} className={`p-4 rounded-xl border ${isEditing ? 'bg-slate-800 border-indigo-500' : 'bg-slate-800/50 border-slate-700'}`}>
               {isEditing && isEditor ? (
@@ -220,7 +220,7 @@ export default function BonusManager({ bonuses, giocatori, isEditor, onUpdateBon
                     )}
                   </div>
                   
-                  {isEditor && !bonus.isAutomatic && (
+                  {isEditor && (
                     <div className="flex gap-2 shrink-0">
                       <button onClick={() => setEditingId(bonus.id)} className="text-slate-400 hover:text-white p-2">
                         <Edit2 className="w-5 h-5" />
@@ -228,11 +228,6 @@ export default function BonusManager({ bonuses, giocatori, isEditor, onUpdateBon
                       <button onClick={() => handleDelete(bonus.id)} className="text-slate-400 hover:text-red-500 p-2">
                         <Trash2 className="w-5 h-5" />
                       </button>
-                    </div>
-                  )}
-                  {bonus.isAutomatic && (
-                    <div className="flex shrink-0">
-                      <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Sistema (Automatico)</span>
                     </div>
                   )}
                 </div>

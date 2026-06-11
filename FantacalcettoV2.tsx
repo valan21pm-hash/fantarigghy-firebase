@@ -1,901 +1,230 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { Trophy, X, Medal, Crown } from "lucide-react";
+import { Fantasquadra, Giocatore, Partita, calculatePlayerChampionshipStats, CustomBonusDef, DEFAULT_BONUSES } from "../types";
 
-import {
-  Calendar,
-  ClipboardCheck,
-  ClipboardList,
-  Coins,
-  FileText,
-  Loader2,
-  Sparkles,
-  Trophy,
-  Users,
-  Lock,
-  User,
-  X,
-  Shield,
-} from "lucide-react";
-import React, { useEffect, useState } from "react";
-import ActivityLog from "./components/ActivityLog";
-import ArchivioMatches from "./components/ArchivioMatches";
-import Convocations from "./components/Convocations";
-import LineupEditor from "./components/LineupEditor";
-import MatchReport from "./components/MatchReport";
-import Navbar from "./components/Navbar";
-import PlayerList from "./components/PlayerList";
-import StatsDashboard from "./components/StatsDashboard";
-import Iscrizioni from "./components/Iscrizioni";
-import Fantacalcetto from "./components/Fantacalcetto";
-import FantacalcettoV2 from "./components/FantacalcettoV2";
-import ConsigliRicevuti from "./components/ConsigliRicevuti";
-import BonusManager from "./components/BonusManager";
-import { DatabaseSchema, Formazione, Giocatore, RefertoGiocatore, CustomBonusDef, DEFAULT_BONUSES } from "./types";
-import { initAuth, googleSignIn, logout } from "./lib/firebase";
+export interface PodioGraficoDinamicoProps {
+  giocatori: Giocatore[];
+  fantasquadre: Fantasquadra[];
+  partiteChiuse: Partita[];
+  rankedTeams: any[]; // The already calculated leaderboard of Fantasquadre
+  bonuses?: CustomBonusDef[];
+  onClose: () => void;
+  targetId: string; // "Tutte", "GiocatoriAssoluti", or "fantasquadra_id"
+}
 
-export default function App() {
-  const [data, setData] = useState<DatabaseSchema | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [mainSection, setMainSection] = useState<"gare" | "club">("club");
-  const [activeTab, setActiveTab] = useState<
-    "rosa" | "convocazioni" | "formazione" | "referto" | "archivio" | "iscrizioni" | "fantacalcetto" | "bonus"
-  >("rosa");
-  const [isPublicPortal, setIsPublicPortal] = useState(() => {
-    return typeof window !== "undefined" && window.location.search.includes("portal=true");
-  });
-  const [isPublicPortalV2, setIsPublicPortalV2] = useState(() => {
-    return typeof window !== "undefined" && window.location.search.includes("portal=v2");
-  });
-  const [showLogsMenu, setShowLogsMenu] = useState(false);
-  const [showConsigliMenu, setShowConsigliMenu] = useState(false);
-  const [selectedRefertoMatchId, setSelectedRefertoMatchId] = useState<string>("");
-  const [systemSA, setSystemSA] = useState<string | null>(null);
-  const [dismissedSABanner, setDismissedSABanner] = useState(() => {
-    return typeof window !== "undefined" && localStorage.getItem("dismissedSABanner") === "true";
-  });
-  const [dismissedSyncErrorBanner, setDismissedSyncErrorBanner] = useState(() => {
-    return typeof window !== "undefined" && localStorage.getItem("dismissedSyncErrorBanner") === "true";
-  });
-
-  // Authentication State
-  const [user, setUser] = useState<any>(null);
-  const [token, setToken] = useState<string | null>(null);
-
-  // Load initial database records
-  const fetchDatabase = async (currentToken?: string | null, bypassCache: boolean = false) => {
-    try {
-      const activeToken = currentToken === undefined ? token : currentToken;
-      const headers: Record<string, string> = {};
-      if (activeToken) {
-        headers["Authorization"] = `Bearer ${activeToken}`;
-      }
-      const url = bypassCache ? "/api/dati?bypassCache=true" : "/api/dati";
-      const response = await fetch(url, { headers });
-      if (!response.ok) throw new Error("Connessione di rete fallita.");
-      const json = await response.json();
-      setData(json);
-      
-      // Also fetch service account email in background
-      fetch("/api/system-info").then(r => r.json()).then(data => {
-        if(data.serviceAccountEmail) setSystemSA(data.serviceAccountEmail);
-      }).catch(() => {});
-      
-    } catch (err: any) {
-      console.error("Errore caricamento dati:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+export default function PodioGraficoDinamico({
+  giocatori,
+  fantasquadre,
+  partiteChiuse,
+  rankedTeams,
+  bonuses = DEFAULT_BONUSES,
+  onClose,
+  targetId
+}: PodioGraficoDinamicoProps) {
+  const [step, setStep] = useState(0); // 0 = start, 1 = show 3rd, 2 = show 2nd, 3 = show 1st
 
   useEffect(() => {
-    // Ricarica automaticamente l'app ogni 58 minuti per prevenire la scadenza del token Google (1 ora)
-    // Usiamo anche visibilitychange per gestire il caso in cui il browser metta in sleep il tab
-    const loadTime = Date.now();
-    const intervalTime = 58 * 60 * 1000;
-
-    const checkAndReload = () => {
-      if (Date.now() - loadTime >= intervalTime) {
-        window.location.reload();
-      }
-    };
-
-    const interval = setInterval(checkAndReload, 60 * 1000); // Check ogni minuto invece di un timer lungo soggetto a throttling
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        checkAndReload();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
+    // Sequenziale: 3° dopo 1s, 2° dopo 2.5s, 1° dopo 4.5s
+    const t1 = setTimeout(() => setStep(1), 800);
+    const t2 = setTimeout(() => setStep(2), 2500);
+    const t3 = setTimeout(() => setStep(3), 4500);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
-  useEffect(() => {
-    const unsubscribe = initAuth(
-      async (currentUser, currentToken) => {
-        setUser(currentUser);
-        setToken(currentToken);
-        
-        if (currentUser && currentToken) {
-          try {
-            await fetch("/api/save-token", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ token: currentToken })
-            });
-          } catch (e) {
-            console.error("Errore salvataggio token automatico sul server:", e);
-          }
-        }
-        await fetchDatabase(currentToken);
-      },
-      () => {
-        setUser(null);
-        setToken(null);
-        fetchDatabase(null); // Fallback to local DB on server
-      }
-    );
-    return () => unsubscribe();
-  }, []);
+  // Compute the podium
+  let title = "PODIO FANTACALCETTO";
+  let subtitle = "Classifica Ufficiale";
+  let podiumData: { rank: number; name: string; score: number }[] = [
+    { rank: 1, name: "N/A", score: 0 },
+    { rank: 2, name: "N/A", score: 0 },
+    { rank: 3, name: "N/A", score: 0 },
+  ];
 
-  const isEditor = true; // Chiunque ha il link privato dell'app è amministratore e può modificare!
+  if (targetId === "Tutte") {
+    title = "CLASSIFICA FANTASQUADRE";
+    subtitle = "Migliori Team Assoluti";
+    const top3 = rankedTeams.slice(0, 3);
+    podiumData = top3.map((t, idx) => ({
+      rank: idx + 1,
+      name: t.nomeFantasquadra,
+      score: parseFloat(Number(t.score).toFixed(1))
+    }));
+  } else if (targetId === "GiocatoriAssoluti") {
+    title = "MIGLIORI GIOCATORI";
+    subtitle = "Classifica Assoluta Invididuale";
+    const scoringPlayers = giocatori.map(g => {
+      const stats = calculatePlayerChampionshipStats(g.nome, partiteChiuse, bonuses);
+      return { nome: g.nome, score: stats.fantaScore };
+    }).sort((a, b) => b.score - a.score);
+    
+    podiumData = scoringPlayers.slice(0, 3).map((p, idx) => ({
+      rank: idx + 1,
+      name: p.nome,
+      score: parseFloat(p.score.toFixed(1))
+    }));
+  } else {
+    // Specific Fantasquadra
+    const fq = fantasquadre.find(f => f.id === targetId);
+    if (fq) {
+      title = fq.nomeFantasquadra.toUpperCase();
+      subtitle = "I Migliori della Rosa";
+      const teamPlayers = fq.giocatoriSelezionati.map(nome => {
+        const stats = calculatePlayerChampionshipStats(nome, partiteChiuse, bonuses);
+        return { nome, score: stats.fantaScore };
+      }).sort((a, b) => b.score - a.score);
 
-  const handleLogin = async () => {
-    try {
-      setLoading(true);
-      const res = await googleSignIn();
-      if (res) {
-        const authorizedEmails = ["valan21pm@gmail.com", "10roby1985@gmail.com", "lorenzo.pittiu@gmail.com"];
-        const resEmail = (res.user.email || "").toLowerCase().trim();
-        if (!authorizedEmails.includes(resEmail)) {
-          await logout();
-          alert(`L'account Google selezionato (${resEmail}) non è autorizzato.`);
-          return;
-        }
-
-        // Imposta subito lo stato utente locale così l'app si sblocca all'istante
-        setUser(res.user);
-        setToken(res.accessToken);
-
-        // Salva il token a livello globale sul server
-        const saveRes = await fetch("/api/save-token", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: res.accessToken })
-        });
-        if (!saveRes.ok) {
-          throw new Error("Impossibile salvare il token sul server.");
-        }
-        
-        const freshData = await saveRes.json();
-        setData(freshData);
-        alert("Collegamento Google Sheets attivato con successo! Sincronizzazione automatica attiva su tutti i dispositivi.");
-      }
-    } catch (err: any) {
-      console.error("Errore collegamento Google Sheets:", err);
-      alert(`Errore di collegamento: ${err.message || err.toString()}`);
-    } finally {
-      setLoading(false);
+      podiumData = teamPlayers.slice(0, 3).map((p, idx) => ({
+        rank: idx + 1,
+        name: p.nome,
+        score: parseFloat(p.score.toFixed(1))
+      }));
     }
-  };
-
-  const handleLogout = async () => {
-    try {
-      setLoading(true);
-      await logout();
-      setUser(null);
-      setToken(null);
-      await fetchDatabase(null);
-    } catch (err: any) {
-      console.error("Logout fallito:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // API Call Wrapper mapping to express endpoints
-  const executePostAction = async (endpoint: string, payload: Record<string, any>) => {
-    payload.utente = user?.email || "anonimo";
-    setLoading(true);
-    try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      const activeToken = token;
-      if (activeToken) {
-        headers["Authorization"] = `Bearer ${activeToken}`;
-      }
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const errJson = await res.json();
-        throw new Error(errJson.err || "Si è verificato un errore.");
-      }
-      const updatedData = await res.json();
-      setData(updatedData);
-      return updatedData;
-    } catch (error: any) {
-      alert(`Errore: ${error.message}`);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 1. Rosa Operations
-  const handleAddPlayer = async (nome: string) => {
-    await executePostAction("/api/giocatori", { nome });
-  };
-
-  const handleDeletePlayer = async (nome: string) => {
-    await executePostAction("/api/giocatori/delete", { nome });
-  };
-
-  const handleVersaQuota = async (nome: string, importo: number) => {
-    await executePostAction("/api/giocatori/versa", { nome, importo });
-  };
-
-  const handleVersaQuotaMassivo = async (ricariche: { nome: string; importo: number }[]) => {
-    await executePostAction("/api/giocatori/versa-massivo", { ricariche });
-  };
-
-  const handleVersaIscrizione = async (nome: string, importo: number) => {
-    await executePostAction("/api/giocatori/versa-iscrizione", { nome, importo });
-  };
-
-  const handleCambiaStatoGiocatore = async (nome: string, nuovoStato: boolean) => {
-    await executePostAction("/api/giocatori/stato", { nome, nuovoStato });
-  };
-
-  const handleDisattivaTutti = async () => {
-    await executePostAction("/api/giocatori/disattiva-tutti", {});
-  };
-
-  const handleEditPlayer = async (nomeOriginale: string, dati: Partial<Giocatore>) => {
-    await executePostAction("/api/giocatori/modifica", { nomeOriginale, datiAggiornati: dati });
-  };
-
-  // 2. Convocazioni & Matches Operations
-  const handleCreaPartita = async (
-    costo: number,
-    convocati: string[],
-    dettagli: string,
-    campo: string,
-    mappaRuoli: Record<string, string>
-  ) => {
-    await executePostAction("/api/partite/crea", {
-      costo,
-      convocati,
-      dettagli,
-      campo,
-      mappaRuoli,
-    });
-    // Move immediately to lineup panel
-    setMainSection("gare");
-    setActiveTab("formazione");
-  };
-
-  const handleSalvaFormazione = async (idPartita: string, formazione: Formazione) => {
-    await executePostAction("/api/partite/formazione", { idPartita, formazione });
-  };
-
-  const handleSalvaBozza = async (
-    idPartita: string,
-    costoFinale: number,
-    presenti: string[],
-    risultato: string,
-    referto: RefertoGiocatore[],
-    note?: string
-  ) => {
-    await executePostAction("/api/partite/salva-bozza", {
-      idPartita,
-      costo: costoFinale,
-      risultato,
-      referto,
-      note,
-    });
-  };
-
-  const handleAggiungiConvocato = async (idPartita: string, nomeGiocatore: string) => {
-    await executePostAction("/api/partite/aggiungi-convocato", {
-      idPartita,
-      nomeGiocatore,
-    });
-  };
-
-  const handleCreaBackupBozza = async (backup: any) => {
-    await executePostAction("/api/partite/backup-bozza", { backup });
-  };
-
-  const handleEliminaBackupBozza = async (backupId: string) => {
-    await executePostAction("/api/partite/elimina-backup-bozza", { backupId });
-  };
-
-  const handleChiudiPartita = async (
-    idPartita: string,
-    costoFinale: number,
-    presenti: string[],
-    risultato: string,
-    referto: RefertoGiocatore[],
-    note?: string
-  ) => {
-    await executePostAction("/api/partite/chiudi", {
-      idPartita,
-      costoFinale,
-      presenti,
-      risultato,
-      referto,
-      note,
-    });
-    // Move immediately to archive panel
-    setMainSection("gare");
-    setActiveTab("archivio");
-  };
-
-  const handleAnnullaPartita = async (idPartita: string) => {
-    await executePostAction("/api/partite/annulla", { idPartita });
-  };
-
-  // 3. Historical report modifications (including proper stats rollbacks)
-  const handleModificaChiusa = async (
-    idPartita: string,
-    dettagli: string,
-    costo: number,
-    risultato: string,
-    referto: RefertoGiocatore[],
-    note?: string
-  ) => {
-    await executePostAction("/api/partite/modifica-chiusa", {
-      idPartita,
-      dettagli,
-      costo,
-      risultato,
-      referto,
-      note,
-    });
-  };
-
-  const handleRiapriPartita = async (idPartita: string, conservaDati?: boolean) => {
-    await executePostAction("/api/partite/riapri", { idPartita, conservaDati });
-    setSelectedRefertoMatchId(idPartita);
-    setMainSection("gare");
-    setActiveTab("referto");
-  };
-
-  const handleEliminaChiusa = async (idPartita: string) => {
-    await executePostAction("/api/partite/elimina-chiusa", { idPartita });
-  };
-
-  const handleInviaFanta = async (idPartita: string) => {
-    await executePostAction("/api/partite/invia-fanta", { idPartita });
-  };
-
-  // 4. Shared Expenses
-  const handleDividiSpesa = async (importoTotale: number, causale: string, giocatoriSelezionati: string[]) => {
-    await executePostAction("/api/finanze/spesa-condivisa", {
-      importoTotale,
-      causale,
-      giocatoriSelezionati,
-    });
-  };
-
-  // 5. Fantacalcetto callbacks
-  const handleIscriviFantasquadra = async (nomePartecipante: string, nomeFantasquadra: string, giocatoriSelezionati: string[], pin: string, email?: string) => {
-    return await executePostAction("/api/fantasquadre/iscrivi", {
-      nomePartecipante,
-      nomeFantasquadra,
-      giocatoriSelezionati,
-      pin,
-      email
-    });
-  };
-
-  const handleEliminaFantasquadra = async (id: string) => {
-    return await executePostAction("/api/fantasquadre/elimina", { id });
-  };
-
-  const handleRinominaFantasquadra = async (id: string, nuovoNome: string) => {
-    return await executePostAction("/api/fantasquadre/rinomina", { id, nuovoNome });
-  };
-
-  const handleUpdateBonuses = async (bonuses: CustomBonusDef[]) => {
-    return await executePostAction("/api/update_bonuses", { bonuses });
-  };
-
-  const handleMigrate = async () => {
-    return await executePostAction("/api/migrate-sheets-to-firestore", {});
-  };
-
-  const handleEmergencyReset = async () => {
-    // TBD: Placeholder for actual implementation when enabled
-    console.warn("Emergency reset requested");
-  };
-
-  const handleToggleMercatoLibero = async (attivo: boolean, scadenza?: string | null) => {
-    return await executePostAction("/api/settings/mercato-libero", { attivo, scadenza });
-  };
-
-  // 6. Consigli/Miglioramenti callbacks
-  const handleCreaConsiglio = async (autore: string, testo: string) => {
-    return await executePostAction("/api/consigli/crea", { autore, testo });
-  };
-
-  const handleSegnaLettoConsiglio = async (id: string) => {
-    return await executePostAction("/api/consigli/segna-letto", { id });
-  };
-
-  const handleEliminaConsiglio = async (id: string) => {
-    return await executePostAction("/api/consigli/elimina", { id });
-  };
-
-  if (!data && loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-        <Loader2 className="h-10 w-10 text-slate-700 animate-spin mb-4" />
-        <p className="text-gray-600 font-bold text-sm animate-pulse">
-          Sincronizzazione dei dati con il server di gioco...
-        </p>
-      </div>
-    );
   }
 
-  const authorizedEmails = ["valan21pm@gmail.com", "10roby1985@gmail.com", "lorenzo.pittiu@gmail.com"];
-  const userEmail = (user?.email || "").toLowerCase().trim();
-  const isAdminAuthenticated = user && authorizedEmails.includes(userEmail);
-
-  if (isPublicPortalV2) {
-    const giocatori = data?.giocatori || [];
-    const partiteChiuse = data?.partiteChiuse || [];
-    const partiteAperte = data?.partiteAperte || [];
-    return (
-      <FantacalcettoV2
-        giocatori={giocatori}
-        fantasquadre={data?.fantasquadre || []}
-        partiteChiuse={partiteChiuse}
-        partiteAperte={partiteAperte}
-        bonuses={data?.bonuses}
-        sessioneMercatoLibero={data?.sessioneMercatoLibero}
-        scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
-        onIscriviFantasquadra={handleIscriviFantasquadra}
-        onRinominaFantasquadra={handleRinominaFantasquadra}
-        onEliminaFantasquadra={handleEliminaFantasquadra}
-        onCreaConsiglio={handleCreaConsiglio}
-        onUpdateBonuses={handleUpdateBonuses}
-        onToggleMercatoLibero={handleToggleMercatoLibero}
-        consigli={data?.consigli || []}
-      />
-    );
+  // Se ci sono meno di 3, riempiamo per evitare crash
+  while(podiumData.length < 3) {
+      podiumData.push({ rank: podiumData.length + 1, name: "-", score: 0 });
   }
 
-  if (isPublicPortal) {
-    const giocatori = data?.giocatori || [];
-    const partiteChiuse = data?.partiteChiuse || [];
-    const partiteAperte = data?.partiteAperte || [];
-    return (
-      <Fantacalcetto
-        giocatori={giocatori}
-        fantasquadre={data?.fantasquadre || []}
-        partiteChiuse={partiteChiuse}
-        partiteAperte={partiteAperte}
-        bonuses={data?.bonuses}
-        sessioneMercatoLibero={data?.sessioneMercatoLibero}
-        scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
-        onIscriviFantasquadra={handleIscriviFantasquadra}
-        onRinominaFantasquadra={handleRinominaFantasquadra}
-        onEliminaFantasquadra={handleEliminaFantasquadra}
-        onCreaConsiglio={handleCreaConsiglio}
-        onUpdateBonuses={handleUpdateBonuses}
-        onToggleMercatoLibero={handleToggleMercatoLibero}
-        consigli={data?.consigli || []}
-        isEditor={isEditor}
-        isAdminMode={false}
-        onRefreshData={() => fetchDatabase(undefined, true)}
-      />
-    );
-  }
-
-  // ====================================================================================
-  // ⚠️ ATTENZIONE: BLOCCO LOGIN PRINCIPALE INTOCCABILE
-  // NON DEVE ESSERE MAI RIMOSSO O TOCCATO SENZA ESPLICITA RICHIESTA DELL'UTENTE.
-  // Protegge l'accesso al gestionale tramite Google Auth (solo email autorizzate).
-  // ====================================================================================
-  if (!isAdminAuthenticated) {
-    return (
-      <div className="min-h-screen bg-slate-950 text-white flex flex-col justify-center items-center p-4 sm:p-6 font-sans relative overflow-hidden">
-        {/* Elementi di sfondo decorativi */}
-        <div className="absolute inset-0 select-none pointer-events-none overflow-hidden opacity-20">
-          <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-blue-500/10 blur-3xl"></div>
-          <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl"></div>
-        </div>
-
-        <div className="max-w-md w-full relative z-10 bg-slate-900/95 border border-slate-800 rounded-3xl p-8 text-center space-y-6 shadow-2xl backdrop-blur-xl">
-          <div className="relative inline-block">
-            <div className="absolute inset-0 bg-yellow-400/10 rounded-full blur-xl animate-pulse"></div>
-            <div className="bg-slate-950 border border-slate-850 p-5 rounded-3xl inline-block relative">
-              <Shield className="h-12 w-12 text-yellow-400 animate-pulse" />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <span className="bg-slate-850 border border-slate-800 text-yellow-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full animate-pulse">
-              ACCESSO RISERVATO SQUADRA
-            </span>
-            <h3 className="font-extrabold text-2xl text-white uppercase tracking-tight">
-              Autenticazione Richiesta
-            </h3>
-            <p className="text-xs text-slate-400 leading-relaxed max-w-sm mx-auto">
-              Per accedere alla pagina principale del portale gestionale e alle sue sotto-sezioni, è necessario effettuare prima l'accesso con un account Google autorizzato.
-            </p>
-          </div>
-
-          {user && (
-            <div className="p-4 bg-red-950/45 border border-red-900/40 text-red-300 rounded-2xl text-[11px] leading-relaxed text-left space-y-1">
-              <span className="font-black text-red-200 block">🛑 ACCESSO NEGATO</span>
-              L'account collegato <strong className="font-bold text-red-200">{user.email}</strong> non risulta abilitato nell'elenco di sicurezza. Riprova con una casella email autorizzata.
-            </div>
-          )}
-
-          <div className="space-y-3 pt-2">
-            <button
-              onClick={handleLogin}
-              className="w-full bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-slate-950 font-black text-xs uppercase py-3.5 rounded-xl shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center gap-2 font-sans"
-            >
-              🔑 Accedi con Google
-            </button>
-            <button
-              onClick={() => setIsPublicPortal(true)}
-              className="w-full bg-slate-950 border border-emerald-900/50 hover:bg-slate-900 active:bg-slate-800 text-emerald-400 font-bold text-xs uppercase py-3.5 rounded-xl shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center gap-2 font-sans mt-2"
-            >
-              🌐 Vai al Portale Fanta-Calcetto
-            </button>
-          </div>
-
-          <p className="text-[9.5px] text-slate-500 font-semibold mt-4">
-            Manuel Palmas © {new Date().getFullYear()}
-          </p>
-        </div>
-      </div>
-    );
-  }
-  // ====================================================================================
-
-
-  const giocatori = data?.giocatori || [];
-  const fondoCassa = data?.fondoCassa || 0;
-  const partiteAperte = data?.partiteAperte || [];
-  const partiteChiuse = data?.partiteChiuse || [];
-  const campi = data?.campi || [];
-  const logs = data?.logs || [];
+  const p1 = podiumData[0];
+  const p2 = podiumData[1];
+  const p3 = podiumData[2];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      {/* Sync Backdrop spinner during background writes */}
-      {loading && (
-        <div className="fixed inset-0 bg-black/10 select-none pointer-events-none z-50 flex items-start justify-end p-4">
-          <div className="bg-slate-900 text-white rounded-lg shadow-lg py-2 px-3 flex items-center gap-2 border border-slate-700 pointer-events-auto">
-            <Loader2 className="h-4 w-4 text-slate-400 animate-spin" />
-            <span className="text-[11px] font-bold uppercase tracking-wider">Applicazione in scrittura...</span>
-          </div>
+    <div className="fixed inset-0 bg-indigo-950/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 z-50 overflow-hidden font-sans">
+      
+      {/* Intestazione */}
+      <motion.div 
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="text-center mb-16 relative z-10"
+      >
+        <Trophy className="w-16 h-16 text-yellow-400 mx-auto mb-4 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]" />
+        <h1 className="text-3xl md:text-5xl font-black text-white tracking-widest uppercase truncate max-w-xl mx-auto drop-shadow-md">
+          {title}
+        </h1>
+        <p className="text-indigo-300 text-lg md:text-xl font-bold tracking-widest mt-2 uppercase">
+          {subtitle}
+        </p>
+      </motion.div>
+
+      {/* Podio Area */}
+      <div className="relative w-full max-w-3xl h-[400px] flex items-end justify-center gap-1 sm:gap-4 md:gap-8 z-10">
+        
+        {/* 2° Posto (Sinistra) - Appare allo step >= 2 */}
+        <div className="flex-1 flex flex-col items-center justify-end h-full max-w-[200px]">
+          <AnimatePresence>
+            {step >= 2 && (
+              <motion.div 
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 100, damping: 15 }}
+                className="w-full flex flex-col items-center"
+              >
+                <div className="bg-slate-300/10 border border-slate-300/30 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(203,213,225,0.4)]">
+                  <Medal className="w-6 h-6 md:w-8 md:h-8 text-slate-300" />
+                </div>
+                <div className="text-center mb-4 px-2 w-full">
+                  <h3 className="text-white font-black text-sm md:text-xl truncate drop-shadow-md">{p2.name}</h3>
+                  <p className="text-slate-300 font-bold text-lg">{p2.score} <span className="text-xs">pt</span></p>
+                </div>
+                <div className="w-full bg-gradient-to-t from-slate-500/80 to-slate-400/90 rounded-t-xl h-[120px] md:h-[180px] flex items-start justify-center pt-4 shadow-lg border-t-2 border-slate-300/50">
+                  <span className="text-white font-black text-4xl opacity-50">2</span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      )}
 
-      {/* Main Navbar */}
-      <Navbar
-        fondoCassa={fondoCassa}
-        onOpenLogs={() => setShowLogsMenu(true)}
-        user={user}
-        onLogin={handleLogin}
-        onLogout={handleLogout}
-        unreadConsigliCount={data?.consigli?.filter(c => !c.letto).length || 0}
-        onOpenConsigli={() => setShowConsigliMenu(true)}
-      />
+        {/* 1° Posto (Centro) - Appare allo step >= 3 */}
+        <div className="flex-1 flex flex-col items-center justify-end h-full max-w-[220px]">
+          <AnimatePresence>
+            {step >= 3 && (
+              <motion.div 
+                initial={{ y: 150, opacity: 0, scale: 0.8 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                transition={{ type: "spring", stiffness: 90, damping: 12, delay: 0.1 }}
+                className="w-full flex flex-col items-center relative z-20"
+              >
+                {/* Particelle per il primo posto */}
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
+                  className="absolute -top-12 opacity-80"
+                >
+                  <Crown className="w-16 h-16 text-yellow-300 drop-shadow-[0_0_15px_rgba(253,224,71,0.8)]" />
+                </motion.div>
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+                <div className="bg-yellow-400/20 border-2 border-yellow-400/50 w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(250,204,21,0.6)] mt-8">
+                  <Trophy className="w-8 h-8 md:w-10 md:h-10 text-yellow-400" />
+                </div>
+                <div className="text-center mb-4 px-2 w-full">
+                  <h3 className="text-yellow-300 font-extrabold text-base md:text-2xl truncate drop-shadow-md">{p1.name}</h3>
+                  <p className="text-yellow-100 font-black text-xl">{p1.score} <span className="text-xs">pt</span></p>
+                </div>
+                <div className="w-full bg-gradient-to-t from-yellow-600/90 to-yellow-500 rounded-t-xl h-[160px] md:h-[240px] flex items-start justify-center pt-4 shadow-2xl border-t-2 border-yellow-300/80">
+                  <span className="text-yellow-100 font-black text-5xl opacity-80">1</span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-        {/* Informazione Servizio in background */}
-        {user && systemSA && !dismissedSABanner && (
-          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 shadow-sm text-blue-900 text-sm relative">
-            <button 
-              onClick={() => {
-                setDismissedSABanner(true);
-                localStorage.setItem("dismissedSABanner", "true");
-              }}
-              className="absolute top-4 right-4 text-blue-500 hover:text-blue-700 hover:bg-blue-100 p-1.5 rounded-full transition-colors cursor-pointer"
-              title="Nascondi questa notifica permanentemente"
-            >
-              <X className="w-4 h-4" />
-            </button>
-            <h3 className="font-bold flex items-center gap-2 text-blue-950 mb-1">
-              <span className="text-lg">ℹ️</span> Sincronizzazione Permanente
-            </h3>
-            <p>
-              Per garantire che il Fantacalcetto funzioni e comunichi con Google Sheets 24 ore su 24 (anche quando questo pannello amministrativo è chiuso o il login cade), condividi il documento Sheets ("Gestione Calcetto") con questa email di sistema come <strong className="font-bold whitespace-nowrap">Editor</strong>:
-            </p>
-            <div className="bg-white mt-2 p-3 font-mono text-xs border border-blue-100 rounded-lg select-all bg-white/80">
-              {systemSA}
-            </div>
-            <p className="mt-2 text-xs opacity-90">
-              Fino a quando non inserisci questo indirizzo nei permessi del foglio Google, l'app continuerà a usare la sessione passeggera del tuo account admin, che purtroppo scade ogni ora.
-            </p>
-          </div>
+        {/* 3° Posto (Destra) - Appare allo step >= 1 */}
+        <div className="flex-1 flex flex-col items-center justify-end h-full max-w-[200px]">
+          <AnimatePresence>
+            {step >= 1 && (
+              <motion.div 
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 100, damping: 15 }}
+                className="w-full flex flex-col items-center"
+              >
+                <div className="bg-amber-700/20 border border-amber-600/30 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(180,83,9,0.4)]">
+                  <Medal className="w-6 h-6 md:w-8 md:h-8 text-amber-500" />
+                </div>
+                <div className="text-center mb-4 px-2 w-full">
+                  <h3 className="text-white font-black text-sm md:text-xl truncate drop-shadow-md">{p3.name}</h3>
+                  <p className="text-amber-400 font-bold text-lg">{p3.score} <span className="text-xs">pt</span></p>
+                </div>
+                <div className="w-full bg-gradient-to-t from-amber-800/80 to-amber-600/90 rounded-t-xl h-[90px] md:h-[130px] flex items-start justify-center pt-4 shadow-lg border-t-2 border-amber-500/50">
+                  <span className="text-white font-black text-4xl opacity-50">3</span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+      </div>
+
+      {/* Pulsante chiusura */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 5.5, duration: 1 }}
+        onClick={onClose}
+        className="absolute top-4 right-4 sm:top-8 sm:right-8 bg-white/10 hover:bg-white/20 text-white rounded-full p-3 backdrop-blur-md transition-colors"
+      >
+        <X className="w-6 h-6" />
+      </motion.button>
+      
+      {/* Istruzione condivisore */}
+      <AnimatePresence>
+        {step >= 3 && (
+           <motion.div 
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 2.0 }}
+             className="absolute bottom-10 left-0 right-0 text-center px-4"
+           >
+             <p className="text-indigo-300 text-sm italic font-medium">Ora puoi fare uno screenshot e condividerlo ai giocatori!</p>
+           </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* Google Sync Error Educational Banner -> Removed since data is now 24/7 on Firestore */}
-
-        {/* Quick Podiums */}
-        <StatsDashboard giocatori={giocatori} partiteChiuse={partiteChiuse} />
-
-        {/* Segmented Control: Macro Area Toggle */}
-        <div className="bg-slate-100 p-1 rounded-xl border border-slate-200 grid grid-cols-2 max-w-xl mx-auto shadow-sm">
-          <button
-            onClick={() => {
-              setMainSection("gare");
-              setActiveTab("convocazioni");
-            }}
-            className={`py-2 rounded-lg font-bold text-xs uppercase tracking-wider text-center flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer ${
-              mainSection === "gare"
-                ? "bg-slate-800 text-white shadow-sm font-black"
-                : "text-slate-650 hover:text-slate-900 hover:bg-slate-50"
-            }`}
-          >
-            <Calendar className={`h-4.5 w-4.5 ${mainSection === "gare" ? "text-amber-400" : "text-slate-500"}`} />
-            <span>⚽ Gare e Calendario</span>
-          </button>
-
-          <button
-            onClick={() => {
-              setMainSection("club");
-              setActiveTab("rosa");
-            }}
-            className={`py-2 rounded-lg font-bold text-xs uppercase tracking-wider text-center flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer ${
-              mainSection === "club"
-                ? "bg-slate-800 text-white shadow-sm font-black"
-                : "text-slate-650 hover:text-slate-900 hover:bg-slate-50"
-            }`}
-          >
-            <Users className={`h-4.5 w-4.5 ${mainSection === "club" ? "text-amber-400" : "text-slate-500"}`} />
-            <span>👥 Club e Fantacalcetto</span>
-          </button>
-        </div>
-
-        {/* Tab Selection Row - Conditionally render sub-tabs based on active macro navigation */}
-        <div className="bg-white border border-slate-200 p-2 rounded-xl flex flex-wrap gap-1.5 shadow-xs shrink-0 justify-center">
-          {mainSection === "gare" ? (
-            <>
-              <button
-                onClick={() => setActiveTab("convocazioni")}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  activeTab === "convocazioni"
-                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <Calendar className="h-4 w-4 text-slate-700" /> <span>Convocazioni</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("formazione")}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  activeTab === "formazione"
-                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <ClipboardCheck className="h-4 w-4 text-slate-700" /> <span>Formazioni</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("referto")}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer relative ${
-                  activeTab === "referto"
-                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <ClipboardList className="h-4 w-4 text-slate-700" /> <span>Inserisci Referto</span>
-                {partiteAperte.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] font-black h-4.5 w-4.5 rounded-full flex items-center justify-center border-2 border-white animate-pulse">
-                    {partiteAperte.length}
-                  </span>
-                )}
-              </button>
-
-              <button
-                onClick={() => setActiveTab("archivio")}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  activeTab === "archivio"
-                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <FileText className="h-4 w-4 text-slate-700" /> <span>Archivio</span>
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => setActiveTab("rosa")}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  activeTab === "rosa"
-                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <Users className="h-4 w-4 text-slate-700" /> <span>Rosa & Cassa</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("iscrizioni")}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  activeTab === "iscrizioni"
-                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <Trophy className="h-4 w-4 text-slate-700" /> <span>Tessere & Iscrizioni</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("fantacalcetto")}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  activeTab === "fantacalcetto"
-                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <Sparkles className="h-4 w-4 text-amber-500" />
-                <span>Fantacalcetto</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("bonus")}
-                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-bold text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  activeTab === "bonus"
-                    ? "bg-slate-100 text-slate-900 border border-slate-300 shadow-3xs"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <Sparkles className="h-4 w-4 text-indigo-500" />
-                <span>Bonus & Malus</span>
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* Dynamic Tab Pane Render */}
-        <div className="focus-outline-none transition-all duration-300">
-          {activeTab === "rosa" && (
-            <PlayerList
-              giocatori={giocatori}
-              partiteAperte={partiteAperte}
-              partiteChiuse={partiteChiuse}
-              logs={logs}
-              onAddPlayer={handleAddPlayer}
-              onDeletePlayer={handleDeletePlayer}
-              onVersaQuota={handleVersaQuota}
-              onVersaQuotaMassivo={handleVersaQuotaMassivo}
-              onDividiSpesa={handleDividiSpesa}
-              onEditPlayer={handleEditPlayer}
-              onMigrate={handleMigrate}
-              onEmergencyReset={handleEmergencyReset}
-              isEditor={isEditor}
-            />
-          )}
-
-          {activeTab === "convocazioni" && (
-            <Convocations
-              giocatori={giocatori}
-              campi={campi}
-              onCreaPartita={handleCreaPartita}
-              isEditor={isEditor}
-            />
-          )}
-
-          {activeTab === "formazione" && (
-            <LineupEditor
-              giocatori={giocatori}
-              partiteAperte={partiteAperte}
-              onSalvaFormazione={handleSalvaFormazione}
-              isEditor={isEditor}
-            />
-          )}
-
-          {activeTab === "referto" && (
-            <MatchReport
-              giocatori={giocatori}
-              partiteAperte={partiteAperte}
-              onChiudiPartita={handleChiudiPartita}
-              onSalvaBozza={handleSalvaBozza}
-              onAggiungiConvocato={handleAggiungiConvocato}
-              onCreaBackupBozza={handleCreaBackupBozza}
-              onEliminaBackupBozza={handleEliminaBackupBozza}
-              savedBackups={data?.backupsBozze || []}
-              onAnnullaPartita={handleAnnullaPartita}
-              isEditor={isEditor}
-              selectedMatchId={selectedRefertoMatchId}
-              onSelectMatchId={setSelectedRefertoMatchId}
-              bonuses={data?.bonuses || DEFAULT_BONUSES}
-            />
-          )}
-
-          {activeTab === "archivio" && (
-            <ArchivioMatches
-              giocatori={giocatori}
-              partiteChiuse={partiteChiuse}
-              onModificaChiusa={handleModificaChiusa}
-              onRiapriPartita={handleRiapriPartita}
-              onEliminaChiusa={handleEliminaChiusa}
-              isEditor={isEditor}
-              onInviaFanta={handleInviaFanta}
-              bonuses={data?.bonuses || DEFAULT_BONUSES}
-            />
-          )}
-
-          {activeTab === "iscrizioni" && (
-            <Iscrizioni
-              giocatori={giocatori}
-              onVersaIscrizione={handleVersaIscrizione}
-              onCambiaStatoGiocatore={handleCambiaStatoGiocatore}
-              onDisattivaTutti={handleDisattivaTutti}
-              isEditor={isEditor}
-            />
-          )}
-
-          {activeTab === "fantacalcetto" && (
-            <Fantacalcetto
-              giocatori={giocatori}
-              fantasquadre={data?.fantasquadre || []}
-              partiteChiuse={partiteChiuse}
-              partiteAperte={partiteAperte}
-              bonuses={data?.bonuses}
-              sessioneMercatoLibero={data?.sessioneMercatoLibero}
-              scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
-              onIscriviFantasquadra={handleIscriviFantasquadra}
-              onRinominaFantasquadra={handleRinominaFantasquadra}
-              onEliminaFantasquadra={handleEliminaFantasquadra}
-              onCreaConsiglio={handleCreaConsiglio}
-              onUpdateBonuses={handleUpdateBonuses}
-              onToggleMercatoLibero={handleToggleMercatoLibero}
-              onMigrate={handleMigrate}
-              consigli={data?.consigli || []}
-              isEditor={isEditor}
-              isAdminMode={true}
-              onRefreshData={() => fetchDatabase(undefined, true)}
-            />
-          )}
-
-          {activeTab === "bonus" && (
-            <BonusManager
-              bonuses={data?.bonuses || DEFAULT_BONUSES}
-              giocatori={giocatori}
-              isEditor={isEditor}
-              onUpdateBonuses={handleUpdateBonuses}
-            />
-          )}
-        </div>
-      </main>
-
-      {/* Pop-up: System logs auditor */}
-      {showLogsMenu && <ActivityLog logs={logs} onClose={() => setShowLogsMenu(false)} />}
-
-      {/* Pop-up: Consigli / Miglioramenti */}
-      {showConsigliMenu && (
-        <ConsigliRicevuti
-          consigli={data?.consigli || []}
-          onSegnaLetto={handleSegnaLettoConsiglio}
-          onElimina={handleEliminaConsiglio}
-          onClose={() => setShowConsigliMenu(false)}
-        />
-      )}
     </div>
   );
 }
