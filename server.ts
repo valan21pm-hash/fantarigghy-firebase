@@ -1237,7 +1237,7 @@ async function saveDb(db: DatabaseSchema, token?: string): Promise<void> {
   await safeWriteDb(JSON.stringify(db, null, 2));
 
   // 3. Persist instantly to Firestore (24/7 availability)
-  triggerBackgroundSaveToFirestore(db);
+  // triggerBackgroundSaveToFirestore(db);
 
   let activeToken = token;
   if (!activeToken || activeToken.startsWith("local-admin-")) {
