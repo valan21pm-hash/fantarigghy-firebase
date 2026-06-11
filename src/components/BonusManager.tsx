@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { PlusCircle, Save, Trash2, Edit2, CheckCircle, XCircle } from "lucide-react";
-import { CustomBonusDef, Giocatore } from "../types";
+import { CustomBonusDef, Giocatore, getPlayerBonusKey } from "../types";
 
 interface BonusManagerProps {
   bonuses: CustomBonusDef[];
@@ -179,7 +179,7 @@ export default function BonusManager({ bonuses, giocatori, isEditor, onUpdateBon
                       >
                         <option value="">-- Seleziona Giocatore --</option>
                         {giocatori.map(g => (
-                          <option key={g.nome} value={g.nome.toLowerCase().replace(/\s+/g, "_")}>{g.nome}</option>
+                          <option key={g.nome} value={getPlayerBonusKey(g.nome) || g.nome.toLowerCase().replace(/\s+/g, "_")}>{g.nome}</option>
                         ))}
                       </select>
                     )}

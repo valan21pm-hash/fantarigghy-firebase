@@ -124,8 +124,8 @@ interface FantacalcettoProps {
 // Fantasy Point Formula constants
 const GOAL_POINTS = 3;
 const ASSIST_POINTS = 1;
-const AMMO_POINTS = -1;
-const ESPU_POINTS = -3;
+const AMMO_POINTS = -0.5;
+const ESPU_POINTS = -1;
 
 export default function Fantacalcetto({
   giocatori,
@@ -550,7 +550,9 @@ export default function Fantacalcetto({
               rGol,
               rAssist,
               bonuses,
-              r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo
+              r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
+              rAmm,
+              rEsp
             )
           : 0;
 
@@ -562,7 +564,9 @@ export default function Fantacalcetto({
             rGol,
             rAssist,
             bonuses,
-            r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo
+            r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
+            rAmm,
+            rEsp
           );
           if (breakdown.length > 0) {
             bonusBreakdownStr =
@@ -1189,7 +1193,9 @@ export default function Fantacalcetto({
               rGol,
               rAssist,
               bonuses,
-              r.snapshotGiocatore?.ultimoRuolo || gInfo?.ultimoRuolo
+              r.snapshotGiocatore?.ultimoRuolo || gInfo?.ultimoRuolo,
+              rAmm,
+              rEsp
             );
 
             if (isAmichevole || m.inviatoFanta === true) {
@@ -1199,7 +1205,9 @@ export default function Fantacalcetto({
                 rGol,
                 rAssist,
                 bonuses,
-                r.snapshotGiocatore?.ultimoRuolo || gInfo?.ultimoRuolo
+                r.snapshotGiocatore?.ultimoRuolo || gInfo?.ultimoRuolo,
+                rAmm,
+                rEsp
               );
               breakdown.forEach(b => {
                 const foundBonusDef = bonuses.find(def => def.nome === b.nome);
@@ -4473,8 +4481,7 @@ export default function Fantacalcetto({
               Formula Fantacalcetto
             </span>
             <span className="text-xs font-bold text-gray-600">
-              Gol ({GOAL_POINTS}pt), Assist ({ASSIST_POINTS}pt), Amm (
-              {AMMO_POINTS}pt), Esp ({ESPU_POINTS}pt)
+              Punti base disattivati. Calcolo tramite Bonus/Malus Extra e Ruoli.
             </span>
           </div>
         </div>
@@ -5393,9 +5400,9 @@ function MatchBreakdownModal({
             {mb.giocatoriKpi.map((kpi: any, kIdx: number) => {
               const highlights: string[] = [];
               if (kpi.gol > 0)
-                highlights.push(`⚽ ${kpi.gol} Gol (+${kpi.gol * 3})`);
+                highlights.push(`⚽ ${kpi.gol} Gol (+${kpi.gol * GOAL_POINTS})`);
               if (kpi.assist > 0)
-                highlights.push(`🤝 ${kpi.assist} Assist (+${kpi.assist * 1})`);
+                highlights.push(`🤝 ${kpi.assist} Assist (+${kpi.assist * ASSIST_POINTS})`);
               if (kpi.amm > 0)
                 highlights.push(`🟨 ${kpi.amm} Amm (-${kpi.amm * 0.5})`);
               if (kpi.rossi > 0)

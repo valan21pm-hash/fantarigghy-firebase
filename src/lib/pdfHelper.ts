@@ -284,13 +284,13 @@ export const generateGeneralReportPdf = (
         else if (r.statoPresenza === "sostituito") subStatus = "Sostituito";
         
         const highlights: string[] = [];
-        if (rGol > 0) highlights.push(`${rGol} Gol (+${rGol * 3})`);
-        if (rAssist > 0) highlights.push(`${rAssist} Assist (+${rAssist * 1})`);
-        if (rAmm > 0) highlights.push(`${rAmm} Ammonito (-0.5)`);
-        if (rEsp > 0) highlights.push(`${rEsp} Espulso (-1)`);
+        if (rGol > 0) highlights.push(`${rGol} Gol`);
+        if (rAssist > 0) highlights.push(`${rAssist} Assist`);
+        if (rAmm > 0) highlights.push(`${rAmm} Ammonito`);
+        if (rEsp > 0) highlights.push(`${rEsp} Espulso`);
         
-        const bonusPts = getPlayerBonusPointsForMatch(r.nome, rBonusAttivi, rGol, rAssist, undefined, r.snapshotGiocatore?.ultimoRuolo);
-        const breakdown = getPlayerBonusBreakdownForMatch(r.nome, rBonusAttivi, rGol, rAssist, undefined, r.snapshotGiocatore?.ultimoRuolo);
+        const bonusPts = getPlayerBonusPointsForMatch(r.nome, rBonusAttivi, rGol, rAssist, undefined, r.snapshotGiocatore?.ultimoRuolo, rAmm, rEsp);
+        const breakdown = getPlayerBonusBreakdownForMatch(r.nome, rBonusAttivi, rGol, rAssist, undefined, r.snapshotGiocatore?.ultimoRuolo, rAmm, rEsp);
         if (breakdown.length > 0) {
           const breakdownStr = breakdown.map(b => `${b.nome} (${b.puntiVal > 0 ? "+" : ""}${b.puntiVal})`).join(", ");
           highlights.push(`Bonus Extra: ${breakdownStr} [Totale: ${bonusPts > 0 ? "+" : ""}${bonusPts}]`);
@@ -299,7 +299,7 @@ export const generateGeneralReportPdf = (
           highlights.push(`Bonus Extra: ${bonusPts > 0 ? "+" : ""}${bonusPts}`);
         }
         
-        const displayPtsValue = (rGol * 3) + (rAssist * 1) + (rAmm * -0.5) + (rEsp * -1) + bonusPts;
+        const displayPtsValue = bonusPts;
         const ptsDisplay = displayPtsValue > 0 ? `+${displayPtsValue}` : `${displayPtsValue}`;
         
         return [

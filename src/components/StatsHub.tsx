@@ -132,19 +132,13 @@ export default function StatsHub({
           rGol,
           rAssist,
           bonuses,
-          r.snapshotGiocatore?.ultimoRuolo || g.ultimoRuolo
+          r.snapshotGiocatore?.ultimoRuolo || g.ultimoRuolo,
+          rAmm,
+          rEsp
         );
 
         let matchBonusVal = breakdown.reduce((acc, curr) => acc + curr.puntiVal, 0);
-        let matchScore = parseFloat(
-          (
-            rGol * 3 +
-            rAssist * 1 +
-            rAmm * -1 +
-            rEsp * -3 +
-            matchBonusVal
-          ).toFixed(1)
-        );
+        let matchScore = parseFloat(matchBonusVal.toFixed(1));
 
         let change = 0;
         if (isPresente) {
@@ -216,19 +210,13 @@ export default function StatsHub({
           rGol,
           rAssist,
           bonuses,
-          r.snapshotGiocatore?.ultimoRuolo || g.ultimoRuolo
+          r.snapshotGiocatore?.ultimoRuolo || g.ultimoRuolo,
+          rAmm,
+          rEsp
         );
 
         let matchBonusVal = breakdown.reduce((acc, curr) => acc + curr.puntiVal, 0);
-        let matchScore = parseFloat(
-          (
-            rGol * 3 +
-            rAssist * 1 +
-            rAmm * -1 +
-            rEsp * -3 +
-            matchBonusVal
-          ).toFixed(1)
-        );
+        let matchScore = parseFloat(matchBonusVal.toFixed(1));
 
         score += matchScore;
         golCount += rGol;
@@ -330,6 +318,8 @@ export default function StatsHub({
             if (r) {
               const rGol = r.statoPresenza === "giocato" ? (Number(r.gol) || 0) : 0;
               const rAssist = r.statoPresenza === "giocato" ? (Number(r.assist) || 0) : 0;
+              const rAmm = r.statoPresenza === "giocato" ? (Number(r.amm) || 0) : 0;
+              const rEsp = r.statoPresenza === "giocato" ? (Number(r.rossi) || 0) : 0;
               const rBonusAttivi = r.bonusAttivi || [];
 
               const breakdown = getPlayerBonusBreakdownForMatch(
@@ -338,7 +328,9 @@ export default function StatsHub({
                 rGol,
                 rAssist,
                 bonuses,
-                r.snapshotGiocatore?.ultimoRuolo
+                r.snapshotGiocatore?.ultimoRuolo,
+                rAmm,
+                rEsp
               );
 
               breakdown.forEach((b) => {
@@ -399,6 +391,8 @@ export default function StatsHub({
         const isPresente = r.statoPresenza === "giocato";
         const rGol = isPresente ? (Number(r.gol) || 0) : 0;
         const rAssist = isPresente ? (Number(r.assist) || 0) : 0;
+        const rAmm = isPresente ? (Number(r.amm) || 0) : 0;
+        const rEsp = isPresente ? (Number(r.rossi) || 0) : 0;
         const rBonusAttivi = r.bonusAttivi || [];
 
         const breakdown = getPlayerBonusBreakdownForMatch(
@@ -407,7 +401,9 @@ export default function StatsHub({
           rGol,
           rAssist,
           bonuses,
-          r.snapshotGiocatore?.ultimoRuolo
+          r.snapshotGiocatore?.ultimoRuolo,
+          rAmm,
+          rEsp
         );
 
         breakdown.forEach((b) => {
@@ -478,19 +474,13 @@ export default function StatsHub({
         rGol,
         rAssist,
         bonuses,
-        r.snapshotGiocatore?.ultimoRuolo
+        r.snapshotGiocatore?.ultimoRuolo,
+        rAmm,
+        rEsp
       );
 
       let matchBonusVal = breakdown.reduce((acc, curr) => acc + curr.puntiVal, 0);
-      let matchScore = parseFloat(
-        (
-          rGol * 3 +
-          rAssist * 1 +
-          rAmm * -1 +
-          rEsp * -3 +
-          matchBonusVal
-        ).toFixed(1)
-      );
+      let matchScore = parseFloat(matchBonusVal.toFixed(1));
 
       let change = 0;
       if (isPresente) {

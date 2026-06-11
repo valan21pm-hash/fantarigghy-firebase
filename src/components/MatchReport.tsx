@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { CheckCircle2, Trophy, AlertTriangle } from "lucide-react";
-import { Giocatore, Partita, RefertoGiocatore, getPlayerBonusKey, CustomBonusDef, DEFAULT_BONUSES } from "../types";
+import { Giocatore, Partita, RefertoGiocatore, getPlayerBonusKey, CustomBonusDef, DEFAULT_BONUSES, GOAL_POINTS, ASSIST_POINTS, AMMO_POINTS, ESPU_POINTS } from "../types";
 
 interface MatchReportProps {
   giocatori: Giocatore[];
@@ -961,6 +961,24 @@ export default function MatchReport({
                                   <div className="min-w-0">
                                     <span className="font-extrabold text-sm block truncate group-hover:text-slate-900">
                                       {nome}
+                                      {(() => {
+                                        const stats = [
+                                          { label: "Gol", val: pGoals, pts: GOAL_POINTS },
+                                          { label: "Assist", val: pAssists, pts: ASSIST_POINTS },
+                                          { label: "Ammo", val: pYellows, pts: AMMO_POINTS },
+                                          { label: "Espu", val: pReds, pts: ESPU_POINTS },
+                                        ].filter(s => s.val !== 0);
+
+                                        return stats.length > 0 ? (
+                                          <div className="flex flex-wrap gap-1 mt-0.5">
+                                            {stats.map((s, i) => (
+                                              <span key={i} className={`text-[9px] font-bold px-1 rounded ${s.val * s.pts > 0 ? "bg-indigo-50 text-indigo-700" : "bg-rose-50 text-rose-700"}`}>
+                                                {s.label} {s.val * s.pts > 0 ? '+' : ''}{s.val * s.pts}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        ) : null;
+                                      })()}
                                     </span>
                                     <span className="text-[10px] font-mono font-bold block mt-0.5">
                                       {subtitle}
@@ -1487,11 +1505,17 @@ export default function MatchReport({
                     🛡️ Assegnazione Bonus Generici
                   </h3>
                   <div className="space-y-2">
-                    {(bonuses || DEFAULT_BONUSES).filter(b => !b.isPersonale && !b.isAutomatic && !["gen_gol_pivot", "gen_gol_laterale", "gen_gol_centrale", "gen_gol_portiere"].includes(b.id)).map(b => (
+                    {(bonuses || DEFAULT_BONUSES).filter(b => !b.isPersonale && !b.isAutomatic).map(b => (
                       <details key={b.id} className="bg-white border text-sm border-gray-200 rounded-lg group">
                         <summary className="p-3 cursor-pointer font-bold text-slate-800 group-open:border-b border-gray-100 flex items-center justify-between">
                           <div className="flex flex-col">
-                            <span>{b.nome} {typeof b.punti === 'number' ? (b.punti > 0 ? `(+${b.punti}pt)` : `(${b.punti}pt)`) : ''}</span>
+                            <span>
+                              {b.nome} 
+                              {` (${[
+                                b.punti !== 0 ? `${b.punti > 0 ? '+' : ''}${b.punti}pt` : null,
+                                b.moltiplicatoreGol && b.moltiplicatoreGol !== 0 ? `+${b.moltiplicatoreGol}pt/gol` : null
+                              ].filter(Boolean).join(', ')})`}
+                            </span>
                             <span className="text-[10px] text-gray-500 font-medium">{b.descrizione}</span>
                           </div>
                           <span className="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
@@ -1524,7 +1548,7 @@ export default function MatchReport({
                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-4 max-h-[160px] overflow-y-auto">
                      {giocatori.filter(g => g.attivo).map(g => {
                        const pBonuses = selectedBonuses[g.nome] || [];
-                       const hasGeneric = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && !b.isPersonale && !b.isAutomatic && !["gen_gol_pivot", "gen_gol_laterale", "gen_gol_centrale", "gen_gol_portiere"].includes(b.id)));
+                       const hasGeneric = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && !b.isPersonale && !b.isAutomatic));
                        if (hasGeneric) return null;
                        
                        return (
@@ -1547,7 +1571,7 @@ export default function MatchReport({
                        const newVer = { ...verifiedGeneric };
                        giocatori.filter(g => g.attivo).forEach(g => {
                          const pBonuses = selectedBonuses[g.nome] || [];
-                         const hasGeneric = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && !b.isPersonale && !b.isAutomatic && !["gen_gol_pivot", "gen_gol_laterale", "gen_gol_centrale", "gen_gol_portiere"].includes(b.id)));
+                         const hasGeneric = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && !b.isPersonale && !b.isAutomatic));
                          if (!hasGeneric) newVer[g.nome] = true;
                        });
                        setVerifiedGeneric(newVer);
