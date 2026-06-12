@@ -48,6 +48,7 @@ import {
   getPlayerBasePrice,
   MAX_BUDGET,
   getLastName,
+  isBonusManuale,
 } from "../types";
 
 // (Keep everything else mostly the same)
@@ -478,6 +479,8 @@ export default function Fantacalcetto({
         rossi: number;
         bonusPts: number;
         fantaScore: number;
+        ruolo?: string;
+        stato?: string;
       }[];
     }[] = [];
 
@@ -557,7 +560,28 @@ export default function Fantacalcetto({
             )
           : 0;
 
+        // Calculate non-manual bonus points for bench when they are not subbed in
+        const rBonusAttiviNonManuali = rBonusAttivi.filter(bId => {
+          const bDef = (bonuses || DEFAULT_BONUSES).find(x => x.id === bId);
+          return bDef ? !isBonusManuale(bDef) : true;
+        });
+        const bonusPtsNonManuali = r
+          ? getPlayerBonusPointsForMatch(
+              pName,
+              rBonusAttiviNonManuali,
+              rGol,
+              rAssist,
+              bonuses,
+              r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
+              rAmm,
+              rEsp,
+              r.bonusGolAccreditati
+            )
+          : 0;
+
         let bonusBreakdownStr = "";
+        let bonusBreakdownStrNonManuali = "";
+
         if (r) {
           const breakdown = getPlayerBonusBreakdownForMatch(
             pName,
@@ -578,6 +602,27 @@ export default function Fantacalcetto({
                     `${b.nome} (${b.puntiVal > 0 ? "+" : ""}${b.puntiVal})`,
                 )
                 .join(", ") + ` [Tot: ${bonusPts > 0 ? "+" : ""}${bonusPts}]`;
+          }
+
+          const breakdownNonManuali = getPlayerBonusBreakdownForMatch(
+            pName,
+            rBonusAttiviNonManuali,
+            rGol,
+            rAssist,
+            bonuses,
+            r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
+            rAmm,
+            rEsp,
+            r.bonusGolAccreditati
+          );
+          if (breakdownNonManuali.length > 0) {
+            bonusBreakdownStrNonManuali =
+              breakdownNonManuali
+                .map(
+                  (b) =>
+                    `${b.nome} (${b.puntiVal > 0 ? "+" : ""}${b.puntiVal})`,
+                )
+                .join(", ") + ` [Tot Panchina: ${bonusPtsNonManuali > 0 ? "+" : ""}${bonusPtsNonManuali}]`;
           }
         }
 
@@ -603,6 +648,8 @@ export default function Fantacalcetto({
           bonusBreakdownStr,
           fantaScore,
           played: !!played,
+          bonusPtsNonManuali,
+          bonusBreakdownStrNonManuali,
         };
       };
 
@@ -649,9 +696,12 @@ export default function Fantacalcetto({
             ...benchInfo,
             ruolo: "Panchina",
             stato: "Panchina",
-            puntiConteggiati: benchInfo.bonusPts,
+            bonusPts: benchInfo.bonusPtsNonManuali,
+            bonusBreakdownStr: benchInfo.bonusBreakdownStrNonManuali,
+            fantaScore: benchInfo.bonusPtsNonManuali,
+            puntiConteggiati: benchInfo.bonusPtsNonManuali,
           });
-          puntiTotaliMatch += benchInfo.bonusPts;
+          puntiTotaliMatch += benchInfo.bonusPtsNonManuali;
         }
       }
 
@@ -4804,6 +4854,51 @@ export default function Fantacalcetto({
                             {selectedTeamToView.giocatoriSelezionati.length}/4
                           </span>
                         </div>
+
+                        {(() => {
+                          const matchBreakdownForSeparation = getTeamMatchBreakdownList(selectedTeamToView);
+                          let totalStartersPoints = 0;
+                          let totalBenchPoints = 0;
+
+                          matchBreakdownForSeparation.forEach(mb => {
+                            mb.giocatoriKpi.forEach(kpi => {
+                              const isSostituito = kpi.stato === "Sostituito";
+                              const isAssente = kpi.stato === "Assente";
+                              const displayPts = isSostituito || isAssente ? 0 : kpi.fantaScore;
+                              
+                              if (kpi.stato === "Panchina") {
+                                totalBenchPoints += displayPts;
+                              } else {
+                                totalStartersPoints += displayPts;
+                              }
+                            });
+                          });
+
+                          totalStartersPoints = parseFloat(totalStartersPoints.toFixed(1));
+                          totalBenchPoints = parseFloat(totalBenchPoints.toFixed(1));
+
+                          return (
+                            <div className="bg-white border border-emerald-100 rounded-2xl p-4 space-y-3.5 shadow-xs mb-4">
+                              <p className="text-[10px] text-emerald-900 font-extrabold uppercase tracking-widest flex items-center gap-1.5 border-b border-emerald-100 pb-1.5">
+                                <span>⚖️</span> Punteggi Separati (Titolari vs Panchina)
+                              </p>
+                              <div className="grid grid-cols-2 gap-3 text-center">
+                                <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-2.5">
+                                  <span className="block text-[8px] text-emerald-800 font-black uppercase tracking-wider mb-1">Titolari e Subentri</span>
+                                  <span className="text-sm font-black font-mono text-emerald-700">+{totalStartersPoints} pt</span>
+                                </div>
+                                <div className="bg-amber-50/60 border border-amber-150 rounded-xl p-2.5">
+                                  <span className="block text-[8px] text-amber-800 font-black uppercase tracking-wider mb-1">Panchina</span>
+                                  <span className="text-sm font-black font-mono text-amber-700">+{totalBenchPoints} pt</span>
+                                </div>
+                              </div>
+                              <p className="text-[9.5px] text-gray-500 font-medium leading-relaxed bg-emerald-50/20 p-3 rounded-xl border border-emerald-100/60">
+                                💡 <strong>Regola Panchina Descrittiva:</strong> Un giocatore in panchina (se non subentrato ai titolari) contribuisce alla squadra esclusivamente con i suoi <strong>bonus non manuali</strong> (es. bonus di presenza, bonus social o speciali personali automatici). I suoi <strong>bonus manuali</strong> (es. gol o assist speciali) non vengono conteggiati. La somma totale di questi punti in panchina descrittivi è di <strong>{totalBenchPoints} pt</strong>.
+                              </p>
+                            </div>
+                          );
+                        })()}
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-semibold text-gray-700 text-[11px]">
                           {selectedTeamToView.giocatoriSelezionati.map(
                             (pName, index) => {
