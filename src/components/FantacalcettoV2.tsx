@@ -831,7 +831,7 @@ export default function FantacalcettoV2({
           if (bRef && bRef.bonusAttivi) {
             bRef.bonusAttivi.forEach((bId) => {
               const bDef = (bonuses || DEFAULT_BONUSES).find((x) => x.id === bId);
-              if (bDef && isBonusManuale(bDef)) {
+              if (bDef && isBonusManuale(bDef) && bDef.id !== "pinna_presidenziale" && bDef.id !== "orlandini_leggenda") {
                 unassignedList.push(`${bDef.nome} (+${bDef.punti} pt)`);
               }
             });
