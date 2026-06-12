@@ -339,7 +339,9 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       id: "pinna_presidenziale",
       nome: "Bonus presidenziali 👑",
       descrizione: "I Gol e gli Assist dei Presidenti valgono il doppio (punti gol in base al ruolo)!",
-      punti: 2,
+      punti: 0,
+      moltiplicatoreGol: 3,
+      moltiplicatoreAssist: 1,
       isPersonale: true,
       giocatoreId: "Pinna"
     },
@@ -922,7 +924,11 @@ export const getPlayerBonusPointsForMatch = (
 
       if (b.id === "gen_gol_pivot" || b.id === "gen_gol_laterale" || b.id === "gen_gol_centrale" || b.id === "gen_gol_portiere") {
         const roleGoals = bonusGolAccreditati?.[b.id] || 1;
-        pts = (b.punti || 1) * roleGoals; // Multiply the bonus value by the number of role goals
+        if (isPresidenzialeActive || isLeggendaActive) {
+          pts = (b.punti * 2) * roleGoals;
+        } else {
+          pts = b.punti * roleGoals;
+        }
       } else if (b.id === "gen_assist_extra" || b.id === "gen_assist_merda") {
         const mult = b.moltiplicatoreAssist ?? 0;
         let basePts = mult * assist;
@@ -1014,7 +1020,11 @@ export const getPlayerBonusBreakdownForMatch = (
       
       if (b.id === "gen_gol_pivot" || b.id === "gen_gol_laterale" || b.id === "gen_gol_centrale" || b.id === "gen_gol_portiere") {
         const roleGoals = bonusGolAccreditati?.[b.id] || 1;
-        pts = (b.punti || 1) * roleGoals;
+        if (isPresidenzialeActive || isLeggendaActive) {
+          pts = (b.punti * 2) * roleGoals;
+        } else {
+          pts = b.punti * roleGoals;
+        }
       } else if (b.id === "gen_assist_extra" || b.id === "gen_assist_merda") {
         const mult = b.moltiplicatoreAssist ?? 0;
         let basePts = mult * assist;
