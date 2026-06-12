@@ -134,7 +134,8 @@ export default function StatsHub({
           bonuses,
           r.snapshotGiocatore?.ultimoRuolo || g.ultimoRuolo,
           rAmm,
-          rEsp
+          rEsp,
+          r.bonusGolAccreditati
         );
 
         let matchBonusVal = breakdown.reduce((acc, curr) => acc + curr.puntiVal, 0);
@@ -212,7 +213,8 @@ export default function StatsHub({
           bonuses,
           r.snapshotGiocatore?.ultimoRuolo || g.ultimoRuolo,
           rAmm,
-          rEsp
+          rEsp,
+          r.bonusGolAccreditati
         );
 
         let matchBonusVal = breakdown.reduce((acc, curr) => acc + curr.puntiVal, 0);
@@ -330,7 +332,8 @@ export default function StatsHub({
                 bonuses,
                 r.snapshotGiocatore?.ultimoRuolo,
                 rAmm,
-                rEsp
+                rEsp,
+                r.bonusGolAccreditati
               );
 
               breakdown.forEach((b) => {
@@ -403,7 +406,8 @@ export default function StatsHub({
           bonuses,
           r.snapshotGiocatore?.ultimoRuolo,
           rAmm,
-          rEsp
+          rEsp,
+          r.bonusGolAccreditati
         );
 
         breakdown.forEach((b) => {
@@ -476,7 +480,8 @@ export default function StatsHub({
         bonuses,
         r.snapshotGiocatore?.ultimoRuolo,
         rAmm,
-        rEsp
+        rEsp,
+        r.bonusGolAccreditati
       );
 
       let matchBonusVal = breakdown.reduce((acc, curr) => acc + curr.puntiVal, 0);
