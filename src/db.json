@@ -5071,6 +5071,13 @@
       "nome": "⚽ Gol Centrale 💣"
     },
     {
+      "punti": 1,
+      "descrizione": "+1 punto extra per gol segnato dalla fascia laterale",
+      "id": "gen_gol_laterale",
+      "nome": "⚽ Gol Laterale 🚀",
+      "isManuale": true
+    },
+    {
       "punti": 5,
       "descrizione": "+5 punti per gol segnato dal portiere",
       "nome": "🧤 Gol Portiere 🥅🦅",
@@ -5253,9 +5260,9 @@
     {
       "isPersonale": true,
       "giocatoreId": "Pinna",
-      "descrizione": "I Gol e gli Assist  dei Presidenti valgono il doppio!",
+      "descrizione": "+3 punti. I Gol o gli Assist speciali presidenziali",
       "id": "pinna_presidenziale",
-      "punti": 0,
+      "punti": 3,
       "nome": "Bonus presidenziali 👑"
     },
     {
@@ -5269,10 +5276,9 @@
     {
       "id": "orlandini_leggenda",
       "nome": "Bonus Leggende 🌟",
-      "moltiplicatoreGol": 2,
-      "descrizione": "Ogni Gol segnato da vere Leggende del calcetto vale il doppio",
-      "punti": 0,
-      "giocatoreId": "nicola_orlandini",
+      "descrizione": "+3 punti per ogni Gol segnato",
+      "punti": 3,
+      "giocatoreId": "Orlandini",
       "isPersonale": true
     },
     {

@@ -16,6 +16,7 @@ import {
   Consiglio,
   getPlayerPriceForRoster,
   MAX_BUDGET,
+  DEFAULT_BONUSES,
 } from "./src/types";
 import { dbServer, doc, getDoc, setDoc } from "./src/lib/firestore-server";
 import { fetchFromFirestore, saveToFirestore } from "./src/lib/syncFirestore";
@@ -982,6 +983,25 @@ async function getDb(
     localDb.consigli = firestoreDb.consigli || [];
   } else {
     console.log("[Firestore] Firestore vuoto, inizializzazione da Sheets...");
+  }
+
+  // Ensure bonuses has all default bonuses backfilled dynamically
+  if (!localDb.bonuses) {
+    localDb.bonuses = [];
+  }
+  const existingBonusIds = new Set(localDb.bonuses.map((b: any) => b.id));
+  let modifiedBonuses = false;
+  for (const defB of DEFAULT_BONUSES) {
+    if (!existingBonusIds.has(defB.id)) {
+      localDb.bonuses.push(JSON.parse(JSON.stringify(defB)));
+      modifiedBonuses = true;
+    }
+  }
+  if (modifiedBonuses) {
+    console.log("[getDb] Backfilled missing bonuses:", DEFAULT_BONUSES.filter(b => !existingBonusIds.has(b.id)).map(b => b.id));
+    saveToFirestore(localDb).catch(err => {
+      console.error("[Firestore] Error saving backfilled bonuses:", err);
+    });
   }
 
   let activeToken = token;
@@ -2581,16 +2601,22 @@ async function startServer() {
 
       // Revert player's balances and statistics
       for (const g of db.giocatori) {
-        const dRef = referto.find((r) => r.nome === g.nome);
+        const dRef = referto.find((r: any) => r.nome === g.nome);
         if (dRef) {
+          // Check if player actually paid (or was supposed to)
           if (dRef.pagaQuota) {
-            let qToRestore = baseQuota;
+            let qToRestore = 0;
             if (dRef.quotaMaturata !== undefined) {
               qToRestore = dRef.quotaMaturata;
             } else {
-              if (distributedCents < remainderCents) {
-                qToRestore = parseFloat((qToRestore + 0.01).toFixed(2));
-                distributedCents++;
+              // Retro-compatibility fallback
+              const isPresent = dRef.statoPresenza === "giocato" || dRef.statoPresenza === "sostituito" || (!dRef.statoPresenza && dRef.pagaQuota);
+              if (isPresent) {
+                 qToRestore = baseQuota;
+                 if (distributedCents < remainderCents) {
+                   qToRestore = parseFloat((qToRestore + 0.01).toFixed(2));
+                   distributedCents++;
+                 }
               }
             }
             g.saldo = parseFloat((g.saldo + qToRestore).toFixed(2));
@@ -2676,16 +2702,22 @@ async function startServer() {
 
       // Revert player's balance and statistics
       for (const g of db.giocatori) {
-        const dRef = referto.find((r) => r.nome === g.nome);
+        const dRef = referto.find((r: any) => r.nome === g.nome);
         if (dRef) {
+          // Check if player actually paid
           if (dRef.pagaQuota) {
-            let qToRestore = baseQuota;
+            let qToRestore = 0;
             if (dRef.quotaMaturata !== undefined) {
               qToRestore = dRef.quotaMaturata;
             } else {
-              if (distributedCents < remainderCents) {
-                qToRestore = parseFloat((qToRestore + 0.01).toFixed(2));
-                distributedCents++;
+              // Retro-compatibility fallback
+              const isPresent = dRef.statoPresenza === "giocato" || dRef.statoPresenza === "sostituito" || (!dRef.statoPresenza && dRef.pagaQuota);
+              if (isPresent) {
+                 qToRestore = baseQuota;
+                 if (distributedCents < remainderCents) {
+                   qToRestore = parseFloat((qToRestore + 0.01).toFixed(2));
+                   distributedCents++;
+                 }
               }
             }
             g.saldo = parseFloat((g.saldo + qToRestore).toFixed(2));

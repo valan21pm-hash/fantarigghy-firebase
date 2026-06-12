@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { CheckCircle2, Trophy, AlertTriangle } from "lucide-react";
-import { Giocatore, Partita, RefertoGiocatore, getPlayerBonusKey, CustomBonusDef, DEFAULT_BONUSES, GOAL_POINTS, ASSIST_POINTS, AMMO_POINTS, ESPU_POINTS } from "../types";
+import { Giocatore, Partita, RefertoGiocatore, getPlayerBonusKey, CustomBonusDef, DEFAULT_BONUSES, GOAL_POINTS, ASSIST_POINTS, AMMO_POINTS, ESPU_POINTS, isBonusManuale } from "../types";
 
 interface MatchReportProps {
   giocatori: Giocatore[];
@@ -95,7 +95,7 @@ export default function MatchReport({
   const [validationError, setValidationError] = useState<string | null>(null);
 
   // Tabs structure
-  const [activeTab, setActiveTab] = useState<"referto" | "generic" | "personal">("referto");
+  const [activeTab, setActiveTab] = useState<"referto" | "generic" | "personal" | "manual">("referto");
   
   // Verification tracking for Generic and Personal Bonuses
   const [verifiedGeneric, setVerifiedGeneric] = useState<Record<string, boolean>>({});
@@ -542,8 +542,8 @@ export default function MatchReport({
     // --- Strict Bonus Verification Flow ---
     if (!isAmichevole) {
       const allBonuses = bonuses || DEFAULT_BONUSES;
-      const genericBonusIds = allBonuses.filter(b => !b.isPersonale && !b.isAutomatic && !["gen_gol_pivot", "gen_gol_laterale", "gen_gol_centrale", "gen_gol_portiere"].includes(b.id)).map(b => b.id);
-      const personalBonusIds = allBonuses.filter(b => b.isPersonale).map(b => b.id);
+      const genericBonusIds = allBonuses.filter(b => !b.isPersonale && !b.isAutomatic && !isBonusManuale(b)).map(b => b.id);
+      const personalBonusIds = allBonuses.filter(b => b.isPersonale && !isBonusManuale(b)).map(b => b.id);
 
       const activeGiocatori = giocatori.filter(g => g.attivo);
 
@@ -807,6 +807,19 @@ export default function MatchReport({
                   onClick={() => setActiveTab("personal")}
                 >
                   3. Bonus Personali
+                </button>
+              )}
+              {!isAmichevole && (
+                <button
+                  type="button"
+                  className={`flex-1 py-3 text-xs font-bold uppercase tracking-wider text-center border-b-2 transition-all cursor-pointer ${
+                    activeTab === "manual" 
+                      ? "border-slate-800 text-slate-900 bg-slate-50/50" 
+                      : "border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setActiveTab("manual")}
+                >
+                  4. Bonus Manuali
                 </button>
               )}
             </div>
@@ -1517,7 +1530,7 @@ export default function MatchReport({
                     🛡️ Assegnazione Bonus Generici
                   </h3>
                   <div className="space-y-2">
-                    {(bonuses || DEFAULT_BONUSES).filter(b => !b.isPersonale && !b.isAutomatic).map(b => (
+                    {(bonuses || DEFAULT_BONUSES).filter(b => !b.isPersonale && !b.isAutomatic && !isBonusManuale(b)).map(b => (
                       <details key={b.id} className="bg-white border text-sm border-gray-200 rounded-lg group">
                         <summary className="p-3 cursor-pointer font-bold text-slate-800 group-open:border-b border-gray-100 flex items-center justify-between">
                           <div className="flex flex-col">
@@ -1535,8 +1548,6 @@ export default function MatchReport({
                         <div className="p-3 bg-gray-50 max-h-[300px] overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                           {giocatori.filter(g => g.attivo).map(g => {
                              const isChecked = (selectedBonuses[g.nome] || []).includes(b.id);
-                             const isSpecialGoalBonus = ["gen_gol_pivot", "gen_gol_laterale", "gen_gol_centrale", "gen_gol_portiere"].includes(b.id) || b.nome.toLowerCase().includes("gol laterale") || b.nome.toLowerCase().includes("gol centrale") || b.nome.toLowerCase().includes("gol pivot") || b.nome.toLowerCase().includes("gol portiere");
-                             const golValue = bonusGolAccreditati[g.nome]?.[b.id] || 1;
                              return (
                                <label key={`${b.id}-${g.nome}`} className="flex items-center gap-2 p-2 bg-white border border-gray-150 rounded cursor-pointer hover:bg-gray-50">
                                  <input
@@ -1546,24 +1557,8 @@ export default function MatchReport({
                                     className="w-4 h-4 text-emerald-600 rounded cursor-pointer"
                                  />
                                  <span className="text-xs font-bold text-gray-800 truncate flex-1">{g.nome}</span>
-                                 {isChecked && isSpecialGoalBonus && (
-                                   <input
-                                      type="number"
-                                      min="1"
-                                      className="w-14 h-7 text-xs text-center border-2 border-red-500 rounded focus:outline-none focus:border-red-700 font-bold"
-                                      value={golValue}
-                                      onChange={(e) => {
-                                        const v = parseInt(e.target.value) || 1;
-                                        setBonusGolAccreditati(prev => ({
-                                          ...prev,
-                                          [g.nome]: { ...(prev[g.nome] || {}), [b.id]: v }
-                                        }));
-                                      }}
-                                      onClick={(e) => e.stopPropagation()}
-                                   />
-                                 )}
                                </label>
-                             )
+                             );
                           })}
                         </div>
                       </details>
@@ -1578,7 +1573,7 @@ export default function MatchReport({
                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-4 max-h-[160px] overflow-y-auto">
                      {giocatori.filter(g => g.attivo).map(g => {
                        const pBonuses = selectedBonuses[g.nome] || [];
-                       const hasGeneric = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && !b.isPersonale && !b.isAutomatic));
+                       const hasGeneric = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && !b.isPersonale && !b.isAutomatic && !isBonusManuale(b)));
                        if (hasGeneric) return null;
                        
                        return (
@@ -1601,7 +1596,7 @@ export default function MatchReport({
                        const newVer = { ...verifiedGeneric };
                        giocatori.filter(g => g.attivo).forEach(g => {
                          const pBonuses = selectedBonuses[g.nome] || [];
-                         const hasGeneric = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && !b.isPersonale && !b.isAutomatic));
+                         const hasGeneric = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && !b.isPersonale && !b.isAutomatic && !isBonusManuale(b)));
                          if (!hasGeneric) newVer[g.nome] = true;
                        });
                        setVerifiedGeneric(newVer);
@@ -1624,7 +1619,7 @@ export default function MatchReport({
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[600px] overflow-y-auto pr-1">
                     {giocatori.filter(g => g.attivo).map(g => {
                       const bonusKey = getPlayerBonusKey(g.nome);
-                      const baseBonuses = bonusKey ? (bonuses || DEFAULT_BONUSES).filter(b => b.isPersonale && b.giocatoreId === bonusKey) : [];
+                      const baseBonuses = bonusKey ? (bonuses || DEFAULT_BONUSES).filter(b => b.isPersonale && b.giocatoreId === bonusKey && !isBonusManuale(b)) : [];
                       
                       return (
                         <div key={`bp-${g.nome}`} className="bg-white border border-gray-200 rounded-lg p-3">
@@ -1664,7 +1659,7 @@ export default function MatchReport({
                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-4 max-h-[160px] overflow-y-auto">
                      {giocatori.filter(g => g.attivo).map(g => {
                        const pBonuses = selectedBonuses[g.nome] || [];
-                       const hasPersonal = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && b.isPersonale));
+                       const hasPersonal = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && b.isPersonale && !isBonusManuale(b)));
                        if (hasPersonal) return null;
                        
                        return (
@@ -1687,7 +1682,7 @@ export default function MatchReport({
                        const newVer = { ...verifiedPersonal };
                        giocatori.filter(g => g.attivo).forEach(g => {
                          const pBonuses = selectedBonuses[g.nome] || [];
-                         const hasPersonal = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && b.isPersonale));
+                         const hasPersonal = pBonuses.some(bId => (bonuses || DEFAULT_BONUSES).find(b => b.id === bId && b.isPersonale && !isBonusManuale(b)));
                          if (!hasPersonal) newVer[g.nome] = true;
                        });
                        setVerifiedPersonal(newVer);
@@ -1696,6 +1691,99 @@ export default function MatchReport({
                    >
                      ✨ Assegna "Nessun Bonus/Malus" a tutti i rimanenti
                    </button>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "manual" && (
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-6 mb-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-6 border-b pb-4 border-slate-200">
+                  <h2 className="text-lg font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                    <span className="text-xl">✍️</span> Bonus Manuali
+                  </h2>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {giocatori.filter(g => g.attivo).map(g => {
+                      const presStato = statoPresenza[g.nome] || "giocato";
+                      if (presStato === "assente") return null;
+                      
+                      const gBonus = selectedBonuses[g.nome] || [];
+                      const isSubstitute = presStato === "sostituito";
+                      const mBonuses = (bonuses || DEFAULT_BONUSES).filter(b => {
+                        if (!isBonusManuale(b)) return false;
+                        const lowerName = g.nome.toLowerCase();
+                        if (b.id === "pinna_presidenziale") {
+                          return lowerName.includes("pinna");
+                        }
+                        if (b.id === "orlandini_leggenda") {
+                          return lowerName.includes("orlandini");
+                        }
+                        return true;
+                      });
+                      
+                      if (mBonuses.length === 0) return null;
+
+                      return (
+                        <div key={`manual-${g.nome}`} className={`bg-white border rounded p-4 ${isSubstitute ? 'opacity-50 pointer-events-none' : ''}`}>
+                           <div className="font-bold text-slate-800 uppercase truncate mb-2 pb-1 border-b">
+                             {g.nome} {isSubstitute && "(Sostituto)"}
+                           </div>
+                           <div className="space-y-2">
+                             {mBonuses.map(b => {
+                               const isChecked = gBonus.includes(b.id);
+                               const val = bonusGolAccreditati[g.nome]?.[b.id] || 1;
+                               let showPunti = b.punti;
+                               if (showPunti === 0) {
+                                 const defaultB = DEFAULT_BONUSES.find(x => x.id === b.id);
+                                 if (defaultB) showPunti = defaultB.punti;
+                               }
+                               
+                               return (
+                                 <label key={`${g.nome}-${b.id}`} className="flex items-center gap-2 cursor-pointer group">
+                                   <input
+                                     type="checkbox"
+                                     checked={isChecked}
+                                     onChange={(e) => handleToggleBonus(g.nome, b.id)}
+                                     className="w-5 h-5 text-indigo-600 rounded border-gray-300"
+                                   />
+                                   <div className="flex flex-col flex-1">
+                                     <span className="text-sm font-bold text-gray-800 group-hover:text-indigo-600 transition-colors">
+                                       {b.nome}
+                                     </span>
+                                     <span className="text-xs text-gray-500 font-medium">{b.descrizione}</span>
+                                   </div>
+                                   {isChecked && (
+                                      <div className="flex items-center gap-1 ml-2 bg-indigo-50 border border-indigo-200 rounded-lg px-2 py-1 select-none">
+                                        <span className="text-xs font-bold text-indigo-500 font-mono">x</span>
+                                        <input
+                                          type="number"
+                                          min="1"
+                                          className="w-12 h-6 text-xs text-center border-0 bg-transparent focus:outline-none font-extrabold text-indigo-700 font-mono"
+                                          value={val}
+                                        onChange={(e) => {
+                                          const v = parseInt(e.target.value) || 1;
+                                          setBonusGolAccreditati(prev => ({
+                                            ...prev,
+                                            [g.nome]: { ...(prev[g.nome] || {}), [b.id]: v }
+                                          }));
+                                        }}
+                                        onClick={(e) => e.stopPropagation()}
+                                          />
+                                        </div>
+                                      )}
+                                   <span className="ml-2 font-black text-sm text-indigo-600 w-8 text-right shrink-0">
+                                     {showPunti > 0 ? `+${showPunti * val}` : showPunti * val}
+                                   </span>
+                                 </label>
+                               )
+                             })}
+                           </div>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
               </div>
             )}
