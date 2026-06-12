@@ -2588,46 +2588,28 @@ async function startServer() {
 
       const referto = rigaPartita.referto || [];
       const costoFinale = rigaPartita.costo || 0;
-
-      let paganti = 0;
-      for (const r of referto) {
-        if (r.pagaQuota === true) paganti++;
-      }
+      const convocatiList = rigaPartita.convocati || [];
+      const numConvocati = convocatiList.length;
 
       const totaleEuro =
         typeof costoFinale === "string"
           ? parseFloat(costoFinale)
           : Number(costoFinale || 0);
-      let baseQuota = 0;
-      let remainderCents = 0;
-
-      if (paganti > 0) {
-        const totaleCents = Math.round(totaleEuro * 100);
-        baseQuota = Math.floor(totaleCents / paganti) / 100;
-        remainderCents = totaleCents % paganti;
-      }
-
-      let distributedCents = 0;
 
       // Revert player's balances and statistics
       for (const g of db.giocatori) {
         const dRef = referto.find((r: any) => r.nome === g.nome);
         if (dRef) {
-          // Check if player actually paid (or was supposed to)
-          if (dRef.pagaQuota) {
+          // Check if player is a convocato of the match
+          if (convocatiList.includes(g.nome)) {
             let qToRestore = 0;
             if (dRef.quotaMaturata !== undefined) {
               qToRestore = dRef.quotaMaturata;
             } else {
-              // Retro-compatibility fallback
-              const isPresent = dRef.statoPresenza === "giocato" || dRef.statoPresenza === "sostituito" || (!dRef.statoPresenza && dRef.pagaQuota);
-              if (isPresent) {
-                 qToRestore = baseQuota;
-                 if (distributedCents < remainderCents) {
-                   qToRestore = parseFloat((qToRestore + 0.01).toFixed(2));
-                   distributedCents++;
-                 }
-              }
+              // fallback
+              const totaleCents = Math.round(totaleEuro * 100);
+              const baseQuota = numConvocati > 0 ? Math.floor(totaleCents / numConvocati) / 100 : 0;
+              qToRestore = baseQuota;
             }
             g.saldo = parseFloat((g.saldo + qToRestore).toFixed(2));
           }
@@ -2689,46 +2671,28 @@ async function startServer() {
 
       const referto = rigaPartita.referto || [];
       const costoFinale = rigaPartita.costo || 0;
-
-      let paganti = 0;
-      for (const r of referto) {
-        if (r.pagaQuota === true) paganti++;
-      }
+      const convocatiList = rigaPartita.convocati || [];
+      const numConvocati = convocatiList.length;
 
       const totaleEuro =
         typeof costoFinale === "string"
           ? parseFloat(costoFinale)
           : Number(costoFinale || 0);
-      let baseQuota = 0;
-      let remainderCents = 0;
-
-      if (paganti > 0) {
-        const totaleCents = Math.round(totaleEuro * 100);
-        baseQuota = Math.floor(totaleCents / paganti) / 100;
-        remainderCents = totaleCents % paganti;
-      }
-
-      let distributedCents = 0;
 
       // Revert player's balance and statistics
       for (const g of db.giocatori) {
         const dRef = referto.find((r: any) => r.nome === g.nome);
         if (dRef) {
-          // Check if player actually paid
-          if (dRef.pagaQuota) {
+          // Check if player is a convocato of the match
+          if (convocatiList.includes(g.nome)) {
             let qToRestore = 0;
             if (dRef.quotaMaturata !== undefined) {
               qToRestore = dRef.quotaMaturata;
             } else {
-              // Retro-compatibility fallback
-              const isPresent = dRef.statoPresenza === "giocato" || dRef.statoPresenza === "sostituito" || (!dRef.statoPresenza && dRef.pagaQuota);
-              if (isPresent) {
-                 qToRestore = baseQuota;
-                 if (distributedCents < remainderCents) {
-                   qToRestore = parseFloat((qToRestore + 0.01).toFixed(2));
-                   distributedCents++;
-                 }
-              }
+              // fallback
+              const totaleCents = Math.round(totaleEuro * 100);
+              const baseQuota = numConvocati > 0 ? Math.floor(totaleCents / numConvocati) / 100 : 0;
+              qToRestore = baseQuota;
             }
             g.saldo = parseFloat((g.saldo + qToRestore).toFixed(2));
           }
@@ -2801,11 +2765,11 @@ async function startServer() {
       }
       rigaPartita.rosterSnapshot = snapshot;
 
-      // Exact individual cost calculation handling remainder cents
-      let paganti = 0;
-      for (const r of referto) {
-        if (presenti.includes(r.nome) && r.pagaQuota === true) paganti++;
-      }
+      // Exact individual cost calculation based on convocati list
+      const convocatiList = rigaPartita.convocati && rigaPartita.convocati.length > 0 
+        ? rigaPartita.convocati 
+        : (presenti || []);
+      const numConvocati = convocatiList.length;
 
       const totaleEuro =
         typeof costoFinale === "string"
@@ -2814,34 +2778,32 @@ async function startServer() {
       let baseQuota = 0;
       let remainderCents = 0;
 
-      if (paganti > 0) {
+      if (numConvocati > 0) {
         const totaleCents = Math.round(totaleEuro * 100);
-        baseQuota = Math.floor(totaleCents / paganti) / 100;
-        remainderCents = totaleCents % paganti;
+        baseQuota = Math.floor(totaleCents / numConvocati) / 100;
+        remainderCents = totaleCents % numConvocati;
       }
 
       let distributedCents = 0;
       for (const r of referto) {
-        if (presenti.includes(r.nome) && r.pagaQuota) {
+        if (convocatiList.includes(r.nome)) {
           let quotaToDeduct = baseQuota;
           if (distributedCents < remainderCents) {
             quotaToDeduct = parseFloat((quotaToDeduct + 0.01).toFixed(2));
             distributedCents++;
           }
           r.quotaMaturata = quotaToDeduct;
+          r.pagaQuota = true;
         } else {
           r.quotaMaturata = 0;
+          r.pagaQuota = false;
         }
       }
 
       for (const g of db.giocatori) {
-        if (presenti.includes(g.nome)) {
-          const dRef = referto.find((r: any) => r.nome === g.nome);
-          if (dRef) {
-            if (dRef.pagaQuota) {
-              const q = dRef.quotaMaturata || 0;
-              g.saldo = parseFloat((g.saldo - q).toFixed(2));
-            }
+        const dRef = referto.find((r: any) => r.nome === g.nome);
+        if (dRef) {
+          if (presenti.includes(g.nome)) {
             g.gol += Number(dRef.gol) || 0;
             g.ammonizioni += Number(dRef.amm) || 0;
             g.assist += Number(dRef.assist) || 0;
@@ -2850,6 +2812,10 @@ async function startServer() {
             g.golSubitiRigore += Number(dRef.subitiRigore) || 0;
             g.golSubitiPiazzato += Number(dRef.subitiPiazzato) || 0;
           }
+          if (convocatiList.includes(g.nome)) {
+            const q = dRef.quotaMaturata || 0;
+            g.saldo = parseFloat((g.saldo - q).toFixed(2));
+          }
         }
       }
 
@@ -2857,7 +2823,7 @@ async function startServer() {
         data: new Date().toLocaleString("it-IT"),
         operazione: "Chiusura Partita",
         importo: String(costoFinale ?? 0),
-        dettagli: `Chiusa partita (${rigaPartita.dettagli}), addebitati ~${baseQuota.toFixed(2)}€ a ${paganti} giocatori.`,
+        dettagli: `Chiusa partita (${rigaPartita.dettagli}), addebitati ~${baseQuota.toFixed(2)}€ a ${numConvocati} giocatori.`,
       });
 
       await saveDb(db, token);
