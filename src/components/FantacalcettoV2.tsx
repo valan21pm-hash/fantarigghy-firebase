@@ -574,6 +574,11 @@ export default function FantacalcettoV2({
         fantaScore: number;
         ruolo?: string;
         stato?: string;
+        originalFantaScore?: number;
+        originalBonusPts?: number;
+        originalBonusBreakdownStr?: string;
+        bonusPtsNonManuali?: number;
+        bonusBreakdownStrNonManuali?: string;
       }[];
     }[] = [];
 
@@ -819,6 +824,9 @@ export default function FantacalcettoV2({
             ...benchInfo,
             ruolo: "Panchina",
             stato: "Panchina",
+            originalFantaScore: benchInfo.fantaScore,
+            originalBonusPts: benchInfo.bonusPts,
+            originalBonusBreakdownStr: benchInfo.bonusBreakdownStr,
             bonusPts: benchInfo.bonusPtsNonManuali,
             bonusBreakdownStr: benchInfo.bonusBreakdownStrNonManuali,
             fantaScore: benchInfo.bonusPtsNonManuali,
@@ -5145,6 +5153,65 @@ export default function FantacalcettoV2({
                                         </span>
                                       </div>
                                     )}
+
+                                    {/* Unassigned Bench Bonuses List */}
+                                    {(() => {
+                                      const matchBreakdownForSeparation = getTeamMatchBreakdownList(selectedTeamToView);
+                                      const unassignedItems: { matchDetails: string; description: string; points: number }[] = [];
+                                      
+                                      matchBreakdownForSeparation.forEach(mb => {
+                                        const kpi = mb.giocatoriKpi.find(k => k.nome.toLowerCase() === pName.toLowerCase());
+                                        if (kpi && kpi.stato === "Panchina") {
+                                          const golPts = kpi.gol * GOAL_POINTS;
+                                          const assistPts = kpi.assist * ASSIST_POINTS;
+                                          const lostBonus = (kpi.originalBonusPts || 0) - kpi.bonusPts;
+                                          
+                                          if (golPts > 0 || assistPts > 0 || lostBonus > 0) {
+                                            const exclusions: string[] = [];
+                                            if (golPts > 0) exclusions.push(`${kpi.gol} Gol (+${golPts} pt)`);
+                                            if (assistPts > 0) exclusions.push(`${kpi.assist} Assist (+${assistPts} pt)`);
+                                            
+                                            // Find specific manual/legendary/presidential bonuses that were not assigned
+                                            const matchRef = (partiteChiuse || []).find(x => x.id === mb.matchId)?.referto?.find(x => x.nome.toLowerCase() === pName.toLowerCase());
+                                            if (matchRef && matchRef.bonusAttivi) {
+                                              matchRef.bonusAttivi.forEach(bId => {
+                                                const bDef = (bonuses || DEFAULT_BONUSES).find(x => x.id === bId);
+                                                if (bDef && isBonusManuale(bDef)) {
+                                                  exclusions.push(`${bDef.nome} (+${bDef.punti} pt)`);
+                                                }
+                                              });
+                                            }
+                                            
+                                            const totalLostForMatch = golPts + assistPts + lostBonus;
+                                            if (totalLostForMatch > 0) {
+                                              unassignedItems.push({
+                                                matchDetails: mb.dettagli || `Partita #${mb.matchId}`,
+                                                description: exclusions.join(", ") || "Bonus manuali",
+                                                points: parseFloat(totalLostForMatch.toFixed(1))
+                                              });
+                                            }
+                                          }
+                                        }
+                                      });
+                                      
+                                      if (unassignedItems.length > 0) {
+                                        return (
+                                          <div className="mt-2.5 bg-red-50/75 border border-red-150 rounded-xl p-2.5 space-y-1.5 shadow-2xs">
+                                            <p className="text-red-800 font-extrabold uppercase text-[8.5px] tracking-wider flex items-center gap-1">
+                                              <span>⚠️</span> Bonus Non Attribuiti (Panchina):
+                                            </p>
+                                            <div className="space-y-1">
+                                              {unassignedItems.map((item, idx) => (
+                                                <div key={idx} className="text-[8.5px] text-gray-600 font-semibold border-l-2 border-red-300 pl-2 py-0.5">
+                                                  <span className="font-extrabold text-red-950">-{item.points} pt</span> in <em>{item.matchDetails}</em>: <span className="text-red-700">{item.description}</span>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        );
+                                      }
+                                      return null;
+                                    })()}
                                   </div>
                                 </div>
                               );
