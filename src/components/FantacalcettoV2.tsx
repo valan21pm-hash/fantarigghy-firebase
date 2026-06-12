@@ -649,7 +649,8 @@ export default function FantacalcettoV2({
               bonuses,
               r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
               rAmm,
-              rEsp
+              rEsp,
+              r.bonusGolAccreditati
             )
           : 0;
 
@@ -663,7 +664,8 @@ export default function FantacalcettoV2({
             bonuses,
             r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
             rAmm,
-            rEsp
+            rEsp,
+            r.bonusGolAccreditati
           );
           if (breakdown.length > 0) {
             bonusBreakdownStr =
@@ -1318,7 +1320,8 @@ export default function FantacalcettoV2({
               bonuses,
               r.snapshotGiocatore?.ultimoRuolo || gInfo?.ultimoRuolo,
               rAmm,
-              rEsp
+              rEsp,
+              r.bonusGolAccreditati
             );
 
             if (isAmichevole || m.inviatoFanta === true) {
@@ -1330,7 +1333,8 @@ export default function FantacalcettoV2({
                 bonuses,
                 r.snapshotGiocatore?.ultimoRuolo || gInfo?.ultimoRuolo,
                 rAmm,
-                rEsp
+                rEsp,
+                r.bonusGolAccreditati
               );
               breakdown.forEach(b => {
                 const foundBonusDef = bonuses.find(def => def.nome === b.nome);

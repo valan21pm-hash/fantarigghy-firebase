@@ -31,6 +31,7 @@ export interface RefertoGiocatore {
   pagaQuota: boolean;
   quotaMaturata?: number;
   bonusAttivi?: string[];
+  bonusGolAccreditati?: Record<string, number>;
   statoPresenza?: "giocato" | "assente" | "sostituito";
   sostitutoDa?: string;
   verifiedGeneric?: boolean;
@@ -141,7 +142,8 @@ export const getPlayerCurrentPrice = (
           allBonuses,
           r.snapshotGiocatore?.ultimoRuolo || fallbackPlayerInfo?.ultimoRuolo,
           rAmm,
-          rEsp
+          rEsp,
+          r.bonusGolAccreditati
         );
 
         matchScore = parseFloat(
@@ -235,7 +237,7 @@ export const calculatePlayerChampionshipStats = (nome: string, partiteChiuse: Pa
         const rBonusAttivi = r.bonusAttivi || [];
 
         // Always include bonuses, but filter for game stats if not present
-        const matchBonus = getPlayerBonusPointsForMatch(nome, rBonusAttivi, rGol, rAssist, allBonuses, r.snapshotGiocatore?.ultimoRuolo || fallbackPlayerInfo?.ultimoRuolo, rAmm, rEsp);
+        const matchBonus = getPlayerBonusPointsForMatch(nome, rBonusAttivi, rGol, rAssist, allBonuses, r.snapshotGiocatore?.ultimoRuolo || fallbackPlayerInfo?.ultimoRuolo, rAmm, rEsp, r.bonusGolAccreditati);
 
         gol += rGol;
         assist += rAssist;
@@ -865,7 +867,8 @@ export const getPlayerBonusPointsForMatch = (
   allBonuses: CustomBonusDef[] = DEFAULT_BONUSES,
   ruolo?: string,
   amm: number = 0,
-  rossi: number = 0
+  rossi: number = 0,
+  bonusGolAccreditati?: Record<string, number>
 ): number => {
   let tot = 0;
   
@@ -918,12 +921,8 @@ export const getPlayerBonusPointsForMatch = (
       let pts = b.punti || 0;
 
       if (b.id === "gen_gol_pivot" || b.id === "gen_gol_laterale" || b.id === "gen_gol_centrale" || b.id === "gen_gol_portiere") {
-        const mult = b.moltiplicatoreGol ?? 0;
-        let basePts = mult * gol;
-        if (isPresidenzialeActive || isLeggendaActive) {
-          basePts *= 2;
-        }
-        pts = b.punti + basePts;
+        const roleGoals = bonusGolAccreditati?.[b.id] || 1;
+        pts = (b.punti || 1) * roleGoals; // Multiply the bonus value by the number of role goals
       } else if (b.id === "gen_assist_extra" || b.id === "gen_assist_merda") {
         const mult = b.moltiplicatoreAssist ?? 0;
         let basePts = mult * assist;
@@ -961,7 +960,8 @@ export const getPlayerBonusBreakdownForMatch = (
   allBonuses: CustomBonusDef[] = DEFAULT_BONUSES,
   ruolo?: string,
   amm: number = 0,
-  rossi: number = 0
+  rossi: number = 0,
+  bonusGolAccreditati?: Record<string, number>
 ): { nome: string, puntiVal: number }[] => {
   const breakdown: { nome: string, puntiVal: number }[] = [];
   
@@ -1013,12 +1013,8 @@ export const getPlayerBonusBreakdownForMatch = (
       let pts = b.punti || 0;
       
       if (b.id === "gen_gol_pivot" || b.id === "gen_gol_laterale" || b.id === "gen_gol_centrale" || b.id === "gen_gol_portiere") {
-        const mult = b.moltiplicatoreGol ?? 0;
-        let basePts = mult * gol;
-        if (isPresidenzialeActive || isLeggendaActive) {
-          basePts *= 2;
-        }
-        pts = b.punti + basePts;
+        const roleGoals = bonusGolAccreditati?.[b.id] || 1;
+        pts = (b.punti || 1) * roleGoals;
       } else if (b.id === "gen_assist_extra" || b.id === "gen_assist_merda") {
         const mult = b.moltiplicatoreAssist ?? 0;
         let basePts = mult * assist;

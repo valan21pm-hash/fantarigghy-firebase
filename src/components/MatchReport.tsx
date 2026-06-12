@@ -113,6 +113,7 @@ export default function MatchReport({
   const [subRigore, setSubRigore] = useState<Record<string, string>>({});
   const [subPiazzato, setSubPiazzato] = useState<Record<string, string>>({});
   const [selectedBonuses, setSelectedBonuses] = useState<Record<string, string[]>>({});
+  const [bonusGolAccreditati, setBonusGolAccreditati] = useState<Record<string, Record<string, number>>>({});
   const [malusBrtPlayers, setMalusBrtPlayers] = useState<Record<string, boolean>>({});
   const [statoPresenza, setStatoPresenza] = useState<Record<string, "giocato" | "assente" | "sostituito">>({});
   const [sostitutoDa, setSostitutoDa] = useState<Record<string, string>>({});
@@ -149,6 +150,7 @@ export default function MatchReport({
         subRigore,
         subPiazzato,
         selectedBonuses,
+        bonusGolAccreditati,
         malusBrtPlayers,
         statoPresenza,
         sostitutoDa,
@@ -187,6 +189,7 @@ export default function MatchReport({
     setSubRigore(b.subRigore || {});
     setSubPiazzato(b.subPiazzato || {});
     setSelectedBonuses(b.selectedBonuses || {});
+    setBonusGolAccreditati(b.bonusGolAccreditati || {});
     setMalusBrtPlayers(b.malusBrtPlayers || {});
     setStatoPresenza(b.statoPresenza || {});
     setSostitutoDa(b.sostitutoDa || {});
@@ -233,6 +236,7 @@ export default function MatchReport({
         const srMap: Record<string, string> = {};
         const spMap: Record<string, string> = {};
         const bMap: Record<string, string[]> = {};
+        const bgaMap: Record<string, Record<string, number>> = {};
         const statoPresMap: Record<string, "giocato" | "assente" | "sostituito"> = {};
         const sostDaMap: Record<string, string> = {};
         const noEventsMap: Record<string, boolean> = {};
@@ -250,6 +254,9 @@ export default function MatchReport({
           if (r.subitiPiazzato > 0) spMap[r.nome] = r.subitiPiazzato.toString();
           if (r.bonusAttivi && r.bonusAttivi.length > 0) {
             bMap[r.nome] = r.bonusAttivi;
+          }
+          if (r.bonusGolAccreditati && Object.keys(r.bonusGolAccreditati).length > 0) {
+            bgaMap[r.nome] = r.bonusGolAccreditati;
           }
           if (r.malusBrt) {
             brtoMap[r.nome] = true;
@@ -276,6 +283,7 @@ export default function MatchReport({
         setSubRigore(srMap);
         setSubPiazzato(spMap);
         setSelectedBonuses(bMap);
+        setBonusGolAccreditati(bgaMap);
         setMalusBrtPlayers(brtoMap);
         setStatoPresenza(statoPresMap);
         setSostitutoDa(sostDaMap);
@@ -296,6 +304,7 @@ export default function MatchReport({
         setSubRigore({});
         setSubPiazzato({});
         setSelectedBonuses({});
+        setBonusGolAccreditati({});
 
         const initialStatoPres: Record<string, "giocato" | "assente" | "sostituito"> = {};
         const initialSostDa: Record<string, string> = {};
@@ -409,6 +418,7 @@ export default function MatchReport({
         subitiPiazzato: isPresent ? parseInt(subPiazzato[nome] || "0") : 0,
         pagaQuota: isPresent ? payers.includes(nome) : false,
         bonusAttivi: pres !== "sostituito" ? (selectedBonuses[nome] || []) : [],
+        bonusGolAccreditati: pres !== "sostituito" ? (bonusGolAccreditati[nome] || {}) : {},
         statoPresenza: pres,
         sostitutoDa: isConvocato ? (sostitutoDa[nome] || "") : "",
         verifiedGeneric: !!verifiedGeneric[nome],
@@ -1525,6 +1535,8 @@ export default function MatchReport({
                         <div className="p-3 bg-gray-50 max-h-[300px] overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                           {giocatori.filter(g => g.attivo).map(g => {
                              const isChecked = (selectedBonuses[g.nome] || []).includes(b.id);
+                             const isSpecialGoalBonus = ["gen_gol_pivot", "gen_gol_laterale", "gen_gol_centrale", "gen_gol_portiere"].includes(b.id) || b.nome.toLowerCase().includes("gol laterale") || b.nome.toLowerCase().includes("gol centrale") || b.nome.toLowerCase().includes("gol pivot") || b.nome.toLowerCase().includes("gol portiere");
+                             const golValue = bonusGolAccreditati[g.nome]?.[b.id] || 1;
                              return (
                                <label key={`${b.id}-${g.nome}`} className="flex items-center gap-2 p-2 bg-white border border-gray-150 rounded cursor-pointer hover:bg-gray-50">
                                  <input
@@ -1533,7 +1545,23 @@ export default function MatchReport({
                                     onChange={() => handleToggleBonus(g.nome, b.id)}
                                     className="w-4 h-4 text-emerald-600 rounded cursor-pointer"
                                  />
-                                 <span className="text-xs font-bold text-gray-800 truncate">{g.nome}</span>
+                                 <span className="text-xs font-bold text-gray-800 truncate flex-1">{g.nome}</span>
+                                 {isChecked && isSpecialGoalBonus && (
+                                   <input
+                                      type="number"
+                                      min="1"
+                                      className="w-14 h-7 text-xs text-center border-2 border-red-500 rounded focus:outline-none focus:border-red-700 font-bold"
+                                      value={golValue}
+                                      onChange={(e) => {
+                                        const v = parseInt(e.target.value) || 1;
+                                        setBonusGolAccreditati(prev => ({
+                                          ...prev,
+                                          [g.nome]: { ...(prev[g.nome] || {}), [b.id]: v }
+                                        }));
+                                      }}
+                                      onClick={(e) => e.stopPropagation()}
+                                   />
+                                 )}
                                </label>
                              )
                           })}
