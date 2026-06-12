@@ -96,6 +96,16 @@ async function getOrUpdateSpreadsheetId(token?: string): Promise<string> {
   return targetSpreadsheetId;
 }
 
+const parseSafeFloat = (val: any, fallback = 0): number => {
+  const parsed = parseFloat(val);
+  return isNaN(parsed) ? fallback : parsed;
+};
+
+const parseSafeInt = (val: any, fallback = 0): number => {
+  const parsed = parseInt(val, 10);
+  return isNaN(parsed) ? fallback : parsed;
+};
+
 import { Formazione } from "./src/types";
 
 function parseGiocatori(values: any[][]): Giocatore[] {
@@ -2169,18 +2179,18 @@ async function startServer() {
       if (index !== -1) {
         db.giocatori[index] = {
           nome: datiAggiornati.nome || nomeOriginale,
-          saldo: parseFloat(datiAggiornati.saldo) ?? 0,
-          gol: parseInt(datiAggiornati.gol) ?? 0,
-          ammonizioni: parseInt(datiAggiornati.ammonizioni) ?? 0,
+          saldo: parseSafeFloat(datiAggiornati.saldo, 0),
+          gol: parseSafeInt(datiAggiornati.gol, 0),
+          ammonizioni: parseSafeInt(datiAggiornati.ammonizioni, 0),
           ultimoRuolo: datiAggiornati.ultimoRuolo || "",
-          assist: parseInt(datiAggiornati.assist) ?? 0,
-          espulsioni: parseInt(datiAggiornati.espulsioni) ?? 0,
-          golSubitiAzione: parseInt(datiAggiornati.golSubitiAzione) ?? 0,
-          golSubitiRigore: parseInt(datiAggiornati.golSubitiRigore) ?? 0,
-          golSubitiPiazzato: parseInt(datiAggiornati.golSubitiPiazzato) ?? 0,
-          quotaIscrizione: parseFloat(datiAggiornati.quotaIscrizione) ?? 0,
+          assist: parseSafeInt(datiAggiornati.assist, 0),
+          espulsioni: parseSafeInt(datiAggiornati.espulsioni, 0),
+          golSubitiAzione: parseSafeInt(datiAggiornati.golSubitiAzione, 0),
+          golSubitiRigore: parseSafeInt(datiAggiornati.golSubitiRigore, 0),
+          golSubitiPiazzato: parseSafeInt(datiAggiornati.golSubitiPiazzato, 0),
+          quotaIscrizione: parseSafeFloat(datiAggiornati.quotaIscrizione, 0),
           attivo: datiAggiornati.attivo === true,
-          numeroMaglia: parseInt(datiAggiornati.numeroMaglia) ?? 99,
+          numeroMaglia: parseSafeInt(datiAggiornati.numeroMaglia, 99),
         };
       }
 

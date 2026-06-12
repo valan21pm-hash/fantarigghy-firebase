@@ -697,6 +697,23 @@ export default function Fantacalcetto({
           });
           puntiTotaliMatch += benchInfo.fantaScore;
         } else {
+          const unassignedList: string[] = [];
+          if (benchInfo.gol > 0) {
+            unassignedList.push(`${benchInfo.gol} Gol (+${benchInfo.gol * GOAL_POINTS} pt)`);
+          }
+          if (benchInfo.assist > 0) {
+            unassignedList.push(`${benchInfo.assist} Assist (+${benchInfo.assist * ASSIST_POINTS} pt)`);
+          }
+          const bRef = m.referto?.find((ref) => ref.nome === benchPlayerName);
+          if (bRef && bRef.bonusAttivi) {
+            bRef.bonusAttivi.forEach((bId) => {
+              const bDef = (bonuses || DEFAULT_BONUSES).find((x) => x.id === bId);
+              if (bDef && isBonusManuale(bDef)) {
+                unassignedList.push(`${bDef.nome} (+${bDef.punti} pt)`);
+              }
+            });
+          }
+
           finalKpiList.push({
             ...benchInfo,
             ruolo: "Panchina",
@@ -708,6 +725,7 @@ export default function Fantacalcetto({
             bonusBreakdownStr: benchInfo.bonusBreakdownStrNonManuali,
             fantaScore: benchInfo.bonusPtsNonManuali,
             puntiConteggiati: benchInfo.bonusPtsNonManuali,
+            unassignedBonuses: unassignedList,
           });
           puntiTotaliMatch += benchInfo.bonusPtsNonManuali;
         }
@@ -5653,6 +5671,24 @@ function MatchBreakdownModal({
                         Nessun bonus/malus
                       </div>
                     )
+                  )}
+
+                  {kpi.stato === "Panchina" && kpi.unassignedBonuses && kpi.unassignedBonuses.length > 0 && (
+                    <div className="mt-3 pt-2.5 border-t border-red-100 flex flex-col gap-1">
+                      <span className="text-[9px] font-black text-red-650 uppercase tracking-wide flex items-center gap-1.5">
+                        ⚠️ Bonus Non Assegnati (Panchina):
+                      </span>
+                      <div className="flex flex-wrap gap-1 mt-0.5">
+                        {kpi.unassignedBonuses.map((ub: string, ubIdx: number) => (
+                          <span
+                            key={ubIdx}
+                            className="bg-red-50 text-red-700 border border-red-200 text-[9px] font-extrabold px-1.5 py-0.5 rounded inline-block"
+                          >
+                            {ub}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
               );
