@@ -288,28 +288,10 @@ export default function Fantacalcetto({
     e.preventDefault();
     if (!onAggiornaFantasquadra || !editingTeam) return;
 
-    // Validation
-    const cleanGiocatori = editGiocatoriIds.filter(Boolean);
-    if (cleanGiocatori.length < 4) {
-      setEditError("La fantasquadra deve comprendere esattamente 4 giocatori!");
-      return;
-    }
-
-    // Check duplicates inside team
-    const uniqueG = new Set(cleanGiocatori);
-    if (uniqueG.size !== cleanGiocatori.length) {
-      setEditError("Non puoi selezionare lo stesso giocatore più volte!");
-      return;
-    }
-
-    // Validate PIN length
-    if (editPin.length !== 4) {
-      setEditError("Il PIN deve essere composto da esattamente 4 cifre.");
-      return;
-    }
-
     setIsSubmitEditLoading(true);
     setEditError("");
+
+    const cleanGiocatori = editGiocatoriIds.filter(Boolean);
 
     try {
       // Build final values of purchase dictionary with only selected players
@@ -5662,9 +5644,8 @@ export default function Fantacalcetto({
                     <input
                       type="text"
                       required
-                      maxLength={4}
                       value={editPin}
-                      onChange={(e) => setEditPin(e.target.value.replace(/\D/g, ""))}
+                      onChange={(e) => setEditPin(e.target.value)}
                       className="w-full bg-emerald-900/40 border border-emerald-800 rounded-xl px-3 py-2 text-xs text-white placeholder-emerald-600 font-mono tracking-widest text-center focus:outline-none focus:border-emerald-500"
                     />
                   </div>
@@ -5675,8 +5656,6 @@ export default function Fantacalcetto({
                     <input
                       type="number"
                       required
-                      min={0}
-                      max={100}
                       value={editCreditoResiduo}
                       onChange={(e) => setEditCreditoResiduo(Number(e.target.value))}
                       className="w-full bg-emerald-900/40 border border-emerald-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
