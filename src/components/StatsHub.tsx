@@ -106,6 +106,7 @@ export default function StatsHub({
 
       // Track individual bonus counts
       const bonusCounts: Record<string, number> = {};
+      const bonusImpacts: Record<string, number> = {};
 
       // Match-by-match pricing history
       let currentPrice = basePrice;
@@ -232,9 +233,32 @@ export default function StatsHub({
         ammCount += rAmm;
         espCount += rEsp;
 
-        // Count bonuses
+        // Count report stats with points
+        if (rGol > 0) {
+          const key = "⚽ Gol Segnato";
+          bonusImpacts[key] = parseFloat(((bonusImpacts[key] || 0) + (rGol * GOAL_POINTS)).toFixed(1));
+          bonusCounts[key] = (bonusCounts[key] || 0) + rGol;
+        }
+        if (rAssist > 0) {
+          const key = "🤝 Assist";
+          bonusImpacts[key] = parseFloat(((bonusImpacts[key] || 0) + (rAssist * ASSIST_POINTS)).toFixed(1));
+          bonusCounts[key] = (bonusCounts[key] || 0) + rAssist;
+        }
+        if (rAmm > 0) {
+          const key = "🟨 Ammonito";
+          bonusImpacts[key] = parseFloat(((bonusImpacts[key] || 0) + (rAmm * AMMO_POINTS)).toFixed(1));
+          bonusCounts[key] = (bonusCounts[key] || 0) + rAmm;
+        }
+        if (rEsp > 0) {
+          const key = "🟥 Espulso";
+          bonusImpacts[key] = parseFloat(((bonusImpacts[key] || 0) + (rEsp * ESPU_POINTS)).toFixed(1));
+          bonusCounts[key] = (bonusCounts[key] || 0) + rEsp;
+        }
+
+        // Count custom bonuses
         breakdown.forEach((b) => {
           bonusCounts[b.nome] = (bonusCounts[b.nome] || 0) + 1;
+          bonusImpacts[b.nome] = parseFloat(((bonusImpacts[b.nome] || 0) + b.puntiVal).toFixed(1));
         });
       });
 
@@ -255,7 +279,8 @@ export default function StatsHub({
         basePrice,
         currentPrice,
         priceChange: lastMatchChange,
-        bonusCounts
+        bonusCounts,
+        bonusImpacts
       };
     });
   }, [giocatori, validMatches, timeframe, selectedGiornataId, selectedGiornataObj, bonuses]);
@@ -553,12 +578,12 @@ export default function StatsHub({
         textForCopy += `${rankNum}. [${p.ruolo.toUpperCase()}] *${p.nome}* | *${p.score} pts*\n`;
         textForCopy += `   🪙 Valore: ${p.currentPrice} (${changeSign} Izycoin) | 👕 Presenze: ${p.matchesPlayed}\n`;
         
-        const topBonusList = Object.entries(p.bonusCounts)
-          .sort((a, b) => Number(b[1]) - Number(a[1]))
-          .slice(0, 2);
+        const topBonusList = Object.entries(p.bonusImpacts || {})
+          .sort((a, b) => Math.abs(b[1] as number) - Math.abs(a[1] as number))
+          .slice(0, 3);
         if (topBonusList.length > 0) {
-          const bonusStr = topBonusList.map(([bName, bCnt]) => `${bName} (x${bCnt})`).join(", ");
-          textForCopy += `   ✨ Top Bonus: ${bonusStr}\n`;
+          const bonusStr = topBonusList.map(([bName, bPts]) => `${bName} (${(bPts as number) > 0 ? "+" : ""}${bPts} pt)`).join(", ");
+          textForCopy += `   ✨ Eventi e Bonus: ${bonusStr}\n`;
         }
       });
       if (filteredPlayerStats.length > 15) {
@@ -1009,16 +1034,31 @@ export default function StatsHub({
                           </span>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4 w-[280px]">
                         <div className="flex flex-wrap gap-1.5 max-w-sm">
-                          {Object.entries(p.bonusCounts).length === 0 ? (
+                          {Object.entries(p.bonusImpacts || {}).length === 0 ? (
                             <span className="text-[10px] text-slate-500 font-bold">-</span>
                           ) : (
-                            Object.entries(p.bonusCounts).map(([bName, bCnt]) => (
-                              <span key={bName} className="text-[9px] font-bold bg-indigo-950/60 border border-indigo-900/50 text-indigo-300 px-2 py-0.5 rounded-lg shrink-0">
-                                {bName} <strong className="text-white">x{bCnt}</strong>
-                              </span>
-                            ))
+                            Object.entries(p.bonusImpacts || {}).map(([bName, val]) => {
+                              const bPts = val as number;
+                              const isNegative = bPts < 0;
+                              const formattedPts = `${bPts > 0 ? "+" : ""}${bPts}`;
+                              return (
+                                <span 
+                                  key={bName} 
+                                  className={`text-[9.5px] font-semibold px-2 py-0.5 rounded-lg shrink-0 flex items-center gap-1 border transition-all ${
+                                    isNegative 
+                                      ? "bg-rose-950/40 border-rose-900/30 text-rose-300" 
+                                      : "bg-indigo-950/60 border-indigo-900/40 text-indigo-200"
+                                  }`}
+                                >
+                                  <span>{bName}</span>
+                                  <strong className={isNegative ? "text-rose-200 font-black" : "text-emerald-400 font-black"}>
+                                    {formattedPts} pt
+                                  </strong>
+                                </span>
+                              );
+                            })
                           )}
                         </div>
                       </td>
