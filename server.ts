@@ -763,7 +763,7 @@ let globalSyncError: string | null = null;
 
 // Debounced background backup mechanism
 function triggerBackgroundSaveToSheets(db: DatabaseSchema, token: string) {
-  pendingSyncTask = { db, token };
+  pendingSyncTask = { db: JSON.parse(JSON.stringify(db)), token };
 
   if (sheetsSyncTimeout) {
     clearTimeout(sheetsSyncTimeout);
@@ -777,7 +777,7 @@ function triggerBackgroundSaveToSheets(db: DatabaseSchema, token: string) {
 }
 
 function triggerBackgroundSaveToFirestore(db: DatabaseSchema) {
-  pendingFirestoreSyncTask = db;
+  pendingFirestoreSyncTask = JSON.parse(JSON.stringify(db));
 
   if (firestoreSyncTimeout) {
     clearTimeout(firestoreSyncTimeout);
@@ -2894,28 +2894,31 @@ async function startServer() {
       const totaleCents = Math.round(totaleEuro * 100);
       const paganti = giocatoriSelezionati.length;
 
-      const baseQuota =
-        paganti > 0 ? Math.floor(totaleCents / paganti) / 100 : 0;
-      const remainderCents = paganti > 0 ? totaleCents % paganti : 0;
+      const sign = Math.sign(totaleCents);
+      const absCents = Math.abs(totaleCents);
+      const baseCents = paganti > 0 ? Math.floor(absCents / paganti) : 0;
+      const remainderCents = paganti > 0 ? absCents % paganti : 0;
 
       let distributedCents = 0;
 
       for (const g of db.giocatori) {
         if (giocatoriSelezionati.includes(g.nome)) {
-          let quotaToDeduct = baseQuota;
+          let quotaToDeductCents = baseCents;
           if (distributedCents < remainderCents) {
-            quotaToDeduct = parseFloat((quotaToDeduct + 0.01).toFixed(2));
+            quotaToDeductCents += 1;
             distributedCents++;
           }
+          const quotaToDeduct = (quotaToDeductCents / 100) * sign;
           g.saldo = parseFloat((g.saldo - quotaToDeduct).toFixed(2));
         }
       }
 
+      const baseQuotaStr = ((baseCents / 100) * sign).toFixed(2);
       db.logs.push({
         data: new Date().toLocaleString("it-IT"),
         operazione: "Spesa Condivisa",
         importo: importoTotale.toString(),
-        dettagli: `Dividi spesa '${causale}' (${importoTotale}€), addebitati ~${baseQuota.toFixed(2)}€ a ${giocatoriSelezionati.length} persone`,
+        dettagli: `Dividi spesa '${causale}' (${importoTotale}€), addebitati ~${baseQuotaStr}€ a ${giocatoriSelezionati.length} persone`,
       });
 
       await saveDb(db, token);
