@@ -1,0 +1,7414 @@
+{
+  "giocatori": [
+    {
+      "ammonizioni": 0,
+      "nome": "Alberto Garau",
+      "quotaIscrizione": 10,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "attivo": true,
+      "assist": 0,
+      "saldo": 1.4,
+      "gol": 1,
+      "golSubitiRigore": 0,
+      "numeroMaglia": 12,
+      "ultimoRuolo": "Portiere",
+      "golSubitiPiazzato": 0
+    },
+    {
+      "gol": 0,
+      "golSubitiRigore": 0,
+      "numeroMaglia": 5,
+      "ultimoRuolo": "Centrale",
+      "golSubitiPiazzato": 0,
+      "nome": "Davide Bayre",
+      "ammonizioni": 0,
+      "quotaIscrizione": 10,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "attivo": true,
+      "saldo": 0,
+      "assist": 0
+    },
+    {
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "golSubitiAzione": 0,
+      "assist": 0,
+      "saldo": 1.4,
+      "ammonizioni": 0,
+      "nome": "Enrico Mulas",
+      "numeroMaglia": 13,
+      "ultimoRuolo": "Portiere",
+      "golSubitiPiazzato": 0,
+      "gol": 0,
+      "golSubitiRigore": 0
+    },
+    {
+      "quotaIscrizione": 10,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "attivo": true,
+      "saldo": 9.4,
+      "assist": 0,
+      "nome": "Fabrizio Alimonda",
+      "ammonizioni": 0,
+      "numeroMaglia": 96,
+      "ultimoRuolo": "Laterale",
+      "golSubitiPiazzato": 0,
+      "gol": 0,
+      "golSubitiRigore": 0
+    },
+    {
+      "golSubitiRigore": 0,
+      "gol": 0,
+      "golSubitiPiazzato": 0,
+      "numeroMaglia": 17,
+      "ultimoRuolo": "Pivot",
+      "ammonizioni": 0,
+      "nome": "Federico Addis",
+      "assist": 0,
+      "saldo": 0,
+      "quotaIscrizione": 10,
+      "espulsioni": 0,
+      "attivo": true,
+      "golSubitiAzione": 0
+    },
+    {
+      "golSubitiPiazzato": 0,
+      "ultimoRuolo": "Laterale",
+      "numeroMaglia": 30,
+      "golSubitiRigore": 0,
+      "gol": 0,
+      "saldo": 2.4,
+      "assist": 0,
+      "attivo": true,
+      "golSubitiAzione": 0,
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "nome": "Giampaolo Mattana",
+      "ammonizioni": 0
+    },
+    {
+      "gol": 0,
+      "golSubitiRigore": 0,
+      "ultimoRuolo": "Laterale",
+      "numeroMaglia": 21,
+      "golSubitiPiazzato": 0,
+      "ammonizioni": 0,
+      "nome": "Lorenzo Pittiu",
+      "attivo": true,
+      "golSubitiAzione": 0,
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "assist": 0,
+      "saldo": 1.4
+    },
+    {
+      "gol": 2,
+      "golSubitiRigore": 0,
+      "numeroMaglia": 28,
+      "ultimoRuolo": "Centrale",
+      "golSubitiPiazzato": 0,
+      "nome": "Manuel Palmas",
+      "ammonizioni": 0,
+      "quotaIscrizione": 10,
+      "espulsioni": 0,
+      "attivo": true,
+      "golSubitiAzione": 0,
+      "saldo": 1.4,
+      "assist": 0
+    },
+    {
+      "gol": 0,
+      "golSubitiRigore": 0,
+      "numeroMaglia": 16,
+      "ultimoRuolo": "Allenatore",
+      "golSubitiPiazzato": 0,
+      "ammonizioni": 0,
+      "nome": "Marco Berretta",
+      "quotaIscrizione": 0,
+      "espulsioni": 0,
+      "attivo": false,
+      "golSubitiAzione": 0,
+      "assist": 0,
+      "saldo": 0
+    },
+    {
+      "ammonizioni": 0,
+      "nome": "Marco Scarpellini",
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "golSubitiAzione": 0,
+      "attivo": true,
+      "assist": 4,
+      "saldo": 1.4,
+      "gol": 0,
+      "golSubitiRigore": 0,
+      "numeroMaglia": 10,
+      "ultimoRuolo": "Centrale",
+      "golSubitiPiazzato": 0
+    },
+    {
+      "gol": 0,
+      "golSubitiRigore": 0,
+      "numeroMaglia": 19,
+      "ultimoRuolo": "Laterale",
+      "golSubitiPiazzato": 0,
+      "nome": "Mario Conti",
+      "ammonizioni": 0,
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "golSubitiAzione": 0,
+      "saldo": 3.4,
+      "assist": 3
+    },
+    {
+      "quotaIscrizione": 0,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "attivo": false,
+      "saldo": 0,
+      "assist": 0,
+      "nome": "Matteo Cabras",
+      "ammonizioni": 0,
+      "numeroMaglia": 99,
+      "ultimoRuolo": "Allenatore",
+      "golSubitiPiazzato": 0,
+      "gol": 0,
+      "golSubitiRigore": 0
+    },
+    {
+      "gol": 2,
+      "golSubitiRigore": 0,
+      "ultimoRuolo": "Centrale",
+      "numeroMaglia": 77,
+      "golSubitiPiazzato": 0,
+      "ammonizioni": 1,
+      "nome": "Matteo Scattu",
+      "attivo": true,
+      "golSubitiAzione": 0,
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "assist": 0,
+      "saldo": 0
+    },
+    {
+      "saldo": 1.4,
+      "assist": 0,
+      "quotaIscrizione": 10,
+      "espulsioni": 0,
+      "attivo": true,
+      "golSubitiAzione": 0,
+      "nome": "Michele Carrone",
+      "ammonizioni": 0,
+      "golSubitiPiazzato": 0,
+      "numeroMaglia": 20,
+      "ultimoRuolo": "Laterale",
+      "golSubitiRigore": 0,
+      "gol": 0
+    },
+    {
+      "numeroMaglia": 14,
+      "ultimoRuolo": "Pivot",
+      "golSubitiPiazzato": 0,
+      "gol": 0,
+      "golSubitiRigore": 0,
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "golSubitiAzione": 0,
+      "assist": 0,
+      "saldo": 3.4,
+      "ammonizioni": 0,
+      "nome": "Nicola Orlandini"
+    },
+    {
+      "ultimoRuolo": "Pivot",
+      "numeroMaglia": 9,
+      "golSubitiPiazzato": 0,
+      "gol": 4,
+      "golSubitiRigore": 0,
+      "golSubitiAzione": 0,
+      "attivo": true,
+      "quotaIscrizione": 10,
+      "espulsioni": 0,
+      "saldo": 2.4,
+      "assist": 0,
+      "nome": "Salvatore Roberto Pinna",
+      "ammonizioni": 0
+    },
+    {
+      "golSubitiPiazzato": 0,
+      "numeroMaglia": 11,
+      "ultimoRuolo": "Laterale",
+      "golSubitiRigore": 0,
+      "gol": 0,
+      "assist": 0,
+      "saldo": 4.4,
+      "quotaIscrizione": 10,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "attivo": true,
+      "ammonizioni": 0,
+      "nome": "Sergio Pippia"
+    },
+    {
+      "gol": 0,
+      "golSubitiRigore": 0,
+      "numeroMaglia": 45,
+      "ultimoRuolo": "Pivot",
+      "golSubitiPiazzato": 0,
+      "nome": "Stefano Michele Lauro",
+      "ammonizioni": 0,
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "golSubitiAzione": 0,
+      "attivo": true,
+      "saldo": 9.4,
+      "assist": 0
+    }
+  ],
+  "campi": [
+    "Futura Sales",
+    "Le Serre",
+    "Seminario",
+    "Verderame"
+  ],
+  "partite": [
+    {
+      "referto": [
+        {
+          "assist": "3",
+          "rossi": "0",
+          "subitiAzione": "0",
+          "pagaQuota": true,
+          "gol": "5",
+          "amm": "0",
+          "subitiPiazzato": "0",
+          "subitiRigore": "0",
+          "nome": "Mario Conti"
+        },
+        {
+          "nome": "Sergio Pippia",
+          "subitiRigore": "0",
+          "subitiPiazzato": "0",
+          "amm": "0",
+          "pagaQuota": true,
+          "gol": "1",
+          "subitiAzione": "0",
+          "rossi": "0",
+          "assist": "0"
+        },
+        {
+          "assist": "2",
+          "rossi": "0",
+          "subitiPiazzato": "0",
+          "subitiRigore": "0",
+          "nome": "Salvatore Roberto Pinna",
+          "subitiAzione": "0",
+          "gol": "4",
+          "pagaQuota": true,
+          "amm": "0"
+        },
+        {
+          "subitiAzione": "0",
+          "gol": "5",
+          "pagaQuota": true,
+          "amm": "0",
+          "subitiPiazzato": "0",
+          "subitiRigore": "0",
+          "nome": "Giampaolo Mattana",
+          "assist": "0",
+          "rossi": "0"
+        },
+        {
+          "subitiPiazzato": "0",
+          "nome": "Alberto Garau",
+          "subitiRigore": "0",
+          "pagaQuota": true,
+          "gol": "1",
+          "subitiAzione": "0",
+          "amm": "0",
+          "assist": "0",
+          "rossi": "0"
+        },
+        {
+          "assist": "4",
+          "rossi": "0",
+          "pagaQuota": true,
+          "gol": "3",
+          "subitiAzione": "0",
+          "amm": "0",
+          "subitiPiazzato": "0",
+          "nome": "Lorenzo Pittiu",
+          "subitiRigore": "0"
+        },
+        {
+          "amm": "0",
+          "pagaQuota": true,
+          "gol": "2",
+          "subitiAzione": "0",
+          "nome": "Manuel Palmas",
+          "subitiRigore": "0",
+          "subitiPiazzato": "0",
+          "rossi": "0",
+          "assist": "2"
+        },
+        {
+          "assist": "4",
+          "rossi": "0",
+          "pagaQuota": true,
+          "gol": "1",
+          "subitiAzione": "0",
+          "amm": "0",
+          "subitiPiazzato": "0",
+          "nome": "Marco Scarpellini",
+          "subitiRigore": "0"
+        },
+        {
+          "assist": "0",
+          "rossi": "0",
+          "gol": "2",
+          "pagaQuota": true,
+          "subitiAzione": "0",
+          "amm": "1",
+          "subitiPiazzato": "0",
+          "nome": "Matteo Scattu",
+          "subitiRigore": "0"
+        },
+        {
+          "pagaQuota": true,
+          "gol": "4",
+          "subitiAzione": "0",
+          "amm": "0",
+          "subitiPiazzato": "0",
+          "nome": "AMICO SCATTU (Esterno)",
+          "subitiRigore": "0",
+          "assist": "0",
+          "rossi": "0"
+        }
+      ],
+      "convocati": [
+        "Mario Conti",
+        "Sergio Pippia",
+        "Salvatore Roberto Pinna",
+        "Giampaolo Mattana",
+        "Alberto Garau",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Matteo Scattu",
+        "AMICO SCATTU (Esterno)"
+      ],
+      "stato": "Chiusa",
+      "costo": 40,
+      "formazione": {
+        "panchina": [],
+        "titolari": []
+      },
+      "rosterSnapshot": {},
+      "risultato": "14-12",
+      "dettagli": "Lunedì 25 maggio ore 21:00 - Seminario (TEAM SCURO vs TEAM BIANCO) [Amichevole]\n\n👕 TEAM SCURO:\nMario Conti, Sergio Pippia, Salvatore Roberto Pinna, Lorenzo Pittiu, Marco Scarpellini\n\n👕 TEAM BIANCO:\nGiampaolo Mattana, Alberto Garau, Manuel Palmas, Matteo Scattu, AMICO SCATTU (Esterno)",
+      "inviatoFanta": false,
+      "id": "0ae665e0-7530-4e29-8bbb-3678aba05edd",
+      "dataInserimento": "25/05/2026 17.14.39"
+    },
+    {
+      "convocati": [
+        "Manuel Palmas",
+        "Salvatore Roberto Pinna",
+        "Lorenzo Pittiu",
+        "Stefano Michele Lauro",
+        "Michele Carrone",
+        "Marco Scarpellini",
+        "Sergio Pippia",
+        "Federico Addis",
+        "Spanedda (Esterno)",
+        "Porcella (Esterno)"
+      ],
+      "stato": "Chiusa",
+      "costo": 35,
+      "referto": [
+        {
+          "subitiAzione": 0,
+          "gol": 0,
+          "pagaQuota": true,
+          "bonusAttivi": [],
+          "amm": 0,
+          "subitiPiazzato": 0,
+          "subitiRigore": 0,
+          "nome": "Manuel Palmas",
+          "assist": 0,
+          "rossi": 0
+        },
+        {
+          "subitiAzione": 0,
+          "gol": 0,
+          "pagaQuota": true,
+          "bonusAttivi": [],
+          "amm": 0,
+          "subitiPiazzato": 0,
+          "subitiRigore": 0,
+          "nome": "Salvatore Roberto Pinna",
+          "assist": 0,
+          "rossi": 0
+        },
+        {
+          "rossi": 0,
+          "assist": 0,
+          "nome": "Lorenzo Pittiu",
+          "subitiRigore": 0,
+          "subitiPiazzato": 0,
+          "amm": 0,
+          "bonusAttivi": [],
+          "gol": 0,
+          "pagaQuota": true,
+          "subitiAzione": 0
+        },
+        {
+          "nome": "Stefano Michele Lauro",
+          "subitiRigore": 0,
+          "subitiPiazzato": 0,
+          "bonusAttivi": [],
+          "amm": 0,
+          "pagaQuota": true,
+          "gol": 0,
+          "subitiAzione": 0,
+          "rossi": 0,
+          "assist": 0
+        },
+        {
+          "assist": 0,
+          "rossi": 0,
+          "subitiPiazzato": 0,
+          "nome": "Michele Carrone",
+          "subitiRigore": 0,
+          "pagaQuota": true,
+          "gol": 0,
+          "subitiAzione": 0,
+          "amm": 0,
+          "bonusAttivi": []
+        },
+        {
+          "rossi": 0,
+          "assist": 0,
+          "subitiRigore": 0,
+          "nome": "Marco Scarpellini",
+          "subitiPiazzato": 0,
+          "amm": 0,
+          "bonusAttivi": [],
+          "subitiAzione": 0,
+          "gol": 0,
+          "pagaQuota": true
+        },
+        {
+          "assist": 0,
+          "rossi": 0,
+          "subitiAzione": 0,
+          "gol": 0,
+          "pagaQuota": true,
+          "bonusAttivi": [],
+          "amm": 0,
+          "subitiPiazzato": 0,
+          "subitiRigore": 0,
+          "nome": "Sergio Pippia"
+        },
+        {
+          "assist": 0,
+          "rossi": 0,
+          "subitiPiazzato": 0,
+          "nome": "Federico Addis",
+          "subitiRigore": 0,
+          "pagaQuota": true,
+          "gol": 0,
+          "subitiAzione": 0,
+          "bonusAttivi": [],
+          "amm": 0
+        },
+        {
+          "assist": 0,
+          "rossi": 0,
+          "gol": 0,
+          "pagaQuota": true,
+          "subitiAzione": 0,
+          "bonusAttivi": [],
+          "amm": 0,
+          "subitiPiazzato": 0,
+          "nome": "Spanedda (Esterno)",
+          "subitiRigore": 0
+        },
+        {
+          "amm": 0,
+          "bonusAttivi": [],
+          "pagaQuota": true,
+          "gol": 0,
+          "subitiAzione": 0,
+          "nome": "Porcella (Esterno)",
+          "subitiRigore": 0,
+          "subitiPiazzato": 0,
+          "rossi": 0,
+          "assist": 0
+        }
+      ],
+      "rosterSnapshot": {
+        "fs-1780146759640-rule": [
+          "Manuel Palmas",
+          "Marco Scarpellini",
+          "Enrico Mulas"
+        ]
+      },
+      "risultato": "14-10",
+      "formazione": {
+        "panchina": [
+          "Manuel Palmas",
+          "Salvatore Roberto Pinna",
+          "Lorenzo Pittiu",
+          "Stefano Michele Lauro",
+          "Spanedda (Esterno)"
+        ],
+        "titolari": [
+          "Michele Carrone",
+          "Marco Scarpellini",
+          "Sergio Pippia",
+          "Federico Addis",
+          "Porcella (Esterno)"
+        ]
+      },
+      "dettagli": "Lunedì 1 giugno ore 20:00 - Verderame (Scuri vs Chiari) [Amichevole]\n\n👕 *Scuri*:\nMichele Carrone, Marco Scarpellini, Sergio Pippia, Federico Addis, Porcella (Esterno)\n\n👕 *Chiari*:\nManuel Palmas, Salvatore Roberto Pinna, Lorenzo Pittiu, Stefano Michele Lauro, Spanedda (Esterno)",
+      "inviatoFanta": false,
+      "id": "cl2uyyu-mpv9n0hu",
+      "dataInserimento": "2026-06-01T13:50:25.203Z"
+    },
+    {
+      "note": "Primo tempo non particolarmente brillante, ma Carrone e Mattana, autore di una doppietta su due assist perfetti di Pittiu, permettono ai nostri di chiudere la prima frazione avanti 3-2.\nNella ripresa, complice la maggiore profondità della rosa, arrivati al campo con appena cinque uomini a disposizione, i nostri prendono il largo. A segno ancora Pittiu e Mattana, entrambi ottimamente serviti da Lauro. Il definitivo 6-2 porta la firma di Mulas, che dopo un irresistibile coast to coast deve solo spingere in rete un preciso assist di Pinna, per il più classico dei \"gol della merda\".",
+      "id": "rr7v8hx-mq4yvx2m",
+      "dettagli": "09/06/2026 20:45, Le Serre vs SOS Auto",
+      "inviatoFanta": true,
+      "formazione": {
+        "panchina": [],
+        "titolari": []
+      },
+      "risultato": "6-2 (V)",
+      "rosterSnapshot": {
+        "fs-1780667683304-6wlo": [
+          "Salvatore Roberto Pinna",
+          "Enrico Mulas",
+          "Giampaolo Mattana",
+          "Manuel Palmas"
+        ],
+        "fs-1780663515353-m28b": [
+          "Salvatore Roberto Pinna",
+          "Fabrizio Alimonda",
+          "Michele Carrone",
+          "Manuel Palmas"
+        ],
+        "fs-1780999483908-ma0w": [
+          "Manuel Palmas",
+          "Enrico Mulas",
+          "Fabrizio Alimonda",
+          "Alberto Garau"
+        ],
+        "fs-1780745920763-bd2q": [
+          "Enrico Mulas",
+          "Lorenzo Pittiu",
+          "Matteo Scattu",
+          "Alberto Garau"
+        ],
+        "fs-1780566278880-cqo5": [
+          "Marco Scarpellini",
+          "Giampaolo Mattana",
+          "Lorenzo Pittiu",
+          "Manuel Palmas"
+        ],
+        "fs-1780665284664-7cbl": [
+          "Lorenzo Pittiu",
+          "Enrico Mulas",
+          "Salvatore Roberto Pinna",
+          "Matteo Scattu"
+        ],
+        "fs-1780689922578-g2kb": [
+          "Giampaolo Mattana",
+          "Lorenzo Pittiu",
+          "Enrico Mulas",
+          "Matteo Scattu"
+        ],
+        "fs-1780953269827-gl6h": [
+          "Stefano Michele Lauro",
+          "Manuel Palmas",
+          "Michele Carrone",
+          "Salvatore Roberto Pinna"
+        ],
+        "fs-1780849420864-sqrm": [
+          "Salvatore Roberto Pinna",
+          "Matteo Scattu",
+          "Enrico Mulas",
+          "Davide Bayre"
+        ],
+        "fs-1780933779267-pm9d": [
+          "Enrico Mulas",
+          "Lorenzo Pittiu",
+          "Michele Carrone",
+          "Sergio Pippia"
+        ],
+        "fs-1780685403028-xkyx": [
+          "Lorenzo Pittiu",
+          "Salvatore Roberto Pinna",
+          "Enrico Mulas",
+          "Manuel Palmas"
+        ],
+        "undefined": [
+          "Enrico Mulas",
+          "Giampaolo Mattana",
+          "Lorenzo Pittiu",
+          "Michele Carrone"
+        ],
+        "fs-1780921488693-oq2d": [
+          "Lorenzo Pittiu",
+          "Stefano Michele Lauro",
+          "Manuel Palmas",
+          "Alberto Garau"
+        ],
+        "fs-1780954074418-idrm": [
+          "Lorenzo Pittiu",
+          "Enrico Mulas",
+          "Michele Carrone",
+          "Salvatore Roberto Pinna"
+        ],
+        "fs-1780680923007-9wa6": [
+          "Marco Scarpellini",
+          "Manuel Palmas",
+          "Lorenzo Pittiu",
+          "Giampaolo Mattana"
+        ],
+        "fs-1780681725341-bct5": [
+          "Enrico Mulas",
+          "Lorenzo Pittiu",
+          "Salvatore Roberto Pinna",
+          "Michele Carrone"
+        ],
+        "fs-1780684610938-n1pi": [
+          "Salvatore Roberto Pinna",
+          "Enrico Mulas",
+          "Lorenzo Pittiu",
+          "Sergio Pippia"
+        ],
+        "fs-1780648546905-t7ib": [
+          "Giampaolo Mattana",
+          "Enrico Mulas",
+          "Lorenzo Pittiu",
+          "Michele Carrone"
+        ],
+        "fs-1780948857068-1ekm": [
+          "Enrico Mulas",
+          "Lorenzo Pittiu",
+          "Salvatore Roberto Pinna",
+          "Matteo Scattu"
+        ],
+        "fs-1780667039244-l5ua": [
+          "Salvatore Roberto Pinna",
+          "Enrico Mulas",
+          "Giampaolo Mattana",
+          "Michele Carrone"
+        ],
+        "fs-1781176621937-5jrq": [
+          "Enrico Mulas",
+          "Fabrizio Alimonda",
+          "Manuel Palmas",
+          "Alberto Garau"
+        ],
+        "fs-1780664929583-53wl": [
+          "Michele Carrone",
+          "Sergio Pippia",
+          "Salvatore Roberto Pinna",
+          "Manuel Palmas"
+        ],
+        "fs-1780563044983-4w10": [
+          "Salvatore Roberto Pinna",
+          "Lorenzo Pittiu",
+          "Enrico Mulas",
+          "Sergio Pippia"
+        ],
+        "fs-1780697914943-rols": [
+          "Salvatore Roberto Pinna",
+          "Marco Scarpellini",
+          "Stefano Michele Lauro",
+          "Alberto Garau"
+        ],
+        "fs-1780952845757-p5rj": [
+          "Michele Carrone",
+          "Enrico Mulas",
+          "Lorenzo Pittiu",
+          "Salvatore Roberto Pinna"
+        ],
+        "fs-1780701019002-dnfa": [
+          "Salvatore Roberto Pinna",
+          "Stefano Michele Lauro",
+          "Michele Carrone",
+          "Manuel Palmas"
+        ]
+      },
+      "referto": [
+        {
+          "assist": 0,
+          "statoPresenza": "giocato",
+          "verifiedPersonal": false,
+          "sostitutoDa": "",
+          "nome": "Enrico Mulas",
+          "subitiRigore": 0,
+          "pagaQuota": true,
+          "subitiAzione": 2,
+          "snapshotGiocatore": {
+            "golSubitiRigore": 0,
+            "gol": 0,
+            "golSubitiPiazzato": 0,
+            "numeroMaglia": 13,
+            "ultimoRuolo": "Portiere",
+            "ammonizioni": 0,
+            "nome": "Enrico Mulas",
+            "assist": 0,
+            "saldo": 14.5,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "attivo": true,
+            "golSubitiAzione": 0
+          },
+          "bonusAttivi": [
+            "bonus_1780863339587",
+            "bonus_1781001237055",
+            "gen_social_reaction",
+            "gen_social_motivation",
+            "gen_gol_portiere",
+            "gen_subisce_meno_3",
+            "gen_malus_ritardo",
+            "gen_esultanza_gruppo",
+            "bonus_1780919206691",
+            "mulas_chiquita",
+            "mulas_levissima",
+            "bonus_1781075580791"
+          ],
+          "malusBrt": false,
+          "rossi": 0,
+          "verifiedGeneric": false,
+          "subitiPiazzato": 0,
+          "gol": 1,
+          "quotaMaturata": 4,
+          "amm": 0
+        },
+        {
+          "gol": 0,
+          "amm": 0,
+          "quotaMaturata": 4,
+          "subitiPiazzato": 0,
+          "verifiedGeneric": false,
+          "malusBrt": false,
+          "rossi": 0,
+          "subitiAzione": 0,
+          "pagaQuota": true,
+          "bonusAttivi": [
+            "bonus_1780863339587",
+            "alimonda_fabrillazione",
+            "gen_porta_tifosa",
+            "bonus_1780919270439"
+          ],
+          "snapshotGiocatore": {
+            "numeroMaglia": 96,
+            "ultimoRuolo": "Laterale",
+            "golSubitiPiazzato": 0,
+            "gol": 0,
+            "golSubitiRigore": 0,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "golSubitiAzione": 0,
+            "attivo": true,
+            "assist": 0,
+            "saldo": 17.5,
+            "ammonizioni": 0,
+            "nome": "Fabrizio Alimonda"
+          },
+          "sostitutoDa": "",
+          "subitiRigore": 0,
+          "nome": "Fabrizio Alimonda",
+          "statoPresenza": "giocato",
+          "verifiedPersonal": false,
+          "assist": 0
+        },
+        {
+          "subitiAzione": 0,
+          "pagaQuota": true,
+          "bonusAttivi": [
+            "bonus_1780863339587",
+            "gen_gol_laterale",
+            "gen_mvp_social",
+            "gen_esultanza_gruppo",
+            "bonus_1780918968021",
+            "bonus_1780919041304",
+            "mattana_optana",
+            "bonus_1780919206691",
+            "gen_mvp_uccheddu",
+            "bonus_1781113120417"
+          ],
+          "snapshotGiocatore": {
+            "ultimoRuolo": "Laterale",
+            "numeroMaglia": 30,
+            "golSubitiPiazzato": 0,
+            "gol": 0,
+            "golSubitiRigore": 0,
+            "attivo": true,
+            "golSubitiAzione": 0,
+            "quotaIscrizione": 10,
+            "espulsioni": 0,
+            "assist": 0,
+            "saldo": 15.5,
+            "ammonizioni": 0,
+            "nome": "Giampaolo Mattana"
+          },
+          "sostitutoDa": "",
+          "subitiRigore": 0,
+          "nome": "Giampaolo Mattana",
+          "statoPresenza": "giocato",
+          "verifiedPersonal": false,
+          "assist": 0,
+          "gol": 3,
+          "amm": 0,
+          "quotaMaturata": 4,
+          "subitiPiazzato": 0,
+          "verifiedGeneric": false,
+          "malusBrt": false,
+          "rossi": 0
+        },
+        {
+          "bonusAttivi": [
+            "bonus_1780863339587",
+            "pittiu_mcbonus",
+            "gen_social_adv",
+            "gen_social_reaction",
+            "gen_social_motivation",
+            "bonus_1781001237055",
+            "gen_gol_laterale",
+            "gen_esultanza_gruppo",
+            "bonus_1780919041304",
+            "bonus_1780919271374",
+            "pittiu_survivor",
+            "bonus_1781113120417"
+          ],
+          "snapshotGiocatore": {
+            "ultimoRuolo": "Laterale",
+            "numeroMaglia": 21,
+            "golSubitiPiazzato": 0,
+            "gol": 0,
+            "golSubitiRigore": 0,
+            "attivo": true,
+            "golSubitiAzione": 0,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "assist": 0,
+            "saldo": 29.5,
+            "ammonizioni": 0,
+            "nome": "Lorenzo Pittiu"
+          },
+          "subitiAzione": 0,
+          "pagaQuota": true,
+          "subitiRigore": 0,
+          "nome": "Lorenzo Pittiu",
+          "sostitutoDa": "",
+          "verifiedPersonal": false,
+          "statoPresenza": "giocato",
+          "assist": 2,
+          "amm": 0,
+          "quotaMaturata": 4,
+          "gol": 1,
+          "subitiPiazzato": 0,
+          "verifiedGeneric": false,
+          "rossi": 0,
+          "malusBrt": false
+        },
+        {
+          "assist": 0,
+          "statoPresenza": "giocato",
+          "verifiedPersonal": false,
+          "sostitutoDa": "",
+          "subitiRigore": 0,
+          "nome": "Manuel Palmas",
+          "subitiAzione": 0,
+          "pagaQuota": true,
+          "bonusAttivi": [
+            "bonus_1780863339587",
+            "gen_social_adv",
+            "gen_social_share",
+            "gen_malus_ritardo",
+            "bonus_1780918968021",
+            "bonus_1780919041304",
+            "bonus_1780919206691",
+            "palmas_reietto"
+          ],
+          "snapshotGiocatore": {
+            "nome": "Manuel Palmas",
+            "ammonizioni": 0,
+            "saldo": 14.5,
+            "assist": 0,
+            "golSubitiAzione": 0,
+            "attivo": true,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "golSubitiRigore": 0,
+            "gol": 2,
+            "golSubitiPiazzato": 0,
+            "ultimoRuolo": "Centrale",
+            "numeroMaglia": 28
+          },
+          "malusBrt": false,
+          "rossi": 0,
+          "verifiedGeneric": false,
+          "subitiPiazzato": 0,
+          "gol": 0,
+          "amm": 0,
+          "quotaMaturata": 4
+        },
+        {
+          "verifiedGeneric": false,
+          "rossi": 0,
+          "malusBrt": false,
+          "quotaMaturata": 4,
+          "amm": 0,
+          "gol": 0,
+          "subitiPiazzato": 0,
+          "verifiedPersonal": false,
+          "statoPresenza": "giocato",
+          "assist": 0,
+          "snapshotGiocatore": {
+            "golSubitiRigore": 0,
+            "gol": 0,
+            "golSubitiPiazzato": 0,
+            "numeroMaglia": 10,
+            "ultimoRuolo": "Centrale",
+            "ammonizioni": 0,
+            "nome": "Marco Scarpellini",
+            "assist": 4,
+            "saldo": 29.5,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "attivo": true,
+            "golSubitiAzione": 0
+          },
+          "bonusAttivi": [
+            "bonus_1780863339587",
+            "gen_malus_ritardo",
+            "bonus_1780919041304",
+            "bonus_1780919271374",
+            "scarpellini_tutela",
+            "scarpellini_trio"
+          ],
+          "pagaQuota": true,
+          "subitiAzione": 0,
+          "nome": "Marco Scarpellini",
+          "subitiRigore": 0,
+          "sostitutoDa": ""
+        },
+        {
+          "verifiedGeneric": false,
+          "malusBrt": false,
+          "rossi": 0,
+          "gol": 1,
+          "quotaMaturata": 4,
+          "amm": 0,
+          "subitiPiazzato": 0,
+          "statoPresenza": "giocato",
+          "verifiedPersonal": false,
+          "assist": 0,
+          "pagaQuota": true,
+          "subitiAzione": 0,
+          "snapshotGiocatore": {
+            "ammonizioni": 0,
+            "nome": "Michele Carrone",
+            "attivo": true,
+            "golSubitiAzione": 0,
+            "quotaIscrizione": 10,
+            "espulsioni": 0,
+            "assist": 0,
+            "saldo": 14.5,
+            "gol": 0,
+            "golSubitiRigore": 0,
+            "ultimoRuolo": "Laterale",
+            "numeroMaglia": 20,
+            "golSubitiPiazzato": 0
+          },
+          "bonusAttivi": [
+            "bonus_1780863339587",
+            "gen_social_share",
+            "gen_social_reaction",
+            "gen_gol_laterale",
+            "gen_malus_ritardo",
+            "gen_esultanza_gruppo",
+            "bonus_1780919041304",
+            "bonus_1780919206691",
+            "carrone_polemichele",
+            "bonus_1781113120417"
+          ],
+          "sostitutoDa": "",
+          "nome": "Michele Carrone",
+          "subitiRigore": 0
+        },
+        {
+          "subitiPiazzato": 0,
+          "amm": 0,
+          "quotaMaturata": 4,
+          "gol": 0,
+          "rossi": 0,
+          "malusBrt": false,
+          "verifiedGeneric": false,
+          "subitiRigore": 0,
+          "nome": "Salvatore Roberto Pinna",
+          "sostitutoDa": "",
+          "bonusAttivi": [
+            "bonus_1780863339587",
+            "gen_social_adv",
+            "gen_social_motivation",
+            "bonus_1781001237055",
+            "gen_social_reaction",
+            "bonus_1780919271374",
+            "gen_assist_merda",
+            "gen_porta_tifosa",
+            "bonus_1780918968021",
+            "bonus_1780919041304",
+            "bonus_1781028581619",
+            "pinna_lazzaro",
+            "bonus_1781113156113"
+          ],
+          "snapshotGiocatore": {
+            "assist": 0,
+            "saldo": 30.5,
+            "attivo": true,
+            "golSubitiAzione": 0,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "ammonizioni": 0,
+            "nome": "Salvatore Roberto Pinna",
+            "golSubitiPiazzato": 0,
+            "ultimoRuolo": "Pivot",
+            "numeroMaglia": 9,
+            "golSubitiRigore": 0,
+            "gol": 4
+          },
+          "subitiAzione": 0,
+          "pagaQuota": true,
+          "assist": 1,
+          "verifiedPersonal": false,
+          "statoPresenza": "giocato"
+        },
+        {
+          "amm": 0,
+          "quotaMaturata": 4,
+          "gol": 0,
+          "subitiPiazzato": 0,
+          "verifiedGeneric": false,
+          "rossi": 0,
+          "malusBrt": false,
+          "bonusAttivi": [
+            "bonus_1780917716152",
+            "bonus_1780863339587",
+            "bonus_1781001237055",
+            "gen_malus_ritardo",
+            "bonus_1780918968021",
+            "bonus_1780919041304",
+            "bonus_1780919206691",
+            "bonus_1780919270439",
+            "lauro_bibitone",
+            "lauro_divo"
+          ],
+          "snapshotGiocatore": {
+            "saldo": 17.5,
+            "assist": 0,
+            "golSubitiAzione": 0,
+            "attivo": true,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "nome": "Stefano Michele Lauro",
+            "ammonizioni": 0,
+            "golSubitiPiazzato": 0,
+            "ultimoRuolo": "Pivot",
+            "numeroMaglia": 45,
+            "golSubitiRigore": 0,
+            "gol": 0
+          },
+          "subitiAzione": 0,
+          "pagaQuota": true,
+          "subitiRigore": 0,
+          "nome": "Stefano Michele Lauro",
+          "sostitutoDa": "",
+          "verifiedPersonal": false,
+          "statoPresenza": "giocato",
+          "assist": 2
+        },
+        {
+          "gol": 0,
+          "quotaMaturata": 4,
+          "amm": 0,
+          "subitiPiazzato": 0,
+          "verifiedGeneric": false,
+          "malusBrt": false,
+          "rossi": 0,
+          "pagaQuota": true,
+          "subitiAzione": 0,
+          "snapshotGiocatore": {
+            "numeroMaglia": 5,
+            "ultimoRuolo": "Centrale",
+            "golSubitiPiazzato": 0,
+            "gol": 0,
+            "golSubitiRigore": 0,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "attivo": true,
+            "golSubitiAzione": 0,
+            "assist": 0,
+            "saldo": 18,
+            "ammonizioni": 0,
+            "nome": "Davide Bayre"
+          },
+          "bonusAttivi": [
+            "bonus_1780919041304",
+            "bonus_1780919270439",
+            "bonus_1781028245748",
+            "bayre_redivivo"
+          ],
+          "sostitutoDa": "",
+          "nome": "Davide Bayre",
+          "subitiRigore": 0,
+          "statoPresenza": "giocato",
+          "verifiedPersonal": false,
+          "assist": 0
+        },
+        {
+          "verifiedGeneric": true,
+          "rossi": 0,
+          "malusBrt": false,
+          "amm": 0,
+          "quotaMaturata": 0,
+          "gol": 0,
+          "subitiPiazzato": 0,
+          "verifiedPersonal": true,
+          "statoPresenza": "assente",
+          "assist": 0,
+          "bonusAttivi": [],
+          "snapshotGiocatore": {
+            "ultimoRuolo": "Portiere",
+            "numeroMaglia": 12,
+            "golSubitiPiazzato": 0,
+            "gol": 1,
+            "golSubitiRigore": 0,
+            "golSubitiAzione": 0,
+            "attivo": true,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "saldo": 1.5,
+            "assist": 0,
+            "nome": "Alberto Garau",
+            "ammonizioni": 0
+          },
+          "subitiAzione": 0,
+          "pagaQuota": false,
+          "subitiRigore": 0,
+          "nome": "Alberto Garau",
+          "sostitutoDa": ""
+        },
+        {
+          "pagaQuota": false,
+          "subitiAzione": 0,
+          "snapshotGiocatore": {
+            "assist": 0,
+            "saldo": 0,
+            "golSubitiAzione": 0,
+            "attivo": true,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "ammonizioni": 0,
+            "nome": "Federico Addis",
+            "golSubitiPiazzato": 0,
+            "ultimoRuolo": "Pivot",
+            "numeroMaglia": 17,
+            "golSubitiRigore": 0,
+            "gol": 0
+          },
+          "bonusAttivi": [],
+          "sostitutoDa": "",
+          "nome": "Federico Addis",
+          "subitiRigore": 0,
+          "statoPresenza": "assente",
+          "verifiedPersonal": true,
+          "assist": 0,
+          "gol": 0,
+          "quotaMaturata": 0,
+          "amm": 0,
+          "subitiPiazzato": 0,
+          "verifiedGeneric": true,
+          "malusBrt": false,
+          "rossi": 0
+        },
+        {
+          "assist": 0,
+          "statoPresenza": "assente",
+          "verifiedPersonal": true,
+          "sostitutoDa": "",
+          "nome": "Mario Conti",
+          "subitiRigore": 0,
+          "pagaQuota": false,
+          "subitiAzione": 0,
+          "snapshotGiocatore": {
+            "ammonizioni": 0,
+            "nome": "Mario Conti",
+            "assist": 3,
+            "saldo": 3.5,
+            "quotaIscrizione": 10,
+            "espulsioni": 0,
+            "attivo": true,
+            "golSubitiAzione": 0,
+            "golSubitiRigore": 0,
+            "gol": 0,
+            "golSubitiPiazzato": 0,
+            "numeroMaglia": 19,
+            "ultimoRuolo": "Laterale"
+          },
+          "bonusAttivi": [],
+          "malusBrt": false,
+          "rossi": 0,
+          "verifiedGeneric": true,
+          "subitiPiazzato": 0,
+          "gol": 0,
+          "quotaMaturata": 0,
+          "amm": 0
+        },
+        {
+          "assist": 0,
+          "verifiedPersonal": true,
+          "statoPresenza": "assente",
+          "nome": "Matteo Scattu",
+          "subitiRigore": 0,
+          "sostitutoDa": "",
+          "snapshotGiocatore": {
+            "ultimoRuolo": "Centrale",
+            "numeroMaglia": 77,
+            "golSubitiPiazzato": 0,
+            "gol": 2,
+            "golSubitiRigore": 0,
+            "golSubitiAzione": 0,
+            "attivo": true,
+            "quotaIscrizione": 10,
+            "espulsioni": 0,
+            "saldo": 0,
+            "assist": 0,
+            "nome": "Matteo Scattu",
+            "ammonizioni": 1
+          },
+          "bonusAttivi": [
+            "gen_social_reaction"
+          ],
+          "pagaQuota": false,
+          "subitiAzione": 0,
+          "rossi": 0,
+          "malusBrt": false,
+          "verifiedGeneric": false,
+          "subitiPiazzato": 0,
+          "quotaMaturata": 0,
+          "amm": 0,
+          "gol": 0
+        },
+        {
+          "malusBrt": false,
+          "rossi": 0,
+          "verifiedGeneric": true,
+          "subitiPiazzato": 0,
+          "gol": 0,
+          "quotaMaturata": 0,
+          "amm": 0,
+          "assist": 0,
+          "statoPresenza": "assente",
+          "verifiedPersonal": true,
+          "sostitutoDa": "",
+          "nome": "Nicola Orlandini",
+          "subitiRigore": 0,
+          "pagaQuota": false,
+          "subitiAzione": 0,
+          "snapshotGiocatore": {
+            "golSubitiRigore": 0,
+            "gol": 0,
+            "golSubitiPiazzato": 0,
+            "ultimoRuolo": "Pivot",
+            "numeroMaglia": 14,
+            "nome": "Nicola Orlandini",
+            "ammonizioni": 0,
+            "saldo": 3.5,
+            "assist": 0,
+            "golSubitiAzione": 0,
+            "attivo": true,
+            "espulsioni": 0,
+            "quotaIscrizione": 10
+          },
+          "bonusAttivi": []
+        },
+        {
+          "verifiedGeneric": false,
+          "rossi": 0,
+          "malusBrt": false,
+          "amm": 0,
+          "quotaMaturata": 0,
+          "gol": 0,
+          "subitiPiazzato": 0,
+          "verifiedPersonal": true,
+          "statoPresenza": "assente",
+          "assist": 0,
+          "bonusAttivi": [
+            "gen_social_adv",
+            "gen_social_motivation",
+            "gen_vecchio_cuore",
+            "gen_porta_tifosa",
+            "bonus_1780919041304",
+            "bonus_1781001237055",
+            "gen_social_reaction"
+          ],
+          "snapshotGiocatore": {
+            "golSubitiPiazzato": 0,
+            "ultimoRuolo": "Laterale",
+            "numeroMaglia": 11,
+            "golSubitiRigore": 0,
+            "gol": 0,
+            "assist": 0,
+            "saldo": 4.5,
+            "golSubitiAzione": 0,
+            "attivo": true,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "ammonizioni": 0,
+            "nome": "Sergio Pippia"
+          },
+          "subitiAzione": 0,
+          "pagaQuota": false,
+          "subitiRigore": 0,
+          "nome": "Sergio Pippia",
+          "sostitutoDa": ""
+        }
+      ],
+      "convocati": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre"
+      ],
+      "stato": "Chiusa",
+      "costo": 40
+    }
+  ],
+  "logs": [
+    {
+      "dettagli": "Creata partita convocazione: Lunedì 1 giugno ore 20:00 - Verderame (Scuri vs Chiari) [Amichevole]\n\n👕 *Scuri*:\nManuel Palmas, Stefano Michele Lauro, Sergio Pippia, Michele Carrone, Spanedda (Esterno)\n\n👕 *Chiari*:\nSalvatore Roberto Pinna, Federico Addis, Marco Scarpellini, Lorenzo Pittiu, Porcella (Esterno)",
+      "importo": "35",
+      "operazione": "Partite",
+      "data": "01/06/2026, 09:25:22"
+    },
+    {
+      "importo": "35",
+      "dettagli": "Creata partita convocazione: Lunedì 1 giugno ore 20:00 - Verderame (Scuri vs Chiari) [Amichevole]\n\n👕 *Scuri*:\nMichele Carrone, Marco Scarpellini, Sergio Pippia, Federico Addis, Porcella (Esterno)\n\n👕 *Chiari*:\nManuel Palmas, Salvatore Roberto Pinna, Lorenzo Pittiu, Stefano Michele Lauro, Spanedda (Esterno)",
+      "operazione": "Partite",
+      "data": "01/06/2026, 13:50:10"
+    },
+    {
+      "data": "01/06/2026, 17:14:22",
+      "operazione": "Partite",
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: Martedì 30 giugno ore 19:13 - Futura Sales (Noi vs Avversari) [Amichevole]\n\n👕 *Noi*:\nManuel Palmas, Marco Scarpellini, Lorenzo Pittiu, Davide Bayre, pinco\n\n👕 *Avversari*:\nSalvatore Roberto Pinna, Michele Carrone, Alberto Garau, Enrico Mulas, pallino"
+    },
+    {
+      "dettagli": "Chiusa partita (Martedì 30 giugno ore 19:13 - Futura Sales (Noi vs Avversari) [Amichevole]\n\n👕 *Noi*:\nManuel Palmas, Marco Scarpellini, Lorenzo Pittiu, Davide Bayre, pinco\n\n👕 *Avversari*:\nSalvatore Roberto Pinna, Michele Carrone, Alberto Garau, Enrico Mulas, pallino), addebitati 0.00€ a 10 giocatori.",
+      "importo": "0",
+      "data": "01/06/2026, 17:23:09",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "data": "01/06/2026, 17:23:24",
+      "operazione": "Partite",
+      "dettagli": "Eliminata definitivamente partita chiusa: Martedì 30 giugno ore 19:13 - Futura Sales (Noi vs Avversari) [Amichevole]\n\n👕 *Noi*:\nManuel Palmas, Marco Scarpellini, Lorenzo Pittiu, Davide Bayre, pinco\n\n👕 *Avversari*:\nSalvatore Roberto Pinna, Michele Carrone, Alberto Garau, Enrico Mulas, pallino",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Ricarica di gruppo effettuata al campo: Federico Addis (4€), Sergio Pippia (5€), Stefano Michele Lauro (10€), Marco Scarpellini (5€), Manuel Palmas (7€), Michele Carrone (4€), Salvatore Roberto Pinna (3.5€)",
+      "importo": "38.50.00",
+      "data": "01/06/2026, 19:15:29",
+      "operazione": "Ricarica Massiva"
+    },
+    {
+      "dettagli": "Ricarica di gruppo effettuata al campo: Lorenzo Pittiu (4€)",
+      "importo": "4.00",
+      "data": "01/06/2026, 19:18:54",
+      "operazione": "Ricarica Massiva"
+    },
+    {
+      "data": "01/06/2026, 19:20:47",
+      "operazione": "Chiusura Partita",
+      "importo": "35",
+      "dettagli": "Chiusa partita (Lunedì 1 giugno ore 20:00 - Verderame (Scuri vs Chiari) [Amichevole]\n\n👕 *Scuri*:\nMichele Carrone, Marco Scarpellini, Sergio Pippia, Federico Addis, Porcella (Esterno)\n\n👕 *Chiari*:\nManuel Palmas, Salvatore Roberto Pinna, Lorenzo Pittiu, Stefano Michele Lauro, Spanedda (Esterno)), addebitati 3.50€ a 10 giocatori."
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Izi Riggee da parte di Lorenzo Pittiu",
+      "data": "01/06/2026, 19:37:58",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Izi rigghi da parte di Marco Scarpellini",
+      "operazione": "Fantacalcetto",
+      "data": "01/06/2026, 19:38:46"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ginger da parte di Michele Carrone",
+      "data": "01/06/2026, 19:40:28",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Proposta di Francesco S.: \"Il Gol di Pinna deve dare il doppio dei ...\"",
+      "importo": "-",
+      "data": "01/06/2026, 19:44:05",
+      "operazione": "Sondaggi/Consigli"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "01/06/2026, 19:44:17",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: FC Arroddu Stuart da parte di Francesco Spanedda",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Chiavo Veronica da parte di Stefano lauro",
+      "data": "01/06/2026, 19:44:24",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Eliminata definitivamente partita chiusa: 03/06/2026 20:00, Seminario vs GLi altri",
+      "importo": "-",
+      "data": "01/06/2026, 19:44:35",
+      "operazione": "Partite"
+    },
+    {
+      "dettagli": "Proposta di Manuel: \"Indatinqi dati sulla pagina fantacalcett...\"",
+      "importo": "-",
+      "data": "01/06/2026, 20:16:36",
+      "operazione": "Sondaggi/Consigli"
+    },
+    {
+      "data": "02/06/2026, 20:44:36",
+      "operazione": "Partite",
+      "dettagli": "Creata partita convocazione: 29/06/2026 01:44, Seminario",
+      "importo": "0"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "02/06/2026, 20:58:14",
+      "importo": "-",
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Ma smettila' di Manuel"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel (CoinEasy residui: 0)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 06:10:54"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel (CoinEasy residui: 0)",
+      "importo": "-",
+      "data": "03/06/2026, 06:12:26",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel (CoinEasy residui: 25)",
+      "importo": "-",
+      "data": "03/06/2026, 09:49:58",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: tgtg da parte di Manuel",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 09:51:03"
+    },
+    {
+      "data": "03/06/2026, 09:56:52",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: tgtg (Manuel)",
+      "importo": "-"
+    },
+    {
+      "data": "03/06/2026, 11:37:09",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ciao da parte di Manuel"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: ciao da parte di manuel",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 12:50:58"
+    },
+    {
+      "data": "03/06/2026, 12:51:25",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Formazione modificata per fanta-squadra 'ciao' di manuel (CoinEasy residui: 0)",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 12:53:49",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'ciao' di manuel (CoinEasy residui: 0)"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'ciao' di manuel (CoinEasy residui: 0)",
+      "importo": "-",
+      "data": "03/06/2026, 12:54:44",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 15:20:58",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Manujjj da parte di Manuel",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Manujjj' di Manuel (CoinEasy residui: 25)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 15:21:26"
+    },
+    {
+      "data": "03/06/2026, 17:16:35",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Jjjjjhhh da parte di Maniel",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Jjjjjhhh' di Maniel (CoinEasy residui: 5)",
+      "importo": "-",
+      "data": "03/06/2026, 17:17:10",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Essegus da parte di Marco",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 17:45:07"
+    },
+    {
+      "data": "03/06/2026, 17:47:58",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Essegus' di Marco (CoinEasy residui: 0)"
+    },
+    {
+      "data": "03/06/2026, 17:51:22",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Formazione modificata per fanta-squadra 'Manujjj' di Manuel (CoinEasy residui: 0)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Manujjj' di Manuel (CoinEasy residui: 0)",
+      "importo": "-",
+      "data": "03/06/2026, 17:51:40",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'ciao' di manuel (CoinEasy residui: 35)",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 20:32:44"
+    },
+    {
+      "dettagli": "Chiusa partita (29/06/2026 01:44, Seminario), addebitati 0.00€ a 9 giocatori.",
+      "importo": "0",
+      "data": "03/06/2026, 21:18:13",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 21:18:31",
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 29/06/2026 01:44, Seminario"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Bella Balla da parte di Roberto",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 21:26:27"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: FC Ma che Cazzo ne so da parte di Francesco Spanedda",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 21:58:36"
+    },
+    {
+      "dettagli": "Eliminata definitivamente partita chiusa: 29/06/2026 01:44, Seminario",
+      "importo": "-",
+      "operazione": "Partite",
+      "data": "03/06/2026, 22:01:53"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Balotelli fc da parte di Stefano lauro",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:07:46"
+    },
+    {
+      "data": "03/06/2026, 22:14:52",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Formazione modificata per fanta-squadra 'Balotelli fc' di Stefano lauro (CoinEasy residui: 1)",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:38:22",
+      "dettagli": "Fantasquadra rimossa: Jjjjjhhh (Maniel)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Fantasquadra rimossa: Manujjj (Manuel)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:38:27"
+    },
+    {
+      "data": "03/06/2026, 22:38:35",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: Essegus (Marco)",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: ciao (manuel)",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:38:40"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Izi rigghi (Marco Scarpellini)",
+      "data": "03/06/2026, 22:44:51",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "03/06/2026, 22:44:55",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: Bella Balla (Roberto)",
+      "importo": "-"
+    },
+    {
+      "data": "03/06/2026, 22:44:58",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: FC Ma che Cazzo ne so (Francesco Spanedda)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Fantasquadra rimossa: Balotelli fc (Stefano lauro)",
+      "importo": "-",
+      "data": "03/06/2026, 22:45:02",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "03/06/2026, 22:49:36",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma smettila da parte di Manuel"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel (Izycoin residui: 0)",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:51:52"
+    },
+    {
+      "dettagli": "Fantasquadra rimossa: Ma smettila (Manuel)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:57:40"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: ciao (manuel)",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:57:44"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:57:47",
+      "dettagli": "Fantasquadra rimossa: Essegus (Marco)",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Manujjj (Manuel)",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:57:50"
+    },
+    {
+      "data": "03/06/2026, 22:57:53",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Jjjjjhhh (Maniel)"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:57:57",
+      "dettagli": "Fantasquadra rimossa: Izi rigghi (Marco Scarpellini)",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Izi rigghi (Marco Scarpellini)",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 23:23:49"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 23:23:54",
+      "dettagli": "Fantasquadra rimossa: Jjjjjhhh (Maniel)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Fantasquadra rimossa: Manujjj (Manuel)",
+      "importo": "-",
+      "data": "03/06/2026, 23:23:57",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 23:24:02",
+      "dettagli": "Fantasquadra rimossa: Essegus (Marco)",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 23:24:05",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: ciao (manuel)"
+    },
+    {
+      "dettagli": "Fantasquadra rimossa: Ma smettila (Manuel)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 23:24:09"
+    },
+    {
+      "data": "03/06/2026, 23:24:43",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma smettila da parte di Manuel Palmas",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "04/06/2026, 05:04:21",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel Palmas (Izycoin residui: 0)"
+    },
+    {
+      "data": "04/06/2026, 08:24:16",
+      "operazione": "Partite",
+      "dettagli": "Creata partita convocazione: 04/06/2026 12:00, Futura Sales vs Prova",
+      "importo": "0"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Bella Balla da parte di Roberto Pinna",
+      "data": "04/06/2026, 08:50:44",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "04/06/2026, 09:22:36",
+      "operazione": "Chiusura Partita",
+      "dettagli": "Chiusa partita (04/06/2026 12:00, Futura Sales vs Prova), addebitati 0.00€ a 9 giocatori.",
+      "importo": "0"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "04/06/2026, 09:22:40",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 04/06/2026 12:00, Futura Sales vs Prova",
+      "importo": "-"
+    },
+    {
+      "operazione": "Partite",
+      "data": "04/06/2026, 09:23:15",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 04/06/2026 12:00, Futura Sales vs Prova",
+      "importo": "-"
+    },
+    {
+      "data": "04/06/2026, 09:35:12",
+      "operazione": "Chiusura Partita",
+      "importo": "0",
+      "dettagli": "Chiusa partita (04/06/2026 12:00, Futura Sales vs Prova), addebitati 0.00€ a 9 giocatori."
+    },
+    {
+      "data": "04/06/2026, 09:35:16",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 04/06/2026 12:00, Futura Sales vs Prova",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 04/06/2026 12:00, Futura Sales vs Prova",
+      "operazione": "Partite",
+      "data": "04/06/2026, 09:38:05"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Chiusa partita (04/06/2026 12:00, Futura Sales vs Prova), addebitati 0.00€ a 8 giocatori.",
+      "data": "04/06/2026, 09:38:55",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 04/06/2026 12:00, Futura Sales vs Prova",
+      "importo": "-",
+      "data": "04/06/2026, 09:38:56",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 04/06/2026 12:00, Futura Sales vs Prova",
+      "data": "04/06/2026, 09:40:48",
+      "operazione": "Partite"
+    },
+    {
+      "data": "04/06/2026, 09:44:38",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ginger da parte di Nikele"
+    },
+    {
+      "operazione": "Chiusura Partita",
+      "data": "04/06/2026, 09:47:42",
+      "importo": "0",
+      "dettagli": "Chiusa partita (04/06/2026 12:00, Futura Sales vs Prova), addebitati 0.00€ a 9 giocatori."
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 04/06/2026 12:00, Futura Sales vs Prova",
+      "data": "04/06/2026, 09:47:43",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "04/06/2026, 09:48:06",
+      "operazione": "Partite",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 04/06/2026 12:00, Futura Sales vs Prova",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Chiusa partita (04/06/2026 12:00, Futura Sales vs Prova), addebitati 0.00€ a 9 giocatori.",
+      "importo": "0",
+      "data": "04/06/2026, 09:48:21",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "data": "04/06/2026, 09:48:22",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 04/06/2026 12:00, Futura Sales vs Prova",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel Palmas (Izycoin residui: 2)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "04/06/2026, 10:11:51"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel Palmas (Izycoin residui: 2)",
+      "importo": "-",
+      "data": "04/06/2026, 10:26:29",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "04/06/2026, 19:15:09",
+      "operazione": "Partite",
+      "dettagli": "Eliminata definitivamente partita chiusa: 04/06/2026 12:00, Futura Sales vs Prova",
+      "importo": "-"
+    },
+    {
+      "data": "04/06/2026, 19:17:14",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: Ma smettila (Manuel Palmas)",
+      "importo": "-"
+    },
+    {
+      "data": "04/06/2026, 23:47:26",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: ma smettila da parte di Maniel",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: ma smettila (Maniel)",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 08:25:52"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Manuel da parte di manuel",
+      "data": "05/06/2026, 08:27:02",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "05/06/2026, 08:34:59",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: Ma Smettiamola (manuel)",
+      "importo": "-"
+    },
+    {
+      "data": "05/06/2026, 08:35:46",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma smettiamola da parte di Manuel"
+    },
+    {
+      "operazione": "Partite",
+      "data": "05/06/2026, 08:45:12",
+      "importo": "45",
+      "dettagli": "Creata partita convocazione: 09/06/2026 20:45, Le Serre vs boh"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 0)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 08:47:58"
+    },
+    {
+      "importo": "45",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs boh), addebitati 5.63€ a 8 giocatori.",
+      "operazione": "Chiusura Partita",
+      "data": "05/06/2026, 08:53:39"
+    },
+    {
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 20:45, Le Serre vs boh",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 08:53:47"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Eliminata definitivamente partita chiusa: 09/06/2026 20:45, Le Serre vs boh",
+      "data": "05/06/2026, 09:12:01",
+      "operazione": "Partite"
+    },
+    {
+      "operazione": "Partite",
+      "data": "05/06/2026, 11:06:18",
+      "dettagli": "Creata partita convocazione: 09/06/2026 21:04, Le Serre",
+      "importo": "90"
+    },
+    {
+      "operazione": "Chiusura Partita",
+      "data": "05/06/2026, 11:12:48",
+      "dettagli": "Chiusa partita (09/06/2026 21:04, Le Serre), addebitati 5.44€ a 9 giocatori.",
+      "importo": "49"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 11:12:52",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 21:04, Le Serre",
+      "importo": "-"
+    },
+    {
+      "operazione": "Partite",
+      "data": "05/06/2026, 11:15:17",
+      "dettagli": "Eliminata definitivamente partita chiusa: 09/06/2026 21:04, Le Serre",
+      "importo": "-"
+    },
+    {
+      "data": "05/06/2026, 11:28:00",
+      "operazione": "Sondaggi/Consigli",
+      "dettagli": "Proposta di ff: \"ff\"",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 11:29:03",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 2)"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Easy Epurigging da parte di Lorenzo Pittiu",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 12:43:38"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 12:45:15",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: BellaEstSaMinigonna da parte di Valentina",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 12:50:58",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ginger' di Nikele (Izycoin residui: 1)",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Proposta di Alfio: \"Rendi visibile la password\"",
+      "data": "05/06/2026, 13:08:48",
+      "operazione": "Sondaggi/Consigli"
+    },
+    {
+      "data": "05/06/2026, 13:09:10",
+      "operazione": "Sondaggi/Consigli",
+      "dettagli": "Proposta di Rupert: \"Tvb\"",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 13:11:09",
+      "dettagli": "Formazione modificata per fanta-squadra 'Izi ricchi' di Marco Scarpellini (Izycoin residui: 7)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Isy Resin da parte di Enrico Mulas",
+      "importo": "-",
+      "data": "05/06/2026, 13:14:44",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 13:27:12",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Easy Epurigging (Lorenzo Pittiu)"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Isi Epurigging da parte di Lollo",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 13:29:03"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Izi EpuRigging da parte di McLollo",
+      "importo": "-",
+      "data": "05/06/2026, 13:43:59",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Izi EpuRigging' di McLollo (Izycoin residui: 2)",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 13:44:28"
+    },
+    {
+      "dettagli": "Fantasquadra rimossa: Isi Epurigging (Lollo)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 13:45:37"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Fc Balotelli da parte di Stefano",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 13:54:43"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 13:57:17",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Fc Balotelli' di Stefano (Izycoin residui: 1)"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 14:12:33",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Isy Resin' di Enrico Mulas (Izycoin residui: 1)"
+    },
+    {
+      "data": "05/06/2026, 14:59:55",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: FrEndY da parte di Erika"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Prova' di Manuel (Izycoin residui: 4)",
+      "data": "05/06/2026, 17:31:55",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "05/06/2026, 17:35:23",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: F.C Gerry da parte di Eleonora"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 17:39:45",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 2)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 2)",
+      "importo": "-",
+      "data": "05/06/2026, 17:39:55",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "05/06/2026, 17:48:45",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Crazy Rigging da parte di Geggio"
+    },
+    {
+      "data": "05/06/2026, 17:49:27",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'F.C Gerry' di Eleonora (Izycoin residui: 1)"
+    },
+    {
+      "data": "05/06/2026, 17:58:33",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Crazy Rigging' di Geggio (Izycoin residui: 0)"
+    },
+    {
+      "data": "05/06/2026, 18:10:38",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: Prova (Manuel)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "data": "05/06/2026, 18:21:18",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "05/06/2026, 18:24:14",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 18:36:23",
+      "dettagli": "Fantasquadra rimossa: FrEndY (Erika)",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: FREndY da parte di Erika",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 18:36:50"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'FREndY' di Erika (Izycoin residui: 1)",
+      "importo": "-",
+      "data": "05/06/2026, 18:40:18",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "05/06/2026, 18:50:03",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: RealPittiu F.C da parte di Florentino Perez"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'RealPittiu F.C' di Florentino Perez (Izycoin residui: 1)",
+      "data": "05/06/2026, 19:41:41",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "05/06/2026, 20:17:19",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Formazione modificata per fanta-squadra 'Pescaramanzia' di Matteo Scattu (Izycoin residui: 4)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Signori, 5 minuti di recupero 🖐️ da parte di Mhet84",
+      "importo": "-",
+      "data": "05/06/2026, 23:10:19",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Chiusa partita (08/06/2026 04:44, Verderame vs Prova), addebitati ~0.00€ a 10 giocatori.",
+      "importo": "0",
+      "operazione": "Chiusura Partita",
+      "data": "05/06/2026, 23:13:41"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 08/06/2026 04:44, Verderame vs Prova",
+      "data": "05/06/2026, 23:13:59",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "05/06/2026, 23:15:39",
+      "operazione": "Partite",
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: 04/07/2026 03:14, Futura Sales vs prova  2"
+    },
+    {
+      "operazione": "Chiusura Partita",
+      "data": "05/06/2026, 23:17:19",
+      "dettagli": "Chiusa partita (04/07/2026 03:14, Futura Sales vs prova  2), addebitati ~0.00€ a 10 giocatori.",
+      "importo": "0"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 23:17:37",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 04/07/2026 03:14, Futura Sales vs prova  2",
+      "importo": "-"
+    },
+    {
+      "data": "05/06/2026, 23:19:10",
+      "operazione": "Partite",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 08/06/2026 04:44, Verderame vs Prova",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 3)",
+      "data": "05/06/2026, 23:21:01",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 04/07/2026 03:14, Futura Sales vs prova  2",
+      "data": "05/06/2026, 23:34:06",
+      "operazione": "Partite"
+    },
+    {
+      "data": "05/06/2026, 23:34:29",
+      "operazione": "Chiusura Partita",
+      "dettagli": "Chiusa partita (08/06/2026 04:44, Verderame vs Prova), addebitati ~0.00€ a 10 giocatori.",
+      "importo": "0"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 23:34:31",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 08/06/2026 04:44, Verderame vs Prova",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 3)",
+      "importo": "-",
+      "data": "05/06/2026, 23:38:29",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 08/06/2026 04:44, Verderame vs Prova",
+      "importo": "-",
+      "operazione": "Partite",
+      "data": "06/06/2026, 00:22:30"
+    },
+    {
+      "operazione": "Chiusura Partita",
+      "data": "06/06/2026, 00:22:37",
+      "dettagli": "Chiusa partita (08/06/2026 04:44, Verderame vs Prova), addebitati ~0.00€ a 10 giocatori.",
+      "importo": "0"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 08/06/2026 04:44, Verderame vs Prova",
+      "data": "06/06/2026, 00:22:40",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "06/06/2026, 11:38:40",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Mai Una Gioia FC da parte di Alice",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Mai Una Gioia FC' di Alice (Izycoin residui: 2)",
+      "data": "06/06/2026, 11:49:04",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Eliminata definitivamente partita chiusa: 08/06/2026 04:44, Verderame vs Prova",
+      "importo": "-",
+      "operazione": "Partite",
+      "data": "06/06/2026, 15:11:37"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Crazy Rigging (Geggio)",
+      "operazione": "Fantacalcetto",
+      "data": "06/06/2026, 15:13:59"
+    },
+    {
+      "data": "06/06/2026, 15:17:05",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Crazy Rigging (Geggio)"
+    },
+    {
+      "data": "06/06/2026, 15:17:52",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Eliminata definitivamente partita chiusa: 08/06/2026 04:44, Verderame vs Prova"
+    },
+    {
+      "dettagli": "Fantasquadra rimossa: Crazy Rigging (Geggio)",
+      "importo": "-",
+      "data": "06/06/2026, 15:18:49",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "06/06/2026, 15:20:09",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 04/07/2026 03:14, Futura Sales vs prova  2"
+    },
+    {
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 08/06/2026 04:44, Verderame vs Prova",
+      "importo": "-",
+      "data": "06/06/2026, 15:20:22",
+      "operazione": "Partite"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 08/06/2026 04:44, Verderame vs Prova",
+      "operazione": "Partite",
+      "data": "06/06/2026, 15:20:31"
+    },
+    {
+      "data": "06/06/2026, 15:35:29",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: Crazy Rigging (Geggio)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Fantasquadra rimossa: Crazy Rigging (Geggio)",
+      "importo": "-",
+      "data": "06/06/2026, 17:04:00",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Annullata partita aperta: 04/07/2026 03:14, Futura Sales vs prova  2",
+      "importo": "-",
+      "data": "06/06/2026, 17:06:13",
+      "operazione": "Partite"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Eliminata definitivamente partita chiusa: 08/06/2026 04:44, Verderame vs Prova",
+      "operazione": "Partite",
+      "data": "06/06/2026, 17:06:26"
+    },
+    {
+      "data": "06/06/2026, 17:07:27",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 04/07/2026 03:14, Futura Sales vs prova  2"
+    },
+    {
+      "dettagli": "Annullata partita aperta: 04/07/2026 03:14, Futura Sales vs prova  2",
+      "importo": "-",
+      "data": "07/06/2026, 10:03:05",
+      "operazione": "Partite"
+    },
+    {
+      "data": "07/06/2026, 10:03:15",
+      "operazione": "Partite",
+      "dettagli": "Eliminata definitivamente partita chiusa: 08/06/2026 04:44, Verderame vs Prova",
+      "importo": "-"
+    },
+    {
+      "data": "07/06/2026, 10:04:21",
+      "operazione": "Partite",
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: 17/06/2026 12:07, Futura Sales"
+    },
+    {
+      "dettagli": "Annullata partita aperta: 04/07/2026 03:14, Futura Sales vs prova  2",
+      "importo": "-",
+      "data": "07/06/2026, 10:18:18",
+      "operazione": "Partite"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 17/06/2026 12:07, Futura Sales",
+      "data": "07/06/2026, 10:18:30",
+      "operazione": "Partite"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Eliminata definitivamente partita chiusa: 08/06/2026 04:44, Verderame vs Prova",
+      "data": "07/06/2026, 10:18:52",
+      "operazione": "Partite"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: 24/06/2026 16:32, Le Serre vs prova",
+      "data": "07/06/2026, 10:32:45",
+      "operazione": "Partite"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Chiusa partita (24/06/2026 16:32, Le Serre vs prova), addebitati ~0.00€ a 10 giocatori.",
+      "data": "07/06/2026, 10:37:36",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 24/06/2026 16:32, Le Serre vs prova",
+      "data": "07/06/2026, 10:37:39",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Partite",
+      "data": "07/06/2026, 12:27:09",
+      "importo": "-",
+      "dettagli": "Eliminata definitivamente partita chiusa: 24/06/2026 16:32, Le Serre vs prova"
+    },
+    {
+      "data": "07/06/2026, 13:28:24",
+      "operazione": "Gestione Bonus/Malus",
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database."
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "data": "07/06/2026, 13:28:38",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "data": "07/06/2026, 13:29:23",
+      "operazione": "Partite",
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: 16/06/2026 19:28, Futura Sales vs rffff"
+    },
+    {
+      "dettagli": "Chiusa partita (16/06/2026 19:28, Futura Sales vs rffff), addebitati ~0.00€ a 10 giocatori.",
+      "importo": "0",
+      "data": "07/06/2026, 13:31:22",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 16/06/2026 19:28, Futura Sales vs rffff",
+      "operazione": "Fantacalcetto",
+      "data": "07/06/2026, 13:31:24"
+    },
+    {
+      "dettagli": "Eliminata definitivamente partita chiusa: 16/06/2026 19:28, Futura Sales vs rffff",
+      "importo": "-",
+      "data": "07/06/2026, 13:31:43",
+      "operazione": "Partite"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "07/06/2026, 14:12:56",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "07/06/2026, 14:18:02"
+    },
+    {
+      "data": "07/06/2026, 14:18:42",
+      "operazione": "Gestione Bonus/Malus",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "07/06/2026, 14:19:05"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "data": "07/06/2026, 14:19:40",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "07/06/2026, 14:19:47",
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database."
+    },
+    {
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "07/06/2026, 14:20:46"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "07/06/2026, 14:25:08"
+    },
+    {
+      "data": "07/06/2026, 16:23:40",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: A da parte di A",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "07/06/2026, 16:27:47",
+      "dettagli": "Formazione modificata per fanta-squadra 'A' di A (Izycoin residui: 4)",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 1)",
+      "data": "07/06/2026, 19:11:28",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 1)",
+      "importo": "-",
+      "data": "07/06/2026, 19:15:35",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "07/06/2026, 19:16:28",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 2)"
+    },
+    {
+      "data": "07/06/2026, 20:16:12",
+      "operazione": "Gestione Bonus/Malus",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Signori, 5 minuti di recupero 🖐️' di Mhet84 (Izycoin residui: 0)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "07/06/2026, 20:22:24"
+    },
+    {
+      "dettagli": "Creata partita convocazione: 22/06/2026 23:58, Le Serre",
+      "importo": "0",
+      "operazione": "Partite",
+      "data": "07/06/2026, 20:59:13"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Isy Resin' di Enrico Mulas (Izycoin residui: 1)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "07/06/2026, 20:59:56"
+    },
+    {
+      "dettagli": "Proposta di per aigoogle: \"sezione ricarica, adesso c'è un menu a t...\"",
+      "importo": "-",
+      "data": "07/06/2026, 21:38:12",
+      "operazione": "Sondaggi/Consigli"
+    },
+    {
+      "data": "08/06/2026, 08:46:51",
+      "operazione": "Partite",
+      "importo": "40",
+      "dettagli": "Creata partita convocazione: 09/06/2026 20:45, Le Serre vs SOS Auto"
+    },
+    {
+      "dettagli": "Aggiunto giocatore: Matteo Cabras",
+      "importo": "-",
+      "data": "08/06/2026, 08:53:34",
+      "operazione": "Rosa"
+    },
+    {
+      "operazione": "Rosa",
+      "data": "08/06/2026, 08:54:57",
+      "importo": "-",
+      "dettagli": "Aggiunto giocatore: Marco Berretta"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 22/06/2026 23:58, Le Serre",
+      "data": "08/06/2026, 09:26:22",
+      "operazione": "Partite"
+    },
+    {
+      "data": "08/06/2026, 11:33:16",
+      "operazione": "Gestione Bonus/Malus",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 2)",
+      "data": "08/06/2026, 11:50:55",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "data": "08/06/2026, 11:56:28",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "08/06/2026, 12:08:27",
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database."
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: I Buzzurri da parte di AronC",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 12:24:48"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 12:30:01",
+      "dettagli": "Formazione modificata per fanta-squadra 'I Buzzurri' di AronC (Izycoin residui: 2)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'I Buzzurri' di AronC (Izycoin residui: 2)",
+      "importo": "-",
+      "data": "08/06/2026, 12:30:38",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Pescaramanzia' di Matteo Scattu (Izycoin residui: 0)",
+      "importo": "-",
+      "data": "08/06/2026, 12:43:59",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Pescaramanzia' di Matteo Scattu (Izycoin residui: 0)",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 12:44:18"
+    },
+    {
+      "data": "08/06/2026, 13:20:35",
+      "operazione": "Gestione Bonus/Malus",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Crazy Rigging' di Geggio (Izycoin residui: 2)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 13:23:15"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Crazy Rigging' di Geggio (Izycoin residui: 1)",
+      "data": "08/06/2026, 13:25:01",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 13:55:18",
+      "dettagli": "Formazione modificata per fanta-squadra 'Bella Balla' di Roberto Pinna (Izycoin residui: 1)",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Izi EpuRigging' di McLollo (Izycoin residui: 1)",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 14:21:15"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 15:47:45",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Barroso United da parte di Pittura Christian"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Barrosu United da parte di Pittiu Christian",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 15:49:39"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Signori, 5 minuti di recupero 🖐️' di Mhet84 (Izycoin residui: 0)",
+      "importo": "-",
+      "data": "08/06/2026, 18:41:19",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'BellaEstSaMinigonna' di Valentina (Izycoin residui: 0)",
+      "data": "08/06/2026, 18:42:23",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Barroso United (Pittura Christian)",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 19:17:56"
+    },
+    {
+      "data": "08/06/2026, 19:38:02",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Barrosu United' di Pittiu Christian (Izycoin residui: 2)"
+    },
+    {
+      "data": "08/06/2026, 19:57:57",
+      "operazione": "Gestione Bonus/Malus",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Izyraighing da parte di Fabrizio",
+      "importo": "-",
+      "data": "08/06/2026, 20:00:57",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Izyraighing' di Fabrizio (Izycoin residui: 1)",
+      "importo": "-",
+      "data": "08/06/2026, 20:07:52",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "08/06/2026, 20:38:33",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "data": "08/06/2026, 20:52:43",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "data": "08/06/2026, 21:03:22",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Formazione modificata per fanta-squadra 'Bella Balla' di Roberto Pinna (Izycoin residui: 1)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Bella Balla' di Roberto Pinna (Izycoin residui: 1)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 21:05:51"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: I Leggendari da parte di La Leggenda",
+      "data": "08/06/2026, 21:07:25",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Hsaccio da parte di Frank",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 21:14:29"
+    },
+    {
+      "data": "08/06/2026, 21:15:36",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'I Leggendari' di La Leggenda (Izycoin residui: 1)"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Palmasm82@gmail.com da parte di Gghg",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 21:24:54"
+    },
+    {
+      "data": "08/06/2026, 21:25:41",
+      "operazione": "Sondaggi/Consigli",
+      "importo": "-",
+      "dettagli": "Proposta di Essegua: \"Frocio\""
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Hsaccio' di Frank (Izycoin residui: 0)",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 21:27:16"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 21:27:54",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: EasyScoring da parte di G Matt"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'EasyScoring' di G Matt (Izycoin residui: 1)",
+      "data": "08/06/2026, 21:31:30",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "08/06/2026, 22:44:18",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 2)",
+      "importo": "-"
+    },
+    {
+      "data": "09/06/2026, 07:12:09",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 2)",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "09/06/2026, 10:04:43",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Loceri da parte di Alessandro Palmas"
+    },
+    {
+      "importo": "10",
+      "dettagli": "Dividi spesa 'Assunzione allenatori' (10€), addebitati ~0.62€ a 16 persone",
+      "operazione": "Spesa Condivisa",
+      "data": "09/06/2026, 10:08:25"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "09/06/2026, 10:09:05",
+      "dettagli": "Formazione modificata per fanta-squadra 'Loceri' di Alessandro Palmas (Izycoin residui: 0)",
+      "importo": "-"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "09/06/2026, 10:22:17",
+      "importo": "5.18",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Alberto Garau (0.4€), Enrico Mulas (0.4€), Fabrizio Alimonda (0.4€), Giampaolo Mattana (0.4€), Lorenzo Pittiu (0.4€), Manuel Palmas (0.38€), Marco Scarpellini (0.4€), Mario Conti (0.4€), Michele Carrone (0.4€), Nicola Orlandini (0.4€), Salvatore Roberto Pinna (0.4€), Sergio Pippia (0.4€), Stefano Michele Lauro (0.4€)"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "09/06/2026, 10:43:07"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "09/06/2026, 13:04:52",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 2)",
+      "importo": "-"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "09/06/2026, 13:20:39",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "09/06/2026, 14:45:10"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Signori, 5 minuti di recupero 🖐️' di Mhet84 (Izycoin residui: 0)",
+      "importo": "-",
+      "data": "09/06/2026, 15:31:08",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "09/06/2026, 17:31:23",
+      "importo": "20.00",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Salvatore Roberto Pinna (20€)"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "data": "09/06/2026, 18:05:24",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "09/06/2026, 18:10:46"
+    },
+    {
+      "data": "09/06/2026, 18:14:15",
+      "operazione": "Gestione Bonus/Malus",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "09/06/2026, 18:46:44",
+      "importo": "20.00",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Lorenzo Pittiu (20€)"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "09/06/2026, 18:53:34",
+      "importo": "5.00",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Giampaolo Mattana (5€)"
+    },
+    {
+      "data": "09/06/2026, 18:55:04",
+      "operazione": "Ricarica Massiva",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Marco Scarpellini (20€)",
+      "importo": "20.00"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "09/06/2026, 18:55:59",
+      "importo": "5.00",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Enrico Mulas (5€)"
+    },
+    {
+      "importo": "5.00",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Michele Carrone (5€)",
+      "operazione": "Ricarica Massiva",
+      "data": "09/06/2026, 18:56:32"
+    },
+    {
+      "data": "09/06/2026, 20:52:19",
+      "operazione": "Ricarica Massiva",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Davide Bayre (10€)",
+      "importo": "10.00"
+    },
+    {
+      "importo": "5.00",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Manuel Palmas (5€)",
+      "operazione": "Ricarica Massiva",
+      "data": "09/06/2026, 21:27:37"
+    },
+    {
+      "data": "10/06/2026, 07:16:14",
+      "operazione": "Gestione Bonus/Malus",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "operazione": "Chiusura Partita",
+      "data": "10/06/2026, 08:54:27",
+      "importo": "40",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori."
+    },
+    {
+      "data": "10/06/2026, 08:55:10",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "importo": "-"
+    },
+    {
+      "data": "10/06/2026, 08:56:08",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Hard Rigging da parte di Ali",
+      "importo": "-"
+    },
+    {
+      "data": "10/06/2026, 10:28:00",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Hard Rigging (Ali)",
+      "operazione": "Fantacalcetto",
+      "data": "10/06/2026, 10:53:05"
+    },
+    {
+      "importo": "40",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "operazione": "Chiusura Partita",
+      "data": "10/06/2026, 11:18:59"
+    },
+    {
+      "data": "10/06/2026, 12:00:52",
+      "operazione": "Partite",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "importo": "-"
+    },
+    {
+      "importo": "40",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "operazione": "Chiusura Partita",
+      "data": "10/06/2026, 14:46:02"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "operazione": "Fantacalcetto",
+      "data": "10/06/2026, 14:46:16"
+    },
+    {
+      "data": "10/06/2026, 15:24:28",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto"
+    },
+    {
+      "operazione": "Chiusura Partita",
+      "data": "10/06/2026, 15:46:48",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "importo": "40"
+    },
+    {
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "importo": "-",
+      "data": "10/06/2026, 15:46:51",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "10/06/2026, 15:49:29",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto"
+    },
+    {
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "importo": "40",
+      "data": "10/06/2026, 16:06:09",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "operazione": "Fantacalcetto",
+      "data": "10/06/2026, 16:06:11"
+    },
+    {
+      "data": "10/06/2026, 16:33:59",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto"
+    },
+    {
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "importo": "40",
+      "operazione": "Chiusura Partita",
+      "data": "10/06/2026, 16:34:12"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "operazione": "Fantacalcetto",
+      "data": "10/06/2026, 16:34:15"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "operazione": "Partite",
+      "data": "10/06/2026, 16:44:15"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "10/06/2026, 17:25:16",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "10/06/2026, 17:25:24",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "operazione": "Chiusura Partita",
+      "data": "10/06/2026, 17:25:42",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "importo": "40"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "data": "10/06/2026, 17:25:44",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "10/06/2026, 17:26:40"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "10/06/2026, 17:28:39",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "data": "10/06/2026, 17:35:49",
+      "operazione": "Gestione Bonus/Malus",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "operazione": "Partite",
+      "data": "10/06/2026, 17:36:55",
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto"
+    },
+    {
+      "importo": "40",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "operazione": "Chiusura Partita",
+      "data": "10/06/2026, 17:38:03"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "10/06/2026, 17:38:06",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "10/06/2026, 17:38:39"
+    },
+    {
+      "data": "10/06/2026, 17:39:18",
+      "operazione": "Gestione Bonus/Malus",
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database."
+    },
+    {
+      "data": "11/06/2026, 05:25:53",
+      "operazione": "Gestione Bonus/Malus",
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database."
+    },
+    {
+      "importo": "40",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "operazione": "Chiusura Partita",
+      "data": "11/06/2026, 11:12:45"
+    },
+    {
+      "data": "11/06/2026, 11:17:01",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Hard Rigging da parte di Alì"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Hard Rigging' di Alì (Izycoin residui: 0)",
+      "operazione": "Fantacalcetto",
+      "data": "11/06/2026, 11:20:48"
+    },
+    {
+      "operazione": "Partite",
+      "data": "11/06/2026, 13:01:20",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "importo": "-"
+    },
+    {
+      "data": "11/06/2026, 13:02:33",
+      "operazione": "Chiusura Partita",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "importo": "40"
+    },
+    {
+      "data": "11/06/2026, 13:11:21",
+      "operazione": "Partite",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "importo": "-"
+    },
+    {
+      "importo": "40",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "data": "11/06/2026, 13:11:56",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "11/06/2026, 13:22:32",
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database."
+    },
+    {
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "operazione": "Partite",
+      "data": "11/06/2026, 13:30:29"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "data": "11/06/2026, 13:36:05",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "data": "11/06/2026, 13:40:30",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "operazione": "Chiusura Partita",
+      "data": "11/06/2026, 13:44:24",
+      "importo": "40",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori."
+    },
+    {
+      "data": "11/06/2026, 13:45:04",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto"
+    },
+    {
+      "data": "11/06/2026, 13:45:55",
+      "operazione": "Gestione Bonus/Malus",
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database."
+    },
+    {
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "importo": "40",
+      "operazione": "Chiusura Partita",
+      "data": "11/06/2026, 13:46:32"
+    },
+    {
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "importo": "-",
+      "data": "11/06/2026, 13:51:37",
+      "operazione": "Partite"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "data": "11/06/2026, 13:53:17",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "data": "11/06/2026, 14:36:03",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "importo": "40",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "operazione": "Chiusura Partita",
+      "data": "11/06/2026, 14:37:45"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Modificati dati per: Manuel Palmas",
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.20.18"
+    },
+    {
+      "dettagli": "Giocatore Manuel Palmas impostato come: Attivato",
+      "importo": "-",
+      "data": "16/05/2026 7.20.41",
+      "operazione": "Stato Giocatore"
+    },
+    {
+      "dettagli": "Modificati dati per: Il migliore Salvatore Roberto Pinna",
+      "importo": "0",
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.21.03"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Modificati dati per: 10. Marco Scarpellini",
+      "data": "16/05/2026 7.21.23",
+      "operazione": "Modifica Rosa"
+    },
+    {
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.21.40",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 20. Michele Carrone"
+    },
+    {
+      "data": "16/05/2026 7.22.14",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 13. Enrico Mulas"
+    },
+    {
+      "data": "16/05/2026 7.22.32",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 5. Davide Bayre"
+    },
+    {
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.22.49",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 12. Alberto Garau"
+    },
+    {
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.23.12",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 21. Lorenzo Pittiu"
+    },
+    {
+      "data": "16/05/2026 7.23.32",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Manuel Palmas"
+    },
+    {
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.24.09",
+      "dettagli": "Modificati dati per: 19. Mario Conti",
+      "importo": "0"
+    },
+    {
+      "data": "16/05/2026 7.25.14",
+      "operazione": "Modifica Rosa",
+      "dettagli": "Modificati dati per: 11. Sergio Pippia",
+      "importo": "0"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Modificati dati per: 30. Giampaolo Mattana",
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.25.32"
+    },
+    {
+      "dettagli": "Modificati dati per: 96. Fabrizio Alimonda",
+      "importo": "0",
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.25.54"
+    },
+    {
+      "dettagli": "Modificati dati per: 77. Matteo Scattu",
+      "importo": "0",
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.26.11"
+    },
+    {
+      "data": "16/05/2026 7.26.24",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 45. Stefano Michele Lauro"
+    },
+    {
+      "dettagli": "Modificati dati per: 17. Federico Addis",
+      "importo": "0",
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.26.42"
+    },
+    {
+      "data": "16/05/2026 7.26.53",
+      "operazione": "Quota Iscrizione",
+      "dettagli": "Versamento iscrizione da: Davide Bayre",
+      "importo": "10"
+    },
+    {
+      "dettagli": "Versamento iscrizione da: Salvatore Roberto Pinna",
+      "importo": "10",
+      "data": "16/05/2026 7.27.00",
+      "operazione": "Quota Iscrizione"
+    },
+    {
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.27.08",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Marco Scarpellini"
+    },
+    {
+      "dettagli": "Versamento iscrizione da: Sergio Pippia",
+      "importo": "10",
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.27.20"
+    },
+    {
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Alberto Garau",
+      "data": "16/05/2026 7.27.29",
+      "operazione": "Quota Iscrizione"
+    },
+    {
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.27.37",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Enrico Mulas"
+    },
+    {
+      "dettagli": "Versamento iscrizione da: Federico Addis",
+      "importo": "10",
+      "data": "16/05/2026 7.27.44",
+      "operazione": "Quota Iscrizione"
+    },
+    {
+      "dettagli": "Versamento iscrizione da: Mario Conti",
+      "importo": "10",
+      "data": "16/05/2026 7.27.52",
+      "operazione": "Quota Iscrizione"
+    },
+    {
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.28.02",
+      "dettagli": "Versamento iscrizione da: Michele Carrone",
+      "importo": "10"
+    },
+    {
+      "dettagli": "Versamento iscrizione da: Lorenzo Pittiu",
+      "importo": "10",
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.28.09"
+    },
+    {
+      "dettagli": "Versamento iscrizione da: Giampaolo Mattana",
+      "importo": "10",
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.28.29"
+    },
+    {
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Stefano Michele Lauro",
+      "data": "16/05/2026 7.28.37",
+      "operazione": "Quota Iscrizione"
+    },
+    {
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Stefano Michele Lauro",
+      "data": "16/05/2026 7.28.38",
+      "operazione": "Quota Iscrizione"
+    },
+    {
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Matteo Scattu",
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.28.50"
+    },
+    {
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.28.51",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Matteo Scattu"
+    },
+    {
+      "data": "16/05/2026 7.28.56",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Davide Bayre impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.29.00",
+      "operazione": "Stato Giocatore",
+      "dettagli": "Giocatore Salvatore Roberto Pinna impostato come: Attivato",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Giocatore Marco Scarpellini impostato come: Attivato",
+      "importo": "-",
+      "data": "16/05/2026 7.29.04",
+      "operazione": "Stato Giocatore"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Giocatore Sergio Pippia impostato come: Attivato",
+      "operazione": "Stato Giocatore",
+      "data": "16/05/2026 7.29.08"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Giocatore Enrico Mulas impostato come: Attivato",
+      "operazione": "Stato Giocatore",
+      "data": "16/05/2026 7.29.14"
+    },
+    {
+      "data": "16/05/2026 7.29.19",
+      "operazione": "Stato Giocatore",
+      "dettagli": "Giocatore Alberto Garau impostato come: Attivato",
+      "importo": "-"
+    },
+    {
+      "operazione": "Stato Giocatore",
+      "data": "16/05/2026 7.29.23",
+      "importo": "-",
+      "dettagli": "Giocatore Federico Addis impostato come: Attivato"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Giocatore Mario Conti impostato come: Attivato",
+      "data": "16/05/2026 7.29.27",
+      "operazione": "Stato Giocatore"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Giocatore Michele Carrone impostato come: Attivato",
+      "data": "16/05/2026 7.29.30",
+      "operazione": "Stato Giocatore"
+    },
+    {
+      "data": "16/05/2026 7.29.34",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Lorenzo Pittiu impostato come: Attivato"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Giocatore Giampaolo Mattana impostato come: Attivato",
+      "operazione": "Stato Giocatore",
+      "data": "16/05/2026 7.29.38"
+    },
+    {
+      "operazione": "Stato Giocatore",
+      "data": "16/05/2026 7.30.09",
+      "dettagli": "Giocatore Alberto Garau impostato come: Attivato",
+      "importo": "-"
+    },
+    {
+      "importo": "-10",
+      "dettagli": "Versamento iscrizione da: Stefano Michele Lauro",
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.30.36"
+    },
+    {
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.30.53",
+      "dettagli": "Versamento iscrizione da: Matteo Scattu",
+      "importo": "-10"
+    },
+    {
+      "data": "16/05/2026 7.30.58",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Matteo Scattu impostato come: Attivato"
+    },
+    {
+      "operazione": "Stato Giocatore",
+      "data": "16/05/2026 7.31.02",
+      "dettagli": "Giocatore Stefano Michele Lauro impostato come: Attivato",
+      "importo": "-"
+    },
+    {
+      "data": "16/05/2026 7.31.49",
+      "operazione": "Rosa",
+      "dettagli": "Aggiunto giocatore: Nicola Orlandini",
+      "importo": "-"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Modificati dati per: Nicola Orlandini",
+      "data": "16/05/2026 7.32.07",
+      "operazione": "Modifica Rosa"
+    },
+    {
+      "data": "16/05/2026 7.37.30",
+      "operazione": "Chiusura Partita",
+      "dettagli": "2026-05-17 21:00, Seminario (Quota: 4.00€)",
+      "importo": "40"
+    },
+    {
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.38.55",
+      "dettagli": "Modificati dati per: Salvatore Roberto Pinna",
+      "importo": "0"
+    },
+    {
+      "data": "16/05/2026 7.39.08",
+      "operazione": "Modifica Rosa",
+      "dettagli": "Modificati dati per: Marco Scarpellini",
+      "importo": "0"
+    },
+    {
+      "dettagli": "Modificati dati per: Enrico Mulas",
+      "importo": "0",
+      "data": "16/05/2026 7.39.25",
+      "operazione": "Modifica Rosa"
+    },
+    {
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.39.57",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Mario Conti"
+    },
+    {
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.40.12",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Michele Carrone"
+    },
+    {
+      "data": "16/05/2026 7.40.22",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Lorenzo Pittiu"
+    },
+    {
+      "dettagli": "Modificati dati per: Manuel Palmas",
+      "importo": "0",
+      "data": "16/05/2026 7.40.41",
+      "operazione": "Modifica Rosa"
+    },
+    {
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.40.51",
+      "dettagli": "Modificati dati per: Giampaolo Mattana",
+      "importo": "0"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Modificati dati per: Stefano Michele Lauro",
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.41.03"
+    },
+    {
+      "dettagli": "Modificati dati per: Matteo Scattu",
+      "importo": "0",
+      "data": "16/05/2026 7.41.15",
+      "operazione": "Modifica Rosa"
+    },
+    {
+      "dettagli": "Versamento iscrizione da: Fabrizio Alimonda",
+      "importo": "10",
+      "data": "17/05/2026 18.36.50",
+      "operazione": "Quota Iscrizione"
+    },
+    {
+      "dettagli": "Giocatore Fabrizio Alimonda impostato come: Attivato",
+      "importo": "-",
+      "data": "17/05/2026 18.36.56",
+      "operazione": "Stato Giocatore"
+    },
+    {
+      "importo": "10",
+      "dettagli": "Versamento da: Fabrizio Alimonda",
+      "operazione": "Ricarica",
+      "data": "17/05/2026 18.43.08"
+    },
+    {
+      "data": "18/05/2026 22.31.41",
+      "operazione": "Quota Iscrizione",
+      "dettagli": "Versamento iscrizione da: Nicola Orlandini",
+      "importo": "10"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Giocatore Nicola Orlandini impostato come: Attivato",
+      "data": "18/05/2026 22.31.46",
+      "operazione": "Stato Giocatore"
+    },
+    {
+      "data": "19/05/2026 22.20.48",
+      "operazione": "Ricarica",
+      "dettagli": "Versamento da: Michele Carrone",
+      "importo": "1"
+    },
+    {
+      "data": "19/05/2026 22.20.59",
+      "operazione": "Ricarica",
+      "dettagli": "Versamento da: Mario Conti",
+      "importo": "2"
+    },
+    {
+      "dettagli": "Versamento da: Lorenzo Pittiu",
+      "importo": "1",
+      "data": "19/05/2026 22.21.09",
+      "operazione": "Ricarica"
+    },
+    {
+      "data": "19/05/2026 22.24.44",
+      "operazione": "Ricarica",
+      "importo": "1",
+      "dettagli": "Versamento da: Salvatore Roberto Pinna"
+    },
+    {
+      "data": "19/05/2026 22.25.13",
+      "operazione": "Ricarica",
+      "dettagli": "Versamento da: Sergio Pippia",
+      "importo": "1"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Giocatore Matteo Scattu impostato come: Disattivato",
+      "data": "19/05/2026 23.21.39",
+      "operazione": "Stato Giocatore"
+    },
+    {
+      "data": "19/05/2026 23.22.21",
+      "operazione": "Stato Giocatore",
+      "dettagli": "Giocatore Matteo Scattu impostato come: Attivato",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Pianificata: Lunedì 25 maggio ore 21:00, Futura Sales (Amichevole) con 10 giocatori",
+      "importo": "40",
+      "operazione": "Nuova Partita",
+      "data": "20/05/2026 15.46.24"
+    },
+    {
+      "importo": "40",
+      "dettagli": "deminario | Partecipanti totali: 10 | Rosa: 9 | Esterni: 1 | Quota individuale: 4.00€ | Esterni: porcella?",
+      "data": "20/05/2026 16.45.02",
+      "operazione": "Amichevole"
+    },
+    {
+      "data": "20/05/2026 18.04.13",
+      "operazione": "Nuova Partita",
+      "importo": "0",
+      "dettagli": "Pianificata: Venerdì 29 maggio ore 21:04, Futura Sales (Amichevole) con 10 giocatori"
+    },
+    {
+      "operazione": "Annullamento",
+      "data": "20/05/2026 18.12.13",
+      "dettagli": "Annullata partita: Venerdì 29 maggio ore 21:04, Futura Sales (Amichevole)",
+      "importo": "-"
+    },
+    {
+      "data": "21/05/2026 12.31.06",
+      "operazione": "Creazione Amichevole",
+      "importo": "39",
+      "dettagli": "Lunedì 25 maggio ore 12:30 - Seminario (Scuri vs Chiari) [Amichevole]"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Annullata partita: Lunedì 25 maggio ore 12:30 - Seminario (Scuri vs Chiari) [Amichevole]",
+      "operazione": "Annullamento",
+      "data": "21/05/2026 12.32.20"
+    },
+    {
+      "dettagli": "Versamento da: Manuel Palmas",
+      "importo": "1000",
+      "operazione": "Ricarica",
+      "data": "21/05/2026 12.33.02"
+    },
+    {
+      "dettagli": "Modificati dati per: Manuel Palmas",
+      "importo": "1",
+      "operazione": "Modifica Rosa",
+      "data": "21/05/2026 12.33.20"
+    },
+    {
+      "dettagli": "Creata con formazioni e referto in attesa",
+      "importo": "39",
+      "operazione": "Creazione Amichevole",
+      "data": "21/05/2026 12.48.02"
+    },
+    {
+      "dettagli": "Dettagli: Lunedì 25 maggio ore 15:47 - Futura Sales (Chiari vs Scuri) [Amichevole] | Presenti: 10 (10 paganti) (Quota: 10.00€)",
+      "importo": "100",
+      "operazione": "Chiusura Partita",
+      "data": "21/05/2026 12.49.57"
+    },
+    {
+      "dettagli": "Annullata partita archiviata e ripristinati saldi/statistiche: Lunedì 25 maggio ore 15:47 - Futura Sales (Chiari vs Scuri) [Amichevole]",
+      "importo": "39",
+      "operazione": "Storno e Annullamento",
+      "data": "21/05/2026 13.03.12"
+    },
+    {
+      "importo": "10",
+      "dettagli": "Modificati dati per: Fabrizio Alimonda",
+      "operazione": "Modifica Rosa",
+      "data": "21/05/2026 13.06.48"
+    },
+    {
+      "data": "21/05/2026 13.15.02",
+      "operazione": "Ricarica",
+      "dettagli": "Versamento da: Salvatore Roberto Pinna",
+      "importo": "5"
+    },
+    {
+      "data": "21/05/2026 13.15.30",
+      "operazione": "Ricarica",
+      "importo": "5",
+      "dettagli": "Versamento da: Davide Bayre"
+    },
+    {
+      "data": "21/05/2026 13.16.17",
+      "operazione": "Modifica Rosa",
+      "dettagli": "Modificati dati per: Nicola Orlandini",
+      "importo": "4"
+    },
+    {
+      "importo": "6",
+      "dettagli": "Modificati dati per: Mario Conti",
+      "data": "21/05/2026 13.16.36",
+      "operazione": "Modifica Rosa"
+    },
+    {
+      "importo": "3.20",
+      "dettagli": "Modificati dati per: Matteo Scattu",
+      "operazione": "Modifica Rosa",
+      "data": "21/05/2026 13.17.00"
+    },
+    {
+      "operazione": "Ricarica",
+      "data": "21/05/2026 13.17.11",
+      "importo": "2,5",
+      "dettagli": "Versamento da: Enrico Mulas"
+    },
+    {
+      "importo": "2,4",
+      "dettagli": "Versamento da: Sergio Pippia",
+      "operazione": "Ricarica",
+      "data": "21/05/2026 13.17.34"
+    },
+    {
+      "dettagli": "Versamento da: Giampaolo Mattana",
+      "importo": "2",
+      "data": "21/05/2026 13.17.46",
+      "operazione": "Ricarica"
+    },
+    {
+      "operazione": "Ricarica",
+      "data": "21/05/2026 13.18.04",
+      "dettagli": "Versamento da: Alberto Garau",
+      "importo": "1,55"
+    },
+    {
+      "dettagli": "Versamento da: Manuel Palmas",
+      "importo": "1",
+      "data": "21/05/2026 13.18.15",
+      "operazione": "Ricarica"
+    },
+    {
+      "dettagli": "Versamento da: Lorenzo Pittiu",
+      "importo": "0,5",
+      "data": "21/05/2026 13.18.29",
+      "operazione": "Ricarica"
+    },
+    {
+      "importo": "0,5",
+      "dettagli": "Versamento da: Federico Addis",
+      "data": "21/05/2026 13.18.37",
+      "operazione": "Ricarica"
+    },
+    {
+      "dettagli": "Modificati dati per: Davide Bayre",
+      "importo": "",
+      "operazione": "Modifica Rosa",
+      "data": "21/05/2026 13.21.06"
+    },
+    {
+      "operazione": "Stato Giocatore",
+      "data": "21/05/2026 21.59.51",
+      "dettagli": "Giocatore Mario Conti impostato come: Disattivato",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Giocatore Mario Conti impostato come: Attivato",
+      "importo": "-",
+      "data": "21/05/2026 21.59.59",
+      "operazione": "Stato Giocatore"
+    },
+    {
+      "importo": "40",
+      "dettagli": "Creata con formazioni e referto in attesa",
+      "operazione": "Creazione Amichevole",
+      "data": "25/05/2026 15.30.28"
+    },
+    {
+      "dettagli": "Annullata partita in attesa: Lunedì 25 maggio ore 21:00 - Seminario (Team scuro vs Team bianco) [Amichevole]",
+      "importo": "-",
+      "data": "25/05/2026 15.38.07",
+      "operazione": "Annullamento"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "25/05/2026 15.38.43",
+      "importo": "10",
+      "dettagli": "Versamento da: Fabrizio Alimonda"
+    },
+    {
+      "dettagli": "Creata con formazioni e referto in attesa",
+      "importo": "40",
+      "operazione": "Creazione Amichevole",
+      "data": "25/05/2026 17.07.06"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Annullata partita in attesa: Mercoledì 20 maggio ore 22:06 - Futura Sales (Noi vs loro) [Amichevole]",
+      "data": "25/05/2026 17.09.14",
+      "operazione": "Annullamento"
+    },
+    {
+      "operazione": "Creazione Amichevole",
+      "data": "25/05/2026 17.12.43",
+      "dettagli": "Creata con formazioni e referto in attesa",
+      "importo": "40"
+    },
+    {
+      "operazione": "Annullamento",
+      "data": "25/05/2026 17.13.16",
+      "dettagli": "Annullata partita in attesa: Lunedì 25 maggio ore 21:00 - Seminario (TEAM SCURO vs TEAM BIANCO) [Amichevole]",
+      "importo": "-"
+    },
+    {
+      "data": "25/05/2026 17.14.40",
+      "operazione": "Creazione Amichevole",
+      "importo": "40",
+      "dettagli": "Creata con formazioni e referto in attesa"
+    },
+    {
+      "data": "25/05/2026 22.24.18",
+      "operazione": "Ricarica Massiva",
+      "dettagli": "Versamento da: Mario Conti",
+      "importo": "5"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "25/05/2026 22.24.18",
+      "importo": "4",
+      "dettagli": "Versamento da: Matteo Scattu"
+    },
+    {
+      "importo": "5",
+      "dettagli": "Versamento da: Giampaolo Mattana",
+      "data": "25/05/2026 22.24.20",
+      "operazione": "Ricarica Massiva"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "25/05/2026 22.24.20",
+      "importo": "5",
+      "dettagli": "Versamento da: Lorenzo Pittiu"
+    },
+    {
+      "importo": "4",
+      "dettagli": "Versamento da: Manuel Palmas",
+      "operazione": "Ricarica Massiva",
+      "data": "25/05/2026 22.24.20"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "25/05/2026 22.24.20",
+      "dettagli": "Versamento da: Marco Scarpellini",
+      "importo": "5"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "25/05/2026 22.24.20",
+      "importo": "5",
+      "dettagli": "Versamento da: Salvatore Roberto Pinna"
+    },
+    {
+      "data": "25/05/2026 22.24.21",
+      "operazione": "Ricarica Massiva",
+      "importo": "5",
+      "dettagli": "Versamento da: Alberto Garau"
+    },
+    {
+      "data": "25/05/2026 22.24.21",
+      "operazione": "Ricarica Massiva",
+      "dettagli": "Versamento da: Sergio Pippia",
+      "importo": "5"
+    },
+    {
+      "dettagli": "Dettagli: Lunedì 25 maggio ore 21:00 - Seminario (TEAM SCURO vs TEAM BIANCO) [Amichevole] | Presenti: 10 (10 paganti) (Quota: 4.00€)",
+      "importo": "40",
+      "data": "25/05/2026 22.24.53",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "data": "25/05/2026 22.30.35",
+      "operazione": "Modifica Rosa",
+      "importo": "-2",
+      "dettagli": "Modificati dati per: Manuel Palmas"
+    },
+    {
+      "data": "25/05/2026 22.36.56",
+      "operazione": "Modifica Partita",
+      "importo": "40",
+      "dettagli": "Modificata partita in archivio (Saldi e Stat ricalcolati): Lunedì 25 maggio ore 21:00 - Seminario (TEAM SCURO vs TEAM BIANCO) [Amichevole]"
+    },
+    {
+      "data": "25/05/2026 22.48.16",
+      "operazione": "Modifica Partita",
+      "dettagli": "Modificata partita in archivio (Saldi e Stat ricalcolati): Lunedì 25 maggio ore 21:00 - Seminario (TEAM SCURO vs TEAM BIANCO) [Amichevole]",
+      "importo": "40"
+    },
+    {
+      "data": "25/05/2026, 22:37:04",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta: Ma finiamola da parte di Manuel"
+    },
+    {
+      "data": "25/05/2026, 23:05:37",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma finiamola da parte di Manuel"
+    },
+    {
+      "operazione": "Partite",
+      "data": "25/05/2026, 23:06:43",
+      "importo": "40",
+      "dettagli": "Creata partita convocazione: 28/05/2026 04:06, Futura Sales vs Scapoli fc"
+    },
+    {
+      "operazione": "Sondaggi/Consigli",
+      "data": "26/05/2026, 08:48:42",
+      "dettagli": "Proposta di kgkugk: \"lòkjòjòj\"",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "26/05/2026, 08:49:42",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Mafiniamola da parte di Manuel",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Manuel da parte di Ma smettiamola",
+      "operazione": "Fantacalcetto",
+      "data": "26/05/2026, 16:16:30"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma finiamola 2 da parte di Manuel",
+      "importo": "-",
+      "data": "26/05/2026, 16:17:12",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Ma finiamola 2' di Manuel",
+      "importo": "-",
+      "data": "26/05/2026, 16:17:56",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "26/05/2026, 16:18:14",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma smettiamola da parte di Manuel",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Creata partita convocazione: 26/05/2026 21:00, Futura Sales",
+      "importo": "40",
+      "operazione": "Partite",
+      "data": "26/05/2026, 16:18:53"
+    },
+    {
+      "data": "26/05/2026, 16:20:33",
+      "operazione": "Chiusura Partita",
+      "dettagli": "Chiusa partita (26/05/2026 21:00, Futura Sales), addebitati 0.00€ a 9 giocatori.",
+      "importo": "0"
+    },
+    {
+      "data": "26/05/2026, 16:22:38",
+      "operazione": "Partite",
+      "dettagli": "Creata partita convocazione: 26/05/2026 21:00, Seminario",
+      "importo": "0"
+    },
+    {
+      "operazione": "Partite",
+      "data": "26/05/2026, 16:35:17",
+      "dettagli": "Modificato referto partita chiusa: 26/05/2026 21:00, Futura Sales",
+      "importo": "0"
+    },
+    {
+      "data": "26/05/2026, 18:07:58",
+      "operazione": "Chiusura Partita",
+      "dettagli": "Chiusa partita (26/05/2026 21:00, Seminario), addebitati 0.00€ a 10 giocatori.",
+      "importo": "0"
+    },
+    {
+      "dettagli": "Riaperta partita precedentemente chiusa: 26/05/2026 21:00, Seminario",
+      "importo": "-",
+      "data": "26/05/2026, 18:09:43",
+      "operazione": "Partite"
+    },
+    {
+      "operazione": "Partite",
+      "data": "26/05/2026, 18:09:53",
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 26/05/2026 21:00, Seminario"
+    },
+    {
+      "data": "26/05/2026, 18:10:01",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita precedentemente chiusa: 26/05/2026 21:00, Futura Sales"
+    },
+    {
+      "data": "26/05/2026, 18:10:09",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 26/05/2026 21:00, Futura Sales"
+    },
+    {
+      "data": "27/05/2026, 11:27:30",
+      "operazione": "Sondaggi/Consigli",
+      "importo": "-",
+      "dettagli": "Proposta di D: \"D\""
+    },
+    {
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: 27/05/2026 20:00, Futura Sales vs gli altri",
+      "data": "27/05/2026, 15:11:39",
+      "operazione": "Partite"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "27/05/2026, 15:13:12",
+      "importo": "-",
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Manuel' di Ma smettiamola"
+    },
+    {
+      "data": "27/05/2026, 15:15:01",
+      "operazione": "Chiusura Partita",
+      "dettagli": "Chiusa partita (27/05/2026 20:00, Futura Sales vs gli altri), addebitati 0.00€ a 10 giocatori.",
+      "importo": "0"
+    },
+    {
+      "operazione": "Partite",
+      "data": "27/05/2026, 15:17:55",
+      "importo": "-",
+      "dettagli": "Riaperta partita precedentemente chiusa: 27/05/2026 20:00, Futura Sales vs gli altri"
+    },
+    {
+      "data": "27/05/2026, 15:18:05",
+      "operazione": "Partite",
+      "dettagli": "Annullata partita aperta: 27/05/2026 20:00, Futura Sales vs gli altri",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Manuel (Ma smettiamola)",
+      "operazione": "Fantacalcetto",
+      "data": "27/05/2026, 15:18:20"
+    },
+    {
+      "data": "27/05/2026, 15:18:25",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: Manuel (Ma finiamola 2)",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "27/05/2026, 15:18:31",
+      "dettagli": "Fantasquadra rimossa: Manuel (Accabbadda)",
+      "importo": "-"
+    },
+    {
+      "operazione": "Partite",
+      "data": "27/05/2026, 20:53:14",
+      "dettagli": "Creata partita convocazione: 28/05/2026 03:52, Futura Sales vs kugjh",
+      "importo": "0"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "27/05/2026, 20:54:08",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: hhjkhkjkjh da parte di Manuel"
+    },
+    {
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'hhjkhkjkjh' di Manuel",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "27/05/2026, 20:54:31"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "27/05/2026, 20:55:10",
+      "dettagli": "Fantasquadra rimossa: hhjkhkjkjh (Manuel)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Annullata partita aperta: 28/05/2026 03:52, Futura Sales vs kugjh",
+      "importo": "-",
+      "operazione": "Partite",
+      "data": "28/05/2026, 08:33:08"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "30/05/2026, 13:12:39",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma smettila da parte di Manuel",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Creata partita convocazione: 03/06/2026 20:00, Seminario vs GLi altri",
+      "importo": "0",
+      "data": "30/05/2026, 13:19:31",
+      "operazione": "Partite"
+    },
+    {
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Ma smettila' di Manuel",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "30/05/2026, 13:20:57"
+    },
+    {
+      "dettagli": "Chiusa partita (03/06/2026 20:00, Seminario vs GLi altri), addebitati 0.00€ a 9 giocatori.",
+      "importo": "0",
+      "operazione": "Chiusura Partita",
+      "data": "30/05/2026, 13:23:47"
+    },
+    {
+      "dettagli": "Ricarica di gruppo effettuata al campo: Davide Bayre (1€)",
+      "importo": "1.00",
+      "operazione": "Ricarica Massiva",
+      "data": "30/05/2026, 14:04:48"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Ma smettila' di Manuel",
+      "operazione": "Fantacalcetto",
+      "data": "30/05/2026, 14:22:00"
+    },
+    {
+      "data": "30/05/2026, 14:22:47",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Ma smettila' di Manuel"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Proposta di Manuel: \"Quando cambio giocatore dopo una partita...\"",
+      "data": "30/05/2026, 14:24:03",
+      "operazione": "Sondaggi/Consigli"
+    },
+    {
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 03/06/2026 20:00, Seminario vs GLi altri",
+      "importo": "-",
+      "data": "30/05/2026, 18:02:30",
+      "operazione": "Partite"
+    },
+    {
+      "dettagli": "Chiusa partita (03/06/2026 20:00, Seminario vs GLi altri), addebitati 0.00€ a 9 giocatori.",
+      "importo": "0",
+      "operazione": "Chiusura Partita",
+      "data": "30/05/2026, 18:02:38"
+    },
+    {
+      "data": "30/05/2026, 18:03:35",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 03/06/2026 20:00, Seminario vs GLi altri"
+    },
+    {
+      "data": "30/05/2026, 18:04:44",
+      "operazione": "Partite",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 03/06/2026 20:00, Seminario vs GLi altri",
+      "importo": "-"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Chiusa partita (03/06/2026 20:00, Seminario vs GLi altri), addebitati 0.00€ a 9 giocatori.",
+      "operazione": "Chiusura Partita",
+      "data": "30/05/2026, 18:05:18"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 03/06/2026 20:00, Seminario vs GLi altri",
+      "data": "30/05/2026, 18:05:30",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "31/05/2026, 21:00:13",
+      "operazione": "Rosa",
+      "dettagli": "Aggiunto giocatore: <pinco <pallino",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Eliminato giocatore: <pinco <pallino",
+      "importo": "-",
+      "operazione": "Rosa",
+      "data": "31/05/2026, 21:00:28"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "31/05/2026, 21:18:44",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 03/06/2026 20:00, Seminario vs GLi altri",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Ricarica di gruppo effettuata al campo: Davide Bayre (2€)",
+      "importo": "2.00",
+      "operazione": "Ricarica Massiva",
+      "data": "31/05/2026, 21:22:32"
+    }
+  ],
+  "fantasquadre": [
+    {
+      "dataInserimento": "2026-06-08T21:24:54.839Z",
+      "pin": "mattia2012",
+      "email": "palmasm82@gmail.com",
+      "valoriAcquisto": {
+        "Michele Carrone": 13,
+        "Giampaolo Mattana": 15,
+        "Enrico Mulas": 17,
+        "Lorenzo Pittiu": 15
+      },
+      "rosaOriginaria": [
+        "Enrico Mulas",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Michele Carrone"
+      ],
+      "nomeFantasquadra": "Essegua",
+      "nomePartecipante": "Gghg",
+      "creditoResiduo": 60,
+      "giocatoriSelezionati": [
+        "Enrico Mulas",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Michele Carrone"
+      ]
+    },
+    {
+      "dataInserimento": "2026-06-08T21:05:51.941Z",
+      "id": "fs-1780563044983-4w10",
+      "valoriAcquisto": {
+        "Lorenzo Pittiu": 15,
+        "Enrico Mulas": 17,
+        "Salvatore Roberto Pinna": 14,
+        "Sergio Pippia": 13
+      },
+      "email": "10roby1985@gmail.com",
+      "pin": "Frendy09",
+      "rosaOriginaria": [
+        "Salvatore Roberto Pinna",
+        "Lorenzo Pittiu",
+        "Enrico Mulas",
+        "Sergio Pippia"
+      ],
+      "creditoResiduo": 1,
+      "nomeFantasquadra": "Bella Balla",
+      "nomePartecipante": "Roberto Pinna",
+      "giocatoriSelezionati": [
+        "Salvatore Roberto Pinna",
+        "Lorenzo Pittiu",
+        "Enrico Mulas",
+        "Sergio Pippia"
+      ],
+      "ultimoCambioMatchId": "no-match-closed"
+    },
+    {
+      "nomePartecipante": "Nikele",
+      "nomeFantasquadra": "Ginger",
+      "creditoResiduo": 1,
+      "rosaOriginaria": [
+        "Marco Scarpellini",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas"
+      ],
+      "pin": "Alvrcb20",
+      "email": "carrone20@gmail.com",
+      "valoriAcquisto": {
+        "Marco Scarpellini": 16,
+        "Lorenzo Pittiu": 15,
+        "Giampaolo Mattana": 15,
+        "Manuel Palmas": 13
+      },
+      "id": "fs-1780566278880-cqo5",
+      "dataInserimento": "2026-06-05T12:50:58.445Z",
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Marco Scarpellini",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas"
+      ]
+    },
+    {
+      "rosaOriginaria": [
+        "Giampaolo Mattana",
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Michele Carrone"
+      ],
+      "nomePartecipante": "Manuel",
+      "nomeFantasquadra": "Ma smettiamola",
+      "creditoResiduo": 2,
+      "dataInserimento": "2026-06-09T13:04:52.708Z",
+      "id": "fs-1780648546905-t7ib",
+      "pin": "25062022",
+      "email": "valan21pm@gmail.com",
+      "valoriAcquisto": {
+        "Michele Carrone": 13,
+        "Enrico Mulas": 17,
+        "Giampaolo Mattana": 15,
+        "Lorenzo Pittiu": 15
+      },
+      "ultimoCambioMatchId": "pksu2jg-mq1ii1le",
+      "giocatoriSelezionati": [
+        "Giampaolo Mattana",
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Michele Carrone"
+      ]
+    },
+    {
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Salvatore Roberto Pinna",
+        "Fabrizio Alimonda",
+        "Michele Carrone",
+        "Manuel Palmas"
+      ],
+      "nomeFantasquadra": "BellaEstSaMinigonna",
+      "nomePartecipante": "Valentina",
+      "creditoResiduo": 0,
+      "rosaOriginaria": [
+        "Salvatore Roberto Pinna",
+        "Fabrizio Alimonda",
+        "Michele Carrone",
+        "Manuel Palmas"
+      ],
+      "pin": "Valentina91!",
+      "email": "vale-massi@live.it",
+      "valoriAcquisto": {
+        "Michele Carrone": 13,
+        "Manuel Palmas": 13,
+        "Fabrizio Alimonda": 20,
+        "Salvatore Roberto Pinna": 14
+      },
+      "dataInserimento": "2026-06-08T18:42:23.625Z",
+      "id": "fs-1780663515353-m28b"
+    },
+    {
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Michele Carrone",
+        "Sergio Pippia",
+        "Salvatore Roberto Pinna",
+        "Manuel Palmas"
+      ],
+      "rosaOriginaria": [
+        "Michele Carrone",
+        "Sergio Pippia",
+        "Salvatore Roberto Pinna",
+        "Manuel Palmas"
+      ],
+      "creditoResiduo": 7,
+      "nomeFantasquadra": "Izi ricchi",
+      "nomePartecipante": "Marco Scarpellini",
+      "id": "fs-1780664929583-53wl",
+      "dataInserimento": "2026-06-05T13:11:09.666Z",
+      "valoriAcquisto": {
+        "Michele Carrone": 13,
+        "Manuel Palmas": 13,
+        "Sergio Pippia": 13,
+        "Salvatore Roberto Pinna": 14
+      },
+      "email": "mark.scarpellini@gmail.com",
+      "pin": "50000000"
+    },
+    {
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Lorenzo Pittiu",
+        "Enrico Mulas",
+        "Salvatore Roberto Pinna",
+        "Matteo Scattu"
+      ],
+      "nomeFantasquadra": "Isy Resin",
+      "nomePartecipante": "Enrico Mulas",
+      "creditoResiduo": 1,
+      "rosaOriginaria": [
+        "Lorenzo Pittiu",
+        "Enrico Mulas",
+        "Salvatore Roberto Pinna",
+        "Matteo Scattu"
+      ],
+      "email": "enrimulas@gmail.com",
+      "pin": "Easyrigging2025",
+      "valoriAcquisto": {
+        "Enrico Mulas": 17,
+        "Salvatore Roberto Pinna": 14,
+        "Lorenzo Pittiu": 15,
+        "Matteo Scattu": 13
+      },
+      "id": "fs-1780665284664-7cbl",
+      "dataInserimento": "2026-06-07T20:59:56.814Z"
+    },
+    {
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Salvatore Roberto Pinna",
+        "Enrico Mulas",
+        "Giampaolo Mattana",
+        "Michele Carrone"
+      ],
+      "rosaOriginaria": [
+        "Salvatore Roberto Pinna",
+        "Enrico Mulas",
+        "Giampaolo Mattana",
+        "Michele Carrone"
+      ],
+      "creditoResiduo": 1,
+      "nomePartecipante": "McLollo",
+      "nomeFantasquadra": "Izi EpuRigging",
+      "dataInserimento": "2026-06-08T14:21:15.859Z",
+      "id": "fs-1780667039244-l5ua",
+      "valoriAcquisto": {
+        "Salvatore Roberto Pinna": 14,
+        "Giampaolo Mattana": 15,
+        "Michele Carrone": 13,
+        "Enrico Mulas": 17
+      },
+      "pin": "Estate2026",
+      "email": "settore.edile.sas@gmail.com"
+    },
+    {
+      "rosaOriginaria": [
+        "Salvatore Roberto Pinna",
+        "Enrico Mulas",
+        "Giampaolo Mattana",
+        "Manuel Palmas"
+      ],
+      "creditoResiduo": 1,
+      "nomeFantasquadra": "Fc Balotelli",
+      "nomePartecipante": "Stefano",
+      "dataInserimento": "2026-06-05T13:57:17.402Z",
+      "id": "fs-1780667683304-6wlo",
+      "valoriAcquisto": {
+        "Giampaolo Mattana": 15,
+        "Manuel Palmas": 13,
+        "Enrico Mulas": 17,
+        "Salvatore Roberto Pinna": 14
+      },
+      "pin": "TrapHouse3",
+      "email": "stefanolauroprivato@gmail.com",
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Salvatore Roberto Pinna",
+        "Enrico Mulas",
+        "Giampaolo Mattana",
+        "Manuel Palmas"
+      ]
+    },
+    {
+      "giocatoriSelezionati": [
+        "Marco Scarpellini",
+        "Salvatore Roberto Pinna",
+        "Lorenzo Pittiu",
+        "Giampaolo Mattana"
+      ],
+      "ultimoCambioMatchId": "",
+      "id": "fs-1780680923007-9wa6",
+      "dataInserimento": "2026-06-05T17:49:27.550Z",
+      "pin": "Ashapatah",
+      "email": "elehijos@hotmail.it",
+      "valoriAcquisto": {
+        "Giampaolo Mattana": 15,
+        "Salvatore Roberto Pinna": 14,
+        "Marco Scarpellini": 16,
+        "Lorenzo Pittiu": 15
+      },
+      "rosaOriginaria": [
+        "Marco Scarpellini",
+        "Salvatore Roberto Pinna",
+        "Lorenzo Pittiu",
+        "Giampaolo Mattana"
+      ],
+      "nomePartecipante": "Eleonora",
+      "nomeFantasquadra": "F.C Gerry",
+      "creditoResiduo": 0
+    },
+    {
+      "rosaOriginaria": [
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Salvatore Roberto Pinna",
+        "Michele Carrone"
+      ],
+      "creditoResiduo": 1,
+      "nomeFantasquadra": "Crazy Rigging",
+      "nomePartecipante": "Geggio",
+      "dataInserimento": "2026-06-08T13:25:01.357Z",
+      "id": "fs-1780681725341-bct5",
+      "valoriAcquisto": {
+        "Salvatore Roberto Pinna": 14,
+        "Michele Carrone": 13,
+        "Enrico Mulas": 17,
+        "Lorenzo Pittiu": 15
+      },
+      "pin": "kixnyg-gupFus-qywxi6",
+      "email": "serg92@live.it",
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Salvatore Roberto Pinna",
+        "Michele Carrone"
+      ]
+    },
+    {
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Salvatore Roberto Pinna",
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Sergio Pippia"
+      ],
+      "rosaOriginaria": [
+        "Salvatore Roberto Pinna",
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Sergio Pippia"
+      ],
+      "nomePartecipante": "Erika",
+      "nomeFantasquadra": "FREndY",
+      "creditoResiduo": 1,
+      "id": "fs-1780684610938-n1pi",
+      "dataInserimento": "2026-06-05T18:40:18.036Z",
+      "pin": "Wendy.Frida9",
+      "email": "erikargiolas@gmail.com",
+      "valoriAcquisto": {
+        "Lorenzo Pittiu": 15,
+        "Sergio Pippia": 13,
+        "Salvatore Roberto Pinna": 14,
+        "Enrico Mulas": 17
+      }
+    },
+    {
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Lorenzo Pittiu",
+        "Salvatore Roberto Pinna",
+        "Enrico Mulas",
+        "Manuel Palmas"
+      ],
+      "creditoResiduo": 1,
+      "nomeFantasquadra": "RealPittiu F.C",
+      "nomePartecipante": "Florentino Perez",
+      "rosaOriginaria": [
+        "Lorenzo Pittiu",
+        "Salvatore Roberto Pinna",
+        "Enrico Mulas",
+        "Manuel Palmas"
+      ],
+      "valoriAcquisto": {
+        "Lorenzo Pittiu": 15,
+        "Enrico Mulas": 17,
+        "Manuel Palmas": 13,
+        "Salvatore Roberto Pinna": 14
+      },
+      "pin": "estate2026",
+      "email": "marck-97@hotmail.it",
+      "dataInserimento": "2026-06-05T19:41:41.897Z",
+      "id": "fs-1780685403028-xkyx"
+    },
+    {
+      "nomeFantasquadra": "Pescaramanzia",
+      "nomePartecipante": "Matteo Scattu",
+      "creditoResiduo": 0,
+      "rosaOriginaria": [
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Enrico Mulas",
+        "Matteo Scattu"
+      ],
+      "email": "solloi1987@gmail.com",
+      "pin": "Fantarigging87",
+      "valoriAcquisto": {
+        "Matteo Scattu": 13,
+        "Lorenzo Pittiu": 15,
+        "Enrico Mulas": 17,
+        "Giampaolo Mattana": 15
+      },
+      "id": "fs-1780689922578-g2kb",
+      "dataInserimento": "2026-06-08T12:44:18.720Z",
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Enrico Mulas",
+        "Matteo Scattu"
+      ]
+    },
+    {
+      "nomePartecipante": "Francesco Spanedda",
+      "nomeFantasquadra": "Ma che cazzo ne so",
+      "creditoResiduo": 0,
+      "rosaOriginaria": [
+        "Salvatore Roberto Pinna",
+        "Marco Scarpellini",
+        "Stefano Michele Lauro",
+        "Alberto Garau"
+      ],
+      "email": "f.spanedda77@gmail.com",
+      "pin": "Francesco77*",
+      "valoriAcquisto": {
+        "Stefano Michele Lauro": 20,
+        "Marco Scarpellini": 16,
+        "Alberto Garau": 10,
+        "Salvatore Roberto Pinna": 14
+      },
+      "id": "fs-1780697914943-rols",
+      "dataInserimento": "2026-06-05T22:21:07.716Z",
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Salvatore Roberto Pinna",
+        "Marco Scarpellini",
+        "Stefano Michele Lauro",
+        "Alberto Garau"
+      ]
+    },
+    {
+      "giocatoriSelezionati": [
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Michele Carrone",
+        "Manuel Palmas"
+      ],
+      "pin": "29Undici84",
+      "email": "mhet84@hotmail.it",
+      "valoriAcquisto": {
+        "Michele Carrone": 13,
+        "Manuel Palmas": 13,
+        "Salvatore Roberto Pinna": 14,
+        "Stefano Michele Lauro": 20
+      },
+      "dataInserimento": "2026-06-09T15:31:08.851Z",
+      "id": "fs-1780701019002-dnfa",
+      "nomePartecipante": "Mhet84",
+      "nomeFantasquadra": "Signori, 5 minuti di recupero 🖐️",
+      "creditoResiduo": 0,
+      "rosaOriginaria": [
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Michele Carrone",
+        "Manuel Palmas"
+      ]
+    },
+    {
+      "giocatoriSelezionati": [
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Matteo Scattu",
+        "Alberto Garau"
+      ],
+      "nomeFantasquadra": "Mai Una Gioia FC",
+      "nomePartecipante": "Alice",
+      "creditoResiduo": 2,
+      "rosaOriginaria": [
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Matteo Scattu",
+        "Alberto Garau"
+      ],
+      "pin": "Alice2002",
+      "email": "alicesolaro04092002@gmail.com",
+      "valoriAcquisto": {
+        "Alberto Garau": 10,
+        "Enrico Mulas": 18,
+        "Matteo Scattu": 14,
+        "Lorenzo Pittiu": 16
+      },
+      "dataInserimento": "2026-06-06T11:49:04.698Z",
+      "id": "fs-1780745920763-bd2q"
+    },
+    {
+      "giocatoriSelezionati": [
+        "Salvatore Roberto Pinna",
+        "Matteo Scattu",
+        "Enrico Mulas",
+        "Davide Bayre"
+      ],
+      "nomePartecipante": "A",
+      "nomeFantasquadra": "A",
+      "creditoResiduo": 4,
+      "rosaOriginaria": [
+        "Salvatore Roberto Pinna",
+        "Matteo Scattu",
+        "Enrico Mulas",
+        "Davide Bayre"
+      ],
+      "email": "mirimelere@gmail.con",
+      "pin": "vigliovedere",
+      "valoriAcquisto": {
+        "Matteo Scattu": 13,
+        "Davide Bayre": 12,
+        "Salvatore Roberto Pinna": 14,
+        "Enrico Mulas": 17
+      },
+      "dataInserimento": "2026-06-07T16:27:47.670Z",
+      "id": "fs-1780849420864-sqrm"
+    },
+    {
+      "giocatoriSelezionati": [
+        "Lorenzo Pittiu",
+        "Stefano Michele Lauro",
+        "Manuel Palmas",
+        "Alberto Garau"
+      ],
+      "creditoResiduo": 2,
+      "nomeFantasquadra": "I Buzzurri",
+      "nomePartecipante": "AronC",
+      "rosaOriginaria": [
+        "Lorenzo Pittiu",
+        "Stefano Michele Lauro",
+        "Manuel Palmas",
+        "Alberto Garau"
+      ],
+      "valoriAcquisto": {
+        "Alberto Garau": 10,
+        "Manuel Palmas": 13,
+        "Stefano Michele Lauro": 20,
+        "Lorenzo Pittiu": 15
+      },
+      "email": "leandrina99@hotmail.it",
+      "pin": "aronoele99!",
+      "dataInserimento": "2026-06-08T12:30:38.217Z",
+      "id": "fs-1780921488693-oq2d"
+    },
+    {
+      "email": "chripittiu48@gmail.com",
+      "pin": "Turri2005",
+      "valoriAcquisto": {
+        "Lorenzo Pittiu": 15,
+        "Sergio Pippia": 13,
+        "Michele Carrone": 13,
+        "Enrico Mulas": 17
+      },
+      "id": "fs-1780933779267-pm9d",
+      "dataInserimento": "2026-06-08T19:38:02.160Z",
+      "nomePartecipante": "Pittiu Christian",
+      "nomeFantasquadra": "Barrosu United",
+      "creditoResiduo": 2,
+      "rosaOriginaria": [
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Michele Carrone",
+        "Sergio Pippia"
+      ],
+      "giocatoriSelezionati": [
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Michele Carrone",
+        "Sergio Pippia"
+      ]
+    },
+    {
+      "giocatoriSelezionati": [
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Salvatore Roberto Pinna",
+        "Matteo Scattu"
+      ],
+      "valoriAcquisto": {
+        "Salvatore Roberto Pinna": 14,
+        "Enrico Mulas": 17,
+        "Matteo Scattu": 13,
+        "Lorenzo Pittiu": 15
+      },
+      "pin": "Hermione96$",
+      "email": "fabrizioalimonda@outlook.it",
+      "dataInserimento": "2026-06-08T20:07:52.426Z",
+      "id": "fs-1780948857068-1ekm",
+      "creditoResiduo": 1,
+      "nomePartecipante": "Fabrizio",
+      "nomeFantasquadra": "Izyraighing",
+      "rosaOriginaria": [
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Salvatore Roberto Pinna",
+        "Matteo Scattu"
+      ]
+    },
+    {
+      "rosaOriginaria": [
+        "Michele Carrone",
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Salvatore Roberto Pinna"
+      ],
+      "nomePartecipante": "La Leggenda",
+      "nomeFantasquadra": "I Leggendari",
+      "creditoResiduo": 1,
+      "dataInserimento": "2026-06-08T21:15:36.280Z",
+      "id": "fs-1780952845757-p5rj",
+      "pin": "P0rt0sxus0",
+      "email": "nicolaorlandini14@gmail.com",
+      "valoriAcquisto": {
+        "Salvatore Roberto Pinna": 14,
+        "Enrico Mulas": 17,
+        "Michele Carrone": 13,
+        "Lorenzo Pittiu": 15
+      },
+      "giocatoriSelezionati": [
+        "Michele Carrone",
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Salvatore Roberto Pinna"
+      ]
+    },
+    {
+      "giocatoriSelezionati": [
+        "Stefano Michele Lauro",
+        "Manuel Palmas",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna"
+      ],
+      "id": "fs-1780953269827-gl6h",
+      "dataInserimento": "2026-06-08T21:27:16.323Z",
+      "valoriAcquisto": {
+        "Manuel Palmas": 13,
+        "Michele Carrone": 13,
+        "Salvatore Roberto Pinna": 14,
+        "Stefano Michele Lauro": 20
+      },
+      "email": "frasiddi2@gmail.com",
+      "pin": "Spritz2016",
+      "rosaOriginaria": [
+        "Stefano Michele Lauro",
+        "Manuel Palmas",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna"
+      ],
+      "creditoResiduo": 0,
+      "nomeFantasquadra": "Hsaccio",
+      "nomePartecipante": "Frank"
+    },
+    {
+      "giocatoriSelezionati": [
+        "Lorenzo Pittiu",
+        "Enrico Mulas",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna"
+      ],
+      "nomePartecipante": "G Matt",
+      "nomeFantasquadra": "EasyScoring",
+      "creditoResiduo": 1,
+      "rosaOriginaria": [
+        "Lorenzo Pittiu",
+        "Enrico Mulas",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna"
+      ],
+      "email": "giampmatt@gmail.com",
+      "pin": "Hundr3dG0ls@!",
+      "valoriAcquisto": {
+        "Lorenzo Pittiu": 15,
+        "Michele Carrone": 13,
+        "Enrico Mulas": 17,
+        "Salvatore Roberto Pinna": 14
+      },
+      "id": "fs-1780954074418-idrm",
+      "dataInserimento": "2026-06-08T21:31:30.952Z"
+    },
+    {
+      "giocatoriSelezionati": [
+        "Manuel Palmas",
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Alberto Garau"
+      ],
+      "nomeFantasquadra": "Loceri",
+      "nomePartecipante": "Alessandro Palmas",
+      "creditoResiduo": 0,
+      "rosaOriginaria": [
+        "Manuel Palmas",
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Alberto Garau"
+      ],
+      "pin": "Loceri99ass0209!",
+      "email": "alessandropalmas@ymail.com",
+      "valoriAcquisto": {
+        "Alberto Garau": 10,
+        "Manuel Palmas": 13,
+        "Enrico Mulas": 17,
+        "Fabrizio Alimonda": 20
+      },
+      "dataInserimento": "2026-06-09T10:09:05.699Z",
+      "id": "fs-1780999483908-ma0w"
+    },
+    {
+      "nomePartecipante": "Alì",
+      "nomeFantasquadra": "Hard Rigging",
+      "creditoResiduo": 0,
+      "rosaOriginaria": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Manuel Palmas",
+        "Alberto Garau"
+      ],
+      "pin": "11062026",
+      "email": "ali.nov7@gmail.com",
+      "valoriAcquisto": {
+        "Enrico Mulas": 19,
+        "Alberto Garau": 9,
+        "Manuel Palmas": 13,
+        "Fabrizio Alimonda": 19
+      },
+      "id": "fs-1781176621937-5jrq",
+      "dataInserimento": "2026-06-11T11:20:48.336Z",
+      "giocatoriSelezionati": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Manuel Palmas",
+        "Alberto Garau"
+      ]
+    }
+  ],
+  "consigli": [
+    {
+      "autore": "per aigoogle",
+      "letto": true,
+      "id": "c-1780868292204-fb9jn",
+      "data": "07/06/2026, 21:38:12",
+      "testo": "sezione ricarica, adesso c'è un menu a tendina, voglio poter selezionare i giocatori da un elenco con caselle da spuntare, per ogni giocatore che spunto deve comparire la casellina nella quale indicare l'importo (va bene la storia dei 5 10 15 , ma voglio poter inserire anche altri importi manualmente. poi salvo e mandi tutto insiema, i giocatori no selezionati devono considerarsi non versanti e non aggiungere niente al saldo. cosa ne dici, no coding - questo messaggio di errore: Attenzione / Errore\n\nAzione bloccata: è obbligatorio verificare tutti i giocatori per i bonus generici e personali. Riassunto giocatori mancanti: • Per i Bonus Generici mancano 1 giocatori all'appello. Attenzione: usa il tasto 'Assegna Nessun Bonus/Malus a tutti i rimanenti' in fondo alla tab corrispondente per velocizzare la procedura. deve contenere la sezione e il nome del giocatore - ricordati che nella sezione referto gara devono essere valorizzati tutti i giocatori, nel senso che se qualcuno non fa gol, non fa assit non prende giallo o rosso, io devo poter dire che non neha preso pspuntando una casella, il controllo prima del referto deve considerare anche questo aspetto."
+    },
+    {
+      "testo": "Frocio",
+      "data": "08/06/2026, 21:25:41",
+      "id": "c-1780953941673-qidu2",
+      "letto": true,
+      "autore": "Essegua"
+    },
+    {
+      "testo": "Assegna bonus presidenziale semplice a Pinna anche se non dovrebbe: correggi",
+      "data": "11/06/2026, 13:50:31",
+      "id": "c-1781185831233-3ptp0",
+      "autore": "Roberto",
+      "letto": false
+    }
+  ],
+  "bonuses": [
+    {
+      "punti": 0,
+      "descrizione": "0 punti per gol segnato in posizione di Pivot",
+      "id": "gen_gol_pivot",
+      "nome": "⚽ Gol Pivot 🎯"
+    },
+    {
+      "punti": 2,
+      "descrizione": "+2 punti per gol segnato dalla zona centrale",
+      "id": "gen_gol_centrale",
+      "nome": "⚽ Gol Centrale 💣"
+    },
+    {
+      "punti": 1,
+      "descrizione": "+1 punto extra per gol segnato dalla fascia laterale",
+      "id": "gen_gol_laterale",
+      "nome": "⚽ Gol Laterale 🚀",
+      "isManuale": true
+    },
+    {
+      "punti": 5,
+      "descrizione": "+5 punti per gol segnato dal portiere",
+      "nome": "🧤 Gol Portiere 🥅🦅",
+      "id": "gen_gol_portiere"
+    },
+    {
+      "descrizione": "+2 punti per assist per gol a porta (quasi) spalancata",
+      "id": "gen_assist_merda",
+      "nome": "👼 Assist per gol facile 📉",
+      "punti": 2
+    },
+    {
+      "punti": 5,
+      "descrizione": "+5 punti per rete inviolata (Clean Sheet)",
+      "nome": "🧤 Portiere Imbattuto 🛑",
+      "id": "gen_imbattuto"
+    },
+    {
+      "punti": 2,
+      "descrizione": "+2 punti se il portiere subisce meno di 3 gol nel match",
+      "id": "gen_subisce_meno_3",
+      "nome": "🧤 Portiere subisce 2 gol 🛡️"
+    },
+    {
+      "nome": "🧤 Rigore Parato 🧤🥅",
+      "id": "gen_rigore_parato",
+      "descrizione": "+5 punti per rigore parato dal portiere",
+      "punti": 5
+    },
+    {
+      "punti": 3,
+      "descrizione": "+3 punti per tiro libero parato dal portiere",
+      "nome": "🧤 Tiro Libero Parato ⛔",
+      "id": "gen_tiro_libero_parato"
+    },
+    {
+      "punti": 3,
+      "nome": "👑 MVP Uccheddu 🥇",
+      "id": "gen_mvp_uccheddu",
+      "descrizione": "+3 punti come miglior giocatore eletto d'ufficio"
+    },
+    {
+      "punti": 3,
+      "descrizione": "+3 punti come miglior giocatore votato sui canali social",
+      "id": "gen_mvp_social",
+      "nome": "📱 MVP Social 🗳️"
+    },
+    {
+      "punti": 1,
+      "nome": "📰 Nominato nelle Pagelle 📝",
+      "id": "gen_pagelle",
+      "descrizione": "+1 punto per menzione d'onore o alta valutazione in pagella"
+    },
+    {
+      "punti": 1,
+      "nome": "🎬 Nominato negli Highlights 📽️",
+      "id": "gen_highlights",
+      "descrizione": "+1 punto per presenza nelle azioni salienti del video"
+    },
+    {
+      "punti": 2,
+      "id": "gen_porta_tifosi",
+      "nome": "👥 Porta tifosi alla partita 📢",
+      "descrizione": "+2 punti per aver portato amici o supporter sugli spalti"
+    },
+    {
+      "punti": 3,
+      "nome": "👩 Porta tifosa alla partita 💖",
+      "id": "gen_porta_tifosa",
+      "descrizione": "+3 punti per aver portato supporter femminile al campo"
+    },
+    {
+      "punti": -5,
+      "descrizione": "-5 punti per mancato pagamento della quota campo in giornata (Malus)",
+      "id": "gen_malus_quota",
+      "nome": "💸 Dimentica la Quota ❌"
+    },
+    {
+      "id": "gen_malus_indumento",
+      "nome": "👕 Sbaglia completino (cumulativo) ⚠️",
+      "descrizione": "-5 punti per indumento scompagnato o errato (Malus)",
+      "punti": -5
+    },
+    {
+      "punti": -3,
+      "id": "gen_malus_ritardo",
+      "nome": "⏰ Ritardo > 5 minuti ⏳",
+      "descrizione": "-3 punti per arrivo in ritardo oltre l'orario di convocazione (Malus)"
+    },
+    {
+      "nome": "💥 Rigore Sbagliato 🥅❌",
+      "id": "gen_malus_rigore_sbagliato",
+      "descrizione": "-5 punti per rigore calciato fuori o parato (Malus)",
+      "punti": -5
+    },
+    {
+      "punti": -3,
+      "descrizione": "-3 punti per tiro libero fallito o parato (Malus)",
+      "nome": "💥 Tiro Libero Sbagliato ❌",
+      "id": "gen_malus_tiro_libero_sbagliato"
+    },
+    {
+      "punti": -1,
+      "id": "gen_malus_ammonizione",
+      "nome": "🟨 Ammonizione Extra ⚠️",
+      "descrizione": "-1 punto per ammonizione (Malus addizionale/correttivo)"
+    },
+    {
+      "punti": -3,
+      "nome": "🟥 Espulsione Extra 🔴",
+      "id": "gen_malus_espulsione",
+      "descrizione": "-3 punti per cartellino rosso diretto o doppia ammonizione (Malus addizionale/correttivo)"
+    },
+    {
+      "id": "gen_protesta_arbitro",
+      "nome": "🗣️ Protesta con Arbitro 🦓",
+      "descrizione": "-2 punti per proteste plateali col direttore di gara (Malus)",
+      "punti": -2
+    },
+    {
+      "punti": -2,
+      "descrizione": "-5 punti per scenate o tensioni con compagni/allenatore (Malus)",
+      "nome": "🤬 Protesta contro propria panchina 📣",
+      "id": "gen_protesta_panchina"
+    },
+    {
+      "punti": -3,
+      "descrizione": "-3 punti per gesti violenti, insolenze o danni (calci alle porte/panchine) (Malus)",
+      "id": "gen_comportamento_non_easy",
+      "nome": "🔨 Comportamento Non Easy 🚫🥊"
+    },
+    {
+      "descrizione": "+5 punti se viene a tifare a bordo campo anche se non è stato convocato.",
+      "nome": "❤️ Bonus Vecchio Cuore",
+      "id": "gen_vecchio_cuore",
+      "punti": 5
+    },
+    {
+      "id": "gen_esultanza",
+      "nome": "🎉 Bonus Esultanza",
+      "descrizione": "+1 punto se festeggia dopo aver segnato un gol.",
+      "punti": 1
+    },
+    {
+      "descrizione": "+2 punti se abbraccia o dà il cinque a un compagno dopo un gol.",
+      "nome": "🫂 Bonus Esultanza di Gruppo",
+      "id": "gen_esultanza_gruppo",
+      "punti": 2
+    },
+    {
+      "descrizione": "+2 punti se mette like al post del Match Day.",
+      "id": "gen_social_reaction",
+      "nome": "👍 Bonus Reaction (Social)",
+      "punti": 2
+    },
+    {
+      "punti": 3,
+      "descrizione": "+3 punti se ricondivide il post del Match Day nelle proprie storie IG.",
+      "nome": "📤 Bonus Share Base (Social)",
+      "id": "gen_social_share"
+    },
+    {
+      "id": "gen_social_motivation",
+      "nome": "🔥 Bonus Influencer (Social)",
+      "descrizione": "+5 punti se ricondivide il post nelle storie aggiungendo un dettaglio (testo, emoji o GIF).",
+      "punti": 5
+    },
+    {
+      "punti": 2,
+      "nome": "🏷️ Bonus #adv (Social)",
+      "id": "gen_social_adv",
+      "descrizione": "+2 punti se pubblica una storia usando l'hashtag #FantaEasyRigging."
+    },
+    {
+      "punti": 3,
+      "descrizione": "+3 punti se pubblica una storia in cui dà il cinque al Presidente Pinna (+1 pt extra al Presidente se reposta la storia).",
+      "id": "gen_social_highfive",
+      "nome": "🖐️ Bonus High Five (Social)"
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Pinna",
+      "descrizione": "+3 punti. I Gol o gli Assist speciali presidenziali",
+      "id": "pinna_presidenziale",
+      "punti": 3,
+      "nome": "Bonus presidenziali 👑"
+    },
+    {
+      "descrizione": "+5 punti se gioca almeno 1’ nonostante gli infortuni",
+      "punti": 5,
+      "id": "pinna_lazzaro",
+      "nome": "Bonus Lazzaro 🩹",
+      "giocatoreId": "Pinna",
+      "isPersonale": true
+    },
+    {
+      "id": "orlandini_leggenda",
+      "nome": "Bonus Leggende 🌟",
+      "descrizione": "+3 punti per ogni Gol segnato",
+      "punti": 3,
+      "giocatoreId": "Orlandini",
+      "isPersonale": true
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Orlandini",
+      "descrizione": "+2 punti se ci degna della sua presenza al campo",
+      "id": "orlandini_buon_pastore",
+      "punti": 2,
+      "nome": "Bonus buon pastore 🐑"
+    },
+    {
+      "isPersonale": true,
+      "punti": 2,
+      "descrizione": "+2 punti se posta foto in fast food nei giorni antecedenti la partita (tag alla squadra)",
+      "nome": "McBonus 🍟",
+      "id": "pittiu_mcbonus",
+      "giocatoreId": "Pittiu"
+    },
+    {
+      "giocatoreId": "Pittiu",
+      "punti": 1,
+      "nome": "Bonus survivor 🛡️",
+      "descrizione": "+1 punto se conclude partita senza infortuni",
+      "id": "pittiu_survivor",
+      "isPersonale": true
+    },
+    {
+      "id": "pippia_papa",
+      "punti": 2,
+      "descrizione": "+2 punti se si presenta al campo in qualsiasi veste dopo la nascita del figlio",
+      "nome": "Bonus papà 🍼",
+      "giocatoreId": "Pippia",
+      "isPersonale": true
+    },
+    {
+      "giocatoreId": "Pippia",
+      "nome": "Bonus baby supporter 👶",
+      "punti": 5,
+      "descrizione": "+5 punti se pubblica story del figlio e tagga la società",
+      "id": "pippia_baby_supporter",
+      "isPersonale": true
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Pippia",
+      "nome": "Bonus baby supporter + Maglia/Logo 👕👕",
+      "punti": 10,
+      "descrizione": "+10 punti se compaiono maglia o logo della squadra",
+      "id": "pippia_baby_supporter_jersey"
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Scarpellini",
+      "descrizione": "+1 punto se si presenta al campo con ginocchiera",
+      "id": "scarpellini_tutela",
+      "punti": 1,
+      "nome": "Bonus tutela 🦵"
+    },
+    {
+      "descrizione": "+1 punto se cita Aldo, Giovanni e Giacomo prima, durante o dopo la partita",
+      "nome": "Bonus Tu lo conosci il trio 🎭",
+      "id": "scarpellini_trio",
+      "punti": 1,
+      "giocatoreId": "Scarpellini",
+      "isPersonale": true
+    },
+    {
+      "isPersonale": true,
+      "nome": "Bonus contabile 📊",
+      "id": "palmas_contabile",
+      "punti": 3,
+      "descrizione": "+3 punti se i calcoli a fine partita sono corretti e corrispondono coi saldi",
+      "giocatoreId": "Palmas"
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Palmas",
+      "descrizione": "+1 punto se sta in panchina senza lamentarsi del minutaggio",
+      "id": "palmas_reietto",
+      "punti": 1,
+      "nome": "Bonus serafico 🥱"
+    },
+    {
+      "giocatoreId": "Mulas",
+      "id": "mulas_chiquita",
+      "punti": 3,
+      "descrizione": "+3 punti se addenta una banana durante la partita",
+      "nome": "Bonus Chiquita 🍌",
+      "isPersonale": true
+    },
+    {
+      "giocatoreId": "Mulas",
+      "nome": "Bonus Michael Phelps 🏊🏻‍♂️ ",
+      "id": "mulas_levissima",
+      "descrizione": "+1 punto se si presenta al campo con i suoi occhialini da nuotatore",
+      "punti": 1,
+      "isPersonale": true
+    },
+    {
+      "id": "alimonda_mediterraneo",
+      "punti": 1,
+      "nome": "Bonus Mediterraneo 🫂",
+      "descrizione": "+1 punto se abbraccia Mulas dopo il gol",
+      "giocatoreId": "Alimonda",
+      "isPersonale": true
+    },
+    {
+      "isPersonale": true,
+      "id": "alimonda_fabrillazione",
+      "punti": 1,
+      "descrizione": "+1 punto se manda almeno 3 messaggi nella chat della squadra nel match day",
+      "nome": "Bonus Fabrillazione 💬",
+      "giocatoreId": "Alimonda"
+    },
+    {
+      "giocatoreId": "Lauro",
+      "punti": 1,
+      "nome": "Bonus Altissima, Purissima, Levissima 🪣",
+      "descrizione": "+1 punto se porta in panchina la sua borraccia da 10 litri",
+      "id": "lauro_bibitone",
+      "isPersonale": true
+    },
+    {
+      "nome": "Bonus divo della grigliata 😎",
+      "descrizione": "+1 punto se si presenta al campo con gli occhiali da sole",
+      "id": "lauro_divo",
+      "punti": 1,
+      "giocatoreId": "Lauro",
+      "isPersonale": true
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Addis",
+      "descrizione": "+3 punti se si presenta al campo dopo le ore 21:00",
+      "punti": 3,
+      "id": "addis_coprifuoco",
+      "nome": "Bonus coprifuoco 🌃"
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Addis",
+      "nome": "Bonus rischiatutto 🎲",
+      "id": "addis_rischiatutto",
+      "punti": 5,
+      "descrizione": "+5 punti se si trattiene al campo dopo il match"
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Scattu",
+      "punti": 1,
+      "id": "scattu_arrotino",
+      "descrizione": "+1 punto se carica la squadra con un suo classico urlaccio prima, durante o dopo la partita",
+      "nome": "Bonus È arrivato l'arrotino 📢"
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Scattu",
+      "descrizione": "+3 punti se si presenta al campo sobrio sorseggiando una bottiglietta d’acqua",
+      "nome": "Bonus sobrietà 🥛",
+      "id": "scattu_sobrieta",
+      "punti": 3
+    },
+    {
+      "giocatoreId": "Bayre",
+      "id": "bayre_jeff_turner",
+      "descrizione": "+5 punti se si presenta in panchina in qualsiasi veste con una birra in mano",
+      "punti": 5,
+      "nome": "Bonus Jeff Turner 🍺",
+      "isPersonale": true
+    },
+    {
+      "giocatoreId": "Bayre",
+      "punti": 10,
+      "descrizione": "+10 punti se gioca almeno 1’",
+      "nome": "Bonus redivivo 🧟",
+      "id": "bayre_redivivo",
+      "isPersonale": true
+    },
+    {
+      "giocatoreId": "Carrone",
+      "id": "carrone_polemichele",
+      "descrizione": "+7 punti se chiude una partita senza lamentarsi con l’arbitro",
+      "punti": 7,
+      "nome": "Bonus PoleMichele 🤬🚫",
+      "isPersonale": true
+    },
+    {
+      "isPersonale": true,
+      "punti": 1,
+      "descrizione": "+1 punto se nel riscaldamento, anziché tirare, fa almeno 2 giri di campo di corsa",
+      "nome": "Bonus atleta provetto 🏃‍♂️",
+      "id": "carrone_atleta",
+      "giocatoreId": "Carrone"
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Conti",
+      "nome": "Bonus memoria di ferro 🧠",
+      "id": "conti_memoria_ferro",
+      "punti": 1,
+      "descrizione": "+1 punto se chiude una partita senza sbagliare nomi dei compagni"
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Conti",
+      "descrizione": "+1 punto se nel match day conferma la sua presenza con messaggio in chat",
+      "nome": "Bonus fedeltà 🫡",
+      "punti": 1,
+      "id": "conti_fedelta"
+    },
+    {
+      "giocatoreId": "Mattana",
+      "punti": 1,
+      "descrizione": "+1 punto se si presenta al campo in bicicletta",
+      "id": "mattana_pogacar",
+      "nome": "Bonus Pogačar 🚲",
+      "isPersonale": true
+    },
+    {
+      "giocatoreId": "Mattana",
+      "punti": 1,
+      "descrizione": "+1 punto se prima o dopo il match effettua un riepilogo delle sue statistiche",
+      "nome": "Bonus Opta(na) 📊",
+      "id": "mattana_optana",
+      "isPersonale": true
+    },
+    {
+      "isPersonale": true,
+      "punti": 5,
+      "nome": "Bonus Piscina 🏊‍♂️",
+      "descrizione": "+5 punti se invita un compagno a non 'buttarsi' o simulare in partita",
+      "id": "garau_piscina",
+      "giocatoreId": "Garau"
+    },
+    {
+      "giocatoreId": "Garau",
+      "id": "garau_fedelta",
+      "nome": "Bonus Fedeltà 🤝",
+      "punti": 3,
+      "descrizione": "+3 punti se dà la disponibilità a giocare, anche se c'è già l'adesione di Mulas",
+      "isPersonale": true
+    },
+    {
+      "isPersonale": false,
+      "id": "bonus_1780841558931",
+      "descrizione": "-1 punto se cronista/pagellista sbaglia nome e/o cognome",
+      "punti": -1,
+      "nome": "Di Malus in peggio 😢"
+    },
+    {
+      "punti": -1,
+      "descrizione": "-1 punto se cronista/pagellista sbaglia nome della squadra (valido solo per i convocati)",
+      "nome": "Malus IzyReggae 🚫",
+      "id": "bonus_1780841561568",
+      "isPersonale": false
+    },
+    {
+      "isPersonale": false,
+      "nome": "As pigau malus 🤬",
+      "descrizione": "-5 punti se litiga con un compagno di squadra e lascia il campo senza chiarire",
+      "punti": -5,
+      "id": "bonus_1780842086000"
+    },
+    {
+      "isPersonale": false,
+      "punti": 1,
+      "nome": "Bonus Disponibilità ❤️🖤",
+      "id": "bonus_1780863339587",
+      "descrizione": "+1 punto se dà la disponibilità per la partita nel sondaggio presente nella chat di squadra (la disponibilità deve essere effettiva)"
+    },
+    {
+      "isPersonale": false,
+      "nome": "Malus Sbadatelli 🤦‍♂️",
+      "descrizione": "-3 punti se dopo il reminder in chat del presidente chiede quando e/o dove si gioca",
+      "id": "bonus_1780917716152",
+      "punti": -3
+    },
+    {
+      "punti": -5,
+      "nome": "Malusaldo 💸",
+      "id": "bonus_1780917901081",
+      "descrizione": "-5 punti se dimentica la quota a casa e va in rosso",
+      "isPersonale": false
+    },
+    {
+      "id": "bonus_1780917980734",
+      "descrizione": "-10 punti se rifila un pacco dopo la pubblicazione della lista dei convocati",
+      "nome": "Malus BRT 📦",
+      "punti": -10,
+      "isPersonale": false
+    },
+    {
+      "isPersonale": false,
+      "nome": "Google Malus 📍",
+      "id": "bonus_1780918082492",
+      "descrizione": "-5 punti se sostiene di aver sbagliato campo",
+      "punti": -5
+    },
+    {
+      "isPersonale": false,
+      "descrizione": "-5 punti se sostiene di aver sbagliato orario del match",
+      "punti": -5,
+      "id": "bonus_1780918144185",
+      "nome": "Malus o'clock ⏰"
+    },
+    {
+      "nome": "Bonus All you need is love ❣️",
+      "punti": 2,
+      "descrizione": "+2 punti se dedica il gol a fidanzata presente in tribuna (cumulativo col bonus esultanza)",
+      "id": "bonus_1780918615852",
+      "isPersonale": false
+    },
+    {
+      "isPersonale": false,
+      "id": "bonus_1780918799128",
+      "nome": "Bonus Miguel Ángel Guerrero 🥅📹",
+      "punti": 2,
+      "descrizione": "+2 punti se coinvolge i compagni in esultanza davanti alla telecamera (l'esultanza deve comparire negli highlights, cumulativo col bonus esultanza)"
+    },
+    {
+      "isPersonale": false,
+      "punti": 1,
+      "nome": "Bonus trenino del Bari ",
+      "id": "bonus_1780918869813",
+      "descrizione": "+1 punto se si lascia coinvolgere da compagno in esultanza davanti alla telecamera (l'esultanza deve comparire negli highlights, cumulativo col bonus esultanza)"
+    },
+    {
+      "isPersonale": false,
+      "punti": 2,
+      "nome": "Bonus terzo tempo 🍻",
+      "descrizione": "+2 punti se offre da bere dopo la partita (se offre in compagnia di altri compagni, il bonus viene esteso a tutti i generosi)",
+      "id": "bonus_1780918968021"
+    },
+    {
+      "isPersonale": false,
+      "descrizione": "+4 punti se si trattiene al campo dopo la partita",
+      "punti": 4,
+      "nome": "Bonus Més que un club 😎",
+      "id": "bonus_1780919041304"
+    },
+    {
+      "isPersonale": false,
+      "id": "bonus_1780919055788",
+      "nome": "Bonus Guardiano della notte 🌝",
+      "descrizione": "+1 punto se è l'ultimo o uno degli ultimi insieme ai compagni ad andarsene dal centro sportivo",
+      "punti": 1
+    },
+    {
+      "id": "bonus_1780919206691",
+      "nome": "Bonusaldo 😇",
+      "descrizione": "+1 punto se è in attivo nel saldo dopo il match",
+      "punti": 1,
+      "isPersonale": false
+    },
+    {
+      "punti": 3,
+      "descrizione": "+3 punti se il suo saldo dopo il match arriva almeno a € 5,00",
+      "nome": "Bonus cashback",
+      "id": "bonus_1780919270439",
+      "isPersonale": false
+    },
+    {
+      "isPersonale": false,
+      "id": "bonus_1780919271374",
+      "descrizione": "+5 punti se il suo saldo dopo il match arriva almeno a € 10,00",
+      "punti": 5,
+      "nome": "Bonus cashback gold"
+    },
+    {
+      "punti": -3,
+      "descrizione": "-3 punti se esulta in modo polemico verso un compagno dopo il gol",
+      "id": "bonus_1780919272646",
+      "nome": "Malus Porcella 👂👋",
+      "isPersonale": false
+    },
+    {
+      "isPersonale": false,
+      "id": "bonus_1780920233875",
+      "punti": 3,
+      "descrizione": "+3 al portiere se subisce un solo gol",
+      "nome": "Portiere (quasi) imbattuto 🧤"
+    },
+    {
+      "id": "bonus_1780920234719",
+      "descrizione": "-2 al portiere se subisce 4 gol",
+      "punti": -2,
+      "nome": "Portiere mani bucate 😵‍💫",
+      "isPersonale": false
+    },
+    {
+      "isPersonale": false,
+      "descrizione": "-3 punti al portiere se subisce 5 o più gol",
+      "punti": -3,
+      "nome": "Portiere paperetta 🦆",
+      "id": "bonus_1780920403037"
+    },
+    {
+      "isPersonale": false,
+      "nome": "Bonus VIP 👑 ",
+      "descrizione": "+2 punti se viene nominato nel resoconto settimanale di AT League",
+      "id": "bonus_1780951036015",
+      "punti": 2
+    },
+    {
+      "isPersonale": false,
+      "punti": 1,
+      "nome": "Bonus motivazionale 💪",
+      "descrizione": "+1 punto se motiva la squadra con un messaggio in chat nel giorno della partita",
+      "id": "bonus_1781001237055"
+    },
+    {
+      "isPersonale": false,
+      "descrizione": "+2 punti se viene a fare riscaldamento attivo con la squadra e poi non entra in campo per scelta tecnica",
+      "punti": 2,
+      "nome": "Bonus preparazione atletica 🏋️‍♀️",
+      "id": "bonus_1781001504715"
+    },
+    {
+      "descrizione": "+10 punti se viene richiamato all'ultimo momento e accetta di far parte della lista convocati, pronto a scendere in campo",
+      "nome": "Bonus salvagente 🛟 ",
+      "id": "bonus_1781028245748",
+      "punti": 10,
+      "isPersonale": false
+    },
+    {
+      "id": "bonus_1781028581619",
+      "punti": 1,
+      "nome": "Bonus vice cassiere 🪙 ",
+      "descrizione": "+1 punto a chi, in assenza del cassiere, raccoglie le quote, le dà all'arbitro e non sbaglia i saldi",
+      "isPersonale": false
+    },
+    {
+      "id": "bonus_1781075580791",
+      "descrizione": "+3 punti se eletto miglior portiere del match da AT League",
+      "punti": 3,
+      "nome": "Bonus Best GK AT League ⭐🧤",
+      "isPersonale": false
+    },
+    {
+      "isPersonale": false,
+      "descrizione": " +1 gol laterale",
+      "nome": "⚽ Gol Laterale 🚀",
+      "punti": 1,
+      "id": "bonus_1781113120417"
+    },
+    {
+      "isPersonale": false,
+      "giocatoreId": "",
+      "descrizione": "+3 punti al presidente che raddoppia i suoi bonus",
+      "nome": "1° Bonus Presidenziale ",
+      "id": "bonus_1781113156113",
+      "punti": 3
+    },
+    {
+      "isPersonale": false,
+      "punti": 2,
+      "id": "bonus_1781188431024",
+      "descrizione": "+2 punti a chi trasforma un calcio di rigore",
+      "nome": "Bonus rigore trasformato ⛳"
+    },
+    {
+      "isPersonale": false,
+      "id": "bonus_1781188432165",
+      "nome": "Bonus libero trasformato 🏌️",
+      "descrizione": "+4 punti a chi trasforma un tiro libero",
+      "punti": 4
+    }
+  ],
+  "sessioneMercatoLibero": false,
+  "scadenzaMercatoLibero": null,
+  "backupsBozze": [
+    {
+      "id": "backup_1781164219752",
+      "createdAt": "11/06/2026, 09:50:19",
+      "idPartita": "rr7v8hx-mq4yvx2m",
+      "dettagliPartita": "09/06/2026 20:45, Le Serre vs SOS Auto",
+      "presents": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre",
+        "Alberto Garau",
+        "Federico Addis",
+        "Mario Conti",
+        "Matteo Scattu",
+        "Nicola Orlandini",
+        "Sergio Pippia"
+      ],
+      "payers": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre"
+      ],
+      "costo": "40",
+      "risultato": "6-2 (V)",
+      "note": "Primo tempo non particolarmente brillante, ma Carrone e Mattana, autore di una doppietta su due assist perfetti di Pittiu, permettono ai nostri di chiudere la prima frazione avanti 3-2.\nNella ripresa, complice la maggiore profondità della rosa, arrivati al campo con appena cinque uomini a disposizione, i nostri prendono il largo. A segno ancora Pittiu e Mattana, entrambi ottimamente serviti da Lauro. Il definitivo 6-2 porta la firma di Mulas, che dopo un irresistibile coast to coast deve solo spingere in rete un preciso assist di Pinna, per il più classico dei \"gol della merda\".",
+      "goals": {
+        "Enrico Mulas": "1",
+        "Giampaolo Mattana": "3",
+        "Lorenzo Pittiu": "1",
+        "Michele Carrone": "1"
+      },
+      "assists": {
+        "Lorenzo Pittiu": "2",
+        "Salvatore Roberto Pinna": "1",
+        "Stefano Michele Lauro": "2"
+      },
+      "yellows": {},
+      "reds": {},
+      "subAzione": {
+        "Enrico Mulas": "2"
+      },
+      "subRigore": {},
+      "subPiazzato": {},
+      "selectedBonuses": {
+        "Enrico Mulas": [
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "gen_gol_portiere",
+          "gen_subisce_meno_3",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919206691",
+          "mulas_chiquita",
+          "mulas_levissima",
+          "bonus_1781075580791"
+        ],
+        "Fabrizio Alimonda": [
+          "bonus_1780863339587",
+          "alimonda_fabrillazione",
+          "gen_porta_tifosa",
+          "bonus_1780919270439"
+        ],
+        "Giampaolo Mattana": [
+          "bonus_1780863339587",
+          "gen_gol_laterale",
+          "gen_mvp_social",
+          "gen_esultanza_gruppo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "mattana_optana",
+          "bonus_1780919206691",
+          "gen_mvp_uccheddu"
+        ],
+        "Lorenzo Pittiu": [
+          "bonus_1780863339587",
+          "pittiu_mcbonus",
+          "gen_social_adv",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_gol_laterale",
+          "gen_assist_extra",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "pittiu_survivor",
+          "bonus_1781113120417"
+        ],
+        "Manuel Palmas": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_share",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "palmas_reietto"
+        ],
+        "Marco Scarpellini": [
+          "bonus_1780863339587",
+          "gen_malus_ritardo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "scarpellini_tutela",
+          "scarpellini_trio"
+        ],
+        "Michele Carrone": [
+          "bonus_1780863339587",
+          "gen_social_share",
+          "gen_social_reaction",
+          "gen_gol_laterale",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "carrone_polemichele",
+          "bonus_1781113120417"
+        ],
+        "Salvatore Roberto Pinna": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "bonus_1780919271374",
+          "gen_assist_merda",
+          "gen_porta_tifosa",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1781028581619",
+          "pinna_presidenziale",
+          "pinna_lazzaro"
+        ],
+        "Stefano Michele Lauro": [
+          "bonus_1780917716152",
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_assist_extra",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "bonus_1780919270439",
+          "lauro_bibitone",
+          "lauro_divo"
+        ],
+        "Davide Bayre": [
+          "bonus_1780919041304",
+          "bonus_1780919270439",
+          "bonus_1781028245748",
+          "bayre_redivivo"
+        ],
+        "Matteo Scattu": [
+          "gen_social_reaction"
+        ],
+        "Sergio Pippia": [
+          "gen_social_adv",
+          "gen_social_motivation",
+          "gen_vecchio_cuore",
+          "gen_porta_tifosa",
+          "bonus_1780919041304",
+          "bonus_1781001237055"
+        ]
+      },
+      "malusBrtPlayers": {},
+      "statoPresenza": {
+        "Enrico Mulas": "giocato",
+        "Fabrizio Alimonda": "giocato",
+        "Giampaolo Mattana": "giocato",
+        "Lorenzo Pittiu": "giocato",
+        "Manuel Palmas": "giocato",
+        "Marco Scarpellini": "giocato",
+        "Michele Carrone": "giocato",
+        "Salvatore Roberto Pinna": "giocato",
+        "Stefano Michele Lauro": "giocato",
+        "Davide Bayre": "giocato",
+        "Alberto Garau": "assente",
+        "Federico Addis": "assente",
+        "Mario Conti": "assente",
+        "Matteo Scattu": "assente",
+        "Nicola Orlandini": "assente",
+        "Sergio Pippia": "assente"
+      },
+      "sostitutoDa": {
+        "Enrico Mulas": "",
+        "Fabrizio Alimonda": "",
+        "Giampaolo Mattana": "",
+        "Lorenzo Pittiu": "",
+        "Manuel Palmas": "",
+        "Marco Scarpellini": "",
+        "Michele Carrone": "",
+        "Salvatore Roberto Pinna": "",
+        "Stefano Michele Lauro": "",
+        "Davide Bayre": "",
+        "Alberto Garau": "",
+        "Federico Addis": "",
+        "Mario Conti": "",
+        "Matteo Scattu": "",
+        "Nicola Orlandini": "",
+        "Sergio Pippia": ""
+      },
+      "noEventsPlayers": {
+        "Fabrizio Alimonda": true,
+        "Manuel Palmas": true,
+        "Marco Scarpellini": true,
+        "Davide Bayre": true
+      },
+      "verifiedGeneric": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Nicola Orlandini": true
+      },
+      "verifiedPersonal": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Matteo Scattu": true,
+        "Nicola Orlandini": true,
+        "Sergio Pippia": true
+      }
+    },
+    {
+      "id": "backup_1781163504121",
+      "createdAt": "11/06/2026, 09:38:24",
+      "idPartita": "rr7v8hx-mq4yvx2m",
+      "dettagliPartita": "09/06/2026 20:45, Le Serre vs SOS Auto",
+      "presents": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre",
+        "Alberto Garau",
+        "Federico Addis",
+        "Mario Conti",
+        "Matteo Scattu",
+        "Nicola Orlandini",
+        "Sergio Pippia"
+      ],
+      "payers": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre"
+      ],
+      "costo": "40",
+      "risultato": "6-2 (V)",
+      "note": "Primo tempo non particolarmente brillante, ma Carrone e Mattana, autore di una doppietta su due assist perfetti di Pittiu, permettono ai nostri di chiudere la prima frazione avanti 3-2.\nNella ripresa, complice la maggiore profondità della rosa, arrivati al campo con appena cinque uomini a disposizione, i nostri prendono il largo. A segno ancora Pittiu e Mattana, entrambi ottimamente serviti da Lauro. Il definitivo 6-2 porta la firma di Mulas, che dopo un irresistibile coast to coast deve solo spingere in rete un preciso assist di Pinna, per il più classico dei \"gol della merda\".",
+      "goals": {
+        "Enrico Mulas": "1",
+        "Giampaolo Mattana": "3",
+        "Lorenzo Pittiu": "1",
+        "Michele Carrone": "1"
+      },
+      "assists": {
+        "Lorenzo Pittiu": "2",
+        "Salvatore Roberto Pinna": "1",
+        "Stefano Michele Lauro": "2"
+      },
+      "yellows": {},
+      "reds": {},
+      "subAzione": {
+        "Enrico Mulas": "2"
+      },
+      "subRigore": {},
+      "subPiazzato": {},
+      "selectedBonuses": {
+        "Enrico Mulas": [
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "gen_gol_portiere",
+          "gen_subisce_meno_3",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919206691",
+          "mulas_chiquita",
+          "mulas_levissima",
+          "bonus_1781075580791"
+        ],
+        "Fabrizio Alimonda": [
+          "bonus_1780863339587",
+          "alimonda_fabrillazione",
+          "gen_porta_tifosa",
+          "bonus_1780919270439"
+        ],
+        "Giampaolo Mattana": [
+          "bonus_1780863339587",
+          "gen_gol_laterale",
+          "gen_mvp_social",
+          "gen_esultanza_gruppo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "mattana_optana",
+          "bonus_1780919206691",
+          "gen_mvp_uccheddu"
+        ],
+        "Lorenzo Pittiu": [
+          "bonus_1780863339587",
+          "pittiu_mcbonus",
+          "gen_social_adv",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_gol_laterale",
+          "gen_assist_extra",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "pittiu_survivor",
+          "bonus_1781113120417"
+        ],
+        "Manuel Palmas": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_share",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "palmas_reietto"
+        ],
+        "Marco Scarpellini": [
+          "bonus_1780863339587",
+          "gen_malus_ritardo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "scarpellini_tutela",
+          "scarpellini_trio"
+        ],
+        "Michele Carrone": [
+          "bonus_1780863339587",
+          "gen_social_share",
+          "gen_social_reaction",
+          "gen_gol_laterale",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "carrone_polemichele",
+          "bonus_1781113120417"
+        ],
+        "Salvatore Roberto Pinna": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "bonus_1780919271374",
+          "gen_assist_merda",
+          "gen_porta_tifosa",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1781028581619",
+          "pinna_presidenziale",
+          "pinna_lazzaro"
+        ],
+        "Stefano Michele Lauro": [
+          "bonus_1780917716152",
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_assist_extra",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "bonus_1780919270439",
+          "lauro_bibitone",
+          "lauro_divo"
+        ],
+        "Davide Bayre": [
+          "bonus_1780919041304",
+          "bonus_1780919270439",
+          "bonus_1781028245748",
+          "bayre_redivivo"
+        ],
+        "Matteo Scattu": [
+          "gen_social_reaction"
+        ],
+        "Sergio Pippia": [
+          "gen_social_adv",
+          "gen_social_motivation",
+          "gen_vecchio_cuore",
+          "gen_porta_tifosa",
+          "bonus_1780919041304",
+          "bonus_1781001237055"
+        ]
+      },
+      "malusBrtPlayers": {},
+      "statoPresenza": {
+        "Enrico Mulas": "giocato",
+        "Fabrizio Alimonda": "giocato",
+        "Giampaolo Mattana": "giocato",
+        "Lorenzo Pittiu": "giocato",
+        "Manuel Palmas": "giocato",
+        "Marco Scarpellini": "giocato",
+        "Michele Carrone": "giocato",
+        "Salvatore Roberto Pinna": "giocato",
+        "Stefano Michele Lauro": "giocato",
+        "Davide Bayre": "giocato",
+        "Alberto Garau": "assente",
+        "Federico Addis": "assente",
+        "Mario Conti": "assente",
+        "Matteo Scattu": "assente",
+        "Nicola Orlandini": "assente",
+        "Sergio Pippia": "assente"
+      },
+      "sostitutoDa": {
+        "Enrico Mulas": "",
+        "Fabrizio Alimonda": "",
+        "Giampaolo Mattana": "",
+        "Lorenzo Pittiu": "",
+        "Manuel Palmas": "",
+        "Marco Scarpellini": "",
+        "Michele Carrone": "",
+        "Salvatore Roberto Pinna": "",
+        "Stefano Michele Lauro": "",
+        "Davide Bayre": "",
+        "Alberto Garau": "",
+        "Federico Addis": "",
+        "Mario Conti": "",
+        "Matteo Scattu": "",
+        "Nicola Orlandini": "",
+        "Sergio Pippia": ""
+      },
+      "noEventsPlayers": {
+        "Fabrizio Alimonda": true,
+        "Manuel Palmas": true,
+        "Marco Scarpellini": true,
+        "Davide Bayre": true
+      },
+      "verifiedGeneric": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Nicola Orlandini": true
+      },
+      "verifiedPersonal": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Matteo Scattu": true,
+        "Nicola Orlandini": true,
+        "Sergio Pippia": true
+      }
+    },
+    {
+      "id": "backup_1781163217185",
+      "createdAt": "11/06/2026, 09:33:37",
+      "idPartita": "rr7v8hx-mq4yvx2m",
+      "dettagliPartita": "09/06/2026 20:45, Le Serre vs SOS Auto",
+      "presents": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre",
+        "Alberto Garau",
+        "Federico Addis",
+        "Mario Conti",
+        "Matteo Scattu",
+        "Nicola Orlandini",
+        "Sergio Pippia"
+      ],
+      "payers": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre"
+      ],
+      "costo": "40",
+      "risultato": "6-2 (V)",
+      "note": "Primo tempo non particolarmente brillante, ma Carrone e Mattana, autore di una doppietta su due assist perfetti di Pittiu, permettono ai nostri di chiudere la prima frazione avanti 3-2.\nNella ripresa, complice la maggiore profondità della rosa, arrivati al campo con appena cinque uomini a disposizione, i nostri prendono il largo. A segno ancora Pittiu e Mattana, entrambi ottimamente serviti da Lauro. Il definitivo 6-2 porta la firma di Mulas, che dopo un irresistibile coast to coast deve solo spingere in rete un preciso assist di Pinna, per il più classico dei \"gol della merda\".",
+      "goals": {
+        "Enrico Mulas": "1",
+        "Giampaolo Mattana": "3",
+        "Lorenzo Pittiu": "1",
+        "Michele Carrone": "1"
+      },
+      "assists": {
+        "Lorenzo Pittiu": "2",
+        "Salvatore Roberto Pinna": "1",
+        "Stefano Michele Lauro": "2"
+      },
+      "yellows": {},
+      "reds": {},
+      "subAzione": {
+        "Enrico Mulas": "2"
+      },
+      "subRigore": {},
+      "subPiazzato": {},
+      "selectedBonuses": {
+        "Enrico Mulas": [
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "gen_gol_portiere",
+          "gen_subisce_meno_3",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919206691",
+          "mulas_chiquita",
+          "mulas_levissima",
+          "bonus_1781075580791"
+        ],
+        "Fabrizio Alimonda": [
+          "bonus_1780863339587",
+          "alimonda_fabrillazione",
+          "gen_porta_tifosa",
+          "bonus_1780919270439"
+        ],
+        "Giampaolo Mattana": [
+          "bonus_1780863339587",
+          "gen_gol_laterale",
+          "gen_mvp_social",
+          "gen_esultanza_gruppo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "mattana_optana",
+          "bonus_1780919206691",
+          "gen_mvp_uccheddu"
+        ],
+        "Lorenzo Pittiu": [
+          "bonus_1780863339587",
+          "pittiu_mcbonus",
+          "gen_social_adv",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_gol_laterale",
+          "gen_assist_extra",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "pittiu_survivor",
+          "bonus_1781113120417"
+        ],
+        "Manuel Palmas": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_share",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "palmas_reietto"
+        ],
+        "Marco Scarpellini": [
+          "bonus_1780863339587",
+          "gen_malus_ritardo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "scarpellini_tutela",
+          "scarpellini_trio"
+        ],
+        "Michele Carrone": [
+          "bonus_1780863339587",
+          "gen_social_share",
+          "gen_social_reaction",
+          "gen_gol_laterale",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "carrone_polemichele",
+          "bonus_1781113120417"
+        ],
+        "Salvatore Roberto Pinna": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "bonus_1780919271374",
+          "gen_assist_merda",
+          "gen_porta_tifosa",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1781028581619",
+          "pinna_presidenziale",
+          "pinna_lazzaro"
+        ],
+        "Stefano Michele Lauro": [
+          "bonus_1780917716152",
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_assist_extra",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "bonus_1780919270439",
+          "lauro_bibitone",
+          "lauro_divo"
+        ],
+        "Davide Bayre": [
+          "bonus_1780919041304",
+          "bonus_1780919270439",
+          "bonus_1781028245748",
+          "bayre_redivivo"
+        ],
+        "Matteo Scattu": [
+          "gen_social_reaction"
+        ],
+        "Sergio Pippia": [
+          "gen_social_adv",
+          "gen_social_motivation",
+          "gen_vecchio_cuore",
+          "gen_porta_tifosa",
+          "bonus_1780919041304",
+          "bonus_1781001237055"
+        ]
+      },
+      "malusBrtPlayers": {},
+      "statoPresenza": {
+        "Enrico Mulas": "giocato",
+        "Fabrizio Alimonda": "giocato",
+        "Giampaolo Mattana": "giocato",
+        "Lorenzo Pittiu": "giocato",
+        "Manuel Palmas": "giocato",
+        "Marco Scarpellini": "giocato",
+        "Michele Carrone": "giocato",
+        "Salvatore Roberto Pinna": "giocato",
+        "Stefano Michele Lauro": "giocato",
+        "Davide Bayre": "giocato",
+        "Alberto Garau": "assente",
+        "Federico Addis": "assente",
+        "Mario Conti": "assente",
+        "Matteo Scattu": "assente",
+        "Nicola Orlandini": "assente",
+        "Sergio Pippia": "assente"
+      },
+      "sostitutoDa": {
+        "Enrico Mulas": "",
+        "Fabrizio Alimonda": "",
+        "Giampaolo Mattana": "",
+        "Lorenzo Pittiu": "",
+        "Manuel Palmas": "",
+        "Marco Scarpellini": "",
+        "Michele Carrone": "",
+        "Salvatore Roberto Pinna": "",
+        "Stefano Michele Lauro": "",
+        "Davide Bayre": "",
+        "Alberto Garau": "",
+        "Federico Addis": "",
+        "Mario Conti": "",
+        "Matteo Scattu": "",
+        "Nicola Orlandini": "",
+        "Sergio Pippia": ""
+      },
+      "noEventsPlayers": {
+        "Fabrizio Alimonda": true,
+        "Manuel Palmas": true,
+        "Marco Scarpellini": true,
+        "Davide Bayre": true
+      },
+      "verifiedGeneric": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Nicola Orlandini": true
+      },
+      "verifiedPersonal": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Matteo Scattu": true,
+        "Nicola Orlandini": true,
+        "Sergio Pippia": true
+      }
+    },
+    {
+      "id": "backup_1781162955845",
+      "createdAt": "11/06/2026, 09:29:15",
+      "idPartita": "rr7v8hx-mq4yvx2m",
+      "dettagliPartita": "09/06/2026 20:45, Le Serre vs SOS Auto",
+      "presents": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre",
+        "Alberto Garau",
+        "Federico Addis",
+        "Mario Conti",
+        "Matteo Scattu",
+        "Nicola Orlandini",
+        "Sergio Pippia"
+      ],
+      "payers": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre"
+      ],
+      "costo": "40",
+      "risultato": "6-2 (V)",
+      "note": "Primo tempo non particolarmente brillante, ma Carrone e Mattana, autore di una doppietta su due assist perfetti di Pittiu, permettono ai nostri di chiudere la prima frazione avanti 3-2.\nNella ripresa, complice la maggiore profondità della rosa, arrivati al campo con appena cinque uomini a disposizione, i nostri prendono il largo. A segno ancora Pittiu e Mattana, entrambi ottimamente serviti da Lauro. Il definitivo 6-2 porta la firma di Mulas, che dopo un irresistibile coast to coast deve solo spingere in rete un preciso assist di Pinna, per il più classico dei \"gol della merda\".",
+      "goals": {
+        "Enrico Mulas": "1",
+        "Giampaolo Mattana": "3",
+        "Lorenzo Pittiu": "1",
+        "Michele Carrone": "1"
+      },
+      "assists": {
+        "Lorenzo Pittiu": "2",
+        "Salvatore Roberto Pinna": "1",
+        "Stefano Michele Lauro": "2"
+      },
+      "yellows": {},
+      "reds": {},
+      "subAzione": {
+        "Enrico Mulas": "2"
+      },
+      "subRigore": {},
+      "subPiazzato": {},
+      "selectedBonuses": {
+        "Enrico Mulas": [
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "gen_gol_portiere",
+          "gen_subisce_meno_3",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919206691",
+          "mulas_chiquita",
+          "mulas_levissima",
+          "bonus_1781075580791"
+        ],
+        "Fabrizio Alimonda": [
+          "bonus_1780863339587",
+          "alimonda_fabrillazione",
+          "gen_porta_tifosa",
+          "bonus_1780919270439"
+        ],
+        "Giampaolo Mattana": [
+          "bonus_1780863339587",
+          "gen_gol_laterale",
+          "gen_mvp_social",
+          "gen_esultanza_gruppo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "mattana_optana",
+          "bonus_1780919206691",
+          "gen_mvp_uccheddu"
+        ],
+        "Lorenzo Pittiu": [
+          "bonus_1780863339587",
+          "pittiu_mcbonus",
+          "gen_social_adv",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_gol_laterale",
+          "gen_assist_extra",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "pittiu_survivor",
+          "bonus_1781113120417"
+        ],
+        "Manuel Palmas": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_share",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "palmas_reietto"
+        ],
+        "Marco Scarpellini": [
+          "bonus_1780863339587",
+          "gen_malus_ritardo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "scarpellini_tutela",
+          "scarpellini_trio"
+        ],
+        "Michele Carrone": [
+          "bonus_1780863339587",
+          "gen_social_share",
+          "gen_social_reaction",
+          "gen_gol_laterale",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "carrone_polemichele",
+          "bonus_1781113120417"
+        ],
+        "Salvatore Roberto Pinna": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "bonus_1780919271374",
+          "gen_assist_merda",
+          "gen_porta_tifosa",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1781028581619",
+          "pinna_presidenziale",
+          "pinna_lazzaro"
+        ],
+        "Stefano Michele Lauro": [
+          "bonus_1780917716152",
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_assist_extra",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "bonus_1780919270439",
+          "lauro_bibitone",
+          "lauro_divo"
+        ],
+        "Davide Bayre": [
+          "bonus_1780919041304",
+          "bonus_1780919270439",
+          "bonus_1781028245748",
+          "bayre_redivivo"
+        ],
+        "Matteo Scattu": [
+          "gen_social_reaction"
+        ],
+        "Sergio Pippia": [
+          "gen_social_adv",
+          "gen_social_motivation",
+          "gen_vecchio_cuore",
+          "gen_porta_tifosa",
+          "bonus_1780919041304",
+          "bonus_1781001237055"
+        ]
+      },
+      "malusBrtPlayers": {},
+      "statoPresenza": {
+        "Enrico Mulas": "giocato",
+        "Fabrizio Alimonda": "giocato",
+        "Giampaolo Mattana": "giocato",
+        "Lorenzo Pittiu": "giocato",
+        "Manuel Palmas": "giocato",
+        "Marco Scarpellini": "giocato",
+        "Michele Carrone": "giocato",
+        "Salvatore Roberto Pinna": "giocato",
+        "Stefano Michele Lauro": "giocato",
+        "Davide Bayre": "giocato",
+        "Alberto Garau": "assente",
+        "Federico Addis": "assente",
+        "Mario Conti": "assente",
+        "Matteo Scattu": "assente",
+        "Nicola Orlandini": "assente",
+        "Sergio Pippia": "assente"
+      },
+      "sostitutoDa": {
+        "Enrico Mulas": "",
+        "Fabrizio Alimonda": "",
+        "Giampaolo Mattana": "",
+        "Lorenzo Pittiu": "",
+        "Manuel Palmas": "",
+        "Marco Scarpellini": "",
+        "Michele Carrone": "",
+        "Salvatore Roberto Pinna": "",
+        "Stefano Michele Lauro": "",
+        "Davide Bayre": "",
+        "Alberto Garau": "",
+        "Federico Addis": "",
+        "Mario Conti": "",
+        "Matteo Scattu": "",
+        "Nicola Orlandini": "",
+        "Sergio Pippia": ""
+      },
+      "noEventsPlayers": {
+        "Fabrizio Alimonda": true,
+        "Manuel Palmas": true,
+        "Marco Scarpellini": true,
+        "Davide Bayre": true
+      },
+      "verifiedGeneric": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Nicola Orlandini": true
+      },
+      "verifiedPersonal": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Matteo Scattu": true,
+        "Nicola Orlandini": true,
+        "Sergio Pippia": true
+      }
+    },
+    {
+      "id": "backup_1781162633569",
+      "createdAt": "11/06/2026, 09:23:53",
+      "idPartita": "rr7v8hx-mq4yvx2m",
+      "dettagliPartita": "09/06/2026 20:45, Le Serre vs SOS Auto",
+      "presents": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre",
+        "Alberto Garau",
+        "Federico Addis",
+        "Mario Conti",
+        "Matteo Scattu",
+        "Nicola Orlandini",
+        "Sergio Pippia"
+      ],
+      "payers": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre"
+      ],
+      "costo": "40",
+      "risultato": "6-2 (V)",
+      "note": "Primo tempo non particolarmente brillante, ma Carrone e Mattana, autore di una doppietta su due assist perfetti di Pittiu, permettono ai nostri di chiudere la prima frazione avanti 3-2.\nNella ripresa, complice la maggiore profondità della rosa, arrivati al campo con appena cinque uomini a disposizione, i nostri prendono il largo. A segno ancora Pittiu e Mattana, entrambi ottimamente serviti da Lauro. Il definitivo 6-2 porta la firma di Mulas, che dopo un irresistibile coast to coast deve solo spingere in rete un preciso assist di Pinna, per il più classico dei \"gol della merda\".",
+      "goals": {
+        "Enrico Mulas": "1",
+        "Giampaolo Mattana": "3",
+        "Lorenzo Pittiu": "1",
+        "Michele Carrone": "1"
+      },
+      "assists": {
+        "Lorenzo Pittiu": "2",
+        "Salvatore Roberto Pinna": "1",
+        "Stefano Michele Lauro": "2"
+      },
+      "yellows": {},
+      "reds": {},
+      "subAzione": {
+        "Enrico Mulas": "2"
+      },
+      "subRigore": {},
+      "subPiazzato": {},
+      "selectedBonuses": {
+        "Enrico Mulas": [
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "gen_gol_portiere",
+          "gen_subisce_meno_3",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919206691",
+          "mulas_chiquita",
+          "mulas_levissima",
+          "bonus_1781075580791"
+        ],
+        "Fabrizio Alimonda": [
+          "bonus_1780863339587",
+          "alimonda_fabrillazione",
+          "gen_porta_tifosa",
+          "bonus_1780919270439"
+        ],
+        "Giampaolo Mattana": [
+          "bonus_1780863339587",
+          "gen_gol_laterale",
+          "gen_mvp_social",
+          "gen_esultanza_gruppo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "mattana_optana",
+          "bonus_1780919206691",
+          "gen_mvp_uccheddu"
+        ],
+        "Lorenzo Pittiu": [
+          "bonus_1780863339587",
+          "pittiu_mcbonus",
+          "gen_social_adv",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_gol_laterale",
+          "gen_assist_extra",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "pittiu_survivor",
+          "bonus_1781113120417"
+        ],
+        "Manuel Palmas": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_share",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "palmas_reietto"
+        ],
+        "Marco Scarpellini": [
+          "bonus_1780863339587",
+          "gen_malus_ritardo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "scarpellini_tutela",
+          "scarpellini_trio"
+        ],
+        "Michele Carrone": [
+          "bonus_1780863339587",
+          "gen_social_share",
+          "gen_social_reaction",
+          "gen_gol_laterale",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "carrone_polemichele",
+          "bonus_1781113120417"
+        ],
+        "Salvatore Roberto Pinna": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "bonus_1780919271374",
+          "gen_assist_merda",
+          "gen_porta_tifosa",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1781028581619",
+          "pinna_presidenziale",
+          "pinna_lazzaro"
+        ],
+        "Stefano Michele Lauro": [
+          "bonus_1780917716152",
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_assist_extra",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "bonus_1780919270439",
+          "lauro_bibitone",
+          "lauro_divo"
+        ],
+        "Davide Bayre": [
+          "bonus_1780919041304",
+          "bonus_1780919270439",
+          "bonus_1781028245748",
+          "bayre_redivivo"
+        ],
+        "Matteo Scattu": [
+          "gen_social_reaction"
+        ],
+        "Sergio Pippia": [
+          "gen_social_adv",
+          "gen_social_motivation",
+          "gen_vecchio_cuore",
+          "gen_porta_tifosa",
+          "bonus_1780919041304",
+          "bonus_1781001237055"
+        ]
+      },
+      "malusBrtPlayers": {},
+      "statoPresenza": {
+        "Enrico Mulas": "giocato",
+        "Fabrizio Alimonda": "giocato",
+        "Giampaolo Mattana": "giocato",
+        "Lorenzo Pittiu": "giocato",
+        "Manuel Palmas": "giocato",
+        "Marco Scarpellini": "giocato",
+        "Michele Carrone": "giocato",
+        "Salvatore Roberto Pinna": "giocato",
+        "Stefano Michele Lauro": "giocato",
+        "Davide Bayre": "giocato",
+        "Alberto Garau": "assente",
+        "Federico Addis": "assente",
+        "Mario Conti": "assente",
+        "Matteo Scattu": "assente",
+        "Nicola Orlandini": "assente",
+        "Sergio Pippia": "assente"
+      },
+      "sostitutoDa": {
+        "Enrico Mulas": "",
+        "Fabrizio Alimonda": "",
+        "Giampaolo Mattana": "",
+        "Lorenzo Pittiu": "",
+        "Manuel Palmas": "",
+        "Marco Scarpellini": "",
+        "Michele Carrone": "",
+        "Salvatore Roberto Pinna": "",
+        "Stefano Michele Lauro": "",
+        "Davide Bayre": "",
+        "Alberto Garau": "",
+        "Federico Addis": "",
+        "Mario Conti": "",
+        "Matteo Scattu": "",
+        "Nicola Orlandini": "",
+        "Sergio Pippia": ""
+      },
+      "noEventsPlayers": {
+        "Fabrizio Alimonda": true,
+        "Manuel Palmas": true,
+        "Marco Scarpellini": true,
+        "Davide Bayre": true
+      },
+      "verifiedGeneric": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Nicola Orlandini": true
+      },
+      "verifiedPersonal": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Matteo Scattu": true,
+        "Nicola Orlandini": true,
+        "Sergio Pippia": true
+      }
+    },
+    {
+      "id": "backup_1781162629138",
+      "createdAt": "11/06/2026, 09:23:49",
+      "idPartita": "rr7v8hx-mq4yvx2m",
+      "dettagliPartita": "09/06/2026 20:45, Le Serre vs SOS Auto",
+      "presents": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre",
+        "Alberto Garau",
+        "Federico Addis",
+        "Mario Conti",
+        "Matteo Scattu",
+        "Nicola Orlandini",
+        "Sergio Pippia"
+      ],
+      "payers": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre"
+      ],
+      "costo": "40",
+      "risultato": "6-2 (V)",
+      "note": "Primo tempo non particolarmente brillante, ma Carrone e Mattana, autore di una doppietta su due assist perfetti di Pittiu, permettono ai nostri di chiudere la prima frazione avanti 3-2.\nNella ripresa, complice la maggiore profondità della rosa, arrivati al campo con appena cinque uomini a disposizione, i nostri prendono il largo. A segno ancora Pittiu e Mattana, entrambi ottimamente serviti da Lauro. Il definitivo 6-2 porta la firma di Mulas, che dopo un irresistibile coast to coast deve solo spingere in rete un preciso assist di Pinna, per il più classico dei \"gol della merda\".",
+      "goals": {
+        "Enrico Mulas": "1",
+        "Giampaolo Mattana": "3",
+        "Lorenzo Pittiu": "1",
+        "Michele Carrone": "1"
+      },
+      "assists": {
+        "Lorenzo Pittiu": "2",
+        "Salvatore Roberto Pinna": "1",
+        "Stefano Michele Lauro": "2"
+      },
+      "yellows": {},
+      "reds": {},
+      "subAzione": {
+        "Enrico Mulas": "2"
+      },
+      "subRigore": {},
+      "subPiazzato": {},
+      "selectedBonuses": {
+        "Enrico Mulas": [
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "gen_gol_portiere",
+          "gen_subisce_meno_3",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919206691",
+          "mulas_chiquita",
+          "mulas_levissima",
+          "bonus_1781075580791"
+        ],
+        "Fabrizio Alimonda": [
+          "bonus_1780863339587",
+          "alimonda_fabrillazione",
+          "gen_porta_tifosa",
+          "bonus_1780919270439"
+        ],
+        "Giampaolo Mattana": [
+          "bonus_1780863339587",
+          "gen_gol_laterale",
+          "gen_mvp_social",
+          "gen_esultanza_gruppo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "mattana_optana",
+          "bonus_1780919206691",
+          "gen_mvp_uccheddu"
+        ],
+        "Lorenzo Pittiu": [
+          "bonus_1780863339587",
+          "pittiu_mcbonus",
+          "gen_social_adv",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_gol_laterale",
+          "gen_assist_extra",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "pittiu_survivor",
+          "bonus_1781113120417"
+        ],
+        "Manuel Palmas": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_share",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "palmas_reietto"
+        ],
+        "Marco Scarpellini": [
+          "bonus_1780863339587",
+          "gen_malus_ritardo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "scarpellini_tutela",
+          "scarpellini_trio"
+        ],
+        "Michele Carrone": [
+          "bonus_1780863339587",
+          "gen_social_share",
+          "gen_social_reaction",
+          "gen_gol_laterale",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "carrone_polemichele",
+          "bonus_1781113120417"
+        ],
+        "Salvatore Roberto Pinna": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "bonus_1780919271374",
+          "gen_assist_merda",
+          "gen_porta_tifosa",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1781028581619",
+          "pinna_presidenziale",
+          "pinna_lazzaro"
+        ],
+        "Stefano Michele Lauro": [
+          "bonus_1780917716152",
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_assist_extra",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "bonus_1780919270439",
+          "lauro_bibitone",
+          "lauro_divo"
+        ],
+        "Davide Bayre": [
+          "bonus_1780919041304",
+          "bonus_1780919270439",
+          "bonus_1781028245748",
+          "bayre_redivivo"
+        ],
+        "Matteo Scattu": [
+          "gen_social_reaction"
+        ],
+        "Sergio Pippia": [
+          "gen_social_adv",
+          "gen_social_motivation",
+          "gen_vecchio_cuore",
+          "gen_porta_tifosa",
+          "bonus_1780919041304",
+          "bonus_1781001237055"
+        ]
+      },
+      "malusBrtPlayers": {},
+      "statoPresenza": {
+        "Enrico Mulas": "giocato",
+        "Fabrizio Alimonda": "giocato",
+        "Giampaolo Mattana": "giocato",
+        "Lorenzo Pittiu": "giocato",
+        "Manuel Palmas": "giocato",
+        "Marco Scarpellini": "giocato",
+        "Michele Carrone": "giocato",
+        "Salvatore Roberto Pinna": "giocato",
+        "Stefano Michele Lauro": "giocato",
+        "Davide Bayre": "giocato",
+        "Alberto Garau": "assente",
+        "Federico Addis": "assente",
+        "Mario Conti": "assente",
+        "Matteo Scattu": "assente",
+        "Nicola Orlandini": "assente",
+        "Sergio Pippia": "assente"
+      },
+      "sostitutoDa": {
+        "Enrico Mulas": "",
+        "Fabrizio Alimonda": "",
+        "Giampaolo Mattana": "",
+        "Lorenzo Pittiu": "",
+        "Manuel Palmas": "",
+        "Marco Scarpellini": "",
+        "Michele Carrone": "",
+        "Salvatore Roberto Pinna": "",
+        "Stefano Michele Lauro": "",
+        "Davide Bayre": "",
+        "Alberto Garau": "",
+        "Federico Addis": "",
+        "Mario Conti": "",
+        "Matteo Scattu": "",
+        "Nicola Orlandini": "",
+        "Sergio Pippia": ""
+      },
+      "noEventsPlayers": {
+        "Fabrizio Alimonda": true,
+        "Manuel Palmas": true,
+        "Marco Scarpellini": true,
+        "Davide Bayre": true
+      },
+      "verifiedGeneric": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Nicola Orlandini": true
+      },
+      "verifiedPersonal": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Matteo Scattu": true,
+        "Nicola Orlandini": true,
+        "Sergio Pippia": true
+      }
+    },
+    {
+      "id": "backup_1781161774759",
+      "createdAt": "11/06/2026, 09:09:34",
+      "idPartita": "rr7v8hx-mq4yvx2m",
+      "dettagliPartita": "09/06/2026 20:45, Le Serre vs SOS Auto",
+      "presents": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre",
+        "Alberto Garau",
+        "Federico Addis",
+        "Mario Conti",
+        "Matteo Scattu",
+        "Nicola Orlandini",
+        "Sergio Pippia"
+      ],
+      "payers": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre"
+      ],
+      "costo": "40",
+      "risultato": "6-2 (V)",
+      "note": "Primo tempo non particolarmente brillante, ma Carrone e Mattana, autore di una doppietta su due assist perfetti di Pittiu, permettono ai nostri di chiudere la prima frazione avanti 3-2.\nNella ripresa, complice la maggiore profondità della rosa, arrivati al campo con appena cinque uomini a disposizione, i nostri prendono il largo. A segno ancora Pittiu e Mattana, entrambi ottimamente serviti da Lauro. Il definitivo 6-2 porta la firma di Mulas, che dopo un irresistibile coast to coast deve solo spingere in rete un preciso assist di Pinna, per il più classico dei \"gol della merda\".",
+      "goals": {
+        "Enrico Mulas": "1",
+        "Giampaolo Mattana": "3",
+        "Lorenzo Pittiu": "1",
+        "Michele Carrone": "1"
+      },
+      "assists": {
+        "Lorenzo Pittiu": "2",
+        "Salvatore Roberto Pinna": "1",
+        "Stefano Michele Lauro": "2"
+      },
+      "yellows": {},
+      "reds": {},
+      "subAzione": {
+        "Enrico Mulas": "2"
+      },
+      "subRigore": {},
+      "subPiazzato": {},
+      "selectedBonuses": {
+        "Enrico Mulas": [
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "gen_gol_portiere",
+          "gen_subisce_meno_3",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919206691",
+          "mulas_chiquita",
+          "mulas_levissima",
+          "bonus_1781075580791"
+        ],
+        "Fabrizio Alimonda": [
+          "bonus_1780863339587",
+          "alimonda_fabrillazione",
+          "gen_porta_tifosa",
+          "bonus_1780919270439"
+        ],
+        "Giampaolo Mattana": [
+          "bonus_1780863339587",
+          "gen_gol_laterale",
+          "gen_mvp_social",
+          "gen_esultanza_gruppo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "mattana_optana",
+          "bonus_1780919206691",
+          "gen_mvp_uccheddu",
+          "gen_gol_pivot"
+        ],
+        "Lorenzo Pittiu": [
+          "bonus_1780863339587",
+          "pittiu_mcbonus",
+          "gen_social_adv",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_gol_laterale",
+          "gen_assist_extra",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "pittiu_survivor",
+          "bonus_1781113120417"
+        ],
+        "Manuel Palmas": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_share",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "palmas_reietto"
+        ],
+        "Marco Scarpellini": [
+          "bonus_1780863339587",
+          "gen_malus_ritardo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "scarpellini_tutela",
+          "scarpellini_trio"
+        ],
+        "Michele Carrone": [
+          "bonus_1780863339587",
+          "gen_social_share",
+          "gen_social_reaction",
+          "gen_gol_laterale",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "carrone_polemichele",
+          "bonus_1781113120417"
+        ],
+        "Salvatore Roberto Pinna": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "bonus_1780919271374",
+          "gen_assist_merda",
+          "gen_porta_tifosa",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1781028581619",
+          "pinna_presidenziale",
+          "pinna_lazzaro"
+        ],
+        "Stefano Michele Lauro": [
+          "bonus_1780917716152",
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_assist_extra",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "bonus_1780919270439",
+          "lauro_bibitone",
+          "lauro_divo"
+        ],
+        "Davide Bayre": [
+          "bonus_1780919041304",
+          "bonus_1780919270439",
+          "bonus_1781028245748",
+          "bayre_redivivo"
+        ],
+        "Matteo Scattu": [
+          "gen_social_reaction"
+        ],
+        "Sergio Pippia": [
+          "gen_social_adv",
+          "gen_social_motivation",
+          "gen_vecchio_cuore",
+          "gen_porta_tifosa",
+          "bonus_1780919041304",
+          "bonus_1781001237055"
+        ]
+      },
+      "malusBrtPlayers": {},
+      "statoPresenza": {
+        "Enrico Mulas": "giocato",
+        "Fabrizio Alimonda": "giocato",
+        "Giampaolo Mattana": "giocato",
+        "Lorenzo Pittiu": "giocato",
+        "Manuel Palmas": "giocato",
+        "Marco Scarpellini": "giocato",
+        "Michele Carrone": "giocato",
+        "Salvatore Roberto Pinna": "giocato",
+        "Stefano Michele Lauro": "giocato",
+        "Davide Bayre": "giocato",
+        "Alberto Garau": "assente",
+        "Federico Addis": "assente",
+        "Mario Conti": "assente",
+        "Matteo Scattu": "assente",
+        "Nicola Orlandini": "assente",
+        "Sergio Pippia": "assente"
+      },
+      "sostitutoDa": {
+        "Enrico Mulas": "",
+        "Fabrizio Alimonda": "",
+        "Giampaolo Mattana": "",
+        "Lorenzo Pittiu": "",
+        "Manuel Palmas": "",
+        "Marco Scarpellini": "",
+        "Michele Carrone": "",
+        "Salvatore Roberto Pinna": "",
+        "Stefano Michele Lauro": "",
+        "Davide Bayre": "",
+        "Alberto Garau": "",
+        "Federico Addis": "",
+        "Mario Conti": "",
+        "Matteo Scattu": "",
+        "Nicola Orlandini": "",
+        "Sergio Pippia": ""
+      },
+      "noEventsPlayers": {
+        "Fabrizio Alimonda": true,
+        "Manuel Palmas": true,
+        "Marco Scarpellini": true,
+        "Davide Bayre": true
+      },
+      "verifiedGeneric": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Nicola Orlandini": true
+      },
+      "verifiedPersonal": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Matteo Scattu": true,
+        "Nicola Orlandini": true,
+        "Sergio Pippia": true
+      }
+    }
+  ]
+}
