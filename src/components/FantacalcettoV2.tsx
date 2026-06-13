@@ -665,7 +665,7 @@ export default function FantacalcettoV2({
         // Calculate non-manual bonus points for bench when they are not subbed in
         const rBonusAttiviNonManuali = rBonusAttivi.filter(bId => {
           const bDef = (bonuses || DEFAULT_BONUSES).find(x => x.id === bId);
-          return bDef ? !isBonusManuale(bDef) : true;
+          return bDef ? (!isBonusManuale(bDef) && !bDef.richiedeIngressoInCampo) : true;
         });
         const bonusPtsNonManuali = r
           ? getPlayerBonusPointsForMatch(

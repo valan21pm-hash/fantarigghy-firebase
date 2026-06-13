@@ -306,6 +306,7 @@ export interface CustomBonusDef {
   giocatoreId?: string;
   isAutomatic?: boolean;
   isManuale?: boolean;
+  richiedeIngressoInCampo?: boolean;
 }
 
 export const getPlayerBonusKey = (nomeCompleto: string): string | null => {
@@ -361,7 +362,8 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       descrizione: "+5 punti se gioca almeno 1’ nonostante gli infortuni",
       punti: 5,
       isPersonale: true,
-      giocatoreId: "Pinna"
+      giocatoreId: "Pinna",
+      richiedeIngressoInCampo: true
     },
   ],
   Orlandini: [
@@ -398,7 +400,8 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       descrizione: "+1 punto se conclude partita senza infortuni",
       punti: 1,
       isPersonale: true,
-      giocatoreId: "Pittiu"
+      giocatoreId: "Pittiu",
+      richiedeIngressoInCampo: true
     },
   ],
   Pippia: [
@@ -568,7 +571,8 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       descrizione: "+10 punti se gioca almeno 1’",
       punti: 10,
       isPersonale: true,
-      giocatoreId: "Bayre"
+      giocatoreId: "Bayre",
+      richiedeIngressoInCampo: true
     },
   ],
   Carrone: [
@@ -650,41 +654,47 @@ export const GENERIC_BONUSES: CustomBonusDef[] = [
     id: "gen_gol_pivot",
     nome: "⚽ Gol Pivot 🎯",
     descrizione: "+3 punti per gol segnato in posizione di Pivot",
-    punti: 3
+    punti: 3,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_gol_laterale",
     nome: "⚽ Gol Laterale 🚀",
     descrizione: "+1 punto extra per gol segnato dalla fascia laterale",
     punti: 1,
-    isManuale: true
+    isManuale: true,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_gol_centrale",
     nome: "⚽ Gol Centrale 💣",
     descrizione: "+2 punti extra per gol segnato dalla zona centrale",
     punti: 2,
-    isManuale: true
+    isManuale: true,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_gol_portiere",
     nome: "🧤 Gol Portiere 🥅🦅",
     descrizione: "+5 punti extra per gol segnato dal portiere",
     punti: 5,
-    isManuale: true
+    isManuale: true,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_assist_extra",
     nome: "👟 Assist Extra ⭐",
     descrizione: "+1 punto per assist speciale o determinante",
-    punti: 1
+    punti: 1,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_assist_merda",
     nome: "💩 Assist per gol facile 📉",
     descrizione: "+3 punti per assist per gol facile, sporco o fortuito",
     punti: 3,
-    isManuale: true
+    isManuale: true,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_amm_extra",
@@ -692,7 +702,8 @@ export const GENERIC_BONUSES: CustomBonusDef[] = [
     descrizione: "-1 punto per ammonizione (Malus addizionale/correttivo)",
     punti: 0,
     moltiplicatoreAmm: -1,
-    isAutomatic: true
+    isAutomatic: true,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_esp_extra",
@@ -700,55 +711,64 @@ export const GENERIC_BONUSES: CustomBonusDef[] = [
     descrizione: "-3 punti per cartellino rosso diretto o doppia ammonizione (Malus addizionale/correttivo)",
     punti: 0,
     moltiplicatoreEsp: -3,
-    isAutomatic: true
+    isAutomatic: true,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_imbattuto",
     nome: "🧤 Portiere Imbattuto 🛑",
     descrizione: "+5 punti per rete inviolata (Clean Sheet)",
-    punti: 5
+    punti: 5,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_subisce_meno_3",
     nome: "🧤 Portiere subisce < 3 gol 🛡️",
     descrizione: "+3 punti se il portiere subisce meno di 3 gol nel match",
-    punti: 3
+    punti: 3,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_rigore_parato",
     nome: "🧤 Rigore Parato 🧤🥅",
     descrizione: "+5 punti per rigore parato dal portiere",
-    punti: 5
+    punti: 5,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_tiro_libero_parato",
     nome: "🧤 Tiro Libero Parato ⛔",
     descrizione: "+3 punti per tiro libero parato dal portiere",
-    punti: 3
+    punti: 3,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_mvp_uccheddu",
     nome: "👑 MVP Uccheddu 🥇",
     descrizione: "+3 punti come miglior giocatore eletto d'ufficio",
-    punti: 3
+    punti: 3,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_mvp_social",
     nome: "📱 MVP Social 🗳️",
     descrizione: "+5 punti come miglior giocatore votato sui canali social",
-    punti: 5
+    punti: 5,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_pagelle",
     nome: "📰 Nominato nelle Pagelle 📝",
     descrizione: "+1 punto per menzione d'onore o alta valutazione in pagella",
-    punti: 1
+    punti: 1,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_highlights",
     nome: "🎬 Nominato negli Highlights 📽️",
     descrizione: "+1 punto per presenza nelle azioni salienti del video",
-    punti: 1
+    punti: 1,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_porta_tifosi",
@@ -784,13 +804,15 @@ export const GENERIC_BONUSES: CustomBonusDef[] = [
     id: "gen_malus_rigore_sbagliato",
     nome: "💥 Rigore Sbagliato 🥅❌",
     descrizione: "-5 punti per rigore calciato fuori o parato (Malus)",
-    punti: -5
+    punti: -5,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_malus_tiro_libero_sbagliato",
     nome: "💥 Tiro Libero Sbagliato ❌",
     descrizione: "-3 punti per tiro libero fallito o parato (Malus)",
-    punti: -3
+    punti: -3,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_protesta_arbitro",
@@ -820,13 +842,15 @@ export const GENERIC_BONUSES: CustomBonusDef[] = [
     id: "gen_esultanza",
     nome: "🎉 Bonus Esultanza",
     descrizione: "+1 punto se festeggia dopo aver segnato un gol.",
-    punti: 1
+    punti: 1,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_esultanza_gruppo",
     nome: "🫂 Bonus Esultanza di Gruppo",
     descrizione: "+2 punti se abbraccia o dà il cinque a un compagno dopo un gol (cumulabile).",
-    punti: 2
+    punti: 2,
+    richiedeIngressoInCampo: true
   },
   {
     id: "gen_social_reaction",
