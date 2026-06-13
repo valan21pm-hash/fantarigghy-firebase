@@ -470,6 +470,7 @@ export default function Fantacalcetto({
       matchId: string;
       dettagli: string;
       risultato: string;
+      note?: string;
       puntiTotaliMatch: number;
       giocatoriKpi: {
         nome: string;
@@ -739,6 +740,7 @@ export default function Fantacalcetto({
         matchId: m.id,
         dettagli: m.dettagli,
         risultato: m.risultato || "N.D.",
+        note: m.note,
         puntiTotaliMatch: parseFloat(puntiTotaliMatch.toFixed(1)),
         giocatoriKpi,
       });
@@ -3074,18 +3076,32 @@ export default function Fantacalcetto({
                             </p>
 
                             {m.risultato ? (
-                              <div className="inline-flex items-center gap-2 bg-emerald-950/75 border border-emerald-900/60 rounded-lg px-2.5 py-1 mt-1 shadow-sm">
-                                <span className="text-[9.5px] text-emerald-400 uppercase tracking-widest font-black">
-                                  Risultato:
-                                </span>
-                                <span className="font-mono text-xs text-yellow-300 font-extrabold tracking-widest">
-                                  {m.risultato}
-                                </span>
+                              <div className="flex flex-col items-start gap-1 mt-1">
+                                <div className="inline-flex items-center gap-2 bg-emerald-950/75 border border-emerald-900/60 rounded-lg px-2.5 py-1 shadow-sm">
+                                  <span className="text-[9.5px] text-emerald-400 uppercase tracking-widest font-black">
+                                    Risultato:
+                                  </span>
+                                  <span className="font-mono text-xs text-yellow-300 font-extrabold tracking-widest">
+                                    {m.risultato}
+                                  </span>
+                                </div>
+                                {m.note && (
+                                  <div className="text-[10px] text-emerald-400/80 italic mt-0.5 max-w-sm">
+                                    <span className="font-semibold not-italic">Note:</span> {m.note}
+                                  </div>
+                                )}
                               </div>
                             ) : (
-                              <p className="text-[10px] text-emerald-500/70 italic">
-                                Risultato ufficiale non ancora pubblicato.
-                              </p>
+                              <div className="flex flex-col items-start gap-1 mt-1">
+                                <p className="text-[10px] text-emerald-500/70 italic">
+                                  Risultato ufficiale non ancora pubblicato.
+                                </p>
+                                {m.note && (
+                                  <div className="text-[10px] text-emerald-400/80 italic mt-0.5 max-w-sm">
+                                    <span className="font-semibold not-italic">Note:</span> {m.note}
+                                  </div>
+                                )}
+                              </div>
                             )}
                           </div>
 
@@ -5572,17 +5588,24 @@ function MatchBreakdownModal({
             <h3 className="text-sm font-black text-emerald-950 mb-1 leading-tight uppercase tracking-tight">
               ⚔️ {mb.dettagli}
             </h3>
-            <p className="text-xs text-emerald-700 font-extrabold flex items-center justify-between">
-              <span>
-                Risultato:{" "}
-                <span className="text-emerald-900 bg-emerald-100 px-1.5 py-0.5 rounded ml-1">
-                  {mb.risultato}
+            <div className="flex flex-col gap-1 mb-2">
+              <p className="text-xs text-emerald-700 font-extrabold flex items-center justify-between">
+                <span>
+                  Risultato:{" "}
+                  <span className="text-emerald-900 bg-emerald-100 px-1.5 py-0.5 rounded ml-1">
+                    {mb.risultato}
+                  </span>
                 </span>
-              </span>
-              <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-lg border border-yellow-300 font-black">
-                + {mb.puntiTotaliMatch} pt
-              </span>
-            </p>
+                <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-lg border border-yellow-300 font-black">
+                  + {mb.puntiTotaliMatch} pt
+                </span>
+              </p>
+              {mb.note && (
+                <div className="text-[10px] text-emerald-600/80 italic mt-0.5 max-h-16 overflow-y-auto w-full break-words">
+                  <span className="font-semibold not-italic">Note:</span> {mb.note}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
