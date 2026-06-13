@@ -1053,3 +1053,327 @@ export const getPlayerBonusBreakdownForMatch = (
   return breakdown;
 };
 
+export const getTeamMatchBreakdownList = (
+  team: Fantasquadra,
+  partiteChiuse: Partita[],
+  giocatori: Giocatore[],
+  bonuses: CustomBonusDef[] = DEFAULT_BONUSES
+) => {
+  const list: {
+    matchId: string;
+    dettagli: string;
+    risultato: string;
+    note?: string;
+    puntiTotaliMatch: number;
+    giocatoriKpi: {
+      nome: string;
+      gol: number;
+      assist: number;
+      amm: number;
+      rossi: number;
+      bonusPts: number;
+      fantaScore: number;
+      ruolo?: string;
+      stato?: string;
+      originalFantaScore?: number;
+      originalBonusPts?: number;
+      originalBonusBreakdownStr?: string;
+      bonusPtsNonManuali?: number;
+      bonusBreakdownStrNonManuali?: string;
+    }[];
+  }[] = [];
+
+  const nonAmichevoleMatches = (partiteChiuse || []).filter(
+    (m) =>
+      m.stato === "Chiusa" &&
+      m.inviatoFanta === true &&
+      !(m.dettagli || "").toLowerCase().includes("amichevole"),
+  );
+
+  for (const m of nonAmichevoleMatches) {
+    if (!m.referto) continue;
+
+    const giocatoriKpi: {
+      nome: string;
+      gol: number;
+      assist: number;
+      amm: number;
+      rossi: number;
+      bonusPts: number;
+      fantaScore: number;
+      ruolo?: string;
+      stato?: string;
+      originalFantaScore?: number;
+      originalBonusPts?: number;
+      originalBonusBreakdownStr?: string;
+      bonusPtsNonManuali?: number;
+      bonusBreakdownStrNonManuali?: string;
+    }[] = [];
+    let puntiTotaliMatch = 0;
+
+    const roster =
+      m.rosterSnapshot && m.rosterSnapshot[team.id]
+        ? m.rosterSnapshot[team.id]
+        : team.giocatoriSelezionati;
+
+    const starters = roster.slice(0, 3);
+    const benchPlayerName = roster[3];
+
+    const effectiveBonuses = m.bonusesSnapshot || bonuses;
+
+    const getPlayerInfo = (pName: string) => {
+      const r = m.referto!.find(
+        (x) => (x.snapshotGiocatore?.nome || x.nome).trim().toLowerCase() === pName.trim().toLowerCase(),
+      );
+
+      let played = false;
+      if (r) {
+        if (r.statoPresenza) {
+          played = r.statoPresenza === "giocato";
+        } else {
+          played = !!(
+            r.pagaQuota ||
+            r.gol > 0 ||
+            r.assist > 0 ||
+            r.amm > 0 ||
+            r.rossi > 0 ||
+            r.subitiAzione > 0 ||
+            r.subitiRigore > 0 ||
+            r.subitiPiazzato > 0 ||
+            (r.bonusAttivi && r.bonusAttivi.length > 0)
+          );
+        }
+      }
+
+      const rGol = r ? Number(r.gol) || 0 : 0;
+      const rAssist = r ? Number(r.assist) || 0 : 0;
+      const rAmm = r ? Number(r.amm) || 0 : 0;
+      const rEsp = r ? Number(r.rossi) || 0 : 0;
+      const rBonusAttivi = r ? r.bonusAttivi || [] : [];
+
+      const rSubitiAzione = r ? Number(r.subitiAzione) || 0 : 0;
+      const rSubitiRigore = r ? Number(r.subitiRigore) || 0 : 0;
+      const rSubitiPiazzato = r ? Number(r.subitiPiazzato) || 0 : 0;
+
+      const effectiveBonuses = m.bonusesSnapshot || bonuses;
+      const gInfoFallback = giocatori.find(g => g.nome.toLowerCase() === pName.toLowerCase());
+      const bonusPts = r
+        ? getPlayerBonusPointsForMatch(
+            pName,
+            rBonusAttivi,
+            rGol,
+            rAssist,
+            effectiveBonuses,
+            r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
+            rAmm,
+            rEsp,
+            r.bonusGolAccreditati
+          )
+        : 0;
+
+      const rBonusAttiviNonManuali = rBonusAttivi.filter(bId => {
+        const bDef = (effectiveBonuses || DEFAULT_BONUSES).find(x => x.id === bId);
+        return bDef ? (!isBonusManuale(bDef) && !bDef.richiedeIngressoInCampo) : true;
+      });
+      const bonusPtsNonManuali = r
+        ? getPlayerBonusPointsForMatch(
+            pName,
+            rBonusAttiviNonManuali,
+            rGol,
+            rAssist,
+            effectiveBonuses,
+            r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
+            rAmm,
+            rEsp,
+            r.bonusGolAccreditati
+          )
+        : 0;
+
+      let bonusBreakdownStr = "";
+      let bonusBreakdownStrNonManuali = "";
+
+      if (r) {
+        const breakdown = getPlayerBonusBreakdownForMatch(
+          pName,
+          rBonusAttivi,
+          rGol,
+          rAssist,
+          effectiveBonuses,
+          r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
+          rAmm,
+          rEsp,
+          r.bonusGolAccreditati
+        );
+        if (breakdown.length > 0) {
+          bonusBreakdownStr =
+            breakdown
+              .map(
+                (b) =>
+                  `${b.nome} (${b.puntiVal > 0 ? "+" : ""}${b.puntiVal})`,
+              )
+              .join(", ") + ` [Tot: ${bonusPts > 0 ? "+" : ""}${bonusPts}]`;
+        }
+
+        const breakdownNonManuali = getPlayerBonusBreakdownForMatch(
+          pName,
+          rBonusAttiviNonManuali,
+          rGol,
+          rAssist,
+          effectiveBonuses,
+          r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
+          rAmm,
+          rEsp,
+          r.bonusGolAccreditati
+        );
+        if (breakdownNonManuali.length > 0) {
+          bonusBreakdownStrNonManuali =
+            breakdownNonManuali
+              .map(
+                (b) =>
+                  `${b.nome} (${b.puntiVal > 0 ? "+" : ""}${b.puntiVal})`,
+              )
+              .join(", ") + ` [Tot Panchina: ${bonusPtsNonManuali > 0 ? "+" : ""}${bonusPtsNonManuali}]`;
+        }
+      }
+
+      const fantaScore = r
+        ? parseFloat(
+            (
+              rGol * GOAL_POINTS +
+              rAssist * ASSIST_POINTS +
+              rAmm * AMMO_POINTS +
+              rEsp * ESPU_POINTS +
+              bonusPts
+            ).toFixed(1),
+          )
+        : 0;
+
+      let matchChange = 0;
+      if (played) {
+        if (fantaScore >= 20) matchChange = 2;
+        else if (fantaScore >= 16) matchChange = 1;
+        else if (fantaScore >= 10) matchChange = 0;
+        else if (fantaScore >= -5) matchChange = -1;
+        else if (fantaScore >= -10) matchChange = -2;
+        else matchChange = -3;
+      } else {
+        if (fantaScore >= 15) matchChange = 2;
+        else if (fantaScore >= 7) matchChange = 1;
+        else if (fantaScore >= -1) matchChange = 0;
+        else if (fantaScore >= -5) matchChange = -1;
+        else if (fantaScore >= -10) matchChange = -2;
+        else matchChange = -3;
+      }
+
+      if (r && r.malusBrt === true) {
+        matchChange -= 1;
+      }
+
+      return {
+        nome: pName,
+        gol: rGol,
+        assist: rAssist,
+        amm: rAmm,
+        rossi: rEsp,
+        subitiAzione: rSubitiAzione,
+        subitiRigore: rSubitiRigore,
+        subitiPiazzato: rSubitiPiazzato,
+        bonusPts,
+        bonusBreakdownStr,
+        fantaScore,
+        matchChange,
+        played: !!played,
+        malusBrt: r ? !!r.malusBrt : false,
+        bonusPtsNonManuali,
+        bonusBreakdownStrNonManuali,
+      };
+    };
+
+    const startersInfo = starters.map((p) => getPlayerInfo(p));
+    const benchInfo = benchPlayerName ? getPlayerInfo(benchPlayerName) : null;
+
+    let subbedIn = false;
+    const finalKpiList: any[] = [];
+
+    for (let i = 0; i < startersInfo.length; i++) {
+      const inf = startersInfo[i];
+      if (!inf.played && benchInfo && benchInfo.played && !subbedIn) {
+        subbedIn = true;
+        finalKpiList.push({
+          ...inf,
+          ruolo: "Titolare",
+          stato: "Sostituito",
+          puntiConteggiati: inf.fantaScore,
+        });
+        puntiTotaliMatch += inf.fantaScore;
+      } else {
+        finalKpiList.push({
+          ...inf,
+          ruolo: "Titolare",
+          stato: inf.played ? "Titolare" : "Assente",
+          puntiConteggiati: inf.fantaScore,
+        });
+        puntiTotaliMatch += inf.fantaScore;
+      }
+    }
+
+    if (benchInfo) {
+      if (subbedIn) {
+        finalKpiList.push({
+          ...benchInfo,
+          ruolo: "Panchina",
+          stato: "Subentrato",
+          puntiConteggiati: benchInfo.fantaScore,
+        });
+        puntiTotaliMatch += benchInfo.fantaScore;
+      } else {
+        const unassignedList: string[] = [];
+        if (benchInfo.gol > 0) {
+          unassignedList.push(`${benchInfo.gol} Gol (+${benchInfo.gol * GOAL_POINTS} pt)`);
+        }
+        if (benchInfo.assist > 0) {
+          unassignedList.push(`${benchInfo.assist} Assist (+${benchInfo.assist * ASSIST_POINTS} pt)`);
+        }
+        const bRef = m.referto?.find((ref) => ref.nome === benchPlayerName);
+        if (bRef && bRef.bonusAttivi) {
+          bRef.bonusAttivi.forEach((bId) => {
+            const bDef = (effectiveBonuses || DEFAULT_BONUSES).find((x) => x.id === bId);
+            if (bDef && isBonusManuale(bDef)) {
+              unassignedList.push(`${bDef.nome} (+${bDef.punti} pt)`);
+            }
+          });
+        }
+
+        finalKpiList.push({
+          ...benchInfo,
+          ruolo: "Panchina",
+          stato: "Panchina",
+          originalFantaScore: benchInfo.fantaScore,
+          originalBonusPts: benchInfo.bonusPts,
+          originalBonusBreakdownStr: benchInfo.bonusBreakdownStr,
+          bonusPts: benchInfo.bonusPtsNonManuali,
+          bonusBreakdownStr: benchInfo.bonusBreakdownStrNonManuali,
+          fantaScore: benchInfo.bonusPtsNonManuali,
+          puntiConteggiati: benchInfo.bonusPtsNonManuali,
+          unassignedBonuses: unassignedList,
+        });
+        puntiTotaliMatch += benchInfo.bonusPtsNonManuali;
+      }
+    }
+
+    puntiTotaliMatch = parseFloat(puntiTotaliMatch.toFixed(1));
+    giocatoriKpi.push(...finalKpiList);
+
+    list.push({
+      matchId: m.id,
+      dettagli: m.dettagli,
+      risultato: m.risultato || "N.D.",
+      note: m.note,
+      puntiTotaliMatch: parseFloat(puntiTotaliMatch.toFixed(1)),
+      giocatoriKpi,
+    });
+  }
+
+  return list;
+};
+

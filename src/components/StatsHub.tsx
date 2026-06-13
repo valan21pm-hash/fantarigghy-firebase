@@ -29,7 +29,11 @@ import {
   getPlayerCurrentPrice,
   getPlayerBasePrice,
   getPlayerBonusBreakdownForMatch,
-  getPlayerBonusKey
+  getPlayerBonusKey,
+  GOAL_POINTS,
+  ASSIST_POINTS,
+  AMMO_POINTS,
+  ESPU_POINTS
 } from "../types";
 
 interface StatsHubProps {
@@ -139,7 +143,8 @@ export default function StatsHub({
         );
 
         let matchBonusVal = breakdown.reduce((acc, curr) => acc + curr.puntiVal, 0);
-        let matchScore = parseFloat(matchBonusVal.toFixed(1));
+        const eventPointsVal = (rGol * GOAL_POINTS) + (rAssist * ASSIST_POINTS) + (rAmm * AMMO_POINTS) + (rEsp * ESPU_POINTS);
+        let matchScore = parseFloat((matchBonusVal + eventPointsVal).toFixed(1));
 
         let change = 0;
         if (isPresente) {
@@ -218,7 +223,8 @@ export default function StatsHub({
         );
 
         let matchBonusVal = breakdown.reduce((acc, curr) => acc + curr.puntiVal, 0);
-        let matchScore = parseFloat(matchBonusVal.toFixed(1));
+        const eventPointsVal = (rGol * GOAL_POINTS) + (rAssist * ASSIST_POINTS) + (rAmm * AMMO_POINTS) + (rEsp * ESPU_POINTS);
+        let matchScore = parseFloat((matchBonusVal + eventPointsVal).toFixed(1));
 
         score += matchScore;
         golCount += rGol;
@@ -486,7 +492,8 @@ export default function StatsHub({
       );
 
       let matchBonusVal = breakdown.reduce((acc, curr) => acc + curr.puntiVal, 0);
-      let matchScore = parseFloat(matchBonusVal.toFixed(1));
+      const eventPointsVal = (rGol * GOAL_POINTS) + (rAssist * ASSIST_POINTS) + (rAmm * AMMO_POINTS) + (rEsp * ESPU_POINTS);
+      let matchScore = parseFloat((matchBonusVal + eventPointsVal).toFixed(1));
 
       let change = 0;
       if (isPresente) {
@@ -793,7 +800,7 @@ export default function StatsHub({
             >
               <option value="Tutti">✨ Tutti i Bonus/Malus</option>
               {bonuses.map((b) => (
-                <option key={b.nome} value={b.nome}>
+                <option key={`${b.id}_${b.nome}`} value={b.nome}>
                   {b.nome} ({b.punti > 0 ? `+${b.punti}` : b.punti} pt)
                 </option>
               ))}
@@ -1109,7 +1116,7 @@ export default function StatsHub({
                   const ptsPrefix = ptsVal > 0 ? "+" : "";
 
                   return (
-                    <tr key={b.definition.nome} className="hover:bg-slate-900/40 transition-colors">
+                    <tr key={`${b.definition.id || b.definition.nome}_${b.definition.nome}`} className="hover:bg-slate-900/40 transition-colors">
                       <td className="py-3.5 px-4 font-mono text-xs font-extrabold text-slate-400 text-center">
                         {idx + 1}°
                       </td>

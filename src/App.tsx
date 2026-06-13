@@ -32,7 +32,8 @@ import Fantacalcetto from "./components/Fantacalcetto";
 import FantacalcettoV2 from "./components/FantacalcettoV2";
 import ConsigliRicevuti from "./components/ConsigliRicevuti";
 import BonusManager from "./components/BonusManager";
-import { DatabaseSchema, Formazione, Giocatore, RefertoGiocatore, CustomBonusDef, DEFAULT_BONUSES } from "./types";
+import StatsHub from "./components/StatsHub";
+import { DatabaseSchema, Formazione, Giocatore, RefertoGiocatore, CustomBonusDef, DEFAULT_BONUSES, getTeamMatchBreakdownList } from "./types";
 import { initAuth, googleSignIn, logout } from "./lib/firebase";
 
 export default function App() {
@@ -51,6 +52,7 @@ export default function App() {
   const [showLogsMenu, setShowLogsMenu] = useState(false);
   const [showConsigliMenu, setShowConsigliMenu] = useState(false);
   const [selectedRefertoMatchId, setSelectedRefertoMatchId] = useState<string>("");
+  const [showStatsHub, setShowStatsHub] = useState(false);
   const [systemSA, setSystemSA] = useState<string | null>(null);
   const [dismissedSABanner, setDismissedSABanner] = useState(() => {
     return typeof window !== "undefined" && localStorage.getItem("dismissedSABanner") === "true";
@@ -676,6 +678,44 @@ export default function App() {
 
         {/* Quick Podiums */}
         <StatsDashboard giocatori={giocatori} partiteChiuse={partiteChiuse} />
+
+        {/* Console Statistiche Avanzate (Collapsible & Closed by default) */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl mb-6 max-w-5xl mx-auto text-slate-100">
+          <div 
+            className="flex items-center justify-between cursor-pointer select-none"
+            onClick={() => setShowStatsHub(prev => !prev)}
+            id="admin-stats-hub-header"
+          >
+            <div>
+              <h3 className="text-white font-black text-sm flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-yellow-400 animate-pulse" />
+                Hub Statistiche Avanzate Fanta&Calcetto (Dettaglio Admin)
+              </h3>
+              <p className="text-slate-400 text-[11px] font-medium leading-relaxed mt-0.5">
+                Classifiche, zoom prestazioni, social export ed emissioni Izycoin ricalcolate dinamicamente sui referti di gioco.
+              </p>
+            </div>
+            <button 
+              className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-850 text-slate-200 border border-slate-750 font-bold rounded-lg text-xs transition-colors shrink-0 flex items-center gap-1.5"
+              id="admin-stats-hub-collapse-btn"
+            >
+              <span>{showStatsHub ? "Nascondi" : "Mostra dettagli"}</span>
+              <span className="text-[10px] transform transition-transform duration-200">{showStatsHub ? "▲" : "▼"}</span>
+            </button>
+          </div>
+          
+          {showStatsHub && (
+            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800/80 mt-4 animate-fade-in" id="admin-stats-hub-container">
+              <StatsHub
+                giocatori={giocatori}
+                fantasquadre={data?.fantasquadre || []}
+                partiteChiuse={partiteChiuse || []}
+                bonuses={data?.bonuses || DEFAULT_BONUSES}
+                getTeamMatchBreakdownList={(team) => getTeamMatchBreakdownList(team, partiteChiuse || [], giocatori, data?.bonuses || DEFAULT_BONUSES)}
+              />
+            </div>
+          )}
+        </div>
 
         {/* Segmented Control: Macro Area Toggle */}
         <div className="bg-slate-100 p-1 rounded-xl border border-slate-200 grid grid-cols-2 max-w-xl mx-auto shadow-sm">

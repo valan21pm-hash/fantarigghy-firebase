@@ -289,7 +289,7 @@ export const generateGeneralReportPdf = (
         if (rAmm > 0) highlights.push(`${rAmm} Ammonito`);
         if (rEsp > 0) highlights.push(`${rEsp} Espulso`);
         
-        const effectiveBonuses = match.bonusesSnapshot || undefined;
+        const effectiveBonuses = m.bonusesSnapshot || undefined;
         const bonusPts = getPlayerBonusPointsForMatch(r.nome, rBonusAttivi, rGol, rAssist, effectiveBonuses, r.snapshotGiocatore?.ultimoRuolo, rAmm, rEsp);
         const breakdown = getPlayerBonusBreakdownForMatch(r.nome, rBonusAttivi, rGol, rAssist, effectiveBonuses, r.snapshotGiocatore?.ultimoRuolo, rAmm, rEsp);
         if (breakdown.length > 0) {
