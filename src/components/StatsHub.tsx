@@ -572,7 +572,7 @@ export default function StatsHub({
 
     if (activeTab === "giocatori") {
       textForCopy += `👤 *LEADERBOARD GIOCATORI:*\n`;
-      filteredPlayerStats.slice(0, 15).forEach((p, idx) => {
+      filteredPlayerStats.forEach((p, idx) => {
         const rankNum = idx + 1;
         const changeSign = p.priceChange >= 0 ? `+${p.priceChange}` : `${p.priceChange}`;
         textForCopy += `${rankNum}. [${p.ruolo.toUpperCase()}] *${p.nome}* | *${p.score} pts*\n`;
@@ -586,9 +586,6 @@ export default function StatsHub({
           textForCopy += `   ✨ Eventi e Bonus: ${bonusStr}\n`;
         }
       });
-      if (filteredPlayerStats.length > 15) {
-        textForCopy += `\n...e altri ${filteredPlayerStats.length - 15} giocatori!`;
-      }
     } else if (activeTab === "squadre") {
       textForCopy += `🏆 *CLASSIFICA FANTASQUADRE:*\n`;
       sortedTeamStats.forEach((t, idx) => {
