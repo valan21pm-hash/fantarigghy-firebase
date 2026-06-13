@@ -2549,6 +2549,7 @@ async function startServer() {
           .json({ err: "Partita non trovata o non chiusa" });
 
       rigaPartita.inviatoFanta = true;
+      rigaPartita.bonusesSnapshot = db.bonuses || DEFAULT_BONUSES;
 
       // Initialize snapshot if missing (backwards compatibility)
       if (

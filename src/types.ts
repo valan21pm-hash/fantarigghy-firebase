@@ -134,12 +134,13 @@ export const getPlayerCurrentPrice = (
         const rEsp = isPresente ? (Number(r.rossi) || 0) : 0;
         const rBonusAttivi = r.bonusAttivi || [];
 
+        const effectiveBonuses = m.bonusesSnapshot || allBonuses;
         const matchBonus = getPlayerBonusPointsForMatch(
           nome,
           rBonusAttivi,
           rGol,
           rAssist,
-          allBonuses,
+          effectiveBonuses,
           r.snapshotGiocatore?.ultimoRuolo || fallbackPlayerInfo?.ultimoRuolo,
           rAmm,
           rEsp,
@@ -237,7 +238,8 @@ export const calculatePlayerChampionshipStats = (nome: string, partiteChiuse: Pa
         const rBonusAttivi = r.bonusAttivi || [];
 
         // Always include bonuses, but filter for game stats if not present
-        const matchBonus = getPlayerBonusPointsForMatch(nome, rBonusAttivi, rGol, rAssist, allBonuses, r.snapshotGiocatore?.ultimoRuolo || fallbackPlayerInfo?.ultimoRuolo, rAmm, rEsp, r.bonusGolAccreditati);
+        const effectiveBonuses = m.bonusesSnapshot || allBonuses;
+        const matchBonus = getPlayerBonusPointsForMatch(nome, rBonusAttivi, rGol, rAssist, effectiveBonuses, r.snapshotGiocatore?.ultimoRuolo || fallbackPlayerInfo?.ultimoRuolo, rAmm, rEsp, r.bonusGolAccreditati);
 
         gol += rGol;
         assist += rAssist;

@@ -647,6 +647,7 @@ export default function FantacalcettoV2({
         const rSubitiRigore = r ? Number(r.subitiRigore) || 0 : 0;
         const rSubitiPiazzato = r ? Number(r.subitiPiazzato) || 0 : 0;
 
+        const effectiveBonuses = m.bonusesSnapshot || bonuses;
         const gInfoFallback = giocatori.find(g => g.nome.toLowerCase() === pName.toLowerCase());
         const bonusPts = r
           ? getPlayerBonusPointsForMatch(
@@ -654,7 +655,7 @@ export default function FantacalcettoV2({
               rBonusAttivi,
               rGol,
               rAssist,
-              bonuses,
+              effectiveBonuses,
               r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
               rAmm,
               rEsp,
@@ -664,7 +665,7 @@ export default function FantacalcettoV2({
 
         // Calculate non-manual bonus points for bench when they are not subbed in
         const rBonusAttiviNonManuali = rBonusAttivi.filter(bId => {
-          const bDef = (bonuses || DEFAULT_BONUSES).find(x => x.id === bId);
+          const bDef = (effectiveBonuses || DEFAULT_BONUSES).find(x => x.id === bId);
           return bDef ? (!isBonusManuale(bDef) && !bDef.richiedeIngressoInCampo) : true;
         });
         const bonusPtsNonManuali = r
@@ -673,7 +674,7 @@ export default function FantacalcettoV2({
               rBonusAttiviNonManuali,
               rGol,
               rAssist,
-              bonuses,
+              effectiveBonuses,
               r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
               rAmm,
               rEsp,
@@ -690,7 +691,7 @@ export default function FantacalcettoV2({
             rBonusAttivi,
             rGol,
             rAssist,
-            bonuses,
+            effectiveBonuses,
             r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
             rAmm,
             rEsp,
@@ -711,7 +712,7 @@ export default function FantacalcettoV2({
             rBonusAttiviNonManuali,
             rGol,
             rAssist,
-            bonuses,
+            effectiveBonuses,
             r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
             rAmm,
             rEsp,
