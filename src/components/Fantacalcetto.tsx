@@ -1266,12 +1266,13 @@ export default function Fantacalcetto({
             const rBonusAttivi = r.bonusAttivi || [];
 
             const gInfo = giocatori.find(g => g.nome.toLowerCase() === nome.toLowerCase());
+            const effectiveBonuses = m.bonusesSnapshot || bonuses;
             const matchBonusPts = getPlayerBonusPointsForMatch(
               nome,
               rBonusAttivi,
               rGol,
               rAssist,
-              bonuses,
+              effectiveBonuses,
               r.snapshotGiocatore?.ultimoRuolo || gInfo?.ultimoRuolo,
               rAmm,
               rEsp,
@@ -1284,14 +1285,14 @@ export default function Fantacalcetto({
                 rBonusAttivi,
                 rGol,
                 rAssist,
-                bonuses,
+                effectiveBonuses,
                 r.snapshotGiocatore?.ultimoRuolo || gInfo?.ultimoRuolo,
                 rAmm,
                 rEsp,
                 r.bonusGolAccreditati
               );
               breakdown.forEach(b => {
-                const foundBonusDef = bonuses.find(def => def.nome === b.nome);
+                const foundBonusDef = effectiveBonuses.find(def => def.nome === b.nome);
                 activeBonusDetails.push({
                    bName: b.nome,
                    bDesc: foundBonusDef ? foundBonusDef.descrizione : "",

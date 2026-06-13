@@ -494,7 +494,7 @@ async function fetchFromSheets(
   token: string,
   spreadsheetId: string,
 ): Promise<DatabaseSchema> {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchGet?ranges=Giocatori!A:M&ranges=Campi!A:A&ranges=Partite!A:K&ranges=Log!A:D`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchGet?ranges=Giocatori!A:M&ranges=Campi!A:A&ranges=Partite!A:L&ranges=Log!A:D`;
   const response = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -2653,6 +2653,7 @@ async function startServer() {
       // Convert back to open status
       rigaPartita.stato = "Aperta";
       rigaPartita.inviatoFanta = false;
+      rigaPartita.bonusesSnapshot = undefined;
       if (!conservaDati) {
         rigaPartita.risultato = "";
         rigaPartita.referto = [];

@@ -58,6 +58,7 @@ export interface Partita {
   note?: string;
   inviatoFanta?: boolean;
   rosterSnapshot?: Record<string, string[]>;
+  bonusesSnapshot?: CustomBonusDef[];
 }
 
 export interface Fantasquadra {
