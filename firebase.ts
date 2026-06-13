@@ -1,5942 +1,7411 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import React, { useState, useEffect } from "react";
-import {
-  Sparkles,
-  Users,
-  User,
-  Shield,
-  Search,
-  CheckCircle,
-  Copy,
-  Trash2,
-  Calendar,
-  AlertCircle,
-  Trophy,
-  Award,
-  ChevronDown,
-  ChevronUp,
-  Lightbulb,
-  ExternalLink,
-  Lock,
-  Unlock,
-  BookOpen,
-  HelpCircle,
-  Info,
-  X,
-  Download,
-  Instagram,
-  Share2,
-  Pencil,
-  Home,
-  Shirt,
-  Banknote,
-  ClipboardList,
-  Clock,
-  BarChart3,
-} from "lucide-react";
-import StatsHub from "./StatsHub";
-import {
-  Giocatore,
-  Fantasquadra,
-  Partita,
-  CustomBonusDef,
-  getPlayerBonusKey,
-  getPlayerBonusPointsForMatch,
-  getPlayerBonusBreakdownForMatch,
-  DEFAULT_BONUSES,
-  getPlayerPriceForRoster,
-  getPlayerCurrentPrice,
-  getPlayerBasePrice,
-  MAX_BUDGET,
-  getLastName,
-  isBonusManuale,
-} from "../types";
-
-// (Keep everything else mostly the same)
-// I will place the computation variables inside the component.
-
-import { generateMatchPdf, generateGeneralReportPdf, generatePartitaGiocatoriPdf, generatePartitaSingoloGiocatorePdf, generatePartitaSquadraPdf } from "../lib/pdfHelper";
-import BonusManager from "./BonusManager";
-
-const MercatoCountdown = ({ targetDate, className }: { targetDate: string, className?: string }) => {
-  const [timeLeft, setTimeLeft] = useState("");
-
-  useEffect(() => {
-    const updateCountdown = () => {
-      const end = new Date(targetDate).getTime();
-      const now = new Date().getTime();
-      const diff = end - now;
-
-      if (diff <= 0) {
-        setTimeLeft("SCADUTA");
-        return;
-      }
-
-      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const m = Math.floor((diff / 1000 / 60) % 60);
-      const s = Math.floor((diff / 1000) % 60);
-
-      const parts = [];
-      if (d > 0) parts.push(`${d}g`);
-      if (d > 0 || h > 0) parts.push(`${h}h`);
-      parts.push(`${m}m`);
-      parts.push(`${s}s`);
-      setTimeLeft(parts.join(" "));
-    };
-
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
-    return () => clearInterval(interval);
-  }, [targetDate]);
-
-  return <span className={className !== undefined ? className : "font-mono bg-blue-950 px-1.5 py-0.5 rounded text-blue-300 ml-2"}>{timeLeft}</span>;
-};
-
-interface FantacalcettoProps {
-  giocatori: Giocatore[];
-  fantasquadre: Fantasquadra[];
-  partiteChiuse?: Partita[];
-  partiteAperte?: Partita[];
-  bonuses?: CustomBonusDef[];
-  sessioneMercatoLibero?: boolean;
-  scadenzaMercatoLibero?: string | null;
-  onIscriviFantasquadra: (
-    nomePartecipante: string,
-    nomeFantasquadra: string,
-    giocatoriSelezionati: string[],
-    pin: string,
-    email?: string,
-  ) => Promise<any>;
-  onEliminaFantasquadra: (id: string) => Promise<any>;
-  onRinominaFantasquadra: (id: string, nuovoNome: string) => Promise<any>;
-  onAggiornaFantasquadra?: (
-    id: string,
-    payload: {
-      nomePartecipante?: string;
-      nomeFantasquadra?: string;
-      email?: string;
-      pin?: string;
-      creditoResiduo?: number;
-      giocatoriSelezionati?: string[];
-      valoriAcquisto?: Record<string, number>;
+{
+  "giocatori": [
+    {
+      "ammonizioni": 0,
+      "nome": "Alberto Garau",
+      "quotaIscrizione": 10,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "attivo": true,
+      "assist": 0,
+      "saldo": 1.4,
+      "gol": 1,
+      "golSubitiRigore": 0,
+      "numeroMaglia": 12,
+      "ultimoRuolo": "Portiere",
+      "golSubitiPiazzato": 0
+    },
+    {
+      "gol": 0,
+      "golSubitiRigore": 0,
+      "numeroMaglia": 5,
+      "ultimoRuolo": "Centrale",
+      "golSubitiPiazzato": 0,
+      "nome": "Davide Bayre",
+      "ammonizioni": 0,
+      "quotaIscrizione": 10,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "attivo": true,
+      "saldo": 0,
+      "assist": 0
+    },
+    {
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "golSubitiAzione": 0,
+      "assist": 0,
+      "saldo": 1.4,
+      "ammonizioni": 0,
+      "nome": "Enrico Mulas",
+      "numeroMaglia": 13,
+      "ultimoRuolo": "Portiere",
+      "golSubitiPiazzato": 0,
+      "gol": 0,
+      "golSubitiRigore": 0
+    },
+    {
+      "quotaIscrizione": 10,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "attivo": true,
+      "saldo": 9.4,
+      "assist": 0,
+      "nome": "Fabrizio Alimonda",
+      "ammonizioni": 0,
+      "numeroMaglia": 96,
+      "ultimoRuolo": "Laterale",
+      "golSubitiPiazzato": 0,
+      "gol": 0,
+      "golSubitiRigore": 0
+    },
+    {
+      "golSubitiRigore": 0,
+      "gol": 0,
+      "golSubitiPiazzato": 0,
+      "numeroMaglia": 17,
+      "ultimoRuolo": "Pivot",
+      "ammonizioni": 0,
+      "nome": "Federico Addis",
+      "assist": 0,
+      "saldo": 0,
+      "quotaIscrizione": 10,
+      "espulsioni": 0,
+      "attivo": true,
+      "golSubitiAzione": 0
+    },
+    {
+      "golSubitiPiazzato": 0,
+      "ultimoRuolo": "Laterale",
+      "numeroMaglia": 30,
+      "golSubitiRigore": 0,
+      "gol": 0,
+      "saldo": 2.4,
+      "assist": 0,
+      "attivo": true,
+      "golSubitiAzione": 0,
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "nome": "Giampaolo Mattana",
+      "ammonizioni": 0
+    },
+    {
+      "gol": 0,
+      "golSubitiRigore": 0,
+      "ultimoRuolo": "Laterale",
+      "numeroMaglia": 21,
+      "golSubitiPiazzato": 0,
+      "ammonizioni": 0,
+      "nome": "Lorenzo Pittiu",
+      "attivo": true,
+      "golSubitiAzione": 0,
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "assist": 0,
+      "saldo": 1.4
+    },
+    {
+      "gol": 2,
+      "golSubitiRigore": 0,
+      "numeroMaglia": 28,
+      "ultimoRuolo": "Centrale",
+      "golSubitiPiazzato": 0,
+      "nome": "Manuel Palmas",
+      "ammonizioni": 0,
+      "quotaIscrizione": 10,
+      "espulsioni": 0,
+      "attivo": true,
+      "golSubitiAzione": 0,
+      "saldo": 1.4,
+      "assist": 0
+    },
+    {
+      "gol": 0,
+      "golSubitiRigore": 0,
+      "numeroMaglia": 16,
+      "ultimoRuolo": "Allenatore",
+      "golSubitiPiazzato": 0,
+      "ammonizioni": 0,
+      "nome": "Marco Berretta",
+      "quotaIscrizione": 0,
+      "espulsioni": 0,
+      "attivo": false,
+      "golSubitiAzione": 0,
+      "assist": 0,
+      "saldo": 0
+    },
+    {
+      "ammonizioni": 0,
+      "nome": "Marco Scarpellini",
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "golSubitiAzione": 0,
+      "attivo": true,
+      "assist": 4,
+      "saldo": 1.4,
+      "gol": 0,
+      "golSubitiRigore": 0,
+      "numeroMaglia": 10,
+      "ultimoRuolo": "Centrale",
+      "golSubitiPiazzato": 0
+    },
+    {
+      "gol": 0,
+      "golSubitiRigore": 0,
+      "numeroMaglia": 19,
+      "ultimoRuolo": "Laterale",
+      "golSubitiPiazzato": 0,
+      "nome": "Mario Conti",
+      "ammonizioni": 0,
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "golSubitiAzione": 0,
+      "saldo": 3.4,
+      "assist": 3
+    },
+    {
+      "quotaIscrizione": 0,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "attivo": false,
+      "saldo": 0,
+      "assist": 0,
+      "nome": "Matteo Cabras",
+      "ammonizioni": 0,
+      "numeroMaglia": 99,
+      "ultimoRuolo": "Allenatore",
+      "golSubitiPiazzato": 0,
+      "gol": 0,
+      "golSubitiRigore": 0
+    },
+    {
+      "gol": 2,
+      "golSubitiRigore": 0,
+      "ultimoRuolo": "Centrale",
+      "numeroMaglia": 77,
+      "golSubitiPiazzato": 0,
+      "ammonizioni": 1,
+      "nome": "Matteo Scattu",
+      "attivo": true,
+      "golSubitiAzione": 0,
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "assist": 0,
+      "saldo": 0
+    },
+    {
+      "saldo": 1.4,
+      "assist": 0,
+      "quotaIscrizione": 10,
+      "espulsioni": 0,
+      "attivo": true,
+      "golSubitiAzione": 0,
+      "nome": "Michele Carrone",
+      "ammonizioni": 0,
+      "golSubitiPiazzato": 0,
+      "numeroMaglia": 20,
+      "ultimoRuolo": "Laterale",
+      "golSubitiRigore": 0,
+      "gol": 0
+    },
+    {
+      "numeroMaglia": 14,
+      "ultimoRuolo": "Pivot",
+      "golSubitiPiazzato": 0,
+      "gol": 0,
+      "golSubitiRigore": 0,
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "attivo": true,
+      "golSubitiAzione": 0,
+      "assist": 0,
+      "saldo": 3.4,
+      "ammonizioni": 0,
+      "nome": "Nicola Orlandini"
+    },
+    {
+      "ultimoRuolo": "Pivot",
+      "numeroMaglia": 9,
+      "golSubitiPiazzato": 0,
+      "gol": 4,
+      "golSubitiRigore": 0,
+      "golSubitiAzione": 0,
+      "attivo": true,
+      "quotaIscrizione": 10,
+      "espulsioni": 0,
+      "saldo": 2.4,
+      "assist": 0,
+      "nome": "Salvatore Roberto Pinna",
+      "ammonizioni": 0
+    },
+    {
+      "golSubitiPiazzato": 0,
+      "numeroMaglia": 11,
+      "ultimoRuolo": "Laterale",
+      "golSubitiRigore": 0,
+      "gol": 0,
+      "assist": 0,
+      "saldo": 4.4,
+      "quotaIscrizione": 10,
+      "espulsioni": 0,
+      "golSubitiAzione": 0,
+      "attivo": true,
+      "ammonizioni": 0,
+      "nome": "Sergio Pippia"
+    },
+    {
+      "gol": 0,
+      "golSubitiRigore": 0,
+      "numeroMaglia": 45,
+      "ultimoRuolo": "Pivot",
+      "golSubitiPiazzato": 0,
+      "nome": "Stefano Michele Lauro",
+      "ammonizioni": 0,
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "golSubitiAzione": 0,
+      "attivo": true,
+      "saldo": 9.4,
+      "assist": 0
     }
-  ) => Promise<any>;
-  onCreaConsiglio?: (autore: string, testo: string) => Promise<any>;
-  onUpdateBonuses?: (bonuses: CustomBonusDef[]) => Promise<any>;
-  onToggleMercatoLibero?: (attivo: boolean, scadenza?: string | null) => Promise<any>;
-  portale1Bloccato?: boolean;
-  onTogglePortaleBlocco?: (bloccato: boolean) => Promise<any>;
-  onMigrate?: () => void;
-  consigli?: any[];
-  isEditor?: boolean;
-  isAdminMode?: boolean; // false if viewing as a public portal page
-  onRefreshData?: () => Promise<void>;
-}
-
-// Fantasy Point Formula constants
-const GOAL_POINTS = 3;
-const ASSIST_POINTS = 1;
-const AMMO_POINTS = -0.5;
-const ESPU_POINTS = -1;
-
-const getRoleColor = (ruolo: string) => {
-  const r = (ruolo || "").toLowerCase();
-  switch (r) {
-    case "portiere":
-      return "bg-yellow-500 text-yellow-950 border-yellow-400";
-    case "difensore":
-    case "centrale":
-      return "bg-green-600 text-white border-green-500";
-    case "centrocampista":
-    case "laterale":
-      return "bg-blue-600 text-white border-blue-500";
-    case "attaccante":
-    case "pivot":
-    case "universale":
-      return "bg-red-600 text-white border-red-500";
-    default:
-      return "bg-gray-600 text-white border-gray-500";
-  }
-};
-
-const renderPlayerOnPitch = (
-  name: string,
-  idx: number,
-  giocatori: Giocatore[],
-  selectedPlayers: string[],
-  setSelectedPlayers: React.Dispatch<React.SetStateAction<string[]>>,
-  handleTogglePlayer: (nome: string) => void
-) => {
-  const g = giocatori.find((p) => p.nome === name);
-  const roleColorClass = getRoleColor(g?.ultimoRuolo || "");
-  const isSubentro = idx === 3;
-
-  return (
-    <div key={`${name}-${idx}`} className={`flex flex-col items-center justify-center gap-1.5 sm:gap-2 group w-[72px] sm:w-[90px] transition-all relative ${isSubentro ? 'opacity-95' : ''}`}>
-      <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border-[3px] flex items-center justify-center text-lg sm:text-xl font-black font-mono shadow-2xl relative z-10 ${roleColorClass}`}>
-        {g?.numeroMaglia || "-"}
-      </div>
-      <div className={`text-[11px] sm:text-[12px] font-bold px-2 py-1 rounded-md border truncate w-full flex-grow text-center shadow-lg relative z-20 uppercase tracking-tight ${isSubentro ? 'bg-sky-950/90 text-sky-200 border-sky-600' : 'bg-indigo-950/90 text-white border-indigo-500'}`}>
-        {getLastName(name)}
-      </div>
-      
-      {/* Sempre visibili per massima usabilità (no hover required) */}
-      <div className="absolute -top-4 -right-3 sm:-top-5 sm:-right-4 flex flex-col items-center justify-center gap-1 z-30">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            handleTogglePlayer(name);
-          }}
-          className="bg-red-600 hover:bg-red-500 text-white w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-black cursor-pointer shadow-xl border-2 border-red-400/50 text-base active:scale-90 transition-transform"
-          aria-label="Rimuovi giocatore"
-        >
-          ×
-        </button>
-      </div>
-
-      <div className="absolute -top-4 -left-3 sm:-top-5 sm:-left-4 flex flex-col items-center justify-center gap-1 z-30">
-        {selectedPlayers.length === 4 && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              if (isSubentro) {
-                const others = selectedPlayers.filter((p) => p !== name);
-                setSelectedPlayers([name, ...others]);
-              } else {
-                const others = selectedPlayers.filter((p) => p !== name);
-                setSelectedPlayers([...others, name]);
-              }
-            }}
-            className={`${isSubentro ? 'bg-sky-600 hover:bg-sky-500 border-sky-300/50 text-white' : 'bg-indigo-600 hover:bg-indigo-500 border-indigo-300/50 text-white'} w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center cursor-pointer shadow-xl border-2 active:scale-90 transition-transform`}
-            title={isSubentro ? "Sposta Titolare" : "Sposta in Panchina"}
-          >
-            {isSubentro ? <ChevronUp className="w-5 h-5 font-black" /> : <ChevronDown className="w-5 h-5 font-black" />}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default function FantacalcettoV2({
-  giocatori,
-  fantasquadre = [],
-  partiteChiuse = [],
-  partiteAperte = [],
-  bonuses = DEFAULT_BONUSES,
-  sessioneMercatoLibero = false,
-  scadenzaMercatoLibero = null,
-  onIscriviFantasquadra,
-  onEliminaFantasquadra,
-  onRinominaFantasquadra,
-  onAggiornaFantasquadra,
-  onCreaConsiglio,
-  onUpdateBonuses,
-  onToggleMercatoLibero,
-  portale1Bloccato = false,
-  onTogglePortaleBlocco,
-  consigli = [],
-  isEditor = false,
-  isAdminMode = false,
-  onRefreshData,
-}: FantacalcettoProps) {
-  // Public Portal state loaders
-  const isMercatoLiberoValido = React.useMemo(() => {
-    // Override manuale speciale mercato libero fino a 08.06.2026 23:59
-    const manualMercatoLiberoEnd = new Date("2026-06-08T23:59:00+02:00");
-    if (new Date() <= manualMercatoLiberoEnd) {
-      return true;
-    }
-
-    if (!sessioneMercatoLibero) return false;
-    if (scadenzaMercatoLibero) {
-      if (new Date(scadenzaMercatoLibero).getTime() < new Date().getTime()) {
-        return false;
-      }
-    }
-    return true;
-  }, [sessioneMercatoLibero, scadenzaMercatoLibero]);
-
-  const [activePublicTab, setActivePublicTab] = useState<
-    "home" | "rosa" | "mercato" | "classifica" | "regolamento" | "statistiche"
-  >("mercato");
-  const allPartite = React.useMemo(() => {
-    return [...partiteAperte, ...partiteChiuse].filter(
-      (m) => !(m.dettagli || "").toLowerCase().includes("amichevole"),
-    );
-  }, [partiteAperte, partiteChiuse]);
-  const [nomePartecipante, setNomePartecipante] = useState("");
-  const [nomeFantasquadra, setNomeFantasquadra] = useState("");
-  const [pin, setPin] = useState("");
-  const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterConvocati, setFilterConvocati] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [showInstagramPopup, setShowInstagramPopup] = useState(() => {
-    return localStorage.getItem("fantaInstagramFollowed_v1") !== "true";
-  });
-  const [instagramLinkCopied, setInstagramLinkCopied] = useState(false);
-
-  const [showReRegistrationPopup, setShowReRegistrationPopup] = useState(() => {
-    const now = new Date();
-    // Active from now (June 3rd) through the end of Friday, June 5th, 2026
-    const start = new Date("2026-06-03T00:00:00Z");
-    const end = new Date("2026-06-06T02:00:00Z"); // Covered through midnight of Friday June 5th in Italy (UTC+2) plus a small safety buffer
-    const isPeriod = now >= start && now <= end;
-    if (!isPeriod) return false;
-    return localStorage.getItem("fantaReRegistrationSkipped_v1") !== "true";
-  });
-
-  const [showInstructionsModal, setShowInstructionsModal] = useState(false);
-  const [showSuggestionModal, setShowSuggestionModal] = useState(false);
-  const [instructionsTab, setInstructionsTab] = useState<
-    "guida" | "quotazioni"
-  >("guida");
-
-  // Custom dialog state for trade summary and locking warning
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [proposedTransfer, setProposedTransfer] = useState<{
-    sold: string;
-    bought: string;
-    soldPrice: number;
-    boughtPrice: number;
-    remainingCredits: number;
-  } | null>(null);
-
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const showToast = (message: string) => {
-    setToastMessage(message);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 3000);
-  };
-
-  // Security Authentication states for modifying existing rosters
-  const [authenticatedTeamId, setAuthenticatedTeamId] = useState<string | null>(
-    null,
-  );
-  const [enteredPin, setEnteredPin] = useState("");
-  const [loginError, setLoginError] = useState<string | null>(null);
-
-  // Consigli / Miglioramenti states
-  const [consiglioAutore, setConsiglioAutore] = useState("");
-  const [consiglioTesto, setConsiglioTesto] = useState("");
-  const [consiglioInviatoConSuccesso, setConsiglioInviatoConSuccesso] =
-    useState(false);
-  const [invioConsiglioInCorso, setInvioConsiglioInCorso] = useState(false);
-  const [consiglioError, setConsiglioError] = useState("");
-
-  // Admin state loaders
-  const [copied, setCopied] = useState(false);
-  const [expandedTeamId, setExpandedTeamId] = useState<string | null>(null);
-
-  // Sincronizzazione automatica alla prima interazione e portale d'ingresso con Email e Password
-  const [entryMode, setEntryMode] = useState<"login" | "register">("login");
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [regEmail, setRegEmail] = useState("");
-  const [regPassword, setRegPassword] = useState("");
-  const [regNomeSquadra, setRegNomeSquadra] = useState("");
-  const [regNomePresidente, setRegNomePresidente] = useState("");
-  const [localLoginError, setLocalLoginError] = useState<string | null>(null);
-
-  const [hasInteracted, setHasInteracted] = useState(false);
-  const [syncProgress, setSyncProgress] = useState(0);
-  const [syncStatusText, setSyncStatusText] = useState("");
-  const [syncDone, setSyncDone] = useState(false);
-  const [selectedMatchBreakdown, setSelectedMatchBreakdown] =
-    useState<any>(null);
-  const [showMercatoModal, setShowMercatoModal] = useState(false);
-  const [showRenameModal, setShowRenameModal] = useState(false);
-  const [nuovoNomeSquadra, setNuovoNomeSquadra] = useState("");
-  const [mercatoDateString, setMercatoDateString] = useState("");
-  const [showGeneralReportModal, setShowGeneralReportModal] = useState(false);
-  const [matchForPlayerChoice, setMatchForPlayerChoice] = useState<Partita | null>(null);
-  const [matchForTeamChoice, setMatchForTeamChoice] = useState<Partita | null>(null);
-
-  // Auto-login all'avvio se già registrati in localStorage
-  useEffect(() => {
-    const cachedEmail = localStorage.getItem("fantaEmail");
-    const cachedPassword = localStorage.getItem("fantaPassword");
-    if (cachedEmail && cachedPassword && fantasquadre.length > 0) {
-      const team = fantasquadre.find(
-        (fs) =>
-          (fs.email || "").toLowerCase().trim() ===
-          cachedEmail.toLowerCase().trim(),
-      );
-      if (team) {
-        const passMatch =
-          (team.pin || "").trim().toLowerCase() ===
-          cachedPassword.trim().toLowerCase();
-        if (passMatch) {
-          // Esegui sblocco automatico istantaneo
-          setAuthenticatedTeamId(team.id);
-          setNomeFantasquadra(team.nomeFantasquadra);
-          setNomePartecipante(team.nomePartecipante);
-          setPin((team.pin || "").trim());
-          setSelectedPlayers(team.giocatoriSelezionati || []);
-          setSyncDone(true);
-          setHasInteracted(true);
+  ],
+  "campi": [
+    "Futura Sales",
+    "Le Serre",
+    "Seminario",
+    "Verderame"
+  ],
+  "partite": [
+    {
+      "referto": [
+        {
+          "assist": "3",
+          "rossi": "0",
+          "subitiAzione": "0",
+          "pagaQuota": true,
+          "gol": "5",
+          "amm": "0",
+          "subitiPiazzato": "0",
+          "subitiRigore": "0",
+          "nome": "Mario Conti"
+        },
+        {
+          "nome": "Sergio Pippia",
+          "subitiRigore": "0",
+          "subitiPiazzato": "0",
+          "amm": "0",
+          "pagaQuota": true,
+          "gol": "1",
+          "subitiAzione": "0",
+          "rossi": "0",
+          "assist": "0"
+        },
+        {
+          "assist": "2",
+          "rossi": "0",
+          "subitiPiazzato": "0",
+          "subitiRigore": "0",
+          "nome": "Salvatore Roberto Pinna",
+          "subitiAzione": "0",
+          "gol": "4",
+          "pagaQuota": true,
+          "amm": "0"
+        },
+        {
+          "subitiAzione": "0",
+          "gol": "5",
+          "pagaQuota": true,
+          "amm": "0",
+          "subitiPiazzato": "0",
+          "subitiRigore": "0",
+          "nome": "Giampaolo Mattana",
+          "assist": "0",
+          "rossi": "0"
+        },
+        {
+          "subitiPiazzato": "0",
+          "nome": "Alberto Garau",
+          "subitiRigore": "0",
+          "pagaQuota": true,
+          "gol": "1",
+          "subitiAzione": "0",
+          "amm": "0",
+          "assist": "0",
+          "rossi": "0"
+        },
+        {
+          "assist": "4",
+          "rossi": "0",
+          "pagaQuota": true,
+          "gol": "3",
+          "subitiAzione": "0",
+          "amm": "0",
+          "subitiPiazzato": "0",
+          "nome": "Lorenzo Pittiu",
+          "subitiRigore": "0"
+        },
+        {
+          "amm": "0",
+          "pagaQuota": true,
+          "gol": "2",
+          "subitiAzione": "0",
+          "nome": "Manuel Palmas",
+          "subitiRigore": "0",
+          "subitiPiazzato": "0",
+          "rossi": "0",
+          "assist": "2"
+        },
+        {
+          "assist": "4",
+          "rossi": "0",
+          "pagaQuota": true,
+          "gol": "1",
+          "subitiAzione": "0",
+          "amm": "0",
+          "subitiPiazzato": "0",
+          "nome": "Marco Scarpellini",
+          "subitiRigore": "0"
+        },
+        {
+          "assist": "0",
+          "rossi": "0",
+          "gol": "2",
+          "pagaQuota": true,
+          "subitiAzione": "0",
+          "amm": "1",
+          "subitiPiazzato": "0",
+          "nome": "Matteo Scattu",
+          "subitiRigore": "0"
+        },
+        {
+          "pagaQuota": true,
+          "gol": "4",
+          "subitiAzione": "0",
+          "amm": "0",
+          "subitiPiazzato": "0",
+          "nome": "AMICO SCATTU (Esterno)",
+          "subitiRigore": "0",
+          "assist": "0",
+          "rossi": "0"
         }
-      }
-    }
-  }, [fantasquadre]);
-
-  const handleCustomLogin = async () => {
-    if (!loginEmail.trim() || !loginPassword.trim()) {
-      setLocalLoginError("Inserisci email e password!");
-      return;
-    }
-    setLocalLoginError(null);
-
-    // Cerca la fantasquadra associata a questa email
-    const team = fantasquadre.find(
-      (fs) =>
-        (fs.email || "").toLowerCase().trim() ===
-        loginEmail.toLowerCase().trim(),
-    );
-    if (!team) {
-      setLocalLoginError(
-        "Nessuna fantasquadra associata a questa email. Effettua la registrazione.",
-      );
-      return;
-    }
-
-    const passMatch =
-      (team.pin || "").trim().toLowerCase() ===
-      loginPassword.trim().toLowerCase();
-    if (!passMatch) {
-      setLocalLoginError("Password non corretta!");
-      return;
-    }
-
-    // Successo login!
-    setLocalLoginError(null);
-    setHasInteracted(true);
-    setSyncProgress(0);
-
-    const steps = [
-      { prg: 25, text: "Sincronizzazione della formazione..." },
-      { prg: 70, text: "Caricamento delle rose e dei saldi..." },
-      { prg: 100, text: "Accesso autorizzato!" },
-    ];
-
-    // L'operazione è gestita dal wrapper executePostAction che invia i dati atomici aggiornati
-
-    let currentPrg = 0;
-    for (const step of steps) {
-      setSyncStatusText(step.text);
-      const targetPrg = step.prg;
-      while (currentPrg < targetPrg) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, 8 + Math.random() * 8),
-        );
-        currentPrg += 1;
-        setSyncProgress(currentPrg);
-      }
-      if (step.prg === 70 && onRefreshData) {
-        await onRefreshData();
-      }
-    }
-
-    // Salva le info aggiornate del team dopo la sincronizzazione
-    const refreshedTeam = fantasquadre.find((fs) => fs.id === team.id) || team;
-    setAuthenticatedTeamId(refreshedTeam.id);
-    setNomeFantasquadra(refreshedTeam.nomeFantasquadra);
-    setNomePartecipante(refreshedTeam.nomePartecipante);
-    setPin((refreshedTeam.pin || "").trim());
-    setSelectedPlayers(refreshedTeam.giocatoriSelezionati || []);
-
-    // Salva in localStorage
-    localStorage.setItem("fantaEmail", loginEmail.trim());
-    localStorage.setItem("fantaPassword", loginPassword.trim());
-
-    setSyncProgress(100);
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    setSyncDone(true);
-  };
-
-  const handleCustomRegister = async () => {
-    if (
-      !regEmail.trim() ||
-      !regPassword.trim() ||
-      !regNomeSquadra.trim() ||
-      !regNomePresidente.trim()
-    ) {
-      setLocalLoginError("Tutti i campi sono obbligatori!");
-      return;
-    }
-    if (regPassword.trim().length < 8) {
-      setLocalLoginError("La password deve contenere almeno 8 caratteri!");
-      return;
-    }
-    setLocalLoginError(null);
-
-    // Controlla se email o nome squadra sono già stati presi
-    const emailDuplicata = fantasquadre.find(
-      (fs) =>
-        (fs.email || "").toLowerCase().trim() === regEmail.toLowerCase().trim(),
-    );
-    const nomeDuplicato = fantasquadre.find(
-      (fs) =>
-        fs.nomeFantasquadra.toLowerCase().trim() ===
-        regNomeSquadra.toLowerCase().trim(),
-    );
-    if (emailDuplicata) {
-      setLocalLoginError("Questa email è già associata a una fantasquadra.");
-      return;
-    }
-    if (nomeDuplicato) {
-      setLocalLoginError("Questo nome fantasquadra è già registrato.");
-      return;
-    }
-
-    setHasInteracted(true);
-    setSyncProgress(0);
-    setSyncStatusText("Creazione della tua fantasquadra in corso...");
-
-    try {
-      // Sottoscrizione
-      const updatedData = await onIscriviFantasquadra(
-        regNomePresidente.trim(),
-        regNomeSquadra.trim(),
-        [],
-        regPassword.trim(),
-        regEmail.trim().toLowerCase(),
-      );
-
-      setSyncProgress(60);
-      setSyncStatusText("Finalizzazione dell'iscrizione...");
-
-      // Cerca la squadra appena creata per autenticarsi automaticamente
-      const newTeam = (updatedData?.fantasquadre || fantasquadre).find(
-        (fs: any) =>
-          (fs.email || "").toLowerCase().trim() ===
-          regEmail.trim().toLowerCase(),
-      );
-
-      if (newTeam) {
-        setAuthenticatedTeamId(newTeam.id);
-        setNomeFantasquadra(newTeam.nomeFantasquadra);
-        setNomePartecipante(newTeam.nomePartecipante);
-        setPin((newTeam.pin || "").trim());
-        setSelectedPlayers(newTeam.giocatoriSelezionati || []);
-      } else {
-        // Fallback locale nel caso
-        setAuthenticatedTeamId("new-registered");
-        setNomeFantasquadra(regNomeSquadra.trim());
-        setNomePartecipante(regNomePresidente.trim());
-        setPin(regPassword.trim());
-        setSelectedPlayers([]);
-      }
-
-      localStorage.setItem("fantaEmail", regEmail.trim().toLowerCase());
-      localStorage.setItem("fantaPassword", regPassword.trim());
-
-      setSyncProgress(100);
-      setSyncStatusText("Iscrizione completata!");
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setSyncDone(true);
-    } catch (err: any) {
-      console.error(err);
-      setLocalLoginError(
-        err.message || "Impossibile completare la registrazione.",
-      );
-      setHasInteracted(false);
-      setSyncProgress(0);
-    }
-  };
-
-  const matchedTeam = fantasquadre.find(
-    (fs) =>
-      fs.nomeFantasquadra.toLowerCase().trim() ===
-      nomeFantasquadra.toLowerCase().trim(),
-  );
-
-  const isUnlocked =
-    !matchedTeam || (matchedTeam && authenticatedTeamId === matchedTeam.id);
-
-  // Filter only active players of real roster for pool selection
-  const realPlayersPool = giocatori.filter((g) => g.attivo);
-
-  // Helper to obtain detailed championship match summaries with individual fantasy point details for a team
-  const getTeamMatchBreakdownList = (team: Fantasquadra) => {
-    const list: {
-      matchId: string;
-      dettagli: string;
-      risultato: string;
-      note?: string;
-      puntiTotaliMatch: number;
-      giocatoriKpi: {
-        nome: string;
-        gol: number;
-        assist: number;
-        amm: number;
-        rossi: number;
-        bonusPts: number;
-        fantaScore: number;
-        ruolo?: string;
-        stato?: string;
-        originalFantaScore?: number;
-        originalBonusPts?: number;
-        originalBonusBreakdownStr?: string;
-        bonusPtsNonManuali?: number;
-        bonusBreakdownStrNonManuali?: string;
-      }[];
-    }[] = [];
-
-    const nonAmichevoleMatches = (partiteChiuse || []).filter(
-      (m) =>
-        m.stato === "Chiusa" &&
-        m.inviatoFanta === true &&
-        !(m.dettagli || "").toLowerCase().includes("amichevole"),
-    );
-
-    for (const m of nonAmichevoleMatches) {
-      if (!m.referto) continue;
-
-      const giocatoriKpi: {
-        nome: string;
-        gol: number;
-        assist: number;
-        amm: number;
-        rossi: number;
-        bonusPts: number;
-        fantaScore: number;
-      }[] = [];
-      let puntiTotaliMatch = 0;
-
-      const roster =
-        m.rosterSnapshot && m.rosterSnapshot[team.id]
-          ? m.rosterSnapshot[team.id]
-          : team.giocatoriSelezionati;
-
-      // Starters: up to 3 players. Substitute (Panchinaro): 4th player.
-      const starters = roster.slice(0, 3);
-      const benchPlayerName = roster[3];
-
-      const getPlayerInfo = (pName: string) => {
-        const r = m.referto.find(
-          (x) => (x.snapshotGiocatore?.nome || x.nome).trim().toLowerCase() === pName.trim().toLowerCase(),
-        );
-
-        let played = false;
-        if (r) {
-          if (r.statoPresenza) {
-            played = r.statoPresenza === "giocato";
-          } else {
-            // fallback for backward compatibility
-            played = !!(
-              r.pagaQuota ||
-              r.gol > 0 ||
-              r.assist > 0 ||
-              r.amm > 0 ||
-              r.rossi > 0 ||
-              r.subitiAzione > 0 ||
-              r.subitiRigore > 0 ||
-              r.subitiPiazzato > 0 ||
-              (r.bonusAttivi && r.bonusAttivi.length > 0)
-            );
-          }
-        }
-
-        const rGol = r ? Number(r.gol) || 0 : 0;
-        const rAssist = r ? Number(r.assist) || 0 : 0;
-        const rAmm = r ? Number(r.amm) || 0 : 0;
-        const rEsp = r ? Number(r.rossi) || 0 : 0;
-        const rBonusAttivi = r ? r.bonusAttivi || [] : [];
-
-        const rSubitiAzione = r ? Number(r.subitiAzione) || 0 : 0;
-        const rSubitiRigore = r ? Number(r.subitiRigore) || 0 : 0;
-        const rSubitiPiazzato = r ? Number(r.subitiPiazzato) || 0 : 0;
-
-        const effectiveBonuses = m.bonusesSnapshot || bonuses;
-        const gInfoFallback = giocatori.find(g => g.nome.toLowerCase() === pName.toLowerCase());
-        const bonusPts = r
-          ? getPlayerBonusPointsForMatch(
-              pName,
-              rBonusAttivi,
-              rGol,
-              rAssist,
-              effectiveBonuses,
-              r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
-              rAmm,
-              rEsp,
-              r.bonusGolAccreditati
-            )
-          : 0;
-
-        // Calculate non-manual bonus points for bench when they are not subbed in
-        const rBonusAttiviNonManuali = rBonusAttivi.filter(bId => {
-          const bDef = (effectiveBonuses || DEFAULT_BONUSES).find(x => x.id === bId);
-          return bDef ? (!isBonusManuale(bDef) && !bDef.richiedeIngressoInCampo) : true;
-        });
-        const bonusPtsNonManuali = r
-          ? getPlayerBonusPointsForMatch(
-              pName,
-              rBonusAttiviNonManuali,
-              rGol,
-              rAssist,
-              effectiveBonuses,
-              r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
-              rAmm,
-              rEsp,
-              r.bonusGolAccreditati
-            )
-          : 0;
-
-        let bonusBreakdownStr = "";
-        let bonusBreakdownStrNonManuali = "";
-
-        if (r) {
-          const breakdown = getPlayerBonusBreakdownForMatch(
-            pName,
-            rBonusAttivi,
-            rGol,
-            rAssist,
-            effectiveBonuses,
-            r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
-            rAmm,
-            rEsp,
-            r.bonusGolAccreditati
-          );
-          if (breakdown.length > 0) {
-            bonusBreakdownStr =
-              breakdown
-                .map(
-                  (b) =>
-                    `${b.nome} (${b.puntiVal > 0 ? "+" : ""}${b.puntiVal})`,
-                )
-                .join(", ") + ` [Tot: ${bonusPts > 0 ? "+" : ""}${bonusPts}]`;
-          }
-
-          const breakdownNonManuali = getPlayerBonusBreakdownForMatch(
-            pName,
-            rBonusAttiviNonManuali,
-            rGol,
-            rAssist,
-            effectiveBonuses,
-            r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
-            rAmm,
-            rEsp,
-            r.bonusGolAccreditati
-          );
-          if (breakdownNonManuali.length > 0) {
-            bonusBreakdownStrNonManuali =
-              breakdownNonManuali
-                .map(
-                  (b) =>
-                    `${b.nome} (${b.puntiVal > 0 ? "+" : ""}${b.puntiVal})`,
-                )
-                .join(", ") + ` [Tot Panchina: ${bonusPtsNonManuali > 0 ? "+" : ""}${bonusPtsNonManuali}]`;
-          }
-        }
-
-        const fantaScore = r
-          ? parseFloat(
-              (
-                rGol * GOAL_POINTS +
-                rAssist * ASSIST_POINTS +
-                rAmm * AMMO_POINTS +
-                rEsp * ESPU_POINTS +
-                bonusPts
-              ).toFixed(1),
-            )
-          : 0;
-
-        let matchChange = 0;
-        if (played) {
-          if (fantaScore >= 20) matchChange = 2;
-          else if (fantaScore >= 16) matchChange = 1;
-          else if (fantaScore >= 10) matchChange = 0;
-          else if (fantaScore >= -5) matchChange = -1;
-          else if (fantaScore >= -10) matchChange = -2;
-          else matchChange = -3;
-        } else {
-          if (fantaScore >= 15) matchChange = 2;
-          else if (fantaScore >= 7) matchChange = 1;
-          else if (fantaScore >= -1) matchChange = 0;
-          else if (fantaScore >= -5) matchChange = -1;
-          else if (fantaScore >= -10) matchChange = -2;
-          else matchChange = -3;
-        }
-
-        if (r && r.malusBrt === true) {
-          matchChange -= 1;
-        }
-
-        return {
-          nome: pName,
-          gol: rGol,
-          assist: rAssist,
-          amm: rAmm,
-          rossi: rEsp,
-          subitiAzione: rSubitiAzione,
-          subitiRigore: rSubitiRigore,
-          subitiPiazzato: rSubitiPiazzato,
-          bonusPts,
-          bonusBreakdownStr,
-          fantaScore,
-          matchChange,
-          played: !!played,
-          malusBrt: r ? !!r.malusBrt : false,
-          bonusPtsNonManuali,
-          bonusBreakdownStrNonManuali,
-        };
-      };
-
-      const startersInfo = starters.map((p) => getPlayerInfo(p));
-      const benchInfo = benchPlayerName ? getPlayerInfo(benchPlayerName) : null;
-
-      let subbedIn = false;
-      const finalKpiList: any[] = [];
-
-      for (let i = 0; i < startersInfo.length; i++) {
-        const inf = startersInfo[i];
-        if (!inf.played && benchInfo && benchInfo.played && !subbedIn) {
-          // Starter did not play, substitute is available, performs substitution!
-          subbedIn = true;
-          finalKpiList.push({
-            ...inf,
-            ruolo: "Titolare",
-            stato: "Sostituito",
-            puntiConteggiati: inf.fantaScore,
-          });
-          puntiTotaliMatch += inf.fantaScore;
-        } else {
-          finalKpiList.push({
-            ...inf,
-            ruolo: "Titolare",
-            stato: inf.played ? "Titolare" : "Assente",
-            puntiConteggiati: inf.fantaScore,
-          });
-          puntiTotaliMatch += inf.fantaScore;
-        }
-      }
-
-      if (benchInfo) {
-        if (subbedIn) {
-          finalKpiList.push({
-            ...benchInfo,
-            ruolo: "Panchina",
-            stato: "Subentrato",
-            puntiConteggiati: benchInfo.fantaScore,
-          });
-          puntiTotaliMatch += benchInfo.fantaScore;
-        } else {
-          const unassignedList: string[] = [];
-          if (benchInfo.gol > 0) {
-            unassignedList.push(`${benchInfo.gol} Gol (+${benchInfo.gol * GOAL_POINTS} pt)`);
-          }
-          if (benchInfo.assist > 0) {
-            unassignedList.push(`${benchInfo.assist} Assist (+${benchInfo.assist * ASSIST_POINTS} pt)`);
-          }
-          const bRef = m.referto?.find((ref) => ref.nome === benchPlayerName);
-          if (bRef && bRef.bonusAttivi) {
-            bRef.bonusAttivi.forEach((bId) => {
-              const bDef = (bonuses || DEFAULT_BONUSES).find((x) => x.id === bId);
-              if (bDef && isBonusManuale(bDef)) {
-                unassignedList.push(`${bDef.nome} (+${bDef.punti} pt)`);
-              }
-            });
-          }
-
-          finalKpiList.push({
-            ...benchInfo,
-            ruolo: "Panchina",
-            stato: "Panchina",
-            originalFantaScore: benchInfo.fantaScore,
-            originalBonusPts: benchInfo.bonusPts,
-            originalBonusBreakdownStr: benchInfo.bonusBreakdownStr,
-            bonusPts: benchInfo.bonusPtsNonManuali,
-            bonusBreakdownStr: benchInfo.bonusBreakdownStrNonManuali,
-            fantaScore: benchInfo.bonusPtsNonManuali,
-            puntiConteggiati: benchInfo.bonusPtsNonManuali,
-            unassignedBonuses: unassignedList,
-          });
-          puntiTotaliMatch += benchInfo.bonusPtsNonManuali;
-        }
-      }
-
-      puntiTotaliMatch = parseFloat(puntiTotaliMatch.toFixed(1));
-      giocatoriKpi.push(...finalKpiList);
-
-      list.push({
-        matchId: m.id,
-        dettagli: m.dettagli,
-        risultato: m.risultato || "N.D.",
-        note: m.note,
-        puntiTotaliMatch: parseFloat(puntiTotaliMatch.toFixed(1)),
-        giocatoriKpi,
-      });
-    }
-
-    return list;
-  };
-
-  // Helper to parse "25/05/2026 21:00, Seminario" into Date
-  const parseMatchDate = (dettagli: string): Date | null => {
-    if (!dettagli) return null;
-    const regex = /(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2})[:.](\d{2})/;
-    const match = dettagli.match(regex);
-    if (match) {
-      const day = parseInt(match[1], 10);
-      const month = parseInt(match[2], 10) - 1;
-      const year = parseInt(match[3], 10);
-      const hour = parseInt(match[4], 10);
-      const minute = parseInt(match[5], 10);
-      return new Date(year, month, day, hour, minute);
-    }
-    return null;
-  };
-
-  const checkChampionshipLockStatus = () => {
-    const openMatches = partiteAperte || [];
-    const campMatches = openMatches.filter(
-      (m) => !(m.dettagli || "").toLowerCase().includes("amichevole"),
-    );
-    const now = new Date();
-
-    for (const m of campMatches) {
-      const matchTime = parseMatchDate(m.dettagli);
-      if (matchTime) {
-        const lockoutTime = matchTime.getTime() - 60 * 60 * 1000; // 1 hour before
-        if (now.getTime() >= lockoutTime) {
-          return {
-            isLocked: true,
-            match: m,
-            matchTime,
-            deadline: new Date(lockoutTime),
-            timeLeftString: "",
-          };
-        }
-      }
-    }
-
-    // Also look for the most imminent future championship match
-    let closestMatch: Partita | null = null;
-    let closestTime = Infinity;
-
-    for (const m of campMatches) {
-      const matchTime = parseMatchDate(m.dettagli);
-      if (matchTime) {
-        const t = matchTime.getTime();
-        if (t > now.getTime() && t < closestTime) {
-          closestTime = t;
-          closestMatch = m;
-        }
-      }
-    }
-
-    if (closestMatch) {
-      const mTime = parseMatchDate(closestMatch.dettagli);
-      if (mTime) {
-        const deadline = new Date(mTime.getTime() - 60 * 60 * 1000);
-        // Time left string
-        const diffMs = deadline.getTime() - now.getTime();
-        let timeLeftString = "";
-        if (diffMs > 0) {
-          const hours = Math.floor(diffMs / (1000 * 60 * 60));
-          const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-          timeLeftString = `${hours}h ${minutes}m`;
-        }
-        return {
-          isLocked: false,
-          match: closestMatch,
-          matchTime: mTime,
-          deadline,
-          timeLeftString,
-        };
-      }
-    }
-
-    return {
-      isLocked: false,
-      match: null,
-      matchTime: null,
-      deadline: null,
-      timeLeftString: "",
-    };
-  };
-
-  const _actualLockStatus = checkChampionshipLockStatus();
-  const lockStatus = {
-    ..._actualLockStatus,
-  };
-
-  // Handle verification and login of an existing team
-  const handleUnlockTeam = () => {
-    if (!enteredPin.trim()) {
-      setLoginError("Inserisci il codice PIN della tua squadra!");
-      return;
-    }
-    const team = fantasquadre.find(
-      (fs) =>
-        fs.nomeFantasquadra.toLowerCase().trim() ===
-        nomeFantasquadra.toLowerCase().trim(),
-    );
-    if (team) {
-      if (team.pin && team.pin.trim() !== enteredPin.trim()) {
-        setLoginError(
-          "PIN Errato! Inserisci il codice corretto per questa squadra.",
-        );
-        return;
-      }
-      // PIN matched!
-      setAuthenticatedTeamId(team.id);
-      setSelectedPlayers(team.giocatoriSelezionati || []);
-      setNomePartecipante(team.nomePartecipante);
-      setPin(enteredPin.trim());
-      setLoginError(null);
-    }
-  };
-
-  // Handle Player select toggle
-  const handleTogglePlayer = (nome: string) => {
-    if (lockStatus.isLocked) {
-      alert(
-        "Operazione non consentita: le formazioni sono attualmente bloccate per l'imminente turno di campionato.",
-      );
-      return;
-    }
-
-    const selectedTeam = fantasquadre.find(
-      (fs) =>
-        fs.nomeFantasquadra.toLowerCase().trim() ===
-        nomeFantasquadra.toLowerCase().trim(),
-    );
-    const economyPrevPlayers = selectedTeam
-      ? selectedTeam.giocatoriSelezionati || []
-      : [];
-    const rulePrevPlayers = selectedTeam
-      ? selectedTeam.rosaOriginaria || selectedTeam.giocatoriSelezionati || []
-      : [];
-
-    if (selectedTeam && economyPrevPlayers.length === 4) {
-      // Modify existing roster check: MUST be authenticated!
-      if (authenticatedTeamId !== selectedTeam.id && !isAdminMode) {
-        alert(
-          "Devi sbloccare la tua squadra con il PIN per poter modificare la formazione.",
-        );
-        return;
-      }
-
-      const isLegacy = !selectedTeam.valoriAcquisto;
-
-      let teamValoriAcquisto = selectedTeam.valoriAcquisto || {};
-      let teamCreditoResiduo = selectedTeam.creditoResiduo ?? 0;
-
-      if (isLegacy) {
-        teamValoriAcquisto = {};
-        let totalCost = 0;
-        economyPrevPlayers.forEach((pName) => {
-          const ip = getPlayerPriceForRoster(
-            pName,
-            partiteChiuse || [],
-            bonuses,
-          );
-          teamValoriAcquisto[pName] = ip;
-          totalCost += ip;
-        });
-        teamCreditoResiduo = Math.max(0, MAX_BUDGET - totalCost);
-      }
-
-      // If deselecting a player:
-      if (selectedPlayers.includes(nome)) {
-        const nextPlayers = selectedPlayers.filter((p) => p !== nome);
-
-        const keptFromOrigin = rulePrevPlayers.filter((p) =>
-          nextPlayers.includes(p),
-        );
-
-        // Allow temporary 1+ deselections for exploration, will validate on Save.
-        setSelectedPlayers(nextPlayers);
-      } else {
-        // If selecting a new player:
-        if (selectedPlayers.length >= 4) {
-          alert(
-            "Hai già selezionato il numero massimo di 4 giocatori per la tua rosa! Rimuovine uno prima.",
-          );
-          return;
-        }
-
-        const nextPlayers = [...selectedPlayers, nome];
-        const keptFromOrigin = rulePrevPlayers.filter((p) =>
-          nextPlayers.includes(p),
-        );
-
-        // Allow temporary 1+ selections for exploration, will validate on Save.
-
-        // Budget check with the new player added
-        let soldPrice = 0;
-        let boughtPrice = 0;
-
-        const sold = economyPrevPlayers.filter((p) => !nextPlayers.includes(p));
-        const bought = nextPlayers.filter(
-          (p) => !economyPrevPlayers.includes(p),
-        );
-
-        sold.forEach((p) => {
-          soldPrice += getPlayerPriceForRoster(p, partiteChiuse || [], bonuses);
-        });
-        bought.forEach((p) => {
-          boughtPrice += getPlayerPriceForRoster(
-            p,
-            partiteChiuse || [],
-            bonuses,
-          );
-        });
-
-        const finalCredits = teamCreditoResiduo + soldPrice - boughtPrice;
-        if (finalCredits < 0 && !isAdminMode) {
-          alert(
-            `Credito non sufficiente! Ti costerebbe troppo di mercato: sforeresti di ${Math.abs(finalCredits)} Izycoin.`,
-          );
-          return;
-        }
-
-        setSelectedPlayers(nextPlayers);
-      }
-    } else {
-      // New Team Enrollment flow or composing first-time roster (just keep max 4 players)
-      if (selectedTeam && authenticatedTeamId !== selectedTeam.id && !isAdminMode) {
-        alert(
-          "Devi sbloccare la tua squadra con il PIN per poter completare la formazione.",
-        );
-        return;
-      }
-
-      if (selectedPlayers.includes(nome)) {
-        setSelectedPlayers(selectedPlayers.filter((p) => p !== nome));
-      } else {
-        if (selectedPlayers.length >= 4) {
-          alert(
-            "Hai già selezionato il numero massimo di 4 giocatori per la tua rosa!",
-          );
-          return;
-        }
-        const nextPlayers = [...selectedPlayers, nome];
-        // Check budget constraint for a new registration (max 60)
-        let totalCost = 0;
-        nextPlayers.forEach((pName) => {
-          totalCost += getPlayerPriceForRoster(
-            pName,
-            partiteChiuse || [],
-            bonuses,
-          );
-        });
-        if (totalCost > MAX_BUDGET && !isAdminMode) {
-          alert(
-            `Sfora il budget! La rosa scelta sforerebbe il tetto di ${MAX_BUDGET} Izycoin (costerebbe ${totalCost} Izycoin).`,
-          );
-          return;
-        }
-        setSelectedPlayers(nextPlayers);
-      }
-    }
-  };
-
-  // Submit Registration logic
-  const handleRegisterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg(null);
-
-    if (lockStatus.isLocked && !isAdminMode) {
-      setErrorMsg(
-        "Impossibile procedere: le iscrizioni e variazioni sono bloccate per l'imminente turno di campionato.",
-      );
-      return;
-    }
-
-    // Validate inputs
-    if (!nomePartecipante.trim()) {
-      setErrorMsg("Inserisci il tuo nome e cognome.");
-      return;
-    }
-    if (!nomeFantasquadra.trim()) {
-      setErrorMsg("Scegli un nome originale per la tua Fantasquadra.");
-      return;
-    }
-    if (selectedPlayers.length === 0) {
-      setErrorMsg("Seleziona i giocatori per comporre il tuo roster!");
-      return;
-    }
-    if (selectedPlayers.length < 4) {
-      setErrorMsg(
-        `Devi selezionare esattamente 4 giocatori per la tua rosa (3 titolari e 1 panchinaro). Attualmente ne hai selezionati ${selectedPlayers.length}.`,
-      );
-      return;
-    }
-    if (selectedPlayers.length > 4) {
-      setErrorMsg(
-        `Puoi selezionare al massimo 4 giocatori. Attualmente ne hai selezionati ${selectedPlayers.length}.`,
-      );
-      return;
-    }
-
-    const trimmedPin = (pin ? pin.trim() : "") || "12345678";
-
-    // Real-time market / budget & change limit validation
-    const matchedTeam = fantasquadre.find(
-      (fs) =>
-        fs.nomeFantasquadra.toLowerCase().trim() ===
-        nomeFantasquadra.toLowerCase().trim(),
-    );
-
-    if (!matchedTeam || (matchedTeam.giocatoriSelezionati || []).length < 4) {
-      // NEW SQUAD CHECK
-      let totalCost = 0;
-      selectedPlayers.forEach((pName) => {
-        totalCost += getPlayerPriceForRoster(
-          pName,
-          partiteChiuse || [],
-          bonuses,
-        );
-      });
-      if (totalCost > MAX_BUDGET && !isAdminMode) {
-        setErrorMsg(
-          `Il costo totale della rosa scelto (${totalCost} pinne 🐟) supera il limite consentito di ${MAX_BUDGET} pinne 🐟!`,
-        );
-        return;
-      }
-    } else {
-      // MODIFYING EXISTING SQUAD
-      const economyPrevPlayers = matchedTeam.giocatoriSelezionati || [];
-      const rulePrevPlayers =
-        matchedTeam.rosaOriginaria || matchedTeam.giocatoriSelezionati || [];
-
-      const isLegacy = !matchedTeam.valoriAcquisto;
-
-      let teamValoriAcquisto = matchedTeam.valoriAcquisto || {};
-      let teamCreditoResiduo = matchedTeam.creditoResiduo ?? 0;
-
-      if (isLegacy) {
-        teamValoriAcquisto = {};
-        let totalCost = 0;
-        economyPrevPlayers.forEach((pName) => {
-          const ip = getPlayerPriceForRoster(
-            pName,
-            partiteChiuse || [],
-            bonuses,
-          );
-          teamValoriAcquisto[pName] = ip;
-          totalCost += ip;
-        });
-        teamCreditoResiduo = Math.max(0, MAX_BUDGET - totalCost);
-      }
-
-      if (economyPrevPlayers.length === 4) {
-        const keptFromOrigin = rulePrevPlayers.filter((p) =>
-          selectedPlayers.includes(p),
-        );
-        const numChangesFromOrigin =
-          rulePrevPlayers.length - keptFromOrigin.length;
-
-        if (!isMercatoLiberoValido && numChangesFromOrigin > 1 && !isAdminMode) {
-          setErrorMsg(
-            `Errore di mercato: puoi effettuare al massimo 1 cambio rispetto alla tua rosa originaria post-partita! (A meno di Sessione Speciale)`,
-          );
-          return;
-        }
-
-        const soldPlayers = economyPrevPlayers.filter(
-          (p) => !selectedPlayers.includes(p),
-        );
-        const boughtPlayers = selectedPlayers.filter(
-          (p) => !economyPrevPlayers.includes(p),
-        );
-
-        let soldPrice = 0;
-        let boughtPrice = 0;
-
-        soldPlayers.forEach((pName) => {
-          soldPrice += getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses);
-        });
-
-        boughtPlayers.forEach((pName) => {
-          boughtPrice += getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses);
-        });
-
-        const finalCredits = teamCreditoResiduo + soldPrice - boughtPrice;
-        if (finalCredits < 0 && !isAdminMode) {
-          setErrorMsg(
-            `Credito non sufficiente per l'operazione! Hai a disposizione ${teamCreditoResiduo} Izycoin residui. Cedendo ottenieni ${soldPrice} Izycoin, ma gli acquisti costano ${boughtPrice} Izycoin. Ti mancano ${Math.abs(finalCredits)} Izycoin.`,
-          );
-          return;
-        }
-
-        // Interrupt with confirmation popup
-        if (
-          soldPlayers.length > 0 &&
-          boughtPlayers.length > 0 &&
-          !showConfirmModal
-        ) {
-          setProposedTransfer({
-            sold: soldPlayers.join(", "),
-            bought: boughtPlayers.join(", "),
-            soldPrice: soldPrice,
-            boughtPrice: boughtPrice,
-            remainingCredits: finalCredits,
-          });
-          setShowConfirmModal(true);
-          return;
-        }
-      } else {
-        // Initial composing from empty state (from 0 to 4 players)
-        let totalCost = 0;
-        selectedPlayers.forEach((pName) => {
-          totalCost += getPlayerPriceForRoster(
-            pName,
-            partiteChiuse || [],
-            bonuses,
-          );
-        });
-        if (totalCost > MAX_BUDGET && !isAdminMode) {
-          setErrorMsg(
-            `Il costo totale della rosa scelto (${totalCost} Izycoin) supera il limite consentito di ${MAX_BUDGET} Izycoin!`,
-          );
-          return;
-        }
-      }
-    }
-
-    setSubmitting(true);
-    try {
-      const result = await onIscriviFantasquadra(
-        nomePartecipante,
-        nomeFantasquadra,
-        selectedPlayers,
-        trimmedPin,
-        undefined,
-      );
-      setSubmitted(true);
-      window.location.reload();
-    } catch (err: any) {
-      setErrorMsg(err.message || "Errore sconosciuto di convalida server.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const executeRosterUpdate = async () => {
-    setShowConfirmModal(false);
-    setSubmitting(true);
-    setErrorMsg(null);
-    try {
-      const trimmedPin = (pin ? pin.trim() : "") || "12345678";
-      await onIscriviFantasquadra(
-        nomePartecipante,
-        nomeFantasquadra,
-        selectedPlayers,
-        trimmedPin,
-        undefined,
-      );
-      setSubmitted(true);
-      showToast(
-        "Operazione completata con successo! Formazione modificata."
-      );
-      setTimeout(() => window.location.reload(), 1500);
-    } catch (err: any) {
-      setErrorMsg(err.message || "Errore sconosciuto di convalida server.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // Copy private recruitment portal link
-  const handleCopyLink = () => {
-    const publicUrl = `${window.location.origin}${window.location.pathname}?portal=true`;
-    navigator.clipboard.writeText(publicUrl);
-    setCopied(true);
-    setTimeout(() => {
-      setCopied(false);
-    }, 2500);
-  };
-
-  // Calculations of scores for each team (only Championship matches count!)
-  const getPlayerStatsObj = (nome: string) => {
-    // League Stats (Campionato)
-    let campGol = 0;
-    let campAssist = 0;
-    let campAmm = 0;
-    let campEsp = 0;
-    let campBonusPts = 0;
-
-    // Friendly Stats (Amichevoli)
-    let amichGol = 0;
-    let amichAssist = 0;
-    let amichAmm = 0;
-    let amichEsp = 0;
-    let amichBonusPts = 0;
-
-    const activeBonusDetails: {
-      bName: string;
-      bDesc: string;
-      pts: number;
-      matchDettagli: string;
-    }[] = [];
-
-    if (partiteChiuse && partiteChiuse.length > 0) {
-      for (const m of partiteChiuse) {
-        const isAmichevole = m.dettagli
-          ? m.dettagli.toLowerCase().includes("amichevole")
-          : false;
-        if (m.referto) {
-          const r = m.referto.find(
-            (x) => x.nome.toLowerCase() === nome.toLowerCase(),
-          );
-          if (r) {
-            const rGol = Number(r.gol) || 0;
-            const rAssist = Number(r.assist) || 0;
-            const rAmm = Number(r.amm) || 0;
-            const rEsp = Number(r.rossi) || 0;
-            const rBonusAttivi = r.bonusAttivi || [];
-
-            const gInfo = giocatori.find(g => g.nome.toLowerCase() === nome.toLowerCase());
-            const effectiveBonuses = m.bonusesSnapshot || bonuses;
-            const matchBonusPts = getPlayerBonusPointsForMatch(
-              nome,
-              rBonusAttivi,
-              rGol,
-              rAssist,
-              effectiveBonuses,
-              r.snapshotGiocatore?.ultimoRuolo || gInfo?.ultimoRuolo,
-              rAmm,
-              rEsp,
-              r.bonusGolAccreditati
-            );
-
-            if (isAmichevole || m.inviatoFanta === true) {
-              const breakdown = getPlayerBonusBreakdownForMatch(
-                nome,
-                rBonusAttivi,
-                rGol,
-                rAssist,
-                effectiveBonuses,
-                r.snapshotGiocatore?.ultimoRuolo || gInfo?.ultimoRuolo,
-                rAmm,
-                rEsp,
-                r.bonusGolAccreditati
-              );
-              breakdown.forEach(b => {
-                const foundBonusDef = effectiveBonuses.find(def => def.nome === b.nome);
-                activeBonusDetails.push({
-                   bName: b.nome,
-                   bDesc: foundBonusDef ? foundBonusDef.descrizione : "",
-                   pts: b.puntiVal,
-                   matchDettagli: m.dettagli
-                });
-              });
-            }
-
-            if (isAmichevole) {
-              amichGol += rGol;
-              amichAssist += rAssist;
-              amichAmm += rAmm;
-              amichEsp += rEsp;
-              amichBonusPts += matchBonusPts;
-            } else if (m.inviatoFanta === true) {
-              campGol += rGol;
-              campAssist += rAssist;
-              campAmm += rAmm;
-              campEsp += rEsp;
-              campBonusPts += matchBonusPts;
-            }
-          }
-        }
-      }
-    } else {
-      // Fallback: if matches are unavailable, read the default properties as Campionato baseline
-      const realIdx = giocatori.find(
-        (g) => g.nome.toLowerCase() === nome.toLowerCase(),
-      );
-      if (realIdx) {
-        campGol = realIdx.gol || 0;
-        campAssist = realIdx.assist || 0;
-        campAmm = realIdx.ammonizioni || 0;
-        campEsp = realIdx.espulsioni || 0;
-      }
-    }
-
-    const fantaScore = parseFloat(
-      (
-        campGol * GOAL_POINTS +
-        campAssist * ASSIST_POINTS +
-        campAmm * AMMO_POINTS +
-        campEsp * ESPU_POINTS +
-        campBonusPts
-      ).toFixed(1),
-    );
-    const amichFantaScore = parseFloat(
-      (
-        amichGol * GOAL_POINTS +
-        amichAssist * ASSIST_POINTS +
-        amichAmm * AMMO_POINTS +
-        amichEsp * ESPU_POINTS +
-        amichBonusPts
-      ).toFixed(1),
-    );
-
-    return {
-      gol: campGol,
-      assist: campAssist,
-      ammonizioni: campAmm,
-      espulsioni: campEsp,
-      fantaScore,
-      campBonusPts,
-      amichBonusPts,
-      activeBonusDetails,
-      campionato: {
-        gol: campGol,
-        assist: campAssist,
-        ammonizioni: campAmm,
-        espulsioni: campEsp,
-        fantaScore,
-        bonusPts: campBonusPts,
+      ],
+      "convocati": [
+        "Mario Conti",
+        "Sergio Pippia",
+        "Salvatore Roberto Pinna",
+        "Giampaolo Mattana",
+        "Alberto Garau",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Matteo Scattu",
+        "AMICO SCATTU (Esterno)"
+      ],
+      "stato": "Chiusa",
+      "costo": 40,
+      "formazione": {
+        "panchina": [],
+        "titolari": []
       },
-      amichevole: {
-        gol: amichGol,
-        assist: amichAssist,
-        ammonizioni: amichAmm,
-        espulsioni: amichEsp,
-        fantaScore: amichFantaScore,
-        bonusPts: amichBonusPts,
+      "rosterSnapshot": {},
+      "risultato": "14-12",
+      "dettagli": "Lunedì 25 maggio ore 21:00 - Seminario (TEAM SCURO vs TEAM BIANCO) [Amichevole]\n\n👕 TEAM SCURO:\nMario Conti, Sergio Pippia, Salvatore Roberto Pinna, Lorenzo Pittiu, Marco Scarpellini\n\n👕 TEAM BIANCO:\nGiampaolo Mattana, Alberto Garau, Manuel Palmas, Matteo Scattu, AMICO SCATTU (Esterno)",
+      "inviatoFanta": false,
+      "id": "0ae665e0-7530-4e29-8bbb-3678aba05edd",
+      "dataInserimento": "25/05/2026 17.14.39"
+    },
+    {
+      "convocati": [
+        "Manuel Palmas",
+        "Salvatore Roberto Pinna",
+        "Lorenzo Pittiu",
+        "Stefano Michele Lauro",
+        "Michele Carrone",
+        "Marco Scarpellini",
+        "Sergio Pippia",
+        "Federico Addis",
+        "Spanedda (Esterno)",
+        "Porcella (Esterno)"
+      ],
+      "stato": "Chiusa",
+      "costo": 35,
+      "referto": [
+        {
+          "subitiAzione": 0,
+          "gol": 0,
+          "pagaQuota": true,
+          "bonusAttivi": [],
+          "amm": 0,
+          "subitiPiazzato": 0,
+          "subitiRigore": 0,
+          "nome": "Manuel Palmas",
+          "assist": 0,
+          "rossi": 0
+        },
+        {
+          "subitiAzione": 0,
+          "gol": 0,
+          "pagaQuota": true,
+          "bonusAttivi": [],
+          "amm": 0,
+          "subitiPiazzato": 0,
+          "subitiRigore": 0,
+          "nome": "Salvatore Roberto Pinna",
+          "assist": 0,
+          "rossi": 0
+        },
+        {
+          "rossi": 0,
+          "assist": 0,
+          "nome": "Lorenzo Pittiu",
+          "subitiRigore": 0,
+          "subitiPiazzato": 0,
+          "amm": 0,
+          "bonusAttivi": [],
+          "gol": 0,
+          "pagaQuota": true,
+          "subitiAzione": 0
+        },
+        {
+          "nome": "Stefano Michele Lauro",
+          "subitiRigore": 0,
+          "subitiPiazzato": 0,
+          "bonusAttivi": [],
+          "amm": 0,
+          "pagaQuota": true,
+          "gol": 0,
+          "subitiAzione": 0,
+          "rossi": 0,
+          "assist": 0
+        },
+        {
+          "assist": 0,
+          "rossi": 0,
+          "subitiPiazzato": 0,
+          "nome": "Michele Carrone",
+          "subitiRigore": 0,
+          "pagaQuota": true,
+          "gol": 0,
+          "subitiAzione": 0,
+          "amm": 0,
+          "bonusAttivi": []
+        },
+        {
+          "rossi": 0,
+          "assist": 0,
+          "subitiRigore": 0,
+          "nome": "Marco Scarpellini",
+          "subitiPiazzato": 0,
+          "amm": 0,
+          "bonusAttivi": [],
+          "subitiAzione": 0,
+          "gol": 0,
+          "pagaQuota": true
+        },
+        {
+          "assist": 0,
+          "rossi": 0,
+          "subitiAzione": 0,
+          "gol": 0,
+          "pagaQuota": true,
+          "bonusAttivi": [],
+          "amm": 0,
+          "subitiPiazzato": 0,
+          "subitiRigore": 0,
+          "nome": "Sergio Pippia"
+        },
+        {
+          "assist": 0,
+          "rossi": 0,
+          "subitiPiazzato": 0,
+          "nome": "Federico Addis",
+          "subitiRigore": 0,
+          "pagaQuota": true,
+          "gol": 0,
+          "subitiAzione": 0,
+          "bonusAttivi": [],
+          "amm": 0
+        },
+        {
+          "assist": 0,
+          "rossi": 0,
+          "gol": 0,
+          "pagaQuota": true,
+          "subitiAzione": 0,
+          "bonusAttivi": [],
+          "amm": 0,
+          "subitiPiazzato": 0,
+          "nome": "Spanedda (Esterno)",
+          "subitiRigore": 0
+        },
+        {
+          "amm": 0,
+          "bonusAttivi": [],
+          "pagaQuota": true,
+          "gol": 0,
+          "subitiAzione": 0,
+          "nome": "Porcella (Esterno)",
+          "subitiRigore": 0,
+          "subitiPiazzato": 0,
+          "rossi": 0,
+          "assist": 0
+        }
+      ],
+      "rosterSnapshot": {
+        "fs-1780146759640-rule": [
+          "Manuel Palmas",
+          "Marco Scarpellini",
+          "Enrico Mulas"
+        ]
       },
-    };
-  };
-
-  const calculateTeamScore = (team: Fantasquadra) => {
-    const list = getTeamMatchBreakdownList(team);
-    const tot = list.reduce((acc, m) => acc + (m.puntiTotaliMatch || 0), 0);
-    return parseFloat(tot.toFixed(1));
-  };
-
-  // Sort fantasy teams based on performance
-  const rankedTeams = [...fantasquadre]
-    .map((team) => ({
-      ...team,
-      score: calculateTeamScore(team),
-    }))
-    .sort((a, b) => b.score - a.score);
-
-  // Search filter pool supporting Convocati filtering
-  const currentConvocati = lockStatus.match?.convocati || [];
-  const filteredPool = realPlayersPool.filter((player) => {
-    const matchesSearch = player.nome
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    if (filterConvocati && currentConvocati.length > 0) {
-      return (
-        matchesSearch &&
-        currentConvocati.some(
-          (name) =>
-            name.toLowerCase().trim() === player.nome.toLowerCase().trim(),
-        )
-      );
+      "risultato": "14-10",
+      "formazione": {
+        "panchina": [
+          "Manuel Palmas",
+          "Salvatore Roberto Pinna",
+          "Lorenzo Pittiu",
+          "Stefano Michele Lauro",
+          "Spanedda (Esterno)"
+        ],
+        "titolari": [
+          "Michele Carrone",
+          "Marco Scarpellini",
+          "Sergio Pippia",
+          "Federico Addis",
+          "Porcella (Esterno)"
+        ]
+      },
+      "dettagli": "Lunedì 1 giugno ore 20:00 - Verderame (Scuri vs Chiari) [Amichevole]\n\n👕 *Scuri*:\nMichele Carrone, Marco Scarpellini, Sergio Pippia, Federico Addis, Porcella (Esterno)\n\n👕 *Chiari*:\nManuel Palmas, Salvatore Roberto Pinna, Lorenzo Pittiu, Stefano Michele Lauro, Spanedda (Esterno)",
+      "inviatoFanta": false,
+      "id": "cl2uyyu-mpv9n0hu",
+      "dataInserimento": "2026-06-01T13:50:25.203Z"
+    },
+    {
+      "note": "Primo tempo non particolarmente brillante, ma Carrone e Mattana, autore di una doppietta su due assist perfetti di Pittiu, permettono ai nostri di chiudere la prima frazione avanti 3-2.\nNella ripresa, complice la maggiore profondità della rosa, arrivati al campo con appena cinque uomini a disposizione, i nostri prendono il largo. A segno ancora Pittiu e Mattana, entrambi ottimamente serviti da Lauro. Il definitivo 6-2 porta la firma di Mulas, che dopo un irresistibile coast to coast deve solo spingere in rete un preciso assist di Pinna, per il più classico dei \"gol della merda\".",
+      "id": "rr7v8hx-mq4yvx2m",
+      "dettagli": "09/06/2026 20:45, Le Serre vs SOS Auto",
+      "inviatoFanta": true,
+      "formazione": {
+        "panchina": [],
+        "titolari": []
+      },
+      "risultato": "6-2 (V)",
+      "rosterSnapshot": {
+        "fs-1780667683304-6wlo": [
+          "Salvatore Roberto Pinna",
+          "Enrico Mulas",
+          "Giampaolo Mattana",
+          "Manuel Palmas"
+        ],
+        "fs-1780663515353-m28b": [
+          "Salvatore Roberto Pinna",
+          "Fabrizio Alimonda",
+          "Michele Carrone",
+          "Manuel Palmas"
+        ],
+        "fs-1780999483908-ma0w": [
+          "Manuel Palmas",
+          "Enrico Mulas",
+          "Fabrizio Alimonda",
+          "Alberto Garau"
+        ],
+        "fs-1780745920763-bd2q": [
+          "Enrico Mulas",
+          "Lorenzo Pittiu",
+          "Matteo Scattu",
+          "Alberto Garau"
+        ],
+        "fs-1780566278880-cqo5": [
+          "Marco Scarpellini",
+          "Giampaolo Mattana",
+          "Lorenzo Pittiu",
+          "Manuel Palmas"
+        ],
+        "fs-1780665284664-7cbl": [
+          "Lorenzo Pittiu",
+          "Enrico Mulas",
+          "Salvatore Roberto Pinna",
+          "Matteo Scattu"
+        ],
+        "fs-1780689922578-g2kb": [
+          "Giampaolo Mattana",
+          "Lorenzo Pittiu",
+          "Enrico Mulas",
+          "Matteo Scattu"
+        ],
+        "fs-1780953269827-gl6h": [
+          "Stefano Michele Lauro",
+          "Manuel Palmas",
+          "Michele Carrone",
+          "Salvatore Roberto Pinna"
+        ],
+        "fs-1780849420864-sqrm": [
+          "Salvatore Roberto Pinna",
+          "Matteo Scattu",
+          "Enrico Mulas",
+          "Davide Bayre"
+        ],
+        "fs-1780933779267-pm9d": [
+          "Enrico Mulas",
+          "Lorenzo Pittiu",
+          "Michele Carrone",
+          "Sergio Pippia"
+        ],
+        "fs-1780685403028-xkyx": [
+          "Lorenzo Pittiu",
+          "Salvatore Roberto Pinna",
+          "Enrico Mulas",
+          "Manuel Palmas"
+        ],
+        "undefined": [
+          "Enrico Mulas",
+          "Giampaolo Mattana",
+          "Lorenzo Pittiu",
+          "Michele Carrone"
+        ],
+        "fs-1780921488693-oq2d": [
+          "Lorenzo Pittiu",
+          "Stefano Michele Lauro",
+          "Manuel Palmas",
+          "Alberto Garau"
+        ],
+        "fs-1780954074418-idrm": [
+          "Lorenzo Pittiu",
+          "Enrico Mulas",
+          "Michele Carrone",
+          "Salvatore Roberto Pinna"
+        ],
+        "fs-1780680923007-9wa6": [
+          "Marco Scarpellini",
+          "Manuel Palmas",
+          "Lorenzo Pittiu",
+          "Giampaolo Mattana"
+        ],
+        "fs-1780681725341-bct5": [
+          "Enrico Mulas",
+          "Lorenzo Pittiu",
+          "Salvatore Roberto Pinna",
+          "Michele Carrone"
+        ],
+        "fs-1780684610938-n1pi": [
+          "Salvatore Roberto Pinna",
+          "Enrico Mulas",
+          "Lorenzo Pittiu",
+          "Sergio Pippia"
+        ],
+        "fs-1780648546905-t7ib": [
+          "Giampaolo Mattana",
+          "Enrico Mulas",
+          "Lorenzo Pittiu",
+          "Michele Carrone"
+        ],
+        "fs-1780948857068-1ekm": [
+          "Enrico Mulas",
+          "Lorenzo Pittiu",
+          "Salvatore Roberto Pinna",
+          "Matteo Scattu"
+        ],
+        "fs-1780667039244-l5ua": [
+          "Salvatore Roberto Pinna",
+          "Enrico Mulas",
+          "Giampaolo Mattana",
+          "Michele Carrone"
+        ],
+        "fs-1781176621937-5jrq": [
+          "Enrico Mulas",
+          "Fabrizio Alimonda",
+          "Manuel Palmas",
+          "Alberto Garau"
+        ],
+        "fs-1780664929583-53wl": [
+          "Michele Carrone",
+          "Sergio Pippia",
+          "Salvatore Roberto Pinna",
+          "Manuel Palmas"
+        ],
+        "fs-1780563044983-4w10": [
+          "Salvatore Roberto Pinna",
+          "Lorenzo Pittiu",
+          "Enrico Mulas",
+          "Sergio Pippia"
+        ],
+        "fs-1780697914943-rols": [
+          "Salvatore Roberto Pinna",
+          "Marco Scarpellini",
+          "Stefano Michele Lauro",
+          "Alberto Garau"
+        ],
+        "fs-1780952845757-p5rj": [
+          "Michele Carrone",
+          "Enrico Mulas",
+          "Lorenzo Pittiu",
+          "Salvatore Roberto Pinna"
+        ],
+        "fs-1780701019002-dnfa": [
+          "Salvatore Roberto Pinna",
+          "Stefano Michele Lauro",
+          "Michele Carrone",
+          "Manuel Palmas"
+        ]
+      },
+      "referto": [
+        {
+          "assist": 0,
+          "statoPresenza": "giocato",
+          "verifiedPersonal": false,
+          "sostitutoDa": "",
+          "nome": "Enrico Mulas",
+          "subitiRigore": 0,
+          "pagaQuota": true,
+          "subitiAzione": 2,
+          "snapshotGiocatore": {
+            "golSubitiRigore": 0,
+            "gol": 0,
+            "golSubitiPiazzato": 0,
+            "numeroMaglia": 13,
+            "ultimoRuolo": "Portiere",
+            "ammonizioni": 0,
+            "nome": "Enrico Mulas",
+            "assist": 0,
+            "saldo": 14.5,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "attivo": true,
+            "golSubitiAzione": 0
+          },
+          "bonusAttivi": [
+            "bonus_1780863339587",
+            "bonus_1781001237055",
+            "gen_social_reaction",
+            "gen_social_motivation",
+            "gen_gol_portiere",
+            "gen_subisce_meno_3",
+            "gen_malus_ritardo",
+            "gen_esultanza_gruppo",
+            "bonus_1780919206691",
+            "mulas_chiquita",
+            "mulas_levissima",
+            "bonus_1781075580791"
+          ],
+          "malusBrt": false,
+          "rossi": 0,
+          "verifiedGeneric": false,
+          "subitiPiazzato": 0,
+          "gol": 1,
+          "quotaMaturata": 4,
+          "amm": 0
+        },
+        {
+          "gol": 0,
+          "amm": 0,
+          "quotaMaturata": 4,
+          "subitiPiazzato": 0,
+          "verifiedGeneric": false,
+          "malusBrt": false,
+          "rossi": 0,
+          "subitiAzione": 0,
+          "pagaQuota": true,
+          "bonusAttivi": [
+            "bonus_1780863339587",
+            "alimonda_fabrillazione",
+            "gen_porta_tifosa",
+            "bonus_1780919270439"
+          ],
+          "snapshotGiocatore": {
+            "numeroMaglia": 96,
+            "ultimoRuolo": "Laterale",
+            "golSubitiPiazzato": 0,
+            "gol": 0,
+            "golSubitiRigore": 0,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "golSubitiAzione": 0,
+            "attivo": true,
+            "assist": 0,
+            "saldo": 17.5,
+            "ammonizioni": 0,
+            "nome": "Fabrizio Alimonda"
+          },
+          "sostitutoDa": "",
+          "subitiRigore": 0,
+          "nome": "Fabrizio Alimonda",
+          "statoPresenza": "giocato",
+          "verifiedPersonal": false,
+          "assist": 0
+        },
+        {
+          "subitiAzione": 0,
+          "pagaQuota": true,
+          "bonusAttivi": [
+            "bonus_1780863339587",
+            "gen_gol_laterale",
+            "gen_mvp_social",
+            "gen_esultanza_gruppo",
+            "bonus_1780918968021",
+            "bonus_1780919041304",
+            "mattana_optana",
+            "bonus_1780919206691",
+            "gen_mvp_uccheddu"
+          ],
+          "snapshotGiocatore": {
+            "ultimoRuolo": "Laterale",
+            "numeroMaglia": 30,
+            "golSubitiPiazzato": 0,
+            "gol": 0,
+            "golSubitiRigore": 0,
+            "attivo": true,
+            "golSubitiAzione": 0,
+            "quotaIscrizione": 10,
+            "espulsioni": 0,
+            "assist": 0,
+            "saldo": 15.5,
+            "ammonizioni": 0,
+            "nome": "Giampaolo Mattana"
+          },
+          "sostitutoDa": "",
+          "subitiRigore": 0,
+          "nome": "Giampaolo Mattana",
+          "statoPresenza": "giocato",
+          "verifiedPersonal": false,
+          "assist": 0,
+          "gol": 3,
+          "amm": 0,
+          "quotaMaturata": 4,
+          "subitiPiazzato": 0,
+          "verifiedGeneric": false,
+          "malusBrt": false,
+          "rossi": 0
+        },
+        {
+          "bonusAttivi": [
+            "bonus_1780863339587",
+            "pittiu_mcbonus",
+            "gen_social_adv",
+            "gen_social_reaction",
+            "gen_social_motivation",
+            "bonus_1781001237055",
+            "gen_gol_laterale",
+            "gen_esultanza_gruppo",
+            "bonus_1780919041304",
+            "bonus_1780919271374",
+            "pittiu_survivor"
+          ],
+          "snapshotGiocatore": {
+            "ultimoRuolo": "Laterale",
+            "numeroMaglia": 21,
+            "golSubitiPiazzato": 0,
+            "gol": 0,
+            "golSubitiRigore": 0,
+            "attivo": true,
+            "golSubitiAzione": 0,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "assist": 0,
+            "saldo": 29.5,
+            "ammonizioni": 0,
+            "nome": "Lorenzo Pittiu"
+          },
+          "subitiAzione": 0,
+          "pagaQuota": true,
+          "subitiRigore": 0,
+          "nome": "Lorenzo Pittiu",
+          "sostitutoDa": "",
+          "verifiedPersonal": false,
+          "statoPresenza": "giocato",
+          "assist": 2,
+          "amm": 0,
+          "quotaMaturata": 4,
+          "gol": 1,
+          "subitiPiazzato": 0,
+          "verifiedGeneric": false,
+          "rossi": 0,
+          "malusBrt": false
+        },
+        {
+          "assist": 0,
+          "statoPresenza": "giocato",
+          "verifiedPersonal": false,
+          "sostitutoDa": "",
+          "subitiRigore": 0,
+          "nome": "Manuel Palmas",
+          "subitiAzione": 0,
+          "pagaQuota": true,
+          "bonusAttivi": [
+            "bonus_1780863339587",
+            "gen_social_adv",
+            "gen_social_share",
+            "gen_malus_ritardo",
+            "bonus_1780918968021",
+            "bonus_1780919041304",
+            "bonus_1780919206691",
+            "palmas_reietto"
+          ],
+          "snapshotGiocatore": {
+            "nome": "Manuel Palmas",
+            "ammonizioni": 0,
+            "saldo": 14.5,
+            "assist": 0,
+            "golSubitiAzione": 0,
+            "attivo": true,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "golSubitiRigore": 0,
+            "gol": 2,
+            "golSubitiPiazzato": 0,
+            "ultimoRuolo": "Centrale",
+            "numeroMaglia": 28
+          },
+          "malusBrt": false,
+          "rossi": 0,
+          "verifiedGeneric": false,
+          "subitiPiazzato": 0,
+          "gol": 0,
+          "amm": 0,
+          "quotaMaturata": 4
+        },
+        {
+          "verifiedGeneric": false,
+          "rossi": 0,
+          "malusBrt": false,
+          "quotaMaturata": 4,
+          "amm": 0,
+          "gol": 0,
+          "subitiPiazzato": 0,
+          "verifiedPersonal": false,
+          "statoPresenza": "giocato",
+          "assist": 0,
+          "snapshotGiocatore": {
+            "golSubitiRigore": 0,
+            "gol": 0,
+            "golSubitiPiazzato": 0,
+            "numeroMaglia": 10,
+            "ultimoRuolo": "Centrale",
+            "ammonizioni": 0,
+            "nome": "Marco Scarpellini",
+            "assist": 4,
+            "saldo": 29.5,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "attivo": true,
+            "golSubitiAzione": 0
+          },
+          "bonusAttivi": [
+            "bonus_1780863339587",
+            "gen_malus_ritardo",
+            "bonus_1780919041304",
+            "bonus_1780919271374",
+            "scarpellini_tutela",
+            "scarpellini_trio"
+          ],
+          "pagaQuota": true,
+          "subitiAzione": 0,
+          "nome": "Marco Scarpellini",
+          "subitiRigore": 0,
+          "sostitutoDa": ""
+        },
+        {
+          "verifiedGeneric": false,
+          "malusBrt": false,
+          "rossi": 0,
+          "gol": 1,
+          "quotaMaturata": 4,
+          "amm": 0,
+          "subitiPiazzato": 0,
+          "statoPresenza": "giocato",
+          "verifiedPersonal": false,
+          "assist": 0,
+          "pagaQuota": true,
+          "subitiAzione": 0,
+          "snapshotGiocatore": {
+            "ammonizioni": 0,
+            "nome": "Michele Carrone",
+            "attivo": true,
+            "golSubitiAzione": 0,
+            "quotaIscrizione": 10,
+            "espulsioni": 0,
+            "assist": 0,
+            "saldo": 14.5,
+            "gol": 0,
+            "golSubitiRigore": 0,
+            "ultimoRuolo": "Laterale",
+            "numeroMaglia": 20,
+            "golSubitiPiazzato": 0
+          },
+          "bonusAttivi": [
+            "bonus_1780863339587",
+            "gen_social_share",
+            "gen_social_reaction",
+            "gen_gol_laterale",
+            "gen_malus_ritardo",
+            "gen_esultanza_gruppo",
+            "bonus_1780919041304",
+            "bonus_1780919206691",
+            "carrone_polemichele"
+          ],
+          "sostitutoDa": "",
+          "nome": "Michele Carrone",
+          "subitiRigore": 0
+        },
+        {
+          "subitiPiazzato": 0,
+          "amm": 0,
+          "quotaMaturata": 4,
+          "gol": 0,
+          "rossi": 0,
+          "malusBrt": false,
+          "verifiedGeneric": false,
+          "subitiRigore": 0,
+          "nome": "Salvatore Roberto Pinna",
+          "sostitutoDa": "",
+          "bonusAttivi": [
+            "bonus_1780863339587",
+            "gen_social_adv",
+            "gen_social_motivation",
+            "bonus_1781001237055",
+            "gen_social_reaction",
+            "bonus_1780919271374",
+            "gen_assist_merda",
+            "gen_porta_tifosa",
+            "bonus_1780918968021",
+            "bonus_1780919041304",
+            "bonus_1781028581619",
+            "pinna_lazzaro",
+            "bonus_1781113156113"
+          ],
+          "snapshotGiocatore": {
+            "assist": 0,
+            "saldo": 30.5,
+            "attivo": true,
+            "golSubitiAzione": 0,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "ammonizioni": 0,
+            "nome": "Salvatore Roberto Pinna",
+            "golSubitiPiazzato": 0,
+            "ultimoRuolo": "Pivot",
+            "numeroMaglia": 9,
+            "golSubitiRigore": 0,
+            "gol": 4
+          },
+          "subitiAzione": 0,
+          "pagaQuota": true,
+          "assist": 1,
+          "verifiedPersonal": false,
+          "statoPresenza": "giocato"
+        },
+        {
+          "amm": 0,
+          "quotaMaturata": 4,
+          "gol": 0,
+          "subitiPiazzato": 0,
+          "verifiedGeneric": false,
+          "rossi": 0,
+          "malusBrt": false,
+          "bonusAttivi": [
+            "bonus_1780917716152",
+            "bonus_1780863339587",
+            "bonus_1781001237055",
+            "gen_malus_ritardo",
+            "bonus_1780918968021",
+            "bonus_1780919041304",
+            "bonus_1780919206691",
+            "bonus_1780919270439",
+            "lauro_bibitone",
+            "lauro_divo"
+          ],
+          "snapshotGiocatore": {
+            "saldo": 17.5,
+            "assist": 0,
+            "golSubitiAzione": 0,
+            "attivo": true,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "nome": "Stefano Michele Lauro",
+            "ammonizioni": 0,
+            "golSubitiPiazzato": 0,
+            "ultimoRuolo": "Pivot",
+            "numeroMaglia": 45,
+            "golSubitiRigore": 0,
+            "gol": 0
+          },
+          "subitiAzione": 0,
+          "pagaQuota": true,
+          "subitiRigore": 0,
+          "nome": "Stefano Michele Lauro",
+          "sostitutoDa": "",
+          "verifiedPersonal": false,
+          "statoPresenza": "giocato",
+          "assist": 2
+        },
+        {
+          "gol": 0,
+          "quotaMaturata": 4,
+          "amm": 0,
+          "subitiPiazzato": 0,
+          "verifiedGeneric": false,
+          "malusBrt": false,
+          "rossi": 0,
+          "pagaQuota": true,
+          "subitiAzione": 0,
+          "snapshotGiocatore": {
+            "numeroMaglia": 5,
+            "ultimoRuolo": "Centrale",
+            "golSubitiPiazzato": 0,
+            "gol": 0,
+            "golSubitiRigore": 0,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "attivo": true,
+            "golSubitiAzione": 0,
+            "assist": 0,
+            "saldo": 18,
+            "ammonizioni": 0,
+            "nome": "Davide Bayre"
+          },
+          "bonusAttivi": [
+            "bonus_1780919041304",
+            "bonus_1780919270439",
+            "bonus_1781028245748",
+            "bayre_redivivo"
+          ],
+          "sostitutoDa": "",
+          "nome": "Davide Bayre",
+          "subitiRigore": 0,
+          "statoPresenza": "giocato",
+          "verifiedPersonal": false,
+          "assist": 0
+        },
+        {
+          "verifiedGeneric": true,
+          "rossi": 0,
+          "malusBrt": false,
+          "amm": 0,
+          "quotaMaturata": 0,
+          "gol": 0,
+          "subitiPiazzato": 0,
+          "verifiedPersonal": true,
+          "statoPresenza": "assente",
+          "assist": 0,
+          "bonusAttivi": [],
+          "snapshotGiocatore": {
+            "ultimoRuolo": "Portiere",
+            "numeroMaglia": 12,
+            "golSubitiPiazzato": 0,
+            "gol": 1,
+            "golSubitiRigore": 0,
+            "golSubitiAzione": 0,
+            "attivo": true,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "saldo": 1.5,
+            "assist": 0,
+            "nome": "Alberto Garau",
+            "ammonizioni": 0
+          },
+          "subitiAzione": 0,
+          "pagaQuota": false,
+          "subitiRigore": 0,
+          "nome": "Alberto Garau",
+          "sostitutoDa": ""
+        },
+        {
+          "pagaQuota": false,
+          "subitiAzione": 0,
+          "snapshotGiocatore": {
+            "assist": 0,
+            "saldo": 0,
+            "golSubitiAzione": 0,
+            "attivo": true,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "ammonizioni": 0,
+            "nome": "Federico Addis",
+            "golSubitiPiazzato": 0,
+            "ultimoRuolo": "Pivot",
+            "numeroMaglia": 17,
+            "golSubitiRigore": 0,
+            "gol": 0
+          },
+          "bonusAttivi": [],
+          "sostitutoDa": "",
+          "nome": "Federico Addis",
+          "subitiRigore": 0,
+          "statoPresenza": "assente",
+          "verifiedPersonal": true,
+          "assist": 0,
+          "gol": 0,
+          "quotaMaturata": 0,
+          "amm": 0,
+          "subitiPiazzato": 0,
+          "verifiedGeneric": true,
+          "malusBrt": false,
+          "rossi": 0
+        },
+        {
+          "assist": 0,
+          "statoPresenza": "assente",
+          "verifiedPersonal": true,
+          "sostitutoDa": "",
+          "nome": "Mario Conti",
+          "subitiRigore": 0,
+          "pagaQuota": false,
+          "subitiAzione": 0,
+          "snapshotGiocatore": {
+            "ammonizioni": 0,
+            "nome": "Mario Conti",
+            "assist": 3,
+            "saldo": 3.5,
+            "quotaIscrizione": 10,
+            "espulsioni": 0,
+            "attivo": true,
+            "golSubitiAzione": 0,
+            "golSubitiRigore": 0,
+            "gol": 0,
+            "golSubitiPiazzato": 0,
+            "numeroMaglia": 19,
+            "ultimoRuolo": "Laterale"
+          },
+          "bonusAttivi": [],
+          "malusBrt": false,
+          "rossi": 0,
+          "verifiedGeneric": true,
+          "subitiPiazzato": 0,
+          "gol": 0,
+          "quotaMaturata": 0,
+          "amm": 0
+        },
+        {
+          "assist": 0,
+          "verifiedPersonal": true,
+          "statoPresenza": "assente",
+          "nome": "Matteo Scattu",
+          "subitiRigore": 0,
+          "sostitutoDa": "",
+          "snapshotGiocatore": {
+            "ultimoRuolo": "Centrale",
+            "numeroMaglia": 77,
+            "golSubitiPiazzato": 0,
+            "gol": 2,
+            "golSubitiRigore": 0,
+            "golSubitiAzione": 0,
+            "attivo": true,
+            "quotaIscrizione": 10,
+            "espulsioni": 0,
+            "saldo": 0,
+            "assist": 0,
+            "nome": "Matteo Scattu",
+            "ammonizioni": 1
+          },
+          "bonusAttivi": [
+            "gen_social_reaction"
+          ],
+          "pagaQuota": false,
+          "subitiAzione": 0,
+          "rossi": 0,
+          "malusBrt": false,
+          "verifiedGeneric": false,
+          "subitiPiazzato": 0,
+          "quotaMaturata": 0,
+          "amm": 0,
+          "gol": 0
+        },
+        {
+          "malusBrt": false,
+          "rossi": 0,
+          "verifiedGeneric": true,
+          "subitiPiazzato": 0,
+          "gol": 0,
+          "quotaMaturata": 0,
+          "amm": 0,
+          "assist": 0,
+          "statoPresenza": "assente",
+          "verifiedPersonal": true,
+          "sostitutoDa": "",
+          "nome": "Nicola Orlandini",
+          "subitiRigore": 0,
+          "pagaQuota": false,
+          "subitiAzione": 0,
+          "snapshotGiocatore": {
+            "golSubitiRigore": 0,
+            "gol": 0,
+            "golSubitiPiazzato": 0,
+            "ultimoRuolo": "Pivot",
+            "numeroMaglia": 14,
+            "nome": "Nicola Orlandini",
+            "ammonizioni": 0,
+            "saldo": 3.5,
+            "assist": 0,
+            "golSubitiAzione": 0,
+            "attivo": true,
+            "espulsioni": 0,
+            "quotaIscrizione": 10
+          },
+          "bonusAttivi": []
+        },
+        {
+          "verifiedGeneric": false,
+          "rossi": 0,
+          "malusBrt": false,
+          "amm": 0,
+          "quotaMaturata": 0,
+          "gol": 0,
+          "subitiPiazzato": 0,
+          "verifiedPersonal": true,
+          "statoPresenza": "assente",
+          "assist": 0,
+          "bonusAttivi": [
+            "gen_social_adv",
+            "gen_social_motivation",
+            "gen_vecchio_cuore",
+            "gen_porta_tifosa",
+            "bonus_1780919041304",
+            "bonus_1781001237055",
+            "gen_social_reaction"
+          ],
+          "snapshotGiocatore": {
+            "golSubitiPiazzato": 0,
+            "ultimoRuolo": "Laterale",
+            "numeroMaglia": 11,
+            "golSubitiRigore": 0,
+            "gol": 0,
+            "assist": 0,
+            "saldo": 4.5,
+            "golSubitiAzione": 0,
+            "attivo": true,
+            "espulsioni": 0,
+            "quotaIscrizione": 10,
+            "ammonizioni": 0,
+            "nome": "Sergio Pippia"
+          },
+          "subitiAzione": 0,
+          "pagaQuota": false,
+          "subitiRigore": 0,
+          "nome": "Sergio Pippia",
+          "sostitutoDa": ""
+        }
+      ],
+      "convocati": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre"
+      ],
+      "stato": "Chiusa",
+      "costo": 40
     }
-    return matchesSearch;
-  });
-
-  const marketValuations = React.useMemo(() => {
-    return [...realPlayersPool]
-      .map((p) => ({
-        ...p,
-        price: getPlayerPriceForRoster(p.nome, partiteChiuse || [], bonuses),
-      }))
-      .sort((a, b) => b.price - a.price);
-  }, [realPlayersPool, partiteChiuse]);
-
-  // -------------------------------------------------------------
-  // VIEW RENDER 1: PUBLIC REGISTRATION PORTAL
-  // -------------------------------------------------------------
-  if (!isAdminMode) {
-    if (submitted) {
-      return (
-        <div className="min-h-screen bg-indigo-990 text-white flex items-center justify-center p-4">
-          <div className="max-w-md w-full bg-indigo-950 border border-indigo-800 rounded-3xl p-8 text-center space-y-6 shadow-2xl animate-fade-in font-sans">
-            <div className="w-20 h-20 bg-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto border border-indigo-500/30 font-sans">
-              <CheckCircle className="h-10 w-10 animate-bounce" />
-            </div>
-
-            <div className="space-y-2">
-              <h2 className="text-2xl font-black text-yellow-300 uppercase tracking-widest font-sans">
-                SQUADRA REGISTRATA!
-              </h2>
-              <p className="text-sm text-indigo-300 font-sans">
-                La tua fantasquadra per{" "}
-                <strong className="font-extrabold text-white font-sans">
-                  {nomeFantasquadra}
-                </strong>{" "}
-                è stata salvata con successo.
-              </p>
-            </div>
-
-            <div className="bg-indigo-900/50 border border-indigo-800/60 rounded-2xl p-4 text-left max-h-56 overflow-y-auto space-y-2">
-              <p className="text-[10px] uppercase font-bold tracking-wider text-indigo-400 font-sans font-sans">
-                La tua rosa selezionata:
-              </p>
-              <ol className="list-decimal list-inside text-xs font-semibold text-gray-200 space-y-1 font-sans">
-                {selectedPlayers.map((player, idx) => (
-                  <li
-                    key={idx}
-                    className="truncate border-b border-indigo-950/40 pb-1"
-                  >
-                    {player}
-                  </li>
-                ))}
-              </ol>
-            </div>
-
-            <p className="text-xs text-indigo-400/80 leading-relaxed bg-indigo-900/20 py-2.5 px-4 rounded-xl font-sans">
-              I tuoi dati sono stati trasmessi agli amministratori. In bocca al
-              lupo! ⚽🚀
-            </p>
-
-            <button
-              onClick={() => {
-                setSubmitted(false);
-                setSelectedPlayers([]);
-                setNomePartecipante("");
-                setNomeFantasquadra("");
-                setPin("");
-                setActivePublicTab("classifica");
-              }}
-              className="w-full bg-yellow-400 hover:bg-yellow-350 text-indigo-950 font-extrabold text-xs uppercase py-3 rounded-xl shadow-md transition-all cursor-pointer font-sans"
-            >
-              Vedi la Classifica Generale
-            </button>
-          </div>
-        </div>
-      );
+  ],
+  "logs": [
+    {
+      "dettagli": "Creata partita convocazione: Lunedì 1 giugno ore 20:00 - Verderame (Scuri vs Chiari) [Amichevole]\n\n👕 *Scuri*:\nManuel Palmas, Stefano Michele Lauro, Sergio Pippia, Michele Carrone, Spanedda (Esterno)\n\n👕 *Chiari*:\nSalvatore Roberto Pinna, Federico Addis, Marco Scarpellini, Lorenzo Pittiu, Porcella (Esterno)",
+      "importo": "35",
+      "operazione": "Partite",
+      "data": "01/06/2026, 09:25:22"
+    },
+    {
+      "importo": "35",
+      "dettagli": "Creata partita convocazione: Lunedì 1 giugno ore 20:00 - Verderame (Scuri vs Chiari) [Amichevole]\n\n👕 *Scuri*:\nMichele Carrone, Marco Scarpellini, Sergio Pippia, Federico Addis, Porcella (Esterno)\n\n👕 *Chiari*:\nManuel Palmas, Salvatore Roberto Pinna, Lorenzo Pittiu, Stefano Michele Lauro, Spanedda (Esterno)",
+      "operazione": "Partite",
+      "data": "01/06/2026, 13:50:10"
+    },
+    {
+      "data": "01/06/2026, 17:14:22",
+      "operazione": "Partite",
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: Martedì 30 giugno ore 19:13 - Futura Sales (Noi vs Avversari) [Amichevole]\n\n👕 *Noi*:\nManuel Palmas, Marco Scarpellini, Lorenzo Pittiu, Davide Bayre, pinco\n\n👕 *Avversari*:\nSalvatore Roberto Pinna, Michele Carrone, Alberto Garau, Enrico Mulas, pallino"
+    },
+    {
+      "dettagli": "Chiusa partita (Martedì 30 giugno ore 19:13 - Futura Sales (Noi vs Avversari) [Amichevole]\n\n👕 *Noi*:\nManuel Palmas, Marco Scarpellini, Lorenzo Pittiu, Davide Bayre, pinco\n\n👕 *Avversari*:\nSalvatore Roberto Pinna, Michele Carrone, Alberto Garau, Enrico Mulas, pallino), addebitati 0.00€ a 10 giocatori.",
+      "importo": "0",
+      "data": "01/06/2026, 17:23:09",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "data": "01/06/2026, 17:23:24",
+      "operazione": "Partite",
+      "dettagli": "Eliminata definitivamente partita chiusa: Martedì 30 giugno ore 19:13 - Futura Sales (Noi vs Avversari) [Amichevole]\n\n👕 *Noi*:\nManuel Palmas, Marco Scarpellini, Lorenzo Pittiu, Davide Bayre, pinco\n\n👕 *Avversari*:\nSalvatore Roberto Pinna, Michele Carrone, Alberto Garau, Enrico Mulas, pallino",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Ricarica di gruppo effettuata al campo: Federico Addis (4€), Sergio Pippia (5€), Stefano Michele Lauro (10€), Marco Scarpellini (5€), Manuel Palmas (7€), Michele Carrone (4€), Salvatore Roberto Pinna (3.5€)",
+      "importo": "38.50.00",
+      "data": "01/06/2026, 19:15:29",
+      "operazione": "Ricarica Massiva"
+    },
+    {
+      "dettagli": "Ricarica di gruppo effettuata al campo: Lorenzo Pittiu (4€)",
+      "importo": "4.00",
+      "data": "01/06/2026, 19:18:54",
+      "operazione": "Ricarica Massiva"
+    },
+    {
+      "data": "01/06/2026, 19:20:47",
+      "operazione": "Chiusura Partita",
+      "importo": "35",
+      "dettagli": "Chiusa partita (Lunedì 1 giugno ore 20:00 - Verderame (Scuri vs Chiari) [Amichevole]\n\n👕 *Scuri*:\nMichele Carrone, Marco Scarpellini, Sergio Pippia, Federico Addis, Porcella (Esterno)\n\n👕 *Chiari*:\nManuel Palmas, Salvatore Roberto Pinna, Lorenzo Pittiu, Stefano Michele Lauro, Spanedda (Esterno)), addebitati 3.50€ a 10 giocatori."
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Izi Riggee da parte di Lorenzo Pittiu",
+      "data": "01/06/2026, 19:37:58",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Izi rigghi da parte di Marco Scarpellini",
+      "operazione": "Fantacalcetto",
+      "data": "01/06/2026, 19:38:46"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ginger da parte di Michele Carrone",
+      "data": "01/06/2026, 19:40:28",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Proposta di Francesco S.: \"Il Gol di Pinna deve dare il doppio dei ...\"",
+      "importo": "-",
+      "data": "01/06/2026, 19:44:05",
+      "operazione": "Sondaggi/Consigli"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "01/06/2026, 19:44:17",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: FC Arroddu Stuart da parte di Francesco Spanedda",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Chiavo Veronica da parte di Stefano lauro",
+      "data": "01/06/2026, 19:44:24",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Eliminata definitivamente partita chiusa: 03/06/2026 20:00, Seminario vs GLi altri",
+      "importo": "-",
+      "data": "01/06/2026, 19:44:35",
+      "operazione": "Partite"
+    },
+    {
+      "dettagli": "Proposta di Manuel: \"Indatinqi dati sulla pagina fantacalcett...\"",
+      "importo": "-",
+      "data": "01/06/2026, 20:16:36",
+      "operazione": "Sondaggi/Consigli"
+    },
+    {
+      "data": "02/06/2026, 20:44:36",
+      "operazione": "Partite",
+      "dettagli": "Creata partita convocazione: 29/06/2026 01:44, Seminario",
+      "importo": "0"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "02/06/2026, 20:58:14",
+      "importo": "-",
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Ma smettila' di Manuel"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel (CoinEasy residui: 0)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 06:10:54"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel (CoinEasy residui: 0)",
+      "importo": "-",
+      "data": "03/06/2026, 06:12:26",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel (CoinEasy residui: 25)",
+      "importo": "-",
+      "data": "03/06/2026, 09:49:58",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: tgtg da parte di Manuel",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 09:51:03"
+    },
+    {
+      "data": "03/06/2026, 09:56:52",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: tgtg (Manuel)",
+      "importo": "-"
+    },
+    {
+      "data": "03/06/2026, 11:37:09",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ciao da parte di Manuel"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: ciao da parte di manuel",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 12:50:58"
+    },
+    {
+      "data": "03/06/2026, 12:51:25",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Formazione modificata per fanta-squadra 'ciao' di manuel (CoinEasy residui: 0)",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 12:53:49",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'ciao' di manuel (CoinEasy residui: 0)"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'ciao' di manuel (CoinEasy residui: 0)",
+      "importo": "-",
+      "data": "03/06/2026, 12:54:44",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 15:20:58",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Manujjj da parte di Manuel",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Manujjj' di Manuel (CoinEasy residui: 25)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 15:21:26"
+    },
+    {
+      "data": "03/06/2026, 17:16:35",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Jjjjjhhh da parte di Maniel",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Jjjjjhhh' di Maniel (CoinEasy residui: 5)",
+      "importo": "-",
+      "data": "03/06/2026, 17:17:10",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Essegus da parte di Marco",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 17:45:07"
+    },
+    {
+      "data": "03/06/2026, 17:47:58",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Essegus' di Marco (CoinEasy residui: 0)"
+    },
+    {
+      "data": "03/06/2026, 17:51:22",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Formazione modificata per fanta-squadra 'Manujjj' di Manuel (CoinEasy residui: 0)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Manujjj' di Manuel (CoinEasy residui: 0)",
+      "importo": "-",
+      "data": "03/06/2026, 17:51:40",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'ciao' di manuel (CoinEasy residui: 35)",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 20:32:44"
+    },
+    {
+      "dettagli": "Chiusa partita (29/06/2026 01:44, Seminario), addebitati 0.00€ a 9 giocatori.",
+      "importo": "0",
+      "data": "03/06/2026, 21:18:13",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 21:18:31",
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 29/06/2026 01:44, Seminario"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Bella Balla da parte di Roberto",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 21:26:27"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: FC Ma che Cazzo ne so da parte di Francesco Spanedda",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 21:58:36"
+    },
+    {
+      "dettagli": "Eliminata definitivamente partita chiusa: 29/06/2026 01:44, Seminario",
+      "importo": "-",
+      "operazione": "Partite",
+      "data": "03/06/2026, 22:01:53"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Balotelli fc da parte di Stefano lauro",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:07:46"
+    },
+    {
+      "data": "03/06/2026, 22:14:52",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Formazione modificata per fanta-squadra 'Balotelli fc' di Stefano lauro (CoinEasy residui: 1)",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:38:22",
+      "dettagli": "Fantasquadra rimossa: Jjjjjhhh (Maniel)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Fantasquadra rimossa: Manujjj (Manuel)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:38:27"
+    },
+    {
+      "data": "03/06/2026, 22:38:35",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: Essegus (Marco)",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: ciao (manuel)",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:38:40"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Izi rigghi (Marco Scarpellini)",
+      "data": "03/06/2026, 22:44:51",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "03/06/2026, 22:44:55",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: Bella Balla (Roberto)",
+      "importo": "-"
+    },
+    {
+      "data": "03/06/2026, 22:44:58",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: FC Ma che Cazzo ne so (Francesco Spanedda)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Fantasquadra rimossa: Balotelli fc (Stefano lauro)",
+      "importo": "-",
+      "data": "03/06/2026, 22:45:02",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "03/06/2026, 22:49:36",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma smettila da parte di Manuel"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel (Izycoin residui: 0)",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:51:52"
+    },
+    {
+      "dettagli": "Fantasquadra rimossa: Ma smettila (Manuel)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:57:40"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: ciao (manuel)",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:57:44"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:57:47",
+      "dettagli": "Fantasquadra rimossa: Essegus (Marco)",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Manujjj (Manuel)",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:57:50"
+    },
+    {
+      "data": "03/06/2026, 22:57:53",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Jjjjjhhh (Maniel)"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 22:57:57",
+      "dettagli": "Fantasquadra rimossa: Izi rigghi (Marco Scarpellini)",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Izi rigghi (Marco Scarpellini)",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 23:23:49"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 23:23:54",
+      "dettagli": "Fantasquadra rimossa: Jjjjjhhh (Maniel)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Fantasquadra rimossa: Manujjj (Manuel)",
+      "importo": "-",
+      "data": "03/06/2026, 23:23:57",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 23:24:02",
+      "dettagli": "Fantasquadra rimossa: Essegus (Marco)",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 23:24:05",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: ciao (manuel)"
+    },
+    {
+      "dettagli": "Fantasquadra rimossa: Ma smettila (Manuel)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "03/06/2026, 23:24:09"
+    },
+    {
+      "data": "03/06/2026, 23:24:43",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma smettila da parte di Manuel Palmas",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "04/06/2026, 05:04:21",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel Palmas (Izycoin residui: 0)"
+    },
+    {
+      "data": "04/06/2026, 08:24:16",
+      "operazione": "Partite",
+      "dettagli": "Creata partita convocazione: 04/06/2026 12:00, Futura Sales vs Prova",
+      "importo": "0"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Bella Balla da parte di Roberto Pinna",
+      "data": "04/06/2026, 08:50:44",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "04/06/2026, 09:22:36",
+      "operazione": "Chiusura Partita",
+      "dettagli": "Chiusa partita (04/06/2026 12:00, Futura Sales vs Prova), addebitati 0.00€ a 9 giocatori.",
+      "importo": "0"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "04/06/2026, 09:22:40",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 04/06/2026 12:00, Futura Sales vs Prova",
+      "importo": "-"
+    },
+    {
+      "operazione": "Partite",
+      "data": "04/06/2026, 09:23:15",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 04/06/2026 12:00, Futura Sales vs Prova",
+      "importo": "-"
+    },
+    {
+      "data": "04/06/2026, 09:35:12",
+      "operazione": "Chiusura Partita",
+      "importo": "0",
+      "dettagli": "Chiusa partita (04/06/2026 12:00, Futura Sales vs Prova), addebitati 0.00€ a 9 giocatori."
+    },
+    {
+      "data": "04/06/2026, 09:35:16",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 04/06/2026 12:00, Futura Sales vs Prova",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 04/06/2026 12:00, Futura Sales vs Prova",
+      "operazione": "Partite",
+      "data": "04/06/2026, 09:38:05"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Chiusa partita (04/06/2026 12:00, Futura Sales vs Prova), addebitati 0.00€ a 8 giocatori.",
+      "data": "04/06/2026, 09:38:55",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 04/06/2026 12:00, Futura Sales vs Prova",
+      "importo": "-",
+      "data": "04/06/2026, 09:38:56",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 04/06/2026 12:00, Futura Sales vs Prova",
+      "data": "04/06/2026, 09:40:48",
+      "operazione": "Partite"
+    },
+    {
+      "data": "04/06/2026, 09:44:38",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ginger da parte di Nikele"
+    },
+    {
+      "operazione": "Chiusura Partita",
+      "data": "04/06/2026, 09:47:42",
+      "importo": "0",
+      "dettagli": "Chiusa partita (04/06/2026 12:00, Futura Sales vs Prova), addebitati 0.00€ a 9 giocatori."
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 04/06/2026 12:00, Futura Sales vs Prova",
+      "data": "04/06/2026, 09:47:43",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "04/06/2026, 09:48:06",
+      "operazione": "Partite",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 04/06/2026 12:00, Futura Sales vs Prova",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Chiusa partita (04/06/2026 12:00, Futura Sales vs Prova), addebitati 0.00€ a 9 giocatori.",
+      "importo": "0",
+      "data": "04/06/2026, 09:48:21",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "data": "04/06/2026, 09:48:22",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 04/06/2026 12:00, Futura Sales vs Prova",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel Palmas (Izycoin residui: 2)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "04/06/2026, 10:11:51"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettila' di Manuel Palmas (Izycoin residui: 2)",
+      "importo": "-",
+      "data": "04/06/2026, 10:26:29",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "04/06/2026, 19:15:09",
+      "operazione": "Partite",
+      "dettagli": "Eliminata definitivamente partita chiusa: 04/06/2026 12:00, Futura Sales vs Prova",
+      "importo": "-"
+    },
+    {
+      "data": "04/06/2026, 19:17:14",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: Ma smettila (Manuel Palmas)",
+      "importo": "-"
+    },
+    {
+      "data": "04/06/2026, 23:47:26",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: ma smettila da parte di Maniel",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: ma smettila (Maniel)",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 08:25:52"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Manuel da parte di manuel",
+      "data": "05/06/2026, 08:27:02",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "05/06/2026, 08:34:59",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: Ma Smettiamola (manuel)",
+      "importo": "-"
+    },
+    {
+      "data": "05/06/2026, 08:35:46",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma smettiamola da parte di Manuel"
+    },
+    {
+      "operazione": "Partite",
+      "data": "05/06/2026, 08:45:12",
+      "importo": "45",
+      "dettagli": "Creata partita convocazione: 09/06/2026 20:45, Le Serre vs boh"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 0)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 08:47:58"
+    },
+    {
+      "importo": "45",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs boh), addebitati 5.63€ a 8 giocatori.",
+      "operazione": "Chiusura Partita",
+      "data": "05/06/2026, 08:53:39"
+    },
+    {
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 20:45, Le Serre vs boh",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 08:53:47"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Eliminata definitivamente partita chiusa: 09/06/2026 20:45, Le Serre vs boh",
+      "data": "05/06/2026, 09:12:01",
+      "operazione": "Partite"
+    },
+    {
+      "operazione": "Partite",
+      "data": "05/06/2026, 11:06:18",
+      "dettagli": "Creata partita convocazione: 09/06/2026 21:04, Le Serre",
+      "importo": "90"
+    },
+    {
+      "operazione": "Chiusura Partita",
+      "data": "05/06/2026, 11:12:48",
+      "dettagli": "Chiusa partita (09/06/2026 21:04, Le Serre), addebitati 5.44€ a 9 giocatori.",
+      "importo": "49"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 11:12:52",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 21:04, Le Serre",
+      "importo": "-"
+    },
+    {
+      "operazione": "Partite",
+      "data": "05/06/2026, 11:15:17",
+      "dettagli": "Eliminata definitivamente partita chiusa: 09/06/2026 21:04, Le Serre",
+      "importo": "-"
+    },
+    {
+      "data": "05/06/2026, 11:28:00",
+      "operazione": "Sondaggi/Consigli",
+      "dettagli": "Proposta di ff: \"ff\"",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 11:29:03",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 2)"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Easy Epurigging da parte di Lorenzo Pittiu",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 12:43:38"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 12:45:15",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: BellaEstSaMinigonna da parte di Valentina",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 12:50:58",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ginger' di Nikele (Izycoin residui: 1)",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Proposta di Alfio: \"Rendi visibile la password\"",
+      "data": "05/06/2026, 13:08:48",
+      "operazione": "Sondaggi/Consigli"
+    },
+    {
+      "data": "05/06/2026, 13:09:10",
+      "operazione": "Sondaggi/Consigli",
+      "dettagli": "Proposta di Rupert: \"Tvb\"",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 13:11:09",
+      "dettagli": "Formazione modificata per fanta-squadra 'Izi ricchi' di Marco Scarpellini (Izycoin residui: 7)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Isy Resin da parte di Enrico Mulas",
+      "importo": "-",
+      "data": "05/06/2026, 13:14:44",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 13:27:12",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Easy Epurigging (Lorenzo Pittiu)"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Isi Epurigging da parte di Lollo",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 13:29:03"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Izi EpuRigging da parte di McLollo",
+      "importo": "-",
+      "data": "05/06/2026, 13:43:59",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Izi EpuRigging' di McLollo (Izycoin residui: 2)",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 13:44:28"
+    },
+    {
+      "dettagli": "Fantasquadra rimossa: Isi Epurigging (Lollo)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 13:45:37"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Fc Balotelli da parte di Stefano",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 13:54:43"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 13:57:17",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Fc Balotelli' di Stefano (Izycoin residui: 1)"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 14:12:33",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Isy Resin' di Enrico Mulas (Izycoin residui: 1)"
+    },
+    {
+      "data": "05/06/2026, 14:59:55",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: FrEndY da parte di Erika"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Prova' di Manuel (Izycoin residui: 4)",
+      "data": "05/06/2026, 17:31:55",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "05/06/2026, 17:35:23",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: F.C Gerry da parte di Eleonora"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 17:39:45",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 2)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 2)",
+      "importo": "-",
+      "data": "05/06/2026, 17:39:55",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "05/06/2026, 17:48:45",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Crazy Rigging da parte di Geggio"
+    },
+    {
+      "data": "05/06/2026, 17:49:27",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'F.C Gerry' di Eleonora (Izycoin residui: 1)"
+    },
+    {
+      "data": "05/06/2026, 17:58:33",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Crazy Rigging' di Geggio (Izycoin residui: 0)"
+    },
+    {
+      "data": "05/06/2026, 18:10:38",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: Prova (Manuel)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "data": "05/06/2026, 18:21:18",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "05/06/2026, 18:24:14",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 18:36:23",
+      "dettagli": "Fantasquadra rimossa: FrEndY (Erika)",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: FREndY da parte di Erika",
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 18:36:50"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'FREndY' di Erika (Izycoin residui: 1)",
+      "importo": "-",
+      "data": "05/06/2026, 18:40:18",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "05/06/2026, 18:50:03",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: RealPittiu F.C da parte di Florentino Perez"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'RealPittiu F.C' di Florentino Perez (Izycoin residui: 1)",
+      "data": "05/06/2026, 19:41:41",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "05/06/2026, 20:17:19",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Formazione modificata per fanta-squadra 'Pescaramanzia' di Matteo Scattu (Izycoin residui: 4)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Signori, 5 minuti di recupero 🖐️ da parte di Mhet84",
+      "importo": "-",
+      "data": "05/06/2026, 23:10:19",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Chiusa partita (08/06/2026 04:44, Verderame vs Prova), addebitati ~0.00€ a 10 giocatori.",
+      "importo": "0",
+      "operazione": "Chiusura Partita",
+      "data": "05/06/2026, 23:13:41"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 08/06/2026 04:44, Verderame vs Prova",
+      "data": "05/06/2026, 23:13:59",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "05/06/2026, 23:15:39",
+      "operazione": "Partite",
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: 04/07/2026 03:14, Futura Sales vs prova  2"
+    },
+    {
+      "operazione": "Chiusura Partita",
+      "data": "05/06/2026, 23:17:19",
+      "dettagli": "Chiusa partita (04/07/2026 03:14, Futura Sales vs prova  2), addebitati ~0.00€ a 10 giocatori.",
+      "importo": "0"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 23:17:37",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 04/07/2026 03:14, Futura Sales vs prova  2",
+      "importo": "-"
+    },
+    {
+      "data": "05/06/2026, 23:19:10",
+      "operazione": "Partite",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 08/06/2026 04:44, Verderame vs Prova",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 3)",
+      "data": "05/06/2026, 23:21:01",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 04/07/2026 03:14, Futura Sales vs prova  2",
+      "data": "05/06/2026, 23:34:06",
+      "operazione": "Partite"
+    },
+    {
+      "data": "05/06/2026, 23:34:29",
+      "operazione": "Chiusura Partita",
+      "dettagli": "Chiusa partita (08/06/2026 04:44, Verderame vs Prova), addebitati ~0.00€ a 10 giocatori.",
+      "importo": "0"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "05/06/2026, 23:34:31",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 08/06/2026 04:44, Verderame vs Prova",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 3)",
+      "importo": "-",
+      "data": "05/06/2026, 23:38:29",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 08/06/2026 04:44, Verderame vs Prova",
+      "importo": "-",
+      "operazione": "Partite",
+      "data": "06/06/2026, 00:22:30"
+    },
+    {
+      "operazione": "Chiusura Partita",
+      "data": "06/06/2026, 00:22:37",
+      "dettagli": "Chiusa partita (08/06/2026 04:44, Verderame vs Prova), addebitati ~0.00€ a 10 giocatori.",
+      "importo": "0"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 08/06/2026 04:44, Verderame vs Prova",
+      "data": "06/06/2026, 00:22:40",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "06/06/2026, 11:38:40",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Mai Una Gioia FC da parte di Alice",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Mai Una Gioia FC' di Alice (Izycoin residui: 2)",
+      "data": "06/06/2026, 11:49:04",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Eliminata definitivamente partita chiusa: 08/06/2026 04:44, Verderame vs Prova",
+      "importo": "-",
+      "operazione": "Partite",
+      "data": "06/06/2026, 15:11:37"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Crazy Rigging (Geggio)",
+      "operazione": "Fantacalcetto",
+      "data": "06/06/2026, 15:13:59"
+    },
+    {
+      "data": "06/06/2026, 15:17:05",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Crazy Rigging (Geggio)"
+    },
+    {
+      "data": "06/06/2026, 15:17:52",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Eliminata definitivamente partita chiusa: 08/06/2026 04:44, Verderame vs Prova"
+    },
+    {
+      "dettagli": "Fantasquadra rimossa: Crazy Rigging (Geggio)",
+      "importo": "-",
+      "data": "06/06/2026, 15:18:49",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "06/06/2026, 15:20:09",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 04/07/2026 03:14, Futura Sales vs prova  2"
+    },
+    {
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 08/06/2026 04:44, Verderame vs Prova",
+      "importo": "-",
+      "data": "06/06/2026, 15:20:22",
+      "operazione": "Partite"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 08/06/2026 04:44, Verderame vs Prova",
+      "operazione": "Partite",
+      "data": "06/06/2026, 15:20:31"
+    },
+    {
+      "data": "06/06/2026, 15:35:29",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: Crazy Rigging (Geggio)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Fantasquadra rimossa: Crazy Rigging (Geggio)",
+      "importo": "-",
+      "data": "06/06/2026, 17:04:00",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Annullata partita aperta: 04/07/2026 03:14, Futura Sales vs prova  2",
+      "importo": "-",
+      "data": "06/06/2026, 17:06:13",
+      "operazione": "Partite"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Eliminata definitivamente partita chiusa: 08/06/2026 04:44, Verderame vs Prova",
+      "operazione": "Partite",
+      "data": "06/06/2026, 17:06:26"
+    },
+    {
+      "data": "06/06/2026, 17:07:27",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 04/07/2026 03:14, Futura Sales vs prova  2"
+    },
+    {
+      "dettagli": "Annullata partita aperta: 04/07/2026 03:14, Futura Sales vs prova  2",
+      "importo": "-",
+      "data": "07/06/2026, 10:03:05",
+      "operazione": "Partite"
+    },
+    {
+      "data": "07/06/2026, 10:03:15",
+      "operazione": "Partite",
+      "dettagli": "Eliminata definitivamente partita chiusa: 08/06/2026 04:44, Verderame vs Prova",
+      "importo": "-"
+    },
+    {
+      "data": "07/06/2026, 10:04:21",
+      "operazione": "Partite",
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: 17/06/2026 12:07, Futura Sales"
+    },
+    {
+      "dettagli": "Annullata partita aperta: 04/07/2026 03:14, Futura Sales vs prova  2",
+      "importo": "-",
+      "data": "07/06/2026, 10:18:18",
+      "operazione": "Partite"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 17/06/2026 12:07, Futura Sales",
+      "data": "07/06/2026, 10:18:30",
+      "operazione": "Partite"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Eliminata definitivamente partita chiusa: 08/06/2026 04:44, Verderame vs Prova",
+      "data": "07/06/2026, 10:18:52",
+      "operazione": "Partite"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: 24/06/2026 16:32, Le Serre vs prova",
+      "data": "07/06/2026, 10:32:45",
+      "operazione": "Partite"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Chiusa partita (24/06/2026 16:32, Le Serre vs prova), addebitati ~0.00€ a 10 giocatori.",
+      "data": "07/06/2026, 10:37:36",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 24/06/2026 16:32, Le Serre vs prova",
+      "data": "07/06/2026, 10:37:39",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Partite",
+      "data": "07/06/2026, 12:27:09",
+      "importo": "-",
+      "dettagli": "Eliminata definitivamente partita chiusa: 24/06/2026 16:32, Le Serre vs prova"
+    },
+    {
+      "data": "07/06/2026, 13:28:24",
+      "operazione": "Gestione Bonus/Malus",
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database."
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "data": "07/06/2026, 13:28:38",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "data": "07/06/2026, 13:29:23",
+      "operazione": "Partite",
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: 16/06/2026 19:28, Futura Sales vs rffff"
+    },
+    {
+      "dettagli": "Chiusa partita (16/06/2026 19:28, Futura Sales vs rffff), addebitati ~0.00€ a 10 giocatori.",
+      "importo": "0",
+      "data": "07/06/2026, 13:31:22",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 16/06/2026 19:28, Futura Sales vs rffff",
+      "operazione": "Fantacalcetto",
+      "data": "07/06/2026, 13:31:24"
+    },
+    {
+      "dettagli": "Eliminata definitivamente partita chiusa: 16/06/2026 19:28, Futura Sales vs rffff",
+      "importo": "-",
+      "data": "07/06/2026, 13:31:43",
+      "operazione": "Partite"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "07/06/2026, 14:12:56",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "07/06/2026, 14:18:02"
+    },
+    {
+      "data": "07/06/2026, 14:18:42",
+      "operazione": "Gestione Bonus/Malus",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "07/06/2026, 14:19:05"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "data": "07/06/2026, 14:19:40",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "07/06/2026, 14:19:47",
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database."
+    },
+    {
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "07/06/2026, 14:20:46"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "07/06/2026, 14:25:08"
+    },
+    {
+      "data": "07/06/2026, 16:23:40",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: A da parte di A",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "07/06/2026, 16:27:47",
+      "dettagli": "Formazione modificata per fanta-squadra 'A' di A (Izycoin residui: 4)",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 1)",
+      "data": "07/06/2026, 19:11:28",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 1)",
+      "importo": "-",
+      "data": "07/06/2026, 19:15:35",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "07/06/2026, 19:16:28",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 2)"
+    },
+    {
+      "data": "07/06/2026, 20:16:12",
+      "operazione": "Gestione Bonus/Malus",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Signori, 5 minuti di recupero 🖐️' di Mhet84 (Izycoin residui: 0)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "07/06/2026, 20:22:24"
+    },
+    {
+      "dettagli": "Creata partita convocazione: 22/06/2026 23:58, Le Serre",
+      "importo": "0",
+      "operazione": "Partite",
+      "data": "07/06/2026, 20:59:13"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Isy Resin' di Enrico Mulas (Izycoin residui: 1)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "07/06/2026, 20:59:56"
+    },
+    {
+      "dettagli": "Proposta di per aigoogle: \"sezione ricarica, adesso c'è un menu a t...\"",
+      "importo": "-",
+      "data": "07/06/2026, 21:38:12",
+      "operazione": "Sondaggi/Consigli"
+    },
+    {
+      "data": "08/06/2026, 08:46:51",
+      "operazione": "Partite",
+      "importo": "40",
+      "dettagli": "Creata partita convocazione: 09/06/2026 20:45, Le Serre vs SOS Auto"
+    },
+    {
+      "dettagli": "Aggiunto giocatore: Matteo Cabras",
+      "importo": "-",
+      "data": "08/06/2026, 08:53:34",
+      "operazione": "Rosa"
+    },
+    {
+      "operazione": "Rosa",
+      "data": "08/06/2026, 08:54:57",
+      "importo": "-",
+      "dettagli": "Aggiunto giocatore: Marco Berretta"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 22/06/2026 23:58, Le Serre",
+      "data": "08/06/2026, 09:26:22",
+      "operazione": "Partite"
+    },
+    {
+      "data": "08/06/2026, 11:33:16",
+      "operazione": "Gestione Bonus/Malus",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 2)",
+      "data": "08/06/2026, 11:50:55",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "data": "08/06/2026, 11:56:28",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "08/06/2026, 12:08:27",
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database."
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: I Buzzurri da parte di AronC",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 12:24:48"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 12:30:01",
+      "dettagli": "Formazione modificata per fanta-squadra 'I Buzzurri' di AronC (Izycoin residui: 2)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'I Buzzurri' di AronC (Izycoin residui: 2)",
+      "importo": "-",
+      "data": "08/06/2026, 12:30:38",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Pescaramanzia' di Matteo Scattu (Izycoin residui: 0)",
+      "importo": "-",
+      "data": "08/06/2026, 12:43:59",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Pescaramanzia' di Matteo Scattu (Izycoin residui: 0)",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 12:44:18"
+    },
+    {
+      "data": "08/06/2026, 13:20:35",
+      "operazione": "Gestione Bonus/Malus",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Crazy Rigging' di Geggio (Izycoin residui: 2)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 13:23:15"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Crazy Rigging' di Geggio (Izycoin residui: 1)",
+      "data": "08/06/2026, 13:25:01",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 13:55:18",
+      "dettagli": "Formazione modificata per fanta-squadra 'Bella Balla' di Roberto Pinna (Izycoin residui: 1)",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Izi EpuRigging' di McLollo (Izycoin residui: 1)",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 14:21:15"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 15:47:45",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Barroso United da parte di Pittura Christian"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Barrosu United da parte di Pittiu Christian",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 15:49:39"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Signori, 5 minuti di recupero 🖐️' di Mhet84 (Izycoin residui: 0)",
+      "importo": "-",
+      "data": "08/06/2026, 18:41:19",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'BellaEstSaMinigonna' di Valentina (Izycoin residui: 0)",
+      "data": "08/06/2026, 18:42:23",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Barroso United (Pittura Christian)",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 19:17:56"
+    },
+    {
+      "data": "08/06/2026, 19:38:02",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Barrosu United' di Pittiu Christian (Izycoin residui: 2)"
+    },
+    {
+      "data": "08/06/2026, 19:57:57",
+      "operazione": "Gestione Bonus/Malus",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Izyraighing da parte di Fabrizio",
+      "importo": "-",
+      "data": "08/06/2026, 20:00:57",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Izyraighing' di Fabrizio (Izycoin residui: 1)",
+      "importo": "-",
+      "data": "08/06/2026, 20:07:52",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "08/06/2026, 20:38:33",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "data": "08/06/2026, 20:52:43",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "data": "08/06/2026, 21:03:22",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Formazione modificata per fanta-squadra 'Bella Balla' di Roberto Pinna (Izycoin residui: 1)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Bella Balla' di Roberto Pinna (Izycoin residui: 1)",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 21:05:51"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: I Leggendari da parte di La Leggenda",
+      "data": "08/06/2026, 21:07:25",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Hsaccio da parte di Frank",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 21:14:29"
+    },
+    {
+      "data": "08/06/2026, 21:15:36",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'I Leggendari' di La Leggenda (Izycoin residui: 1)"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Palmasm82@gmail.com da parte di Gghg",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 21:24:54"
+    },
+    {
+      "data": "08/06/2026, 21:25:41",
+      "operazione": "Sondaggi/Consigli",
+      "importo": "-",
+      "dettagli": "Proposta di Essegua: \"Frocio\""
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Hsaccio' di Frank (Izycoin residui: 0)",
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 21:27:16"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "08/06/2026, 21:27:54",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: EasyScoring da parte di G Matt"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'EasyScoring' di G Matt (Izycoin residui: 1)",
+      "data": "08/06/2026, 21:31:30",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "08/06/2026, 22:44:18",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 2)",
+      "importo": "-"
+    },
+    {
+      "data": "09/06/2026, 07:12:09",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 2)",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "09/06/2026, 10:04:43",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Loceri da parte di Alessandro Palmas"
+    },
+    {
+      "importo": "10",
+      "dettagli": "Dividi spesa 'Assunzione allenatori' (10€), addebitati ~0.62€ a 16 persone",
+      "operazione": "Spesa Condivisa",
+      "data": "09/06/2026, 10:08:25"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "09/06/2026, 10:09:05",
+      "dettagli": "Formazione modificata per fanta-squadra 'Loceri' di Alessandro Palmas (Izycoin residui: 0)",
+      "importo": "-"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "09/06/2026, 10:22:17",
+      "importo": "5.18",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Alberto Garau (0.4€), Enrico Mulas (0.4€), Fabrizio Alimonda (0.4€), Giampaolo Mattana (0.4€), Lorenzo Pittiu (0.4€), Manuel Palmas (0.38€), Marco Scarpellini (0.4€), Mario Conti (0.4€), Michele Carrone (0.4€), Nicola Orlandini (0.4€), Salvatore Roberto Pinna (0.4€), Sergio Pippia (0.4€), Stefano Michele Lauro (0.4€)"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "09/06/2026, 10:43:07"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "09/06/2026, 13:04:52",
+      "dettagli": "Formazione modificata per fanta-squadra 'Ma smettiamola' di Manuel (Izycoin residui: 2)",
+      "importo": "-"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "09/06/2026, 13:20:39",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "09/06/2026, 14:45:10"
+    },
+    {
+      "dettagli": "Formazione modificata per fanta-squadra 'Signori, 5 minuti di recupero 🖐️' di Mhet84 (Izycoin residui: 0)",
+      "importo": "-",
+      "data": "09/06/2026, 15:31:08",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "09/06/2026, 17:31:23",
+      "importo": "20.00",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Salvatore Roberto Pinna (20€)"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "data": "09/06/2026, 18:05:24",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "09/06/2026, 18:10:46"
+    },
+    {
+      "data": "09/06/2026, 18:14:15",
+      "operazione": "Gestione Bonus/Malus",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "09/06/2026, 18:46:44",
+      "importo": "20.00",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Lorenzo Pittiu (20€)"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "09/06/2026, 18:53:34",
+      "importo": "5.00",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Giampaolo Mattana (5€)"
+    },
+    {
+      "data": "09/06/2026, 18:55:04",
+      "operazione": "Ricarica Massiva",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Marco Scarpellini (20€)",
+      "importo": "20.00"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "09/06/2026, 18:55:59",
+      "importo": "5.00",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Enrico Mulas (5€)"
+    },
+    {
+      "importo": "5.00",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Michele Carrone (5€)",
+      "operazione": "Ricarica Massiva",
+      "data": "09/06/2026, 18:56:32"
+    },
+    {
+      "data": "09/06/2026, 20:52:19",
+      "operazione": "Ricarica Massiva",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Davide Bayre (10€)",
+      "importo": "10.00"
+    },
+    {
+      "importo": "5.00",
+      "dettagli": "Ricarica di gruppo effettuata al campo: Manuel Palmas (5€)",
+      "operazione": "Ricarica Massiva",
+      "data": "09/06/2026, 21:27:37"
+    },
+    {
+      "data": "10/06/2026, 07:16:14",
+      "operazione": "Gestione Bonus/Malus",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "operazione": "Chiusura Partita",
+      "data": "10/06/2026, 08:54:27",
+      "importo": "40",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori."
+    },
+    {
+      "data": "10/06/2026, 08:55:10",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "importo": "-"
+    },
+    {
+      "data": "10/06/2026, 08:56:08",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Hard Rigging da parte di Ali",
+      "importo": "-"
+    },
+    {
+      "data": "10/06/2026, 10:28:00",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Hard Rigging (Ali)",
+      "operazione": "Fantacalcetto",
+      "data": "10/06/2026, 10:53:05"
+    },
+    {
+      "importo": "40",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "operazione": "Chiusura Partita",
+      "data": "10/06/2026, 11:18:59"
+    },
+    {
+      "data": "10/06/2026, 12:00:52",
+      "operazione": "Partite",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "importo": "-"
+    },
+    {
+      "importo": "40",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "operazione": "Chiusura Partita",
+      "data": "10/06/2026, 14:46:02"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "operazione": "Fantacalcetto",
+      "data": "10/06/2026, 14:46:16"
+    },
+    {
+      "data": "10/06/2026, 15:24:28",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto"
+    },
+    {
+      "operazione": "Chiusura Partita",
+      "data": "10/06/2026, 15:46:48",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "importo": "40"
+    },
+    {
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "importo": "-",
+      "data": "10/06/2026, 15:46:51",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "10/06/2026, 15:49:29",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto"
+    },
+    {
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "importo": "40",
+      "data": "10/06/2026, 16:06:09",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "operazione": "Fantacalcetto",
+      "data": "10/06/2026, 16:06:11"
+    },
+    {
+      "data": "10/06/2026, 16:33:59",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto"
+    },
+    {
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "importo": "40",
+      "operazione": "Chiusura Partita",
+      "data": "10/06/2026, 16:34:12"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "operazione": "Fantacalcetto",
+      "data": "10/06/2026, 16:34:15"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "operazione": "Partite",
+      "data": "10/06/2026, 16:44:15"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "10/06/2026, 17:25:16",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "10/06/2026, 17:25:24",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "operazione": "Chiusura Partita",
+      "data": "10/06/2026, 17:25:42",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "importo": "40"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "data": "10/06/2026, 17:25:44",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "10/06/2026, 17:26:40"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "10/06/2026, 17:28:39",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "data": "10/06/2026, 17:35:49",
+      "operazione": "Gestione Bonus/Malus",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-"
+    },
+    {
+      "operazione": "Partite",
+      "data": "10/06/2026, 17:36:55",
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto"
+    },
+    {
+      "importo": "40",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "operazione": "Chiusura Partita",
+      "data": "10/06/2026, 17:38:03"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "10/06/2026, 17:38:06",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "operazione": "Gestione Bonus/Malus",
+      "data": "10/06/2026, 17:38:39"
+    },
+    {
+      "data": "10/06/2026, 17:39:18",
+      "operazione": "Gestione Bonus/Malus",
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database."
+    },
+    {
+      "data": "11/06/2026, 05:25:53",
+      "operazione": "Gestione Bonus/Malus",
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database."
+    },
+    {
+      "importo": "40",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "operazione": "Chiusura Partita",
+      "data": "11/06/2026, 11:12:45"
+    },
+    {
+      "data": "11/06/2026, 11:17:01",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Hard Rigging da parte di Alì"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata per fanta-squadra 'Hard Rigging' di Alì (Izycoin residui: 0)",
+      "operazione": "Fantacalcetto",
+      "data": "11/06/2026, 11:20:48"
+    },
+    {
+      "operazione": "Partite",
+      "data": "11/06/2026, 13:01:20",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "importo": "-"
+    },
+    {
+      "data": "11/06/2026, 13:02:33",
+      "operazione": "Chiusura Partita",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "importo": "40"
+    },
+    {
+      "data": "11/06/2026, 13:11:21",
+      "operazione": "Partite",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "importo": "-"
+    },
+    {
+      "importo": "40",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "data": "11/06/2026, 13:11:56",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "operazione": "Gestione Bonus/Malus",
+      "data": "11/06/2026, 13:22:32",
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database."
+    },
+    {
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "operazione": "Partite",
+      "data": "11/06/2026, 13:30:29"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "data": "11/06/2026, 13:36:05",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "data": "11/06/2026, 13:40:30",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "operazione": "Chiusura Partita",
+      "data": "11/06/2026, 13:44:24",
+      "importo": "40",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori."
+    },
+    {
+      "data": "11/06/2026, 13:45:04",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto"
+    },
+    {
+      "data": "11/06/2026, 13:45:55",
+      "operazione": "Gestione Bonus/Malus",
+      "importo": "-",
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database."
+    },
+    {
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "importo": "40",
+      "operazione": "Chiusura Partita",
+      "data": "11/06/2026, 13:46:32"
+    },
+    {
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 09/06/2026 20:45, Le Serre vs SOS Auto",
+      "importo": "-",
+      "data": "11/06/2026, 13:51:37",
+      "operazione": "Partite"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "data": "11/06/2026, 13:53:17",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "dettagli": "Aggiornato il regolamento dei Bonus e Malus nel Database.",
+      "importo": "-",
+      "data": "11/06/2026, 14:36:03",
+      "operazione": "Gestione Bonus/Malus"
+    },
+    {
+      "importo": "40",
+      "dettagli": "Chiusa partita (09/06/2026 20:45, Le Serre vs SOS Auto), addebitati ~4.00€ a 10 giocatori.",
+      "operazione": "Chiusura Partita",
+      "data": "11/06/2026, 14:37:45"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Modificati dati per: Manuel Palmas",
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.20.18"
+    },
+    {
+      "dettagli": "Giocatore Manuel Palmas impostato come: Attivato",
+      "importo": "-",
+      "data": "16/05/2026 7.20.41",
+      "operazione": "Stato Giocatore"
+    },
+    {
+      "dettagli": "Modificati dati per: Il migliore Salvatore Roberto Pinna",
+      "importo": "0",
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.21.03"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Modificati dati per: 10. Marco Scarpellini",
+      "data": "16/05/2026 7.21.23",
+      "operazione": "Modifica Rosa"
+    },
+    {
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.21.40",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 20. Michele Carrone"
+    },
+    {
+      "data": "16/05/2026 7.22.14",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 13. Enrico Mulas"
+    },
+    {
+      "data": "16/05/2026 7.22.32",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 5. Davide Bayre"
+    },
+    {
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.22.49",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 12. Alberto Garau"
+    },
+    {
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.23.12",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 21. Lorenzo Pittiu"
+    },
+    {
+      "data": "16/05/2026 7.23.32",
+      "operazione": "Quota Iscrizione",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Manuel Palmas"
+    },
+    {
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.24.09",
+      "dettagli": "Modificati dati per: 19. Mario Conti",
+      "importo": "0"
+    },
+    {
+      "data": "16/05/2026 7.25.14",
+      "operazione": "Modifica Rosa",
+      "dettagli": "Modificati dati per: 11. Sergio Pippia",
+      "importo": "0"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Modificati dati per: 30. Giampaolo Mattana",
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.25.32"
+    },
+    {
+      "dettagli": "Modificati dati per: 96. Fabrizio Alimonda",
+      "importo": "0",
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.25.54"
+    },
+    {
+      "dettagli": "Modificati dati per: 77. Matteo Scattu",
+      "importo": "0",
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.26.11"
+    },
+    {
+      "data": "16/05/2026 7.26.24",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: 45. Stefano Michele Lauro"
+    },
+    {
+      "dettagli": "Modificati dati per: 17. Federico Addis",
+      "importo": "0",
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.26.42"
+    },
+    {
+      "data": "16/05/2026 7.26.53",
+      "operazione": "Quota Iscrizione",
+      "dettagli": "Versamento iscrizione da: Davide Bayre",
+      "importo": "10"
+    },
+    {
+      "dettagli": "Versamento iscrizione da: Salvatore Roberto Pinna",
+      "importo": "10",
+      "data": "16/05/2026 7.27.00",
+      "operazione": "Quota Iscrizione"
+    },
+    {
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.27.08",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Marco Scarpellini"
+    },
+    {
+      "dettagli": "Versamento iscrizione da: Sergio Pippia",
+      "importo": "10",
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.27.20"
+    },
+    {
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Alberto Garau",
+      "data": "16/05/2026 7.27.29",
+      "operazione": "Quota Iscrizione"
+    },
+    {
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.27.37",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Enrico Mulas"
+    },
+    {
+      "dettagli": "Versamento iscrizione da: Federico Addis",
+      "importo": "10",
+      "data": "16/05/2026 7.27.44",
+      "operazione": "Quota Iscrizione"
+    },
+    {
+      "dettagli": "Versamento iscrizione da: Mario Conti",
+      "importo": "10",
+      "data": "16/05/2026 7.27.52",
+      "operazione": "Quota Iscrizione"
+    },
+    {
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.28.02",
+      "dettagli": "Versamento iscrizione da: Michele Carrone",
+      "importo": "10"
+    },
+    {
+      "dettagli": "Versamento iscrizione da: Lorenzo Pittiu",
+      "importo": "10",
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.28.09"
+    },
+    {
+      "dettagli": "Versamento iscrizione da: Giampaolo Mattana",
+      "importo": "10",
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.28.29"
+    },
+    {
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Stefano Michele Lauro",
+      "data": "16/05/2026 7.28.37",
+      "operazione": "Quota Iscrizione"
+    },
+    {
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Stefano Michele Lauro",
+      "data": "16/05/2026 7.28.38",
+      "operazione": "Quota Iscrizione"
+    },
+    {
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Matteo Scattu",
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.28.50"
+    },
+    {
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.28.51",
+      "importo": "10",
+      "dettagli": "Versamento iscrizione da: Matteo Scattu"
+    },
+    {
+      "data": "16/05/2026 7.28.56",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Davide Bayre impostato come: Attivato"
+    },
+    {
+      "data": "16/05/2026 7.29.00",
+      "operazione": "Stato Giocatore",
+      "dettagli": "Giocatore Salvatore Roberto Pinna impostato come: Attivato",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Giocatore Marco Scarpellini impostato come: Attivato",
+      "importo": "-",
+      "data": "16/05/2026 7.29.04",
+      "operazione": "Stato Giocatore"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Giocatore Sergio Pippia impostato come: Attivato",
+      "operazione": "Stato Giocatore",
+      "data": "16/05/2026 7.29.08"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Giocatore Enrico Mulas impostato come: Attivato",
+      "operazione": "Stato Giocatore",
+      "data": "16/05/2026 7.29.14"
+    },
+    {
+      "data": "16/05/2026 7.29.19",
+      "operazione": "Stato Giocatore",
+      "dettagli": "Giocatore Alberto Garau impostato come: Attivato",
+      "importo": "-"
+    },
+    {
+      "operazione": "Stato Giocatore",
+      "data": "16/05/2026 7.29.23",
+      "importo": "-",
+      "dettagli": "Giocatore Federico Addis impostato come: Attivato"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Giocatore Mario Conti impostato come: Attivato",
+      "data": "16/05/2026 7.29.27",
+      "operazione": "Stato Giocatore"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Giocatore Michele Carrone impostato come: Attivato",
+      "data": "16/05/2026 7.29.30",
+      "operazione": "Stato Giocatore"
+    },
+    {
+      "data": "16/05/2026 7.29.34",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Lorenzo Pittiu impostato come: Attivato"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Giocatore Giampaolo Mattana impostato come: Attivato",
+      "operazione": "Stato Giocatore",
+      "data": "16/05/2026 7.29.38"
+    },
+    {
+      "operazione": "Stato Giocatore",
+      "data": "16/05/2026 7.30.09",
+      "dettagli": "Giocatore Alberto Garau impostato come: Attivato",
+      "importo": "-"
+    },
+    {
+      "importo": "-10",
+      "dettagli": "Versamento iscrizione da: Stefano Michele Lauro",
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.30.36"
+    },
+    {
+      "operazione": "Quota Iscrizione",
+      "data": "16/05/2026 7.30.53",
+      "dettagli": "Versamento iscrizione da: Matteo Scattu",
+      "importo": "-10"
+    },
+    {
+      "data": "16/05/2026 7.30.58",
+      "operazione": "Stato Giocatore",
+      "importo": "-",
+      "dettagli": "Giocatore Matteo Scattu impostato come: Attivato"
+    },
+    {
+      "operazione": "Stato Giocatore",
+      "data": "16/05/2026 7.31.02",
+      "dettagli": "Giocatore Stefano Michele Lauro impostato come: Attivato",
+      "importo": "-"
+    },
+    {
+      "data": "16/05/2026 7.31.49",
+      "operazione": "Rosa",
+      "dettagli": "Aggiunto giocatore: Nicola Orlandini",
+      "importo": "-"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Modificati dati per: Nicola Orlandini",
+      "data": "16/05/2026 7.32.07",
+      "operazione": "Modifica Rosa"
+    },
+    {
+      "data": "16/05/2026 7.37.30",
+      "operazione": "Chiusura Partita",
+      "dettagli": "2026-05-17 21:00, Seminario (Quota: 4.00€)",
+      "importo": "40"
+    },
+    {
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.38.55",
+      "dettagli": "Modificati dati per: Salvatore Roberto Pinna",
+      "importo": "0"
+    },
+    {
+      "data": "16/05/2026 7.39.08",
+      "operazione": "Modifica Rosa",
+      "dettagli": "Modificati dati per: Marco Scarpellini",
+      "importo": "0"
+    },
+    {
+      "dettagli": "Modificati dati per: Enrico Mulas",
+      "importo": "0",
+      "data": "16/05/2026 7.39.25",
+      "operazione": "Modifica Rosa"
+    },
+    {
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.39.57",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Mario Conti"
+    },
+    {
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.40.12",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Michele Carrone"
+    },
+    {
+      "data": "16/05/2026 7.40.22",
+      "operazione": "Modifica Rosa",
+      "importo": "0",
+      "dettagli": "Modificati dati per: Lorenzo Pittiu"
+    },
+    {
+      "dettagli": "Modificati dati per: Manuel Palmas",
+      "importo": "0",
+      "data": "16/05/2026 7.40.41",
+      "operazione": "Modifica Rosa"
+    },
+    {
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.40.51",
+      "dettagli": "Modificati dati per: Giampaolo Mattana",
+      "importo": "0"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Modificati dati per: Stefano Michele Lauro",
+      "operazione": "Modifica Rosa",
+      "data": "16/05/2026 7.41.03"
+    },
+    {
+      "dettagli": "Modificati dati per: Matteo Scattu",
+      "importo": "0",
+      "data": "16/05/2026 7.41.15",
+      "operazione": "Modifica Rosa"
+    },
+    {
+      "dettagli": "Versamento iscrizione da: Fabrizio Alimonda",
+      "importo": "10",
+      "data": "17/05/2026 18.36.50",
+      "operazione": "Quota Iscrizione"
+    },
+    {
+      "dettagli": "Giocatore Fabrizio Alimonda impostato come: Attivato",
+      "importo": "-",
+      "data": "17/05/2026 18.36.56",
+      "operazione": "Stato Giocatore"
+    },
+    {
+      "importo": "10",
+      "dettagli": "Versamento da: Fabrizio Alimonda",
+      "operazione": "Ricarica",
+      "data": "17/05/2026 18.43.08"
+    },
+    {
+      "data": "18/05/2026 22.31.41",
+      "operazione": "Quota Iscrizione",
+      "dettagli": "Versamento iscrizione da: Nicola Orlandini",
+      "importo": "10"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Giocatore Nicola Orlandini impostato come: Attivato",
+      "data": "18/05/2026 22.31.46",
+      "operazione": "Stato Giocatore"
+    },
+    {
+      "data": "19/05/2026 22.20.48",
+      "operazione": "Ricarica",
+      "dettagli": "Versamento da: Michele Carrone",
+      "importo": "1"
+    },
+    {
+      "data": "19/05/2026 22.20.59",
+      "operazione": "Ricarica",
+      "dettagli": "Versamento da: Mario Conti",
+      "importo": "2"
+    },
+    {
+      "dettagli": "Versamento da: Lorenzo Pittiu",
+      "importo": "1",
+      "data": "19/05/2026 22.21.09",
+      "operazione": "Ricarica"
+    },
+    {
+      "data": "19/05/2026 22.24.44",
+      "operazione": "Ricarica",
+      "importo": "1",
+      "dettagli": "Versamento da: Salvatore Roberto Pinna"
+    },
+    {
+      "data": "19/05/2026 22.25.13",
+      "operazione": "Ricarica",
+      "dettagli": "Versamento da: Sergio Pippia",
+      "importo": "1"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Giocatore Matteo Scattu impostato come: Disattivato",
+      "data": "19/05/2026 23.21.39",
+      "operazione": "Stato Giocatore"
+    },
+    {
+      "data": "19/05/2026 23.22.21",
+      "operazione": "Stato Giocatore",
+      "dettagli": "Giocatore Matteo Scattu impostato come: Attivato",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Pianificata: Lunedì 25 maggio ore 21:00, Futura Sales (Amichevole) con 10 giocatori",
+      "importo": "40",
+      "operazione": "Nuova Partita",
+      "data": "20/05/2026 15.46.24"
+    },
+    {
+      "importo": "40",
+      "dettagli": "deminario | Partecipanti totali: 10 | Rosa: 9 | Esterni: 1 | Quota individuale: 4.00€ | Esterni: porcella?",
+      "data": "20/05/2026 16.45.02",
+      "operazione": "Amichevole"
+    },
+    {
+      "data": "20/05/2026 18.04.13",
+      "operazione": "Nuova Partita",
+      "importo": "0",
+      "dettagli": "Pianificata: Venerdì 29 maggio ore 21:04, Futura Sales (Amichevole) con 10 giocatori"
+    },
+    {
+      "operazione": "Annullamento",
+      "data": "20/05/2026 18.12.13",
+      "dettagli": "Annullata partita: Venerdì 29 maggio ore 21:04, Futura Sales (Amichevole)",
+      "importo": "-"
+    },
+    {
+      "data": "21/05/2026 12.31.06",
+      "operazione": "Creazione Amichevole",
+      "importo": "39",
+      "dettagli": "Lunedì 25 maggio ore 12:30 - Seminario (Scuri vs Chiari) [Amichevole]"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Annullata partita: Lunedì 25 maggio ore 12:30 - Seminario (Scuri vs Chiari) [Amichevole]",
+      "operazione": "Annullamento",
+      "data": "21/05/2026 12.32.20"
+    },
+    {
+      "dettagli": "Versamento da: Manuel Palmas",
+      "importo": "1000",
+      "operazione": "Ricarica",
+      "data": "21/05/2026 12.33.02"
+    },
+    {
+      "dettagli": "Modificati dati per: Manuel Palmas",
+      "importo": "1",
+      "operazione": "Modifica Rosa",
+      "data": "21/05/2026 12.33.20"
+    },
+    {
+      "dettagli": "Creata con formazioni e referto in attesa",
+      "importo": "39",
+      "operazione": "Creazione Amichevole",
+      "data": "21/05/2026 12.48.02"
+    },
+    {
+      "dettagli": "Dettagli: Lunedì 25 maggio ore 15:47 - Futura Sales (Chiari vs Scuri) [Amichevole] | Presenti: 10 (10 paganti) (Quota: 10.00€)",
+      "importo": "100",
+      "operazione": "Chiusura Partita",
+      "data": "21/05/2026 12.49.57"
+    },
+    {
+      "dettagli": "Annullata partita archiviata e ripristinati saldi/statistiche: Lunedì 25 maggio ore 15:47 - Futura Sales (Chiari vs Scuri) [Amichevole]",
+      "importo": "39",
+      "operazione": "Storno e Annullamento",
+      "data": "21/05/2026 13.03.12"
+    },
+    {
+      "importo": "10",
+      "dettagli": "Modificati dati per: Fabrizio Alimonda",
+      "operazione": "Modifica Rosa",
+      "data": "21/05/2026 13.06.48"
+    },
+    {
+      "data": "21/05/2026 13.15.02",
+      "operazione": "Ricarica",
+      "dettagli": "Versamento da: Salvatore Roberto Pinna",
+      "importo": "5"
+    },
+    {
+      "data": "21/05/2026 13.15.30",
+      "operazione": "Ricarica",
+      "importo": "5",
+      "dettagli": "Versamento da: Davide Bayre"
+    },
+    {
+      "data": "21/05/2026 13.16.17",
+      "operazione": "Modifica Rosa",
+      "dettagli": "Modificati dati per: Nicola Orlandini",
+      "importo": "4"
+    },
+    {
+      "importo": "6",
+      "dettagli": "Modificati dati per: Mario Conti",
+      "data": "21/05/2026 13.16.36",
+      "operazione": "Modifica Rosa"
+    },
+    {
+      "importo": "3.20",
+      "dettagli": "Modificati dati per: Matteo Scattu",
+      "operazione": "Modifica Rosa",
+      "data": "21/05/2026 13.17.00"
+    },
+    {
+      "operazione": "Ricarica",
+      "data": "21/05/2026 13.17.11",
+      "importo": "2,5",
+      "dettagli": "Versamento da: Enrico Mulas"
+    },
+    {
+      "importo": "2,4",
+      "dettagli": "Versamento da: Sergio Pippia",
+      "operazione": "Ricarica",
+      "data": "21/05/2026 13.17.34"
+    },
+    {
+      "dettagli": "Versamento da: Giampaolo Mattana",
+      "importo": "2",
+      "data": "21/05/2026 13.17.46",
+      "operazione": "Ricarica"
+    },
+    {
+      "operazione": "Ricarica",
+      "data": "21/05/2026 13.18.04",
+      "dettagli": "Versamento da: Alberto Garau",
+      "importo": "1,55"
+    },
+    {
+      "dettagli": "Versamento da: Manuel Palmas",
+      "importo": "1",
+      "data": "21/05/2026 13.18.15",
+      "operazione": "Ricarica"
+    },
+    {
+      "dettagli": "Versamento da: Lorenzo Pittiu",
+      "importo": "0,5",
+      "data": "21/05/2026 13.18.29",
+      "operazione": "Ricarica"
+    },
+    {
+      "importo": "0,5",
+      "dettagli": "Versamento da: Federico Addis",
+      "data": "21/05/2026 13.18.37",
+      "operazione": "Ricarica"
+    },
+    {
+      "dettagli": "Modificati dati per: Davide Bayre",
+      "importo": "",
+      "operazione": "Modifica Rosa",
+      "data": "21/05/2026 13.21.06"
+    },
+    {
+      "operazione": "Stato Giocatore",
+      "data": "21/05/2026 21.59.51",
+      "dettagli": "Giocatore Mario Conti impostato come: Disattivato",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Giocatore Mario Conti impostato come: Attivato",
+      "importo": "-",
+      "data": "21/05/2026 21.59.59",
+      "operazione": "Stato Giocatore"
+    },
+    {
+      "importo": "40",
+      "dettagli": "Creata con formazioni e referto in attesa",
+      "operazione": "Creazione Amichevole",
+      "data": "25/05/2026 15.30.28"
+    },
+    {
+      "dettagli": "Annullata partita in attesa: Lunedì 25 maggio ore 21:00 - Seminario (Team scuro vs Team bianco) [Amichevole]",
+      "importo": "-",
+      "data": "25/05/2026 15.38.07",
+      "operazione": "Annullamento"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "25/05/2026 15.38.43",
+      "importo": "10",
+      "dettagli": "Versamento da: Fabrizio Alimonda"
+    },
+    {
+      "dettagli": "Creata con formazioni e referto in attesa",
+      "importo": "40",
+      "operazione": "Creazione Amichevole",
+      "data": "25/05/2026 17.07.06"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Annullata partita in attesa: Mercoledì 20 maggio ore 22:06 - Futura Sales (Noi vs loro) [Amichevole]",
+      "data": "25/05/2026 17.09.14",
+      "operazione": "Annullamento"
+    },
+    {
+      "operazione": "Creazione Amichevole",
+      "data": "25/05/2026 17.12.43",
+      "dettagli": "Creata con formazioni e referto in attesa",
+      "importo": "40"
+    },
+    {
+      "operazione": "Annullamento",
+      "data": "25/05/2026 17.13.16",
+      "dettagli": "Annullata partita in attesa: Lunedì 25 maggio ore 21:00 - Seminario (TEAM SCURO vs TEAM BIANCO) [Amichevole]",
+      "importo": "-"
+    },
+    {
+      "data": "25/05/2026 17.14.40",
+      "operazione": "Creazione Amichevole",
+      "importo": "40",
+      "dettagli": "Creata con formazioni e referto in attesa"
+    },
+    {
+      "data": "25/05/2026 22.24.18",
+      "operazione": "Ricarica Massiva",
+      "dettagli": "Versamento da: Mario Conti",
+      "importo": "5"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "25/05/2026 22.24.18",
+      "importo": "4",
+      "dettagli": "Versamento da: Matteo Scattu"
+    },
+    {
+      "importo": "5",
+      "dettagli": "Versamento da: Giampaolo Mattana",
+      "data": "25/05/2026 22.24.20",
+      "operazione": "Ricarica Massiva"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "25/05/2026 22.24.20",
+      "importo": "5",
+      "dettagli": "Versamento da: Lorenzo Pittiu"
+    },
+    {
+      "importo": "4",
+      "dettagli": "Versamento da: Manuel Palmas",
+      "operazione": "Ricarica Massiva",
+      "data": "25/05/2026 22.24.20"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "25/05/2026 22.24.20",
+      "dettagli": "Versamento da: Marco Scarpellini",
+      "importo": "5"
+    },
+    {
+      "operazione": "Ricarica Massiva",
+      "data": "25/05/2026 22.24.20",
+      "importo": "5",
+      "dettagli": "Versamento da: Salvatore Roberto Pinna"
+    },
+    {
+      "data": "25/05/2026 22.24.21",
+      "operazione": "Ricarica Massiva",
+      "importo": "5",
+      "dettagli": "Versamento da: Alberto Garau"
+    },
+    {
+      "data": "25/05/2026 22.24.21",
+      "operazione": "Ricarica Massiva",
+      "dettagli": "Versamento da: Sergio Pippia",
+      "importo": "5"
+    },
+    {
+      "dettagli": "Dettagli: Lunedì 25 maggio ore 21:00 - Seminario (TEAM SCURO vs TEAM BIANCO) [Amichevole] | Presenti: 10 (10 paganti) (Quota: 4.00€)",
+      "importo": "40",
+      "data": "25/05/2026 22.24.53",
+      "operazione": "Chiusura Partita"
+    },
+    {
+      "data": "25/05/2026 22.30.35",
+      "operazione": "Modifica Rosa",
+      "importo": "-2",
+      "dettagli": "Modificati dati per: Manuel Palmas"
+    },
+    {
+      "data": "25/05/2026 22.36.56",
+      "operazione": "Modifica Partita",
+      "importo": "40",
+      "dettagli": "Modificata partita in archivio (Saldi e Stat ricalcolati): Lunedì 25 maggio ore 21:00 - Seminario (TEAM SCURO vs TEAM BIANCO) [Amichevole]"
+    },
+    {
+      "data": "25/05/2026 22.48.16",
+      "operazione": "Modifica Partita",
+      "dettagli": "Modificata partita in archivio (Saldi e Stat ricalcolati): Lunedì 25 maggio ore 21:00 - Seminario (TEAM SCURO vs TEAM BIANCO) [Amichevole]",
+      "importo": "40"
+    },
+    {
+      "data": "25/05/2026, 22:37:04",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta: Ma finiamola da parte di Manuel"
+    },
+    {
+      "data": "25/05/2026, 23:05:37",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma finiamola da parte di Manuel"
+    },
+    {
+      "operazione": "Partite",
+      "data": "25/05/2026, 23:06:43",
+      "importo": "40",
+      "dettagli": "Creata partita convocazione: 28/05/2026 04:06, Futura Sales vs Scapoli fc"
+    },
+    {
+      "operazione": "Sondaggi/Consigli",
+      "data": "26/05/2026, 08:48:42",
+      "dettagli": "Proposta di kgkugk: \"lòkjòjòj\"",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "26/05/2026, 08:49:42",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Mafiniamola da parte di Manuel",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Manuel da parte di Ma smettiamola",
+      "operazione": "Fantacalcetto",
+      "data": "26/05/2026, 16:16:30"
+    },
+    {
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma finiamola 2 da parte di Manuel",
+      "importo": "-",
+      "data": "26/05/2026, 16:17:12",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Ma finiamola 2' di Manuel",
+      "importo": "-",
+      "data": "26/05/2026, 16:17:56",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "26/05/2026, 16:18:14",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma smettiamola da parte di Manuel",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Creata partita convocazione: 26/05/2026 21:00, Futura Sales",
+      "importo": "40",
+      "operazione": "Partite",
+      "data": "26/05/2026, 16:18:53"
+    },
+    {
+      "data": "26/05/2026, 16:20:33",
+      "operazione": "Chiusura Partita",
+      "dettagli": "Chiusa partita (26/05/2026 21:00, Futura Sales), addebitati 0.00€ a 9 giocatori.",
+      "importo": "0"
+    },
+    {
+      "data": "26/05/2026, 16:22:38",
+      "operazione": "Partite",
+      "dettagli": "Creata partita convocazione: 26/05/2026 21:00, Seminario",
+      "importo": "0"
+    },
+    {
+      "operazione": "Partite",
+      "data": "26/05/2026, 16:35:17",
+      "dettagli": "Modificato referto partita chiusa: 26/05/2026 21:00, Futura Sales",
+      "importo": "0"
+    },
+    {
+      "data": "26/05/2026, 18:07:58",
+      "operazione": "Chiusura Partita",
+      "dettagli": "Chiusa partita (26/05/2026 21:00, Seminario), addebitati 0.00€ a 10 giocatori.",
+      "importo": "0"
+    },
+    {
+      "dettagli": "Riaperta partita precedentemente chiusa: 26/05/2026 21:00, Seminario",
+      "importo": "-",
+      "data": "26/05/2026, 18:09:43",
+      "operazione": "Partite"
+    },
+    {
+      "operazione": "Partite",
+      "data": "26/05/2026, 18:09:53",
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 26/05/2026 21:00, Seminario"
+    },
+    {
+      "data": "26/05/2026, 18:10:01",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Riaperta partita precedentemente chiusa: 26/05/2026 21:00, Futura Sales"
+    },
+    {
+      "data": "26/05/2026, 18:10:09",
+      "operazione": "Partite",
+      "importo": "-",
+      "dettagli": "Annullata partita aperta: 26/05/2026 21:00, Futura Sales"
+    },
+    {
+      "data": "27/05/2026, 11:27:30",
+      "operazione": "Sondaggi/Consigli",
+      "importo": "-",
+      "dettagli": "Proposta di D: \"D\""
+    },
+    {
+      "importo": "0",
+      "dettagli": "Creata partita convocazione: 27/05/2026 20:00, Futura Sales vs gli altri",
+      "data": "27/05/2026, 15:11:39",
+      "operazione": "Partite"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "27/05/2026, 15:13:12",
+      "importo": "-",
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Manuel' di Ma smettiamola"
+    },
+    {
+      "data": "27/05/2026, 15:15:01",
+      "operazione": "Chiusura Partita",
+      "dettagli": "Chiusa partita (27/05/2026 20:00, Futura Sales vs gli altri), addebitati 0.00€ a 10 giocatori.",
+      "importo": "0"
+    },
+    {
+      "operazione": "Partite",
+      "data": "27/05/2026, 15:17:55",
+      "importo": "-",
+      "dettagli": "Riaperta partita precedentemente chiusa: 27/05/2026 20:00, Futura Sales vs gli altri"
+    },
+    {
+      "data": "27/05/2026, 15:18:05",
+      "operazione": "Partite",
+      "dettagli": "Annullata partita aperta: 27/05/2026 20:00, Futura Sales vs gli altri",
+      "importo": "-"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Fantasquadra rimossa: Manuel (Ma smettiamola)",
+      "operazione": "Fantacalcetto",
+      "data": "27/05/2026, 15:18:20"
+    },
+    {
+      "data": "27/05/2026, 15:18:25",
+      "operazione": "Fantacalcetto",
+      "dettagli": "Fantasquadra rimossa: Manuel (Ma finiamola 2)",
+      "importo": "-"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "27/05/2026, 15:18:31",
+      "dettagli": "Fantasquadra rimossa: Manuel (Accabbadda)",
+      "importo": "-"
+    },
+    {
+      "operazione": "Partite",
+      "data": "27/05/2026, 20:53:14",
+      "dettagli": "Creata partita convocazione: 28/05/2026 03:52, Futura Sales vs kugjh",
+      "importo": "0"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "27/05/2026, 20:54:08",
+      "importo": "-",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: hhjkhkjkjh da parte di Manuel"
+    },
+    {
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'hhjkhkjkjh' di Manuel",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "27/05/2026, 20:54:31"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "27/05/2026, 20:55:10",
+      "dettagli": "Fantasquadra rimossa: hhjkhkjkjh (Manuel)",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Annullata partita aperta: 28/05/2026 03:52, Futura Sales vs kugjh",
+      "importo": "-",
+      "operazione": "Partite",
+      "data": "28/05/2026, 08:33:08"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "30/05/2026, 13:12:39",
+      "dettagli": "Nuova fantasquadra iscritta con PIN di sicurezza: Ma smettila da parte di Manuel",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Creata partita convocazione: 03/06/2026 20:00, Seminario vs GLi altri",
+      "importo": "0",
+      "data": "30/05/2026, 13:19:31",
+      "operazione": "Partite"
+    },
+    {
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Ma smettila' di Manuel",
+      "importo": "-",
+      "operazione": "Fantacalcetto",
+      "data": "30/05/2026, 13:20:57"
+    },
+    {
+      "dettagli": "Chiusa partita (03/06/2026 20:00, Seminario vs GLi altri), addebitati 0.00€ a 9 giocatori.",
+      "importo": "0",
+      "operazione": "Chiusura Partita",
+      "data": "30/05/2026, 13:23:47"
+    },
+    {
+      "dettagli": "Ricarica di gruppo effettuata al campo: Davide Bayre (1€)",
+      "importo": "1.00",
+      "operazione": "Ricarica Massiva",
+      "data": "30/05/2026, 14:04:48"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Ma smettila' di Manuel",
+      "operazione": "Fantacalcetto",
+      "data": "30/05/2026, 14:22:00"
+    },
+    {
+      "data": "30/05/2026, 14:22:47",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Formazione modificata previa convalida PIN per fantasquadra 'Ma smettila' di Manuel"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Proposta di Manuel: \"Quando cambio giocatore dopo una partita...\"",
+      "data": "30/05/2026, 14:24:03",
+      "operazione": "Sondaggi/Consigli"
+    },
+    {
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 03/06/2026 20:00, Seminario vs GLi altri",
+      "importo": "-",
+      "data": "30/05/2026, 18:02:30",
+      "operazione": "Partite"
+    },
+    {
+      "dettagli": "Chiusa partita (03/06/2026 20:00, Seminario vs GLi altri), addebitati 0.00€ a 9 giocatori.",
+      "importo": "0",
+      "operazione": "Chiusura Partita",
+      "data": "30/05/2026, 18:02:38"
+    },
+    {
+      "data": "30/05/2026, 18:03:35",
+      "operazione": "Fantacalcetto",
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 03/06/2026 20:00, Seminario vs GLi altri"
+    },
+    {
+      "data": "30/05/2026, 18:04:44",
+      "operazione": "Partite",
+      "dettagli": "Riaperta partita (conservando i dati del referto come bozza): 03/06/2026 20:00, Seminario vs GLi altri",
+      "importo": "-"
+    },
+    {
+      "importo": "0",
+      "dettagli": "Chiusa partita (03/06/2026 20:00, Seminario vs GLi altri), addebitati 0.00€ a 9 giocatori.",
+      "operazione": "Chiusura Partita",
+      "data": "30/05/2026, 18:05:18"
+    },
+    {
+      "importo": "-",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 03/06/2026 20:00, Seminario vs GLi altri",
+      "data": "30/05/2026, 18:05:30",
+      "operazione": "Fantacalcetto"
+    },
+    {
+      "data": "31/05/2026, 21:00:13",
+      "operazione": "Rosa",
+      "dettagli": "Aggiunto giocatore: <pinco <pallino",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Eliminato giocatore: <pinco <pallino",
+      "importo": "-",
+      "operazione": "Rosa",
+      "data": "31/05/2026, 21:00:28"
+    },
+    {
+      "operazione": "Fantacalcetto",
+      "data": "31/05/2026, 21:18:44",
+      "dettagli": "Referto della partita inviato a Fantacalcetto: 03/06/2026 20:00, Seminario vs GLi altri",
+      "importo": "-"
+    },
+    {
+      "dettagli": "Ricarica di gruppo effettuata al campo: Davide Bayre (2€)",
+      "importo": "2.00",
+      "operazione": "Ricarica Massiva",
+      "data": "31/05/2026, 21:22:32"
     }
-
-    if (!syncDone) {
-      return (
-        <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-indigo-990 text-white flex flex-col justify-center items-center p-4 sm:p-6 font-sans relative overflow-hidden">
-          {/* Sfondo decorativo minimale */}
-          <div className="absolute inset-0 select-none pointer-events-none overflow-hidden opacity-20">
-            <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-indigo-500/10 blur-3xl"></div>
-            <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-indigo-400/10 blur-3xl"></div>
-          </div>
-
-          <div className="max-w-md w-full relative z-10 bg-indigo-950/90 border border-indigo-850 rounded-3xl p-8 text-center space-y-6 shadow-2xl backdrop-blur-xl">
-            <div className="space-y-1.5">
-              <h2 className="font-extrabold text-2xl text-white uppercase tracking-tight font-sans leading-tight pointer-events-none">
-                Vai a Fantacalcetto
-              </h2>
-            </div>
-
-            {!hasInteracted ? (
-              <div className="space-y-4">
-                {/* Selettore Tab Login / Registrazione */}
-                <div className="grid grid-cols-2 p-1 bg-indigo-900/60 rounded-xl border border-indigo-800/40">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEntryMode("login");
-                      setLocalLoginError(null);
-                    }}
-                    className={`py-2 px-3 text-xs font-black uppercase rounded-lg transition-all cursor-pointer ${
-                      entryMode === "login"
-                        ? "bg-yellow-400 text-indigo-950 shadow-sm"
-                        : "text-indigo-300 hover:text-white"
-                    }`}
-                  >
-                    Entra
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEntryMode("register");
-                      setLocalLoginError(null);
-                    }}
-                    className={`py-2 px-3 text-xs font-black uppercase rounded-lg transition-all cursor-pointer ${
-                      entryMode === "register"
-                        ? "bg-yellow-400 text-indigo-950 shadow-sm"
-                        : "text-indigo-300 hover:text-white"
-                    }`}
-                  >
-                    Registrati
-                  </button>
-                </div>
-
-                {entryMode === "login" ? (
-                  <div className="space-y-3.5 text-left animate-fadeIn">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-350 block">
-                        Indirizzo Email:
-                      </label>
-                      <input
-                        type="email"
-                        autoComplete="email"
-                        placeholder="latuaemail@esempio.com"
-                        value={loginEmail}
-                        onChange={(e) => {
-                          setLoginEmail(e.target.value);
-                          setLocalLoginError(null);
-                        }}
-                        className="w-full bg-indigo-900 border border-indigo-800/70 rounded-xl px-4 py-3 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-350 block">
-                        Password:
-                      </label>
-                      <input
-                        type="password"
-                        autoComplete="current-password"
-                        placeholder="Inserisci la password"
-                        value={loginPassword}
-                        onChange={(e) => {
-                          setLoginPassword(e.target.value);
-                          setLocalLoginError(null);
-                        }}
-                        className="w-full bg-indigo-900 border border-indigo-800/70 rounded-xl px-4 py-3 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400 focus:border-yellow-400"
-                      />
-                    </div>
-
-                    {localLoginError && (
-                      <div className="bg-red-950/40 border border-red-900/40 text-red-200 text-[11px] p-3 rounded-xl font-semibold leading-relaxed animate-fadeIn">
-                        ⚠️ {localLoginError}
-                      </div>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={handleCustomLogin}
-                      className="w-full bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-indigo-950 font-black text-xs uppercase py-3.5 rounded-xl shadow-lg transition-all cursor-pointer font-sans tracking-wide mt-2"
-                    >
-                      Entra
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-3 text-left animate-fadeIn">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-350 block">
-                        Nome Fantasquadra:
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Es. Real Madrink"
-                        value={regNomeSquadra}
-                        onChange={(e) => {
-                          setRegNomeSquadra(e.target.value);
-                          setLocalLoginError(null);
-                        }}
-                        className="w-full bg-indigo-900 border border-indigo-800/70 rounded-xl px-4 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3.5">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-350 block">
-                          Presidente:
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Es. Mario Rossi"
-                          value={regNomePresidente}
-                          onChange={(e) => {
-                            setRegNomePresidente(e.target.value);
-                            setLocalLoginError(null);
-                          }}
-                          className="w-full bg-indigo-900 border border-indigo-800/70 rounded-xl px-4 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400"
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-350 block">
-                          Password (min. 8):
-                        </label>
-                        <input
-                          type="password"
-                          placeholder="Scegli password"
-                          value={regPassword}
-                          onChange={(e) => {
-                            setRegPassword(e.target.value);
-                            setLocalLoginError(null);
-                          }}
-                          className="w-full bg-indigo-900 border border-indigo-800/70 rounded-xl px-4 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-350 block">
-                        Indirizzo Email:
-                      </label>
-                      <input
-                        type="email"
-                        placeholder="mario.rossi@email.com"
-                        value={regEmail}
-                        onChange={(e) => {
-                          setRegEmail(e.target.value);
-                          setLocalLoginError(null);
-                        }}
-                        className="w-full bg-indigo-900 border border-indigo-800/70 rounded-xl px-4 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-1 focus:ring-yellow-400"
-                      />
-                    </div>
-
-                    {localLoginError && (
-                      <div className="bg-red-950/40 border border-red-900/40 text-red-200 text-[11px] p-3 rounded-xl font-semibold leading-relaxed animate-fadeIn">
-                        ⚠️ {localLoginError}
-                      </div>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={handleCustomRegister}
-                      className="w-full bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-indigo-950 font-black text-xs uppercase py-3.5 rounded-xl shadow-lg transition-all cursor-pointer font-sans tracking-wide mt-2"
-                    >
-                      Registrati ed Entra
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="pt-2 space-y-4 animate-fadeIn">
-                {/* Barra di avanzamento */}
-                <div className="w-full bg-indigo-950 border border-indigo-900/55 rounded-full h-4 overflow-hidden relative shadow-inner">
-                  <div
-                    className="bg-gradient-to-r from-yellow-400 to-sky-400 h-full rounded-full transition-all duration-150 ease-out flex items-center justify-end px-1.5 animate-pulse"
-                    style={{ width: `${syncProgress}%` }}
-                  >
-                    {syncProgress > 15 && (
-                      <span className="text-[8px] font-black text-indigo-950 select-none">
-                        {syncProgress}%
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Testo stato sincronizzazione */}
-                <div className="space-y-1">
-                  <p className="text-[11px] text-indigo-100 font-bold italic font-sans min-h-[32px] flex items-center justify-center leading-relaxed">
-                    ⚙️ {syncStatusText}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      );
+  ],
+  "fantasquadre": [
+    {
+      "dataInserimento": "2026-06-08T21:24:54.839Z",
+      "pin": "mattia2012",
+      "email": "palmasm82@gmail.com",
+      "valoriAcquisto": {
+        "Michele Carrone": 13,
+        "Giampaolo Mattana": 15,
+        "Enrico Mulas": 17,
+        "Lorenzo Pittiu": 15
+      },
+      "rosaOriginaria": [
+        "Enrico Mulas",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Michele Carrone"
+      ],
+      "nomeFantasquadra": "Essegua",
+      "nomePartecipante": "Gghg",
+      "creditoResiduo": 60,
+      "giocatoriSelezionati": [
+        "Enrico Mulas",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Michele Carrone"
+      ]
+    },
+    {
+      "dataInserimento": "2026-06-08T21:05:51.941Z",
+      "id": "fs-1780563044983-4w10",
+      "valoriAcquisto": {
+        "Lorenzo Pittiu": 15,
+        "Enrico Mulas": 17,
+        "Salvatore Roberto Pinna": 14,
+        "Sergio Pippia": 13
+      },
+      "email": "10roby1985@gmail.com",
+      "pin": "Frendy09",
+      "rosaOriginaria": [
+        "Salvatore Roberto Pinna",
+        "Lorenzo Pittiu",
+        "Enrico Mulas",
+        "Sergio Pippia"
+      ],
+      "creditoResiduo": 1,
+      "nomeFantasquadra": "Bella Balla",
+      "nomePartecipante": "Roberto Pinna",
+      "giocatoriSelezionati": [
+        "Salvatore Roberto Pinna",
+        "Lorenzo Pittiu",
+        "Enrico Mulas",
+        "Sergio Pippia"
+      ],
+      "ultimoCambioMatchId": "no-match-closed"
+    },
+    {
+      "nomePartecipante": "Nikele",
+      "nomeFantasquadra": "Ginger",
+      "creditoResiduo": 1,
+      "rosaOriginaria": [
+        "Marco Scarpellini",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas"
+      ],
+      "pin": "Alvrcb20",
+      "email": "carrone20@gmail.com",
+      "valoriAcquisto": {
+        "Marco Scarpellini": 16,
+        "Lorenzo Pittiu": 15,
+        "Giampaolo Mattana": 15,
+        "Manuel Palmas": 13
+      },
+      "id": "fs-1780566278880-cqo5",
+      "dataInserimento": "2026-06-05T12:50:58.445Z",
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Marco Scarpellini",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas"
+      ]
+    },
+    {
+      "rosaOriginaria": [
+        "Giampaolo Mattana",
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Michele Carrone"
+      ],
+      "nomePartecipante": "Manuel",
+      "nomeFantasquadra": "Ma smettiamola",
+      "creditoResiduo": 2,
+      "dataInserimento": "2026-06-09T13:04:52.708Z",
+      "id": "fs-1780648546905-t7ib",
+      "pin": "25062022",
+      "email": "valan21pm@gmail.com",
+      "valoriAcquisto": {
+        "Michele Carrone": 13,
+        "Enrico Mulas": 17,
+        "Giampaolo Mattana": 15,
+        "Lorenzo Pittiu": 15
+      },
+      "ultimoCambioMatchId": "pksu2jg-mq1ii1le",
+      "giocatoriSelezionati": [
+        "Giampaolo Mattana",
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Michele Carrone"
+      ]
+    },
+    {
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Salvatore Roberto Pinna",
+        "Fabrizio Alimonda",
+        "Michele Carrone",
+        "Manuel Palmas"
+      ],
+      "nomeFantasquadra": "BellaEstSaMinigonna",
+      "nomePartecipante": "Valentina",
+      "creditoResiduo": 0,
+      "rosaOriginaria": [
+        "Salvatore Roberto Pinna",
+        "Fabrizio Alimonda",
+        "Michele Carrone",
+        "Manuel Palmas"
+      ],
+      "pin": "Valentina91!",
+      "email": "vale-massi@live.it",
+      "valoriAcquisto": {
+        "Michele Carrone": 13,
+        "Manuel Palmas": 13,
+        "Fabrizio Alimonda": 20,
+        "Salvatore Roberto Pinna": 14
+      },
+      "dataInserimento": "2026-06-08T18:42:23.625Z",
+      "id": "fs-1780663515353-m28b"
+    },
+    {
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Michele Carrone",
+        "Sergio Pippia",
+        "Salvatore Roberto Pinna",
+        "Manuel Palmas"
+      ],
+      "rosaOriginaria": [
+        "Michele Carrone",
+        "Sergio Pippia",
+        "Salvatore Roberto Pinna",
+        "Manuel Palmas"
+      ],
+      "creditoResiduo": 7,
+      "nomeFantasquadra": "Izi ricchi",
+      "nomePartecipante": "Marco Scarpellini",
+      "id": "fs-1780664929583-53wl",
+      "dataInserimento": "2026-06-05T13:11:09.666Z",
+      "valoriAcquisto": {
+        "Michele Carrone": 13,
+        "Manuel Palmas": 13,
+        "Sergio Pippia": 13,
+        "Salvatore Roberto Pinna": 14
+      },
+      "email": "mark.scarpellini@gmail.com",
+      "pin": "50000000"
+    },
+    {
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Lorenzo Pittiu",
+        "Enrico Mulas",
+        "Salvatore Roberto Pinna",
+        "Matteo Scattu"
+      ],
+      "nomeFantasquadra": "Isy Resin",
+      "nomePartecipante": "Enrico Mulas",
+      "creditoResiduo": 1,
+      "rosaOriginaria": [
+        "Lorenzo Pittiu",
+        "Enrico Mulas",
+        "Salvatore Roberto Pinna",
+        "Matteo Scattu"
+      ],
+      "email": "enrimulas@gmail.com",
+      "pin": "Easyrigging2025",
+      "valoriAcquisto": {
+        "Enrico Mulas": 17,
+        "Salvatore Roberto Pinna": 14,
+        "Lorenzo Pittiu": 15,
+        "Matteo Scattu": 13
+      },
+      "id": "fs-1780665284664-7cbl",
+      "dataInserimento": "2026-06-07T20:59:56.814Z"
+    },
+    {
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Salvatore Roberto Pinna",
+        "Enrico Mulas",
+        "Giampaolo Mattana",
+        "Michele Carrone"
+      ],
+      "rosaOriginaria": [
+        "Salvatore Roberto Pinna",
+        "Enrico Mulas",
+        "Giampaolo Mattana",
+        "Michele Carrone"
+      ],
+      "creditoResiduo": 1,
+      "nomePartecipante": "McLollo",
+      "nomeFantasquadra": "Izi EpuRigging",
+      "dataInserimento": "2026-06-08T14:21:15.859Z",
+      "id": "fs-1780667039244-l5ua",
+      "valoriAcquisto": {
+        "Salvatore Roberto Pinna": 14,
+        "Giampaolo Mattana": 15,
+        "Michele Carrone": 13,
+        "Enrico Mulas": 17
+      },
+      "pin": "Estate2026",
+      "email": "settore.edile.sas@gmail.com"
+    },
+    {
+      "rosaOriginaria": [
+        "Salvatore Roberto Pinna",
+        "Enrico Mulas",
+        "Giampaolo Mattana",
+        "Manuel Palmas"
+      ],
+      "creditoResiduo": 1,
+      "nomeFantasquadra": "Fc Balotelli",
+      "nomePartecipante": "Stefano",
+      "dataInserimento": "2026-06-05T13:57:17.402Z",
+      "id": "fs-1780667683304-6wlo",
+      "valoriAcquisto": {
+        "Giampaolo Mattana": 15,
+        "Manuel Palmas": 13,
+        "Enrico Mulas": 17,
+        "Salvatore Roberto Pinna": 14
+      },
+      "pin": "TrapHouse3",
+      "email": "stefanolauroprivato@gmail.com",
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Salvatore Roberto Pinna",
+        "Enrico Mulas",
+        "Giampaolo Mattana",
+        "Manuel Palmas"
+      ]
+    },
+    {
+      "giocatoriSelezionati": [
+        "Marco Scarpellini",
+        "Salvatore Roberto Pinna",
+        "Lorenzo Pittiu",
+        "Giampaolo Mattana"
+      ],
+      "ultimoCambioMatchId": "",
+      "id": "fs-1780680923007-9wa6",
+      "dataInserimento": "2026-06-05T17:49:27.550Z",
+      "pin": "Ashapatah",
+      "email": "elehijos@hotmail.it",
+      "valoriAcquisto": {
+        "Giampaolo Mattana": 15,
+        "Salvatore Roberto Pinna": 14,
+        "Marco Scarpellini": 16,
+        "Lorenzo Pittiu": 15
+      },
+      "rosaOriginaria": [
+        "Marco Scarpellini",
+        "Salvatore Roberto Pinna",
+        "Lorenzo Pittiu",
+        "Giampaolo Mattana"
+      ],
+      "nomePartecipante": "Eleonora",
+      "nomeFantasquadra": "F.C Gerry",
+      "creditoResiduo": 0
+    },
+    {
+      "rosaOriginaria": [
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Salvatore Roberto Pinna",
+        "Michele Carrone"
+      ],
+      "creditoResiduo": 1,
+      "nomeFantasquadra": "Crazy Rigging",
+      "nomePartecipante": "Geggio",
+      "dataInserimento": "2026-06-08T13:25:01.357Z",
+      "id": "fs-1780681725341-bct5",
+      "valoriAcquisto": {
+        "Salvatore Roberto Pinna": 14,
+        "Michele Carrone": 13,
+        "Enrico Mulas": 17,
+        "Lorenzo Pittiu": 15
+      },
+      "pin": "kixnyg-gupFus-qywxi6",
+      "email": "serg92@live.it",
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Salvatore Roberto Pinna",
+        "Michele Carrone"
+      ]
+    },
+    {
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Salvatore Roberto Pinna",
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Sergio Pippia"
+      ],
+      "rosaOriginaria": [
+        "Salvatore Roberto Pinna",
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Sergio Pippia"
+      ],
+      "nomePartecipante": "Erika",
+      "nomeFantasquadra": "FREndY",
+      "creditoResiduo": 1,
+      "id": "fs-1780684610938-n1pi",
+      "dataInserimento": "2026-06-05T18:40:18.036Z",
+      "pin": "Wendy.Frida9",
+      "email": "erikargiolas@gmail.com",
+      "valoriAcquisto": {
+        "Lorenzo Pittiu": 15,
+        "Sergio Pippia": 13,
+        "Salvatore Roberto Pinna": 14,
+        "Enrico Mulas": 17
+      }
+    },
+    {
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Lorenzo Pittiu",
+        "Salvatore Roberto Pinna",
+        "Enrico Mulas",
+        "Manuel Palmas"
+      ],
+      "creditoResiduo": 1,
+      "nomeFantasquadra": "RealPittiu F.C",
+      "nomePartecipante": "Florentino Perez",
+      "rosaOriginaria": [
+        "Lorenzo Pittiu",
+        "Salvatore Roberto Pinna",
+        "Enrico Mulas",
+        "Manuel Palmas"
+      ],
+      "valoriAcquisto": {
+        "Lorenzo Pittiu": 15,
+        "Enrico Mulas": 17,
+        "Manuel Palmas": 13,
+        "Salvatore Roberto Pinna": 14
+      },
+      "pin": "estate2026",
+      "email": "marck-97@hotmail.it",
+      "dataInserimento": "2026-06-05T19:41:41.897Z",
+      "id": "fs-1780685403028-xkyx"
+    },
+    {
+      "nomeFantasquadra": "Pescaramanzia",
+      "nomePartecipante": "Matteo Scattu",
+      "creditoResiduo": 0,
+      "rosaOriginaria": [
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Enrico Mulas",
+        "Matteo Scattu"
+      ],
+      "email": "solloi1987@gmail.com",
+      "pin": "Fantarigging87",
+      "valoriAcquisto": {
+        "Matteo Scattu": 13,
+        "Lorenzo Pittiu": 15,
+        "Enrico Mulas": 17,
+        "Giampaolo Mattana": 15
+      },
+      "id": "fs-1780689922578-g2kb",
+      "dataInserimento": "2026-06-08T12:44:18.720Z",
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Enrico Mulas",
+        "Matteo Scattu"
+      ]
+    },
+    {
+      "nomePartecipante": "Francesco Spanedda",
+      "nomeFantasquadra": "Ma che cazzo ne so",
+      "creditoResiduo": 0,
+      "rosaOriginaria": [
+        "Salvatore Roberto Pinna",
+        "Marco Scarpellini",
+        "Stefano Michele Lauro",
+        "Alberto Garau"
+      ],
+      "email": "f.spanedda77@gmail.com",
+      "pin": "Francesco77*",
+      "valoriAcquisto": {
+        "Stefano Michele Lauro": 20,
+        "Marco Scarpellini": 16,
+        "Alberto Garau": 10,
+        "Salvatore Roberto Pinna": 14
+      },
+      "id": "fs-1780697914943-rols",
+      "dataInserimento": "2026-06-05T22:21:07.716Z",
+      "ultimoCambioMatchId": "",
+      "giocatoriSelezionati": [
+        "Salvatore Roberto Pinna",
+        "Marco Scarpellini",
+        "Stefano Michele Lauro",
+        "Alberto Garau"
+      ]
+    },
+    {
+      "giocatoriSelezionati": [
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Michele Carrone",
+        "Manuel Palmas"
+      ],
+      "pin": "29Undici84",
+      "email": "mhet84@hotmail.it",
+      "valoriAcquisto": {
+        "Michele Carrone": 13,
+        "Manuel Palmas": 13,
+        "Salvatore Roberto Pinna": 14,
+        "Stefano Michele Lauro": 20
+      },
+      "dataInserimento": "2026-06-09T15:31:08.851Z",
+      "id": "fs-1780701019002-dnfa",
+      "nomePartecipante": "Mhet84",
+      "nomeFantasquadra": "Signori, 5 minuti di recupero 🖐️",
+      "creditoResiduo": 0,
+      "rosaOriginaria": [
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Michele Carrone",
+        "Manuel Palmas"
+      ]
+    },
+    {
+      "giocatoriSelezionati": [
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Matteo Scattu",
+        "Alberto Garau"
+      ],
+      "nomeFantasquadra": "Mai Una Gioia FC",
+      "nomePartecipante": "Alice",
+      "creditoResiduo": 2,
+      "rosaOriginaria": [
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Matteo Scattu",
+        "Alberto Garau"
+      ],
+      "pin": "Alice2002",
+      "email": "alicesolaro04092002@gmail.com",
+      "valoriAcquisto": {
+        "Alberto Garau": 10,
+        "Enrico Mulas": 18,
+        "Matteo Scattu": 14,
+        "Lorenzo Pittiu": 16
+      },
+      "dataInserimento": "2026-06-06T11:49:04.698Z",
+      "id": "fs-1780745920763-bd2q"
+    },
+    {
+      "giocatoriSelezionati": [
+        "Salvatore Roberto Pinna",
+        "Matteo Scattu",
+        "Enrico Mulas",
+        "Davide Bayre"
+      ],
+      "nomePartecipante": "A",
+      "nomeFantasquadra": "A",
+      "creditoResiduo": 4,
+      "rosaOriginaria": [
+        "Salvatore Roberto Pinna",
+        "Matteo Scattu",
+        "Enrico Mulas",
+        "Davide Bayre"
+      ],
+      "email": "mirimelere@gmail.con",
+      "pin": "vigliovedere",
+      "valoriAcquisto": {
+        "Matteo Scattu": 13,
+        "Davide Bayre": 12,
+        "Salvatore Roberto Pinna": 14,
+        "Enrico Mulas": 17
+      },
+      "dataInserimento": "2026-06-07T16:27:47.670Z",
+      "id": "fs-1780849420864-sqrm"
+    },
+    {
+      "giocatoriSelezionati": [
+        "Lorenzo Pittiu",
+        "Stefano Michele Lauro",
+        "Manuel Palmas",
+        "Alberto Garau"
+      ],
+      "creditoResiduo": 2,
+      "nomeFantasquadra": "I Buzzurri",
+      "nomePartecipante": "AronC",
+      "rosaOriginaria": [
+        "Lorenzo Pittiu",
+        "Stefano Michele Lauro",
+        "Manuel Palmas",
+        "Alberto Garau"
+      ],
+      "valoriAcquisto": {
+        "Alberto Garau": 10,
+        "Manuel Palmas": 13,
+        "Stefano Michele Lauro": 20,
+        "Lorenzo Pittiu": 15
+      },
+      "email": "leandrina99@hotmail.it",
+      "pin": "aronoele99!",
+      "dataInserimento": "2026-06-08T12:30:38.217Z",
+      "id": "fs-1780921488693-oq2d"
+    },
+    {
+      "email": "chripittiu48@gmail.com",
+      "pin": "Turri2005",
+      "valoriAcquisto": {
+        "Lorenzo Pittiu": 15,
+        "Sergio Pippia": 13,
+        "Michele Carrone": 13,
+        "Enrico Mulas": 17
+      },
+      "id": "fs-1780933779267-pm9d",
+      "dataInserimento": "2026-06-08T19:38:02.160Z",
+      "nomePartecipante": "Pittiu Christian",
+      "nomeFantasquadra": "Barrosu United",
+      "creditoResiduo": 2,
+      "rosaOriginaria": [
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Michele Carrone",
+        "Sergio Pippia"
+      ],
+      "giocatoriSelezionati": [
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Michele Carrone",
+        "Sergio Pippia"
+      ]
+    },
+    {
+      "giocatoriSelezionati": [
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Salvatore Roberto Pinna",
+        "Matteo Scattu"
+      ],
+      "valoriAcquisto": {
+        "Salvatore Roberto Pinna": 14,
+        "Enrico Mulas": 17,
+        "Matteo Scattu": 13,
+        "Lorenzo Pittiu": 15
+      },
+      "pin": "Hermione96$",
+      "email": "fabrizioalimonda@outlook.it",
+      "dataInserimento": "2026-06-08T20:07:52.426Z",
+      "id": "fs-1780948857068-1ekm",
+      "creditoResiduo": 1,
+      "nomePartecipante": "Fabrizio",
+      "nomeFantasquadra": "Izyraighing",
+      "rosaOriginaria": [
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Salvatore Roberto Pinna",
+        "Matteo Scattu"
+      ]
+    },
+    {
+      "rosaOriginaria": [
+        "Michele Carrone",
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Salvatore Roberto Pinna"
+      ],
+      "nomePartecipante": "La Leggenda",
+      "nomeFantasquadra": "I Leggendari",
+      "creditoResiduo": 1,
+      "dataInserimento": "2026-06-08T21:15:36.280Z",
+      "id": "fs-1780952845757-p5rj",
+      "pin": "P0rt0sxus0",
+      "email": "nicolaorlandini14@gmail.com",
+      "valoriAcquisto": {
+        "Salvatore Roberto Pinna": 14,
+        "Enrico Mulas": 17,
+        "Michele Carrone": 13,
+        "Lorenzo Pittiu": 15
+      },
+      "giocatoriSelezionati": [
+        "Michele Carrone",
+        "Enrico Mulas",
+        "Lorenzo Pittiu",
+        "Salvatore Roberto Pinna"
+      ]
+    },
+    {
+      "giocatoriSelezionati": [
+        "Stefano Michele Lauro",
+        "Manuel Palmas",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna"
+      ],
+      "id": "fs-1780953269827-gl6h",
+      "dataInserimento": "2026-06-08T21:27:16.323Z",
+      "valoriAcquisto": {
+        "Manuel Palmas": 13,
+        "Michele Carrone": 13,
+        "Salvatore Roberto Pinna": 14,
+        "Stefano Michele Lauro": 20
+      },
+      "email": "frasiddi2@gmail.com",
+      "pin": "Spritz2016",
+      "rosaOriginaria": [
+        "Stefano Michele Lauro",
+        "Manuel Palmas",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna"
+      ],
+      "creditoResiduo": 0,
+      "nomeFantasquadra": "Hsaccio",
+      "nomePartecipante": "Frank"
+    },
+    {
+      "giocatoriSelezionati": [
+        "Lorenzo Pittiu",
+        "Enrico Mulas",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna"
+      ],
+      "nomePartecipante": "G Matt",
+      "nomeFantasquadra": "EasyScoring",
+      "creditoResiduo": 1,
+      "rosaOriginaria": [
+        "Lorenzo Pittiu",
+        "Enrico Mulas",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna"
+      ],
+      "email": "giampmatt@gmail.com",
+      "pin": "Hundr3dG0ls@!",
+      "valoriAcquisto": {
+        "Lorenzo Pittiu": 15,
+        "Michele Carrone": 13,
+        "Enrico Mulas": 17,
+        "Salvatore Roberto Pinna": 14
+      },
+      "id": "fs-1780954074418-idrm",
+      "dataInserimento": "2026-06-08T21:31:30.952Z"
+    },
+    {
+      "giocatoriSelezionati": [
+        "Manuel Palmas",
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Alberto Garau"
+      ],
+      "nomeFantasquadra": "Loceri",
+      "nomePartecipante": "Alessandro Palmas",
+      "creditoResiduo": 0,
+      "rosaOriginaria": [
+        "Manuel Palmas",
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Alberto Garau"
+      ],
+      "pin": "Loceri99ass0209!",
+      "email": "alessandropalmas@ymail.com",
+      "valoriAcquisto": {
+        "Alberto Garau": 10,
+        "Manuel Palmas": 13,
+        "Enrico Mulas": 17,
+        "Fabrizio Alimonda": 20
+      },
+      "dataInserimento": "2026-06-09T10:09:05.699Z",
+      "id": "fs-1780999483908-ma0w"
+    },
+    {
+      "nomePartecipante": "Alì",
+      "nomeFantasquadra": "Hard Rigging",
+      "creditoResiduo": 0,
+      "rosaOriginaria": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Manuel Palmas",
+        "Alberto Garau"
+      ],
+      "pin": "11062026",
+      "email": "ali.nov7@gmail.com",
+      "valoriAcquisto": {
+        "Enrico Mulas": 19,
+        "Alberto Garau": 9,
+        "Manuel Palmas": 13,
+        "Fabrizio Alimonda": 19
+      },
+      "id": "fs-1781176621937-5jrq",
+      "dataInserimento": "2026-06-11T11:20:48.336Z",
+      "giocatoriSelezionati": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Manuel Palmas",
+        "Alberto Garau"
+      ]
     }
-
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-indigo-990 text-white p-4 sm:p-6 lg:p-8 flex flex-col justify-between font-sans relative pb-28 md:pb-8">
-        {/* Toast Notification */}
-        {toastMessage && (
-          <div className="fixed bottom-24 sm:bottom-12 left-1/2 -translate-x-1/2 z-[9999] animate-fade-in pointer-events-none">
-            <div className="bg-emerald-500 text-white px-4 py-2.5 rounded-full shadow-2xl font-sans font-bold text-xs sm:text-sm tracking-wide flex items-center gap-2 border border-emerald-400">
-              <CheckCircle className="w-5 h-5 flex-shrink-0" />
-              <span>{toastMessage}</span>
-            </div>
-          </div>
-        )}
-        
-        {showReRegistrationPopup && (
-          <div className="fixed inset-0 bg-black/85 backdrop-blur-xs flex items-center justify-center p-4 z-[9995] animate-fade-in font-sans">
-            <div className="bg-indigo-950 border-2 border-red-500/50 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-left">
-              <div className="w-12 h-12 rounded-2xl bg-red-500/10 text-red-400 flex items-center justify-center border border-red-500/30">
-                <Sparkles className="h-6 w-6 animate-pulse" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-base font-black text-rose-400 uppercase tracking-widest leading-snug">
-                  📢 RESET DATABASE SQUADRE!
-                </h3>
-                <p className="text-[12px] text-indigo-100 font-semibold leading-relaxed">
-                  Ciao Presidente! A causa del nuovo importante aggiornamento
-                  della piattaforma (che introduce il{" "}
-                  <strong>4° giocatore obbligatorio</strong>, il nuovo calcolo
-                  flessibile del valore dei giocatori e l'email/PIN
-                  obbligatori),{" "}
-                  <strong>
-                    tutte le vecchie squadre esistenti sono state
-                    definitivamente eliminate
-                  </strong>{" "}
-                  dal database.
-                </p>
-                <div className="bg-indigo-900/30 border border-indigo-800/40 rounded-2xl p-4.5 space-y-1.5 text-[11px] text-indigo-250 leading-relaxed font-sans">
-                  <p>
-                    • <strong>Nessun Import:</strong> Le vecchie squadre non
-                    sono più compatibili. Per partecipare al torneo, ogni
-                    Presidente deve effettuare una{" "}
-                    <strong>nuova iscrizione da zero</strong>.
-                  </p>
-                  <p>
-                    • <strong>Nuova Formula:</strong> Crea subito la tua
-                    formazione con esattamente{" "}
-                    <strong>3 Titolari + 1 Panchinaro</strong> rispettando il
-                    budget massimo di 60 Izycoin!
-                  </p>
-                </div>
-                <p className="text-[10px] text-sky-300 border-t border-indigo-800/30 pt-2 font-semibold leading-normal">
-                  Se hai già provveduto a registrare la tua nuova fanta-squadra
-                  a 4 giocatori dopo questo aggiornamento, ignora pure questo
-                  avviso.
-                </p>
-              </div>
-              <div className="space-y-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowReRegistrationPopup(false);
-                    localStorage.setItem(
-                      "fantaReRegistrationSkipped_v1",
-                      "true",
-                    );
-                    setActivePublicTab("iscrizione");
-                    setSubmitted(false);
-                  }}
-                  className="w-full bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-indigo-950 font-black text-xs uppercase py-3 rounded-xl transition-all cursor-pointer shadow-md text-center"
-                >
-                  Vai all'Iscrizione/Registrazione ⚽
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowReRegistrationPopup(false);
-                    localStorage.setItem(
-                      "fantaReRegistrationSkipped_v1",
-                      "true",
-                    );
-                  }}
-                  className="w-full bg-indigo-900/40 hover:bg-indigo-800/60 text-indigo-300 font-bold text-xs uppercase py-2.5 rounded-xl transition-all cursor-pointer border border-indigo-800/40 text-center"
-                >
-                  Salta, ho già provveduto / Nuova iscrizione 👍
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        {showInstagramPopup && (
-          <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-[9990] animate-fade-in">
-            <div className="bg-gradient-to-b from-purple-950 via-indigo-950/95 to-indigo-990 border border-pink-500/30 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-center">
-              <button
-                type="button"
-                onClick={() => setShowInstagramPopup(false)}
-                className="absolute top-4 right-4 text-white/50 hover:text-white bg-white/10 hover:bg-white/20 p-1.5 rounded-full transition-colors cursor-pointer"
-                title="Chiudi"
-              >
-                <X className="h-4 w-4" />
-              </button>
-
-              <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-pink-600 via-red-500 to-yellow-500 text-white flex items-center justify-center border border-white/20 shadow-lg animate-bounce">
-                <Instagram className="h-7 w-7" />
-              </div>
-
-              <div className="space-y-1.5 font-sans">
-                <h3 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-rose-300 to-yellow-300 uppercase tracking-widest leading-snug">
-                  Unisciti alla Community! 🚀
-                </h3>
-                <p className="text-[12px] text-indigo-100 font-semibold leading-relaxed">
-                  Per non perderti gli <strong>highlight</strong> delle partite, le foto sul campo più belle, notizie calde, le pagelle interattive dei nostri tesserati e i meme più esilaranti, segui la pagina ufficiale di <strong>EasyRigging C5</strong>!
-                </p>
-              </div>
-
-              <div className="space-y-3 pt-2">
-                <a
-                  href="https://www.instagram.com/easyrigging_c5?igsh=MWJkbW40NWJnemFmOQ=="
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-pink-600 via-red-500 to-yellow-500 hover:from-pink-500 hover:to-yellow-400 active:from-pink-700 active:to-yellow-600 text-white font-extrabold uppercase text-xs py-3 rounded-xl transition-all shadow-md hover:scale-[1.02] duration-150 cursor-pointer"
-                >
-                  <Instagram className="h-4.5 w-4.5 animate-pulse" />
-                  Segui @easyrigging_c5 su Instagram 📸
-                </a>
-
-                <div className="bg-indigo-900/30 border border-indigo-800/40 rounded-2xl p-4 space-y-3 text-left">
-                  <p className="text-[10px] text-indigo-200/90 font-bold uppercase tracking-wider text-center">
-                    📢 AIUTACI A FARE CRESCERE IL TORNEO!
-                  </p>
-                  
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <a
-                      href={`https://api.whatsapp.com/send?text=${encodeURIComponent("Segui EasyRigging C5 su Instagram per gli highlights, le foto ed i meme del torneo più caldo dell'anno! 🚀📷 https://www.instagram.com/easyrigging_c5?igsh=MWJkbW40NWJnemFmOQ==")}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-550 active:bg-indigo-650 text-white font-extrabold text-[10.5px] uppercase py-2.5 px-3 rounded-lg transition-all cursor-pointer shadow-sm text-center"
-                    >
-                      <Share2 className="h-3.5 w-3.5" />
-                      Stato WhatsApp 💬
-                    </a>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        navigator.clipboard.writeText("https://www.instagram.com/easyrigging_c5?igsh=MWJkbW40NWJnemFmOQ==");
-                        setInstagramLinkCopied(true);
-                        setTimeout(() => setInstagramLinkCopied(false), 2500);
-                      }}
-                      className="flex-1 flex items-center justify-center gap-1.5 bg-indigo-900/50 hover:bg-indigo-800/60 text-indigo-300 border border-indigo-800/50 hover:border-indigo-700/60 font-extrabold text-[10.5px] uppercase py-2.5 px-3 rounded-lg transition-all cursor-pointer shadow-sm text-center"
-                    >
-                      {instagramLinkCopied ? (
-                        <>
-                          <CheckCircle className="h-3.5 w-3.5 text-yellow-400 animate-pulse" />
-                          Copiato! ✔
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="h-3.5 w-3.5" />
-                          Copia Link 🔗
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowInstagramPopup(false);
-                      localStorage.setItem("fantaInstagramFollowed_v1", "true");
-                    }}
-                    className="w-full bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-indigo-950 font-black text-xs uppercase py-3 rounded-xl transition-all cursor-pointer shadow-md text-center"
-                  >
-                    Ho già seguito / Non mostrare più 👍
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowInstagramPopup(false)}
-                    className="w-full text-indigo-300 hover:text-white text-[10.5px] font-bold uppercase transition-colors cursor-pointer py-1"
-                  >
-                    Ricordamelo più tardi ➔
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showSuggestionModal && (
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-fade-in font-sans overflow-y-auto">
-            <div className="bg-indigo-950 border-2 border-indigo-800 rounded-3xl max-w-lg w-full shadow-2xl relative my-8 overflow-hidden">
-              {/* Modal Top Bar */}
-              <div className="flex justify-between items-center bg-indigo-900/60 px-6 py-4 border-b border-indigo-800/40">
-                <div className="flex items-center gap-2">
-                  <Lightbulb className="h-5 w-5 text-yellow-300 animate-pulse" />
-                  <span className="text-sm font-black text-white uppercase tracking-wider">
-                    PROPONI UN MIGLIORAMENTO 💡
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowSuggestionModal(false)}
-                  className="p-1 rounded-lg hover:bg-indigo-800/50 text-indigo-300 hover:text-white transition-all cursor-pointer"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              {/* Modal Content */}
-              <div className="p-6 space-y-4 text-left">
-                <p className="text-[11px] text-indigo-300 font-medium leading-relaxed">
-                  Hai un'idea per migliorare questa applicazione, implementare
-                  nuove statistiche o ottimizzare le regole del torneo? Invia il
-                  tuo suggerimento compilando i campi sottostanti.
-                </p>
-
-                {consiglioInviatoConSuccesso ? (
-                  <div className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs rounded-2xl p-5 text-center leading-relaxed">
-                    <p className="font-extrabold text-[13px] text-yellow-300 mb-1">
-                      ✨ Inviato con Successo! ✨
-                    </p>
-                    Il tuo suggerimento è stato recapitato all'organizzatore del
-                    Fantacalcetto. Grazie per il tuo prezioso contributo!
-                    <button
-                      type="button"
-                      onClick={() => setConsiglioInviatoConSuccesso(false)}
-                      className="block mx-auto text-yellow-400 hover:text-yellow-350 font-black mt-3 text-[10.5px] uppercase tracking-wider cursor-pointer underline"
-                    >
-                      Invia un'altra idea →
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-4 font-sans">
-                    {consiglioError && (
-                      <div className="bg-red-950/40 border border-red-900/50 text-red-300 text-[10.5px] rounded-xl p-3 font-semibold text-center leading-tight">
-                        ⚠️ {consiglioError}
-                      </div>
-                    )}
-                    <div className="space-y-1">
-                      <label className="block text-[9px] font-black uppercase tracking-wider text-indigo-400 leading-none">
-                        Tuo Nome / Fantallenatore
-                      </label>
-                      <input
-                        type="text"
-                        value={consiglioAutore}
-                        onChange={(e) => setConsiglioAutore(e.target.value)}
-                        placeholder="Es. Stefano L."
-                        className="w-full bg-indigo-900/45 border border-indigo-800 focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 rounded-xl px-3.5 py-2.5 outline-none text-xs text-white placeholder-indigo-700 font-extrabold"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="block text-[9px] font-black uppercase tracking-wider text-indigo-400 leading-none">
-                        Dettaglio del Miglioramento Proposto
-                      </label>
-                      <textarea
-                        value={consiglioTesto}
-                        rows={4}
-                        onChange={(e) => setConsiglioTesto(e.target.value)}
-                        placeholder="Cose da aggiungere? Es: Mi piacerebbe inserire grafici dei prezzi storici o voti divisi per data..."
-                        className="w-full bg-indigo-900/45 border border-indigo-800 focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 rounded-xl px-3.5 py-2.5 outline-none text-xs text-white placeholder-indigo-700 font-medium leading-relaxed"
-                      />
-                    </div>
-
-                    <div className="pt-2 flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setShowSuggestionModal(false)}
-                        className="flex-1 bg-indigo-900/30 hover:bg-indigo-900/40 border border-indigo-800 text-indigo-300 font-extrabold text-[10.5px] uppercase py-3 rounded-xl transition-all cursor-pointer"
-                      >
-                        Annulla
-                      </button>
-                      <button
-                        type="button"
-                        disabled={invioConsiglioInCorso}
-                        onClick={async () => {
-                          if (
-                            !consiglioAutore.trim() ||
-                            !consiglioTesto.trim()
-                          ) {
-                            setConsiglioError(
-                              "Compila sia il tuo nome sia la proposta di miglioramento!",
-                            );
-                            return;
-                          }
-                          setInvioConsiglioInCorso(true);
-                          setConsiglioError("");
-                          try {
-                            if (onCreaConsiglio) {
-                              await onCreaConsiglio(
-                                consiglioAutore,
-                                consiglioTesto,
-                              );
-                            } else {
-                              const response = await fetch(
-                                "/api/consigli/crea",
-                                {
-                                  method: "POST",
-                                  headers: {
-                                    "Content-Type": "application/json",
-                                  },
-                                  body: JSON.stringify({
-                                    autore: consiglioAutore,
-                                    testo: consiglioTesto,
-                                  }),
-                                },
-                              );
-                              if (!response.ok)
-                                throw new Error(
-                                  "Errore nel salvataggio remoto",
-                                );
-                            }
-                            setConsiglioAutore("");
-                            setConsiglioTesto("");
-                            setConsiglioInviatoConSuccesso(true);
-                          } catch (err: any) {
-                            setConsiglioError(
-                              "Impossibile inviare la proposta: " + err.message,
-                            );
-                          } finally {
-                            setInvioConsiglioInCorso(false);
-                          }
-                        }}
-                        className="flex-1 bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 disabled:bg-indigo-900 text-indigo-950 font-black text-[10.5px] uppercase py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-                      >
-                        {invioConsiglioInCorso
-                          ? "Invio in corso..."
-                          : "Invia Proposta 🚀"}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showInstructionsModal && (
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] animate-fade-in font-sans overflow-y-auto">
-            <div className="bg-indigo-950 border-2 border-indigo-800 rounded-3xl max-w-lg w-full shadow-2xl relative my-8 overflow-hidden">
-              {/* Modal Top Bar */}
-              <div className="flex justify-between items-center bg-indigo-900/60 px-6 py-4 border-b border-indigo-800/40">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-yellow-300" />
-                  <span className="text-sm font-black text-white uppercase tracking-wider">
-                    GUIDA & REGOLAMENTO ARTIGIANALE
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowInstructionsModal(false)}
-                  className="p-1 rounded-lg hover:bg-indigo-800/50 text-indigo-300 hover:text-white transition-all cursor-pointer"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              {/* Sub-tabs with elegant gold active accent */}
-              <div className="flex border-b border-indigo-800/20 bg-indigo-950/40">
-                <button
-                  type="button"
-                  onClick={() => setInstructionsTab("guida")}
-                  className={`flex-1 py-3 text-[11px] font-black uppercase tracking-wider transition-all border-b-2 text-center cursor-pointer ${
-                    instructionsTab === "guida"
-                      ? "border-yellow-400 text-yellow-300 bg-indigo-900/20 font-black"
-                      : "border-transparent text-indigo-400 hover:text-indigo-250 hover:bg-indigo-900/10 font-bold"
-                  }`}
-                >
-                  📖 Come Funziona il Portale
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setInstructionsTab("quotazioni")}
-                  className={`flex-1 py-3 text-[11px] font-black uppercase tracking-wider transition-all border-b-2 text-center cursor-pointer ${
-                    instructionsTab === "quotazioni"
-                      ? "border-yellow-400 text-yellow-300 bg-indigo-900/20 font-black"
-                      : "border-transparent text-indigo-400 hover:text-indigo-250 hover:bg-indigo-900/10 font-bold"
-                  }`}
-                >
-                  📈 Algoritmo Quotazioni
-                </button>
-              </div>
-
-              {/* Modal Content container */}
-              <div className="p-6 max-h-[60vh] overflow-y-auto space-y-5 text-left text-xs text-indigo-100 font-sans leading-relaxed">
-                {instructionsTab === "guida" ? (
-                  <>
-                    <div className="space-y-3">
-                      <h4 className="font-extrabold text-yellow-300 uppercase tracking-wide flex items-center gap-1.5 text-[12px]">
-                        🎯 1. Iscrizione & Budget Iniziale
-                      </h4>
-                      <p>
-                        Ogni fanta-squadra ha a disposizione un budget massimo
-                        iniziale di <strong>60 Izycoin 🪙</strong> per comporre
-                        la propria rosa inserendo esattamente{" "}
-                        <strong>4 tesserati</strong> (3 Titolari + 1 Panchina).
-                      </p>
-                      <p className="bg-indigo-900/25 border border-indigo-800/40 rounded-xl p-3 text-[11px] text-yellow-250 font-sans">
-                        💡 <strong>PIN di Sicurezza:</strong> All'iscrizione
-                        indica un indirizzo email ed un PIN segreto personale.
-                        Questo PIN ti servirà in futuro per sbloccare la tua
-                        fanta-squadra e fare operazioni di mercato in piena
-                        sicurezza!
-                      </p>
-                    </div>
-
-                    <div className="space-y-3 border-t border-indigo-900/40 pt-4">
-                      <h4 className="font-extrabold text-yellow-300 uppercase tracking-wide flex items-center gap-1.5 text-[12px]">
-                        ⚽ 2. Titolari e Sostituzione Automatica
-                      </h4>
-                      <p>
-                        In campo scenderanno i tuoi <strong>3 Titolari</strong>.
-                        Se uno o più giocatori scelti tra i titolari dovessero
-                        non giocare o non prendere voto,{" "}
-                        <strong>subentreranno i voti del tuo Panchinaro</strong>{" "}
-                        d'ufficio, salvando il punteggio della giornata.
-                      </p>
-                      <p className="bg-sky-950/30 border border-sky-900/40 rounded-xl p-3 text-[11px] text-sky-200 mt-2">
-                        💡 <strong>Regola Panchina Punteggi:</strong> Un giocatore in panchina contribuisce alla squadra esclusivamente con i suoi <strong>bonus non manuali</strong> (es. bonus di presenza, bonus social o speciali) e <strong>che non richiedono l'ingresso in campo</strong>. I suoi bonus derivanti dal gioco effettivo (es. gol o bonus legati al minutaggio) <strong>non vengono conteggiati</strong> a meno che non subentri per assenza di un titolare.
-                      </p>
-                    </div>
-
-                    <div className="space-y-3 border-t border-indigo-900/40 pt-4">
-                      <h4 className="font-extrabold text-yellow-300 uppercase tracking-wide flex items-center gap-1.5 text-[12px]">
-                        🔄 3. Mercato: Regola del Cambio Singolo e Slot
-                        Flessibile
-                      </h4>
-                      <p>
-                        Tra una partita refertata e l'altra puoi sostituire{" "}
-                        <strong>
-                          al massimo 1 giocatore in rosa (cambio singolo)
-                        </strong>
-                        . Tuttavia, prima della chiusura del mercato (fino a
-                        un'ora dal calcio d'inizio), potrai cambiare idea e
-                        sostituire nuovamente quel medesimo giocatore
-                        (utilizzando l'unico slot "sbloccato") quante volte
-                        vorrai. Gli altri 3 giocatori scelti resteranno invece
-                        confermati e incedibili per l'intero turno.
-                      </p>
-                      <p>
-                        Il saldo dell'operazione di mercato (l'Izycoin ricavato
-                        dalla vendita, sommato al tuo credito residuo) deve
-                        essere sempre sufficiente a coprire la quotazione di
-                        acquisto del nuovo tesserato.
-                      </p>
-                    </div>
-
-                    <div className="space-y-3 border-t border-indigo-900/40 pt-4">
-                      <h4 className="font-extrabold text-yellow-400 uppercase tracking-wide flex items-center gap-1.5 text-[11.5px]">
-                        ⏰ 4. Scadenza Ultima (Blocco Formazioni)
-                      </h4>
-                      <p className="bg-red-950/30 border border-red-900/40 rounded-xl p-3 text-[11px] text-red-200">
-                        🔔 <strong>PRO-TIP:</strong> Le operazioni di mercato,
-                        nuove iscrizioni e modifiche della formazione si{" "}
-                        <strong>
-                          bloccano rigorosamente alle 23:59 del giorno prima
-                        </strong>{" "}
-                        della partita controllata dall'Amministratore. Prepara la tua
-                        mossa in tempo!
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="space-y-3">
-                      <h4 className="font-extrabold text-yellow-300 uppercase tracking-wide flex items-center gap-1.5 text-[12px]">
-                        📊 Calcolo del FantaScore della Giornata
-                      </h4>
-                      <p>
-                        Il punteggio delle partite ufficiali per ciascun
-                        giocatore tesserato viene calcolato combinando
-                        prestazioni reali e bonus:
-                      </p>
-                      <div className="bg-indigo-900/20 border border-indigo-800/40 rounded-xl p-3.5 space-y-1 font-mono text-[10.5px]">
-                        <div className="flex justify-between border-b border-indigo-800/40 pb-1">
-                          <span>⚽ Gol Segnato:</span>
-                          <span className="text-indigo-400 font-bold">
-                            +3.0 pt
-                          </span>
-                        </div>
-                        <div className="flex justify-between border-b border-indigo-800/40 py-1">
-                          <span>👟 Assist Vincente:</span>
-                          <span className="text-indigo-400 font-bold">
-                            +1.0 pt
-                          </span>
-                        </div>
-                        <div className="flex justify-between border-b border-indigo-800/40 py-1">
-                          <span>🟨 Ammonizione:</span>
-                          <span className="text-red-400 font-bold">
-                            -0.5 pt
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>🟥 Espulsione:</span>
-                          <span className="text-red-500 font-bold">
-                            -1.0 pt
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <h5 className="font-bold text-indigo-300 text-[11px] uppercase tracking-wider mb-2">
-                          🏅 Bonus Extra / Generici
-                        </h5>
-                        <div className="grid grid-cols-1 gap-1.5 font-mono text-[10px]">
-                          {(() => {
-                            const allB = bonuses || DEFAULT_BONUSES;
-                            const currentGenericBonuses = allB.filter(
-                              (b) => !b.isPersonale,
-                            );
-                            return currentGenericBonuses.map((b) => (
-                              <div
-                                key={b.id}
-                                className="flex justify-between items-center bg-indigo-900/10 border border-indigo-800/20 rounded p-1.5 px-2"
-                              >
-                                <div className="pr-2">
-                                  <span className="font-bold">{b.nome}</span>
-                                  <div className="text-[8.5px] text-indigo-200/70 font-sans leading-tight mt-0.5">
-                                    {b.descrizione}
-                                  </div>
-                                </div>
-                                <span
-                                  className={`font-bold whitespace-nowrap ${typeof b.punti === "number" && b.punti > 0 ? "text-indigo-400" : typeof b.punti === "number" && b.punti < 0 ? "text-red-400" : "text-sky-400"}`}
-                                >
-                                  {typeof b.punti === "number"
-                                    ? b.punti > 0
-                                      ? `+${b.punti}`
-                                      : b.punti
-                                    : "Variabile"}{" "}
-                                  pt
-                                </span>
-                              </div>
-                            ));
-                          })()}
-                        </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <h5 className="font-bold text-sky-300 text-[11px] uppercase tracking-wider mb-2">
-                          ⭐ Bonus Ad Personam
-                        </h5>
-                        <div className="space-y-3 font-mono text-[10px]">
-                          {(() => {
-                            const allB = bonuses || DEFAULT_BONUSES;
-                            const currentPlayerBonuses = allB.filter(
-                              (b) => b.isPersonale && b.giocatoreId,
-                            );
-                            const grouped = currentPlayerBonuses.reduce(
-                              (acc, b) => {
-                                if (b.giocatoreId) {
-                                  if (!acc[b.giocatoreId])
-                                    acc[b.giocatoreId] = [];
-                                  acc[b.giocatoreId].push(b);
-                                }
-                                return acc;
-                              },
-                              {} as Record<string, CustomBonusDef[]>,
-                            );
-
-                            return Object.entries(grouped).map(
-                              ([playerName, bns]) => (
-                                <div key={playerName} className="space-y-1">
-                                  <p className="font-bold text-indigo-250 border-b border-indigo-800/30 pb-0.5">
-                                    {playerName}
-                                  </p>
-                                  <div className="grid grid-cols-1 gap-1">
-                                    {bns.map((b) => (
-                                      <div
-                                        key={b.id}
-                                        className="flex justify-between items-center bg-indigo-900/10 border border-sky-500/10 rounded p-1.5 px-2"
-                                      >
-                                        <div className="pr-2">
-                                          <span className="font-bold">
-                                            {b.nome}
-                                          </span>
-                                          <div className="text-[8.5px] text-indigo-200/70 font-sans leading-tight mt-0.5">
-                                            {b.descrizione}
-                                          </div>
-                                        </div>
-                                        <span
-                                          className={`font-bold whitespace-nowrap ${typeof b.punti === "number" && b.punti > 0 ? "text-indigo-400" : typeof b.punti === "number" && b.punti < 0 ? "text-red-400" : "text-sky-400"}`}
-                                        >
-                                          {typeof b.punti === "number"
-                                            ? b.punti > 0
-                                              ? `+${b.punti}`
-                                              : b.punti
-                                            : "Variabile"}{" "}
-                                          pt
-                                        </span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              ),
-                            );
-                          })()}
-                        </div>
-                      </div>
-
-                      <p className="text-[10px] text-indigo-300 mt-2">
-                        * Possono essere conteggiati anche bonus personalizzati
-                        ad hoc aggiunti dall'Amministratore del torneo per
-                        premiare parate decisive, giocate formidabili o autogol.
-                      </p>
-                    </div>
-
-                    <div className="space-y-3 border-t border-indigo-900/40 pt-4">
-                      <h4 className="font-extrabold text-yellow-300 uppercase tracking-wide flex items-center gap-1.5 text-[12px]">
-                        📈 Meccanismo di Rivalutazione Monetaria
-                      </h4>
-                      <p>
-                        Le quotazioni dei giocatori non rimangono statiche, ma
-                        fluttuano in modo semplice e trasparente in base ai
-                        punti accumulati!
-                      </p>
-
-                      <div className="bg-sky-500/10 border border-sky-500/20 text-sky-300 p-3.5 rounded-xl font-medium leading-relaxed font-sans mb-3 text-[11px]">
-                        🧠 <strong>Regola Base:</strong> Se un giocatore fa
-                        esattamente <strong>3 punti</strong>, il suo valore
-                        rimane invariato (variazione pari a 0 crediti), poiché
-                        il punteggio di 3 rientra nella soglia neutra.
-                      </div>
-
-                      <div className="space-y-3 bg-indigo-900/30 border border-indigo-800/50 rounded-2xl p-4 text-[11px]">
-                        <div>
-                          <p className="font-extrabold text-yellow-300 uppercase tracking-wider text-[10.5px] mb-1.5 border-b border-indigo-800/20 pb-1">
-                            📋 Riepilogo Completo delle Fasce di Valore:
-                          </p>
-                          <div className="space-y-4 mt-2">
-                            <div>
-                              <span className="text-yellow-400 font-extrabold text-xs uppercase block mb-1">🏃 Calciatori Convocati (In Campo/Giocato):</span>
-                              <ul className="space-y-1.5 list-disc pl-4 text-emerald-200 text-[11px]">
-                                <li><strong>Fascia Neutra (da +10 a +15 punti):</strong> Invariato 🪙 (0)</li>
-                                <li><strong>Fascia Positiva (da +16 a +19 punti):</strong> Variazione di <strong>+1 Izycoin 🪙</strong></li>
-                                <li><strong>Fascia Positiva (da +20 punti in poi):</strong> Variazione di <strong>+2 Izycoin 🪙</strong></li>
-                                <li><strong>Fascia Negativa (da -5 a +9 punti):</strong> Variazione di <strong>-1 Izycoin 🪙</strong></li>
-                                <li><strong>Fascia Negativa (da -6 a -10 punti):</strong> Variazione di <strong>-2 Izycoin 🪙</strong></li>
-                                <li><strong>Fascia Negativa (da -11 punti in poi):</strong> Variazione di <strong>-3 Izycoin 🪙</strong></li>
-                              </ul>
-                            </div>
-                            
-                            <div className="border-t border-indigo-950/40 pt-2.5">
-                              <span className="text-cyan-400 font-extrabold text-xs uppercase block mb-1">📢 Calciatori Non Convocati/Assenti:</span>
-                              <ul className="space-y-1.5 list-disc pl-4 text-cyan-200 text-[11px]">
-                                <li><strong>Fascia Neutra (da -1 a +6 punti):</strong> Invariato 🪙 (0)</li>
-                                <li><strong>Fascia Positiva (da +7 a +14 punti):</strong> Variazione di <strong>+1 Izycoin 🪙</strong></li>
-                                <li><strong>Fascia Positiva (da +15 punti in poi):</strong> Variazione di <strong>+2 Izycoin 🪙</strong></li>
-                                <li><strong>Fascia Negativa (da -5 a -2 punti):</strong> Variazione di <strong>-1 Izycoin 🪙</strong></li>
-                                <li><strong>Fascia Negativa (da -6 a -10 punti):</strong> Variazione di <strong>-2 Izycoin 🪙</strong></li>
-                                <li><strong>Fascia Negativa (da -11 punti in poi):</strong> Variazione di <strong>-3 Izycoin 🪙</strong></li>
-                              </ul>
-                            </div>
-
-                            <div className="border-t border-indigo-950/40 pt-2.5 bg-rose-955/20 p-2 rounded-lg border border-rose-900/30 text-[11px]">
-                              <span className="text-rose-455 font-extrabold text-xs uppercase block mb-0.5">📦 Malus BRT:</span>
-                              <span className="text-rose-200 leading-relaxed block">
-                                Se attivo risulta spuntato <strong>Malus BRT</strong>: applica una variazione supplementare di <strong>-1 Izycoin 🪙</strong> per quella partita.
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <p className="text-[11px] bg-indigo-900/20 border border-indigo-800/40 text-indigo-300 p-3 rounded-xl font-medium leading-relaxed font-sans mt-3">
-                        💵 <strong>Strategia Mercato:</strong> Vendendo un
-                        calciatore la cui quotazione è cresciuta, incasserai la
-                        nuova quotazione rivalutata sul mercato! Questo
-                        incremento genera <em>Plusvalenze Reali</em>, aumentando
-                        sistematicamente il budget totale della tua
-                        fanta-squadra per acquistare altri top player.
-                      </p>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Modal Footer */}
-              <div className="bg-indigo-900/40 px-6 py-4 border-t border-indigo-800/40 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setShowInstructionsModal(false)}
-                  className="bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-indigo-950 font-black text-xs uppercase px-6 py-2.5 rounded-xl transition-all cursor-pointer shadow-md"
-                >
-                  Ho Capito, grazie! 👍
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        <div className="max-w-4xl w-full mx-auto space-y-6 my-auto">
-          {/* Header */}
-          <div className="text-center space-y-2">
-            <span className="bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] sm:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full select-none font-sans">
-              🏆 FANTACALCETTO ASD
-            </span>
-            <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-indigo-300 font-sans">
-              Classifica & Portale Fantacalcetto
-            </h1>
-            <p className="text-xs sm:text-sm text-indigo-300 max-w-lg mx-auto font-medium leading-relaxed font-sans">
-              Dedicato ai tornei del lunedì! Guarda i punteggi in tempo reale ed
-              iscrivi la tua squadra.
-            </p>
-            <div className="flex flex-wrap justify-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setInstructionsTab("guida");
-                  setShowInstructionsModal(true);
-                }}
-                className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-indigo-950 px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-md hover:scale-[1.03] duration-150"
-              >
-                <BookOpen className="h-3.5 w-3.5" />
-                Regolamento & Istruzioni Gioco 📖
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setConsiglioInviatoConSuccesso(false);
-                  setConsiglioError("");
-                  setShowSuggestionModal(true);
-                }}
-                className="inline-flex items-center gap-2 bg-indigo-900/60 hover:bg-indigo-850 border border-indigo-705 text-yellow-300 hover:text-yellow-250 px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-md hover:scale-[1.03] duration-150"
-              >
-                <Lightbulb className="h-3.5 w-3.5 text-yellow-400 animate-pulse" />
-                Proponi Miglioramento 💡
-              </button>
-              <a
-                href="https://www.instagram.com/easyrigging_c5?igsh=MWJkbW40NWJnemFmOQ=="
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-600 via-red-500 to-yellow-500 hover:from-pink-500 hover:to-yellow-400 active:from-pink-700 active:to-yellow-600 text-white px-4 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-md hover:scale-[1.03] duration-150"
-              >
-                <Instagram className="h-4 w-4 text-white" />
-                Instagram @easyrigging_c5 📸
-              </a>
-            </div>
-          </div>
-
-          {/* Instagram Follower Engagement Banner */}
-          <div className="bg-gradient-to-r from-purple-950/60 via-pink-950/50 to-sky-950/40 border border-pink-500/20 rounded-2xl p-4 text-center space-y-2.5 max-w-lg mx-auto shadow-lg backdrop-blur-xs">
-            <div className="flex items-center justify-center gap-1.5">
-              <Instagram className="h-4.5 w-4.5 text-pink-400 animate-pulse" />
-              <span className="text-[10.5px] font-extrabold uppercase tracking-widest text-pink-300 font-sans">
-                Segui @easyrigging_c5 su Instagram
-              </span>
-            </div>
-            <p className="text-xs text-indigo-100 leading-relaxed max-w-sm mx-auto font-sans font-medium">
-              Highlights esclusivi, meme del torneo, foto dal campo e pagelle interattive! Aiutaci a far crescere la community di <strong>EasyRigging C5</strong>. 🚀
-            </p>
-            <div>
-              <a
-                href="https://www.instagram.com/easyrigging_c5?igsh=MWJkbW40NWJnemFmOQ=="
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-550 active:bg-pink-650 text-white font-extrabold uppercase text-[10.5px] px-5 py-2 rounded-xl transition-all shadow-md cursor-pointer hover:shadow-pink-500/25 tracking-wider font-sans"
-              >
-                Diventa un Follower! ➔
-              </a>
-            </div>
-          </div>
-
-          {/* Navigation Tabs for Public Portal - MOBILE OPTIMIZED */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 md:sticky md:bottom-4 px-2 py-3 md:py-1.5 bg-indigo-950/95 md:bg-indigo-950/60 backdrop-blur-xl md:rounded-2xl border-t md:border border-indigo-800/80 font-sans flex items-center justify-around md:justify-center gap-1 md:gap-1.5 mx-auto w-full max-w-none md:max-w-xl shadow-[0_-10px_40px_-5px_rgba(0,0,0,0.5)] md:shadow-none pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-1.5">
-            <button
-              type="button"
-              onClick={() => setActivePublicTab("home")}
-              className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-1.5 rounded-xl text-[9px] md:text-[10.5px] font-bold md:font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
-                activePublicTab === "home"
-                  ? "text-yellow-400 md:bg-yellow-400 md:text-indigo-950 shadow-none md:shadow-md"
-                  : "text-indigo-400 hover:text-white hover:bg-indigo-900/30"
-              }`}
-            >
-              <Home className={`w-5 h-5 md:w-3.5 md:h-3.5 ${activePublicTab === "home" ? "fill-yellow-400 md:fill-none" : ""}`} />
-              <span className="hidden md:inline">Home</span>
-              <span className="md:hidden mt-0.5 tracking-tight">Home</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActivePublicTab("rosa");
-                setSubmitted(false);
-              }}
-              className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-1.5 rounded-xl text-[9px] md:text-[10.5px] font-bold md:font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
-                activePublicTab === "rosa"
-                  ? "text-yellow-400 md:bg-yellow-400 md:text-indigo-950 shadow-none md:shadow-md"
-                  : "text-indigo-400 hover:text-white hover:bg-indigo-900/30"
-              }`}
-            >
-              <Shirt className={`w-5 h-5 md:w-3.5 md:h-3.5 ${activePublicTab === "rosa" ? "fill-yellow-400 md:fill-none" : ""}`} />
-              <span className="hidden md:inline">Rosa/Formaz.</span>
-              <span className="md:hidden mt-0.5 tracking-tight">Rosa</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActivePublicTab("mercato")}
-              className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-1.5 rounded-xl text-[8px] md:text-[10px] sm:text-[10.5px] font-bold md:font-extrabold uppercase transition-all tracking-tight sm:tracking-wider cursor-pointer text-center font-sans ${
-                activePublicTab === "mercato"
-                  ? "text-yellow-400 md:bg-yellow-400 md:text-indigo-950 shadow-none md:shadow-md"
-                  : "text-indigo-400 hover:text-white hover:bg-indigo-900/30"
-              }`}
-            >
-              <Banknote className={`w-5 h-5 md:w-3.5 md:h-3.5 ${activePublicTab === "mercato" ? "fill-yellow-400 md:fill-none" : ""}`} />
-              <span className="hidden md:inline">Formazione/Mercato</span>
-              <span className="md:hidden mt-0.5 tracking-tighter">Formaz/Mercato</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActivePublicTab("classifica")}
-              className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-1.5 rounded-xl text-[9px] md:text-[10.5px] font-bold md:font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
-                activePublicTab === "classifica"
-                  ? "text-yellow-400 md:bg-yellow-400 md:text-indigo-950 shadow-none md:shadow-md"
-                  : "text-indigo-400 hover:text-white hover:bg-indigo-900/30"
-              }`}
-            >
-              <Trophy className={`w-5 h-5 md:w-3.5 md:h-3.5 ${activePublicTab === "classifica" ? "fill-yellow-400 md:fill-none" : ""}`} />
-              <span className="hidden md:inline">Class & Calen</span>
-              <span className="md:hidden mt-0.5 tracking-tight">Classifica</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActivePublicTab("regolamento")}
-              className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-1.5 rounded-xl text-[9px] md:text-[10.5px] font-bold md:font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
-                activePublicTab === "regolamento"
-                  ? "text-yellow-400 md:bg-yellow-400 md:text-indigo-950 shadow-none md:shadow-md"
-                  : "text-indigo-400 hover:text-white hover:bg-indigo-900/30"
-              }`}
-            >
-              <ClipboardList className={`w-5 h-5 md:w-3.5 md:h-3.5 ${activePublicTab === "regolamento" ? "fill-yellow-400 md:fill-none" : ""}`} />
-              <span className="hidden md:inline">Regolamento</span>
-              <span className="md:hidden mt-0.5 tracking-tight">Regole</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActivePublicTab("statistiche")}
-              className={`flex-1 flex flex-col md:flex-row items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-1.5 rounded-xl text-[9px] md:text-[10.5px] font-bold md:font-extrabold uppercase transition-all tracking-wider cursor-pointer text-center font-sans ${
-                activePublicTab === "statistiche"
-                  ? "text-yellow-400 md:bg-yellow-400 md:text-indigo-950 shadow-none md:shadow-md"
-                  : "text-indigo-400 hover:text-white hover:bg-indigo-900/30"
-              }`}
-            >
-              <BarChart3 className={`w-5 h-5 md:w-3.5 md:h-3.5 ${activePublicTab === "statistiche" ? "fill-yellow-400 md:fill-none" : ""}`} />
-              <span className="hidden md:inline">Statistiche</span>
-              <span className="md:hidden mt-0.5 tracking-tight">Stats</span>
-            </button>
-          </div>
-
-          {isMercatoLiberoValido && (
-            <div className="rounded-xl p-4 border flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-sans shadow-lg bg-blue-900/40 border-blue-500 text-blue-100 animate-pulse-slow mb-4">
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-xl shrink-0 mt-0.5 bg-blue-800 text-blue-200">
-                  <Sparkles className="h-5 w-5" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-black uppercase tracking-wider text-white">
-                    ⭐ SESSIONE DI MERCATO SPECIALE ATTIVA
-                    {scadenzaMercatoLibero && <MercatoCountdown targetDate={scadenzaMercatoLibero} />}
-                  </h4>
-                  <p className="text-[11px] mt-0.5 leading-relaxed">
-                    Il limite di <span className="font-extrabold text-white">1 solo cambio</span> è momentaneamente sospeso! Puoi modificare interamente la rosa per questo mercato.
-                  </p>
-                </div>
-              </div>
-              {isEditor && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    let datePart = "";
-                    if (scadenzaMercatoLibero) {
-                      const d = new Date(scadenzaMercatoLibero);
-                      datePart = ` fino al ${d.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute:"2-digit" })}`;
-                    }
-                    const text = `🚨 *FANTACALCETTO FLASH* 🚨\n\nAttenzione Presidenti! È stata appena attivata una *Sessione di Mercato Speciale*! ⭐\n\nIl limite rigido di 1 solo cambio a settimana è stato temporaneamente SOSPESO${datePart}. Potete stravolgere interamente le vostre rose senza penalità!\n\nCorrete subito sul portale per approfittarne: https://Fantacalcetto...`;
-                    navigator.clipboard.writeText(text);
-                    alert("Messaggio copiato negli appunti! Ora puoi incollarlo su WhatsApp.");
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold text-[10px] uppercase tracking-wide cursor-pointer ml-auto"
-                >
-                  <Copy className="h-3 w-3" />
-                  Copia Avviso Wa
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Lock Status Banner */}
-          {lockStatus.match ? (
-            <div
-              className={`rounded-xl p-4 border flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-sans shadow-lg ${
-                lockStatus.isLocked
-                  ? "bg-red-950/70 border-red-900 text-red-200"
-                  : "bg-indigo-950/60 border-indigo-800/80 text-indigo-100"
-              }`}
-            >
-              <div className="flex items-start gap-3">
-                <div
-                  className={`p-2 rounded-xl shrink-0 mt-0.5 ${
-                    lockStatus.isLocked
-                      ? "bg-red-900/30 text-red-400 animate-pulse"
-                      : "bg-indigo-900/40 text-indigo-400"
-                  }`}
-                >
-                  <AlertCircle className="h-5 w-5" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-1.5">
-                    {lockStatus.isLocked
-                      ? "🔒 Formazioni Bloccate"
-                      : "🔓 Formazioni Aperte"}
-                  </h4>
-                  <p className="text-[11px] mt-0.5 leading-relaxed">
-                    {lockStatus.isLocked ? (
-                      <>
-                        Le iscrizioni e variazioni sono chiuse per questa
-                        settimana. Prossimo turno di campionato:{" "}
-                        <span className="font-extrabold text-white">
-                          {lockStatus.match.dettagli.split(",")[0]}
-                        </span>
-                        . Rimangono in vigore le formazioni salvate
-                        precedentemente!
-                      </>
-                    ) : (
-                      <>
-                        Puoi inserire o aggiornare la tua formazione per il
-                        turno di campionato del{" "}
-                        <span className="font-extrabold text-white">
-                          {lockStatus.match.dettagli.split(",")[0]}
-                        </span>
-                        .
-                      </>
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              <div className="text-left sm:text-right shrink-0">
-                <span
-                  className={`text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded-lg inline-block ${
-                    lockStatus.isLocked
-                      ? "bg-red-850 text-white"
-                      : "bg-sky-500/10 text-sky-300 border border-sky-500/25"
-                  }`}
-                >
-                  Scadenza: {lockStatus.deadline?.toLocaleDateString("it-IT")}{" "}
-                  {lockStatus.deadline?.toLocaleTimeString("it-IT", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-                {!lockStatus.isLocked && lockStatus.timeLeftString && (
-                  <p className="text-[10px] text-yellow-300 font-extrabold uppercase tracking-wider mt-1.5 animate-pulse">
-                    Mancano: {lockStatus.timeLeftString}
-                  </p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="rounded-xl p-4 border bg-indigo-950/40 border-indigo-900 text-indigo-300/80 text-xs flex items-center gap-3">
-              <AlertCircle className="h-4 w-4 text-indigo-500 shrink-0" />
-              <span>
-                Nessuna gara di campionato attualmente programmata in bacheca.
-                Le iscrizioni e formazioni sono aperte.
-              </span>
-            </div>
-          )}
-
-          {activePublicTab === "classifica" ? (
-            <div className="space-y-6 animate-fade-in font-sans">
-              <div className="bg-indigo-900/30 border-l-4 border-indigo-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <p className="text-xs text-indigo-200 leading-relaxed font-medium">
-                  <strong className="text-indigo-400">ℹ️ Punto Informativo:</strong> Qui puoi monitorare l'andamento del campionato. Clicca su ciascun team per vedere nel dettaglio il valore attuale della rosa, il tesoretto residuo e le scelte dei giocatori fatte dagli altri partecipanti!
-                </p>
-                <button
-                  id="btn-export-classifica-v2-classifica-tab"
-                  type="button"
-                  onClick={async () => {
-                    let text = `🏆 *CLASSIFICA FANTASQUADRE* 🏆\n\n`;
-                    rankedTeams.forEach((t, idx) => {
-                      const medal = idx === 0 ? "🥇 " : idx === 1 ? "🥈 " : idx === 2 ? "🥉 " : "📋 ";
-                      text += `${medal}*${idx + 1}° ${t.nomeFantasquadra}* - *${t.score} pts*\n`;
-                    });
-                    text += `\n⚽ #FantaEasyRigging #Fantacalcetto`;
-                    try {
-                      await navigator.clipboard.writeText(text);
-                      alert("Classifica copiata negli appunti! 🚀");
-                    } catch (err) {
-                      alert("Errore nella copia.");
-                    }
-                  }}
-                  className="bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 text-white font-black text-xs uppercase px-4.5 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md select-none shrink-0"
-                >
-                  <Trophy className="h-4 w-4" /> Esporta Classifica 🏆
-                </button>
-              </div>
-
-              {/* Podium View if any */}
-              {rankedTeams.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans">
-                  {rankedTeams.slice(0, 3).map((item, index) => {
-                    const badgeColor =
-                      index === 0
-                        ? "bg-yellow-400 text-indigo-950"
-                        : index === 1
-                          ? "bg-slate-300 text-indigo-950"
-                          : "bg-sky-600 text-white";
-                    const subtitleLabel =
-                      index === 0
-                        ? "🥇 Primo"
-                        : index === 1
-                          ? "🥈 Secondo"
-                          : "🥉 Terzo";
-                    return (
-                      <div
-                        key={item.id}
-                        className="text-center bg-indigo-950/85 border border-indigo-800 p-5 rounded-3xl shadow-xl flex flex-col items-center justify-center relative overflow-hidden backdrop-blur-md font-sans"
-                      >
-                        <span
-                          className={`text-[9px] uppercase font-black px-2.5 py-1 rounded-full font-sans ${badgeColor}`}
-                        >
-                          {subtitleLabel}
-                        </span>
-                        <p
-                          className="font-black text-sm text-yellow-300 mt-3 truncate max-w-full font-sans"
-                          title={item.nomeFantasquadra}
-                        >
-                          {item.nomeFantasquadra}
-                        </p>
-                        <p className="text-[10px] text-indigo-400 truncate max-w-full font-medium font-sans">
-                          Di:{" "}
-                          <span className="font-extrabold text-white font-sans">
-                            {item.nomePartecipante}
-                          </span>
-                        </p>
-                        <span className="text-xl font-black font-mono text-white mt-2 flex items-baseline gap-1">
-                          {item.score}{" "}
-                          <span className="text-[10px] text-indigo-400 font-bold uppercase font-sans">
-                            pt
-                          </span>
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Leaderboard Table / Cards */}
-              <div className="bg-indigo-950/80 border border-indigo-800 rounded-3xl p-5 shadow-xl backdrop-blur-md space-y-4 font-sans">
-                <div className="border-b border-indigo-900 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 font-sans">
-                  <div>
-                    <h3 className="font-extrabold text-xs text-white uppercase tracking-wider font-sans flex items-center gap-2">
-                      Classifica Generale
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setInstructionsTab("guida");
-                          setShowInstructionsModal(true);
-                        }}
-                        className="text-indigo-400 hover:text-yellow-400 transition-colors"
-                        title="Vedi info su come funziona il torneo"
-                      >
-                        <BookOpen className="h-4 w-4" />
-                      </button>
-                    </h3>
-                    <p className="text-[9px] text-indigo-400 font-semibold uppercase tracking-wider font-sans mt-0.5">
-                      Aggiornata ad ogni referto inserito dagli Amministratori
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 select-none">
-                    {rankedTeams.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setActivePublicTab("statistiche")}
-                        className="bg-blue-600 hover:bg-blue-700 text-white text-[9px] font-black uppercase px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1 cursor-pointer transition-transform hover:-translate-y-0.5"
-                        title="Vedi referto, statistiche avanzate ed esporta per i social"
-                      >
-                        <span>📊 Filtra & Apri Statistiche</span>
-                      </button>
-                    )}
-                    <span className="bg-indigo-900 text-indigo-200 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full font-mono shrink-0">
-                      {rankedTeams.length} Team
-                    </span>
-                  </div>
-                </div>
-
-                {rankedTeams.length === 0 ? (
-                  <div className="text-center py-16 text-indigo-500 font-medium font-sans">
-                    <Trophy className="h-10 w-10 mx-auto text-indigo-700 mb-3 animate-pulse" />
-                    Nessuna fantasquadra registrata nel Fantacalcetto.
-                    <br />
-                    Iscrivi la prima squadra cliccando sulla tab "Iscrizione"!
-                  </div>
-                ) : (
-                  <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1 font-sans">
-                    {rankedTeams.map((team, index) => {
-                      const isExpanded = expandedTeamId === team.id;
-                      return (
-                        <div
-                          key={team.id || team.nomeFantasquadra}
-                          className={`border rounded-2xl transition-all font-sans ${
-                            isExpanded
-                              ? "border-yellow-400 bg-indigo-900/45"
-                              : "border-indigo-850 bg-indigo-900/10 hover:bg-indigo-900/20"
-                          }`}
-                        >
-                          {/* Card header */}
-                          <div
-                            onClick={() =>
-                              setExpandedTeamId(isExpanded ? null : team.id)
-                            }
-                            className="p-3.5 flex items-center justify-between cursor-pointer select-none font-sans"
-                          >
-                            <div className="flex items-center gap-3 min-w-0 font-sans">
-                              <span
-                                className={`w-6 h-6 rounded-full flex items-center justify-center font-mono text-xs font-black ${
-                                  index === 0
-                                    ? "bg-yellow-400 text-indigo-950 font-black h-6.5 w-6.5"
-                                    : index === 1
-                                      ? "bg-slate-300 text-indigo-950"
-                                      : index === 2
-                                        ? "bg-sky-600 text-white"
-                                        : "text-indigo-300 bg-indigo-900/50"
-                                }`}
-                              >
-                                {index + 1}
-                              </span>
-                              <div className="min-w-0 font-sans">
-                                <p className="font-black text-xs text-white truncate font-sans">
-                                  {team.nomeFantasquadra}
-                                </p>
-                                <p className="text-[10px] text-indigo-400 font-bold truncate font-sans">
-                                  Presidente:{" "}
-                                  <span className="text-gray-200 font-extrabold font-sans">
-                                    {team.nomePartecipante}
-                                  </span>
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-3 shrink-0 font-sans">
-                              <div className="text-right font-sans">
-                                <span className="text-xs font-black font-mono text-yellow-300 block leading-none font-sans">
-                                  {team.score} pt
-                                </span>
-                                <span className="text-[8px] uppercase tracking-wider font-extrabold text-indigo-500 mt-0.5 block leading-none font-sans">
-                                  Fantascore
-                                </span>
-                              </div>
-                              {isExpanded ? (
-                                <ChevronUp className="h-4 w-4 text-indigo-400" />
-                              ) : (
-                                <ChevronDown className="h-4 w-4 text-indigo-400" />
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Expansion list of players */}
-                          {isExpanded && (
-                            <div className="border-t border-indigo-900 p-4 bg-indigo-950/60 space-y-3.5 animate-fade-in text-xs font-sans">
-                              {/* Financial/Roster values block */}
-                              {(() => {
-                                const currentTotalVal =
-                                  team.giocatoriSelezionati.reduce(
-                                    (sum, name) => {
-                                      const stats = getPlayerStatsObj(name);
-                                      return (
-                                        sum +
-                                        getPlayerCurrentPrice(
-                                          name,
-                                          stats.fantaScore,
-                                          partiteChiuse,
-                                          bonuses,
-                                          giocatori
-                                        )
-                                      );
-                                    },
-                                    0,
-                                  );
-                                return (
-                                  <div className="grid grid-cols-2 gap-3.5 bg-indigo-950/85 border border-indigo-900 p-3 rounded-xl text-left">
-                                    <div>
-                                      <p className="text-[7.5px] uppercase font-bold tracking-widest text-indigo-450 mb-0.5">
-                                        Tesoretto Residuo
-                                      </p>
-                                      <p className="font-mono text-xs font-black text-yellow-300 leading-none">
-                                        {team.creditoResiduo ?? 0} Izycoin 🪙
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <p className="text-[7.5px] uppercase font-bold tracking-widest text-indigo-450 mb-0.5">
-                                        Valore Totale Rosa
-                                      </p>
-                                      <p className="font-mono text-xs font-black text-indigo-300 leading-none">
-                                        {currentTotalVal} Izycoin 🪙
-                                      </p>
-                                    </div>
-                                  </div>
-                                );
-                              })()}
-
-                              <div>
-                                <h4 className="text-[9px] uppercase font-black tracking-wider text-yellow-300 mb-2 font-sans">
-                                  ROSTER ATTUALE –{" "}
-                                  {team.giocatoriSelezionati.length} GIOCATORI
-                                </h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-sans">
-                                  {team.giocatoriSelezionati.map(
-                                    (pName, pIdx) => {
-                                      const originalPlayer = giocatori.find(
-                                        (g) =>
-                                          g.nome.toLowerCase() ===
-                                          pName.toLowerCase(),
-                                      );
-                                      const isBench = pIdx === 3;
-
-                                      return (
-                                        <div
-                                          key={pIdx}
-                                          className={`border p-2.5 rounded-xl flex items-center justify-between font-sans ${
-                                            isBench
-                                              ? "bg-sky-950/30 border-sky-500/25 text-sky-200"
-                                              : "bg-indigo-900/30 border-indigo-850 text-white"
-                                          }`}
-                                        >
-                                          <div className="min-w-0 pr-1 flex-1 text-left">
-                                            <p className="font-black text-[11px] truncate text-gray-100 font-sans">
-                                              {pIdx + 1}. {getLastName(pName)}
-                                            </p>
-                                            <p className="text-[8px] text-indigo-400/80 font-extrabold uppercase mt-0.5 font-sans">
-                                              #
-                                              {originalPlayer?.numeroMaglia ||
-                                                "??"}{" "}
-                                              •{" "}
-                                              {originalPlayer?.ultimoRuolo ||
-                                                "Ruolo"}
-                                            </p>
-                                          </div>
-                                          <span
-                                            className={`text-[8px] px-1.5 py-0.5 rounded font-bold font-mono tracking-wider shadow-sm border ${isBench ? "bg-sky-900/40 text-sky-300 border-sky-500/50" : "bg-indigo-900/40 text-indigo-300 border-indigo-500/50"}`}
-                                          >
-                                            {isBench ? "PANCHINA" : "TITOLARE"}
-                                          </span>
-                                        </div>
-                                      );
-                                    },
-                                  )}
-                                </div>
-                              </div>
-
-                              {/* Detailed Championship Match Reports & Player Scores */}
-                              {(() => {
-                                const matchBreakdown =
-                                  getTeamMatchBreakdownList(team);
-                                return (
-                                  <div className="mt-4 border-t border-indigo-900/40 pt-3 space-y-2">
-                                    <h4 className="text-[9px] uppercase font-black tracking-wider text-yellow-350 flex items-center gap-1.5 font-sans">
-                                      📈 DETTAGLIO PARTITE REFERTATE (
-                                      {matchBreakdown.length})
-                                    </h4>
-                                    {matchBreakdown.length === 0 ? (
-                                      <p className="text-[10px] text-indigo-500 italic pb-1">
-                                        Nessun match di campionato refertato
-                                        finora per questa squadra.
-                                      </p>
-                                    ) : (
-                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                                        {matchBreakdown.map((mb, mbIdx) => (
-                                          <div
-                                            key={mbIdx}
-                                            onClick={(e) => {
-                                              e.preventDefault();
-                                              e.stopPropagation();
-                                              setSelectedMatchBreakdown({
-                                                mb,
-                                                teamName: team.nomeFantasquadra,
-                                              });
-                                            }}
-                                            className="bg-indigo-950/40 hover:bg-indigo-900/60 transition-colors border border-indigo-900/50 rounded-xl p-3 flex items-center justify-between cursor-pointer group"
-                                          >
-                                            <div className="min-w-0 pr-2">
-                                              <p
-                                                className="text-[11px] font-extrabold text-white truncate group-hover:text-yellow-300 transition-colors"
-                                                title={mb.dettagli}
-                                              >
-                                                ⚔️{" "}
-                                                {mb.dettagli.split(" - ")[0] ||
-                                                  mb.dettagli}
-                                              </p>
-                                              {mb.dettagli.includes(" - ") && (
-                                                <p className="text-[8px] text-indigo-400 font-medium truncate mt-0.5">
-                                                  {mb.dettagli
-                                                    .split(" - ")
-                                                    .slice(1)
-                                                    .join(" - ")}
-                                                </p>
-                                              )}
-                                            </div>
-                                            <div className="text-right shrink-0 flex items-center gap-2">
-                                              <span className="font-mono text-[10px] font-black bg-indigo-900 text-yellow-300 border border-indigo-800 px-1.5 py-0.5 rounded-lg shadow-xs group-hover:bg-yellow-400 group-hover:text-indigo-950 transition-colors">
-                                                {mb.puntiTotaliMatch > 0
-                                                  ? "+"
-                                                  : ""}
-                                                {mb.puntiTotaliMatch} pt
-                                              </span>
-                                              <span className="text-[10px] text-indigo-600 group-hover:text-yellow-400 font-bold transition-colors">
-                                                ➔
-                                              </span>
-                                            </div>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })()}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : activePublicTab === "home" ? (
-            <div className="space-y-6 animate-fade-in font-sans">
-              
-              {/* Dashboard Layout - Grid System Mobile-First */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
-                
-                {/* Left Column: Turno Attuale & News */}
-                <div className="lg:col-span-8 flex flex-col gap-4 sm:gap-6">
-                   {/* News Flash / Punto Informativo (Compact) */}
-                   <div className="bg-gradient-to-r from-blue-900/40 to-indigo-900/40 border-l-4 border-indigo-500 p-4 rounded-r-2xl shadow-sm flex items-start gap-3">
-                     <AlertCircle className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
-                     <div>
-                       <strong className="text-indigo-400 text-[10px] font-black uppercase tracking-widest block mb-1">Flash News</strong>
-                       <p className="text-xs text-indigo-200 leading-relaxed font-medium">Bacheca degli avvisi. Da qui puoi navigare la classifica, gestire la rosa settimanale e analizzare le quotazioni di mercato.</p>
-                     </div>
-                   </div>
-
-                   {/* Panoramica Turno Attuale & Countdown */}
-                   {(() => {
-                     const matchAttuale = lockStatus.match || (partiteAperte && partiteAperte[0]) || null;
-                     if (matchAttuale) {
-                       return (
-                         <div className="bg-indigo-950/80 border border-indigo-800/80 rounded-3xl p-5 shadow-xl backdrop-blur-md space-y-4">
-                           <div className="flex justify-between items-center border-b border-indigo-800/50 pb-3">
-                             <div className="flex items-center gap-2">
-                               <Clock className="w-4 h-4 text-yellow-400 animate-pulse" />
-                               <h3 className="font-extrabold text-white uppercase tracking-wider text-sm">Prossimo Turno</h3>
-                             </div>
-                             <span className="bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest">
-                               🟢 In Corso
-                             </span>
-                           </div>
-                           <div className="text-center py-4">
-                             <p className="text-indigo-200 text-xs font-medium mb-1.5uppercase tracking-wider">Termine Consegna Formazione</p>
-                             <div className="font-mono text-xl sm:text-2xl font-black text-yellow-400 tracking-widest bg-indigo-900/40 inline-flex items-center justify-center min-w-[200px] py-2.5 rounded-xl border border-indigo-800/80 shadow-md">
-                               {lockStatus.deadline ? <MercatoCountdown targetDate={lockStatus.deadline.toISOString()} className="" /> : (lockStatus.timeLeftString || "SCADUTO")}
-                             </div>
-                             <p className="text-white font-black text-sm sm:text-base mt-4 px-2 uppercase tracking-wide">{matchAttuale.dettagli}</p>
-                           </div>
-                         </div>
-                       );
-                     }
-                     return null;
-                   })()}
-
-                   {/* Ultimi Risultati Grid */}
-                   <div className="bg-indigo-950/80 border border-indigo-800/80 rounded-3xl p-4 sm:p-5 shadow-xl backdrop-blur-md">
-                     <div className="flex justify-between items-center mb-4">
-                       <h3 className="font-extrabold text-white uppercase tracking-wider text-sm flex items-center gap-2">
-                         <Calendar className="w-4 h-4 text-indigo-400" />
-                         Archivio Partite
-                       </h3>
-                     </div>
-
-                     {allPartite.length === 0 ? (
-                        <div className="py-8 text-center bg-indigo-900/20 rounded-2xl border border-indigo-800/30">
-                          <p className="text-indigo-400/80 font-bold text-xs uppercase tracking-wider">
-                            Nessun referto disponibile
-                          </p>
-                        </div>
-                     ) : (
-                       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3">
-                         {allPartite.map((m) => {
-                           const isAperta = m.stato === "Aperta";
-                           return (
-                             <div key={m.id} className="bg-indigo-900/30 border border-indigo-800/50 rounded-2xl p-3 flex flex-col justify-between gap-3 hover:bg-indigo-800/40 transition-colors">
-                               <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-1.5 sm:gap-0">
-                                 <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider border self-start ${isAperta ? 'bg-yellow-400/10 text-yellow-400 border-yellow-400/30' : 'bg-gray-800/60 text-gray-400 border-gray-700/60'}`}>
-                                   {isAperta ? 'Aperta' : 'Conclusa'}
-                                 </span>
-                                 {m.dataInserimento && (
-                                    <span className="text-[9px] text-indigo-400 font-mono self-start sm:self-auto">
-                                      {new Date(m.dataInserimento).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })}
-                                    </span>
-                                 )}
-                               </div>
-                               <p className="font-bold text-white text-[11px] sm:text-xs leading-tight line-clamp-2">
-                                 {m.dettagli || "Incontro calcistico"}
-                               </p>
-                               <div className="flex items-center justify-between mt-auto pt-2 border-t border-indigo-800/40">
-                                 <div className="flex flex-col gap-0.5">
-                                   {m.risultato ? (
-                                     <div className="font-mono text-[9px] sm:text-[10px] text-yellow-300 font-extrabold tracking-widest bg-indigo-950/80 px-2 py-1 rounded w-fit">
-                                       {m.risultato}
-                                     </div>
-                                   ) : (
-                                     <span className="text-[9px] text-indigo-500 italic">No score</span>
-                                   )}
-                                   {m.note && (
-                                     <span className="text-[8px] text-indigo-400/80 italic max-w-[140px] truncate" title={m.note}>
-                                       Note: {m.note}
-                                     </span>
-                                   )}
-                                 </div>
-                                 <span className="text-[9px] text-indigo-300 font-bold flex items-center gap-1 flex-shrink-0">
-                                   <Users className="w-3 h-3" /> {m.referto?.length || 0}
-                                 </span>
-                               </div>
-
-                               {/* Link unificato all'Hub Statistiche centralizzato */}
-                               <div className="mt-2 border-t border-indigo-800/40 pt-2 text-center">
-                                 <button
-                                   onClick={() => setActivePublicTab("statistiche")}
-                                   className="w-full bg-indigo-900/40 hover:bg-yellow-400 hover:text-indigo-950 text-indigo-300 text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-all cursor-pointer flex items-center justify-center gap-1"
-                                 >
-                                    <BarChart3 className="w-3.5 h-3.5" />
-                                    <span>Vedi su Hub Statistiche 📊</span>
-                                 </button>
-                               </div>
-
-                             </div>
-                           )
-                         })}
-                       </div>
-                     )}
-                   </div>
-                </div>
-
-                {/* Right Column: Azioni Rapide & Tools */}
-                <div className="lg:col-span-4 flex flex-col gap-4 sm:gap-6">
-                   <div className="bg-gradient-to-br from-indigo-950 to-indigo-900/80 border border-indigo-800/80 rounded-3xl p-5 shadow-xl backdrop-blur-md">
-                     <h3 className="font-extrabold text-white uppercase tracking-wider text-sm flex items-center gap-2 mb-4">
-                       <Lightbulb className="w-4 h-4 text-yellow-400" />
-                       Tool Rapidi
-                     </h3>
-                     <div className="grid grid-cols-2 gap-2.5">
-                        {rankedTeams.length > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => setActivePublicTab("statistiche")}
-                            className="bg-indigo-900/50 hover:bg-yellow-400 hover:text-indigo-950 text-indigo-200 border border-indigo-800/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 transition-all group col-span-2 shadow-sm"
-                          >
-                            <ClipboardList className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                            <span className="text-[10px] font-black uppercase tracking-wider">Apri Hub Statistiche</span>
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setInstructionsTab("guida");
-                            setShowInstructionsModal(true);
-                          }}
-                          className="bg-indigo-900/50 hover:bg-indigo-800 text-indigo-300 border border-indigo-800/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 transition-colors shadow-sm"
-                        >
-                          <BookOpen className="w-5 h-5" />
-                          <span className="text-[9px] font-bold uppercase tracking-wider">Manuale</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setInstructionsTab("quote");
-                            setShowInstructionsModal(true);
-                          }}
-                          className="bg-indigo-900/50 hover:bg-indigo-800 text-indigo-300 border border-indigo-800/50 rounded-xl p-3 flex flex-col items-center justify-center gap-2 transition-colors shadow-sm"
-                        >
-                          <Award className="w-5 h-5" />
-                          <span className="text-[9px] font-bold uppercase tracking-wider">Le Quote</span>
-                        </button>
-                     </div>
-                   </div>
-                </div>
-
-              </div>
-            </div>
-          ) : activePublicTab === "rosa" ? (
-            <div className="space-y-6 animate-fade-in font-sans">
-              <div className="bg-indigo-900/30 border-l-4 border-sky-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm">
-                <p className="text-xs text-indigo-200 leading-relaxed font-medium">
-                  <strong className="text-sky-400">ℹ️ Come Schierare la Formazione:</strong> Assicurati di schierare i 4 giocatori ogni settimana (prima che scada il tempo indicato)! Se un tuo titolare non giocherà la partita prenderà s.v. e verrà sostituito in automatico dal voto del tuo giocatore in panchina.
-                </p>
-              </div>
-              {(() => {
-                const activeMatch =
-                  lockStatus.match ||
-                  (partiteAperte && partiteAperte[0]) ||
-                  null;
-                const matchConvocati = activeMatch?.convocati || [];
-                const activeRoster = giocatori.filter((g) => g.attivo);
-
-                const convocatiGiocatori = activeRoster.filter((g) =>
-                  matchConvocati.some(
-                    (name) =>
-                      name.toLowerCase().trim() === g.nome.toLowerCase().trim(),
-                  ),
-                );
-
-                const nonConvocatiGiocatori = activeRoster.filter(
-                  (g) =>
-                    !matchConvocati.some(
-                      (name) =>
-                        name.toLowerCase().trim() ===
-                        g.nome.toLowerCase().trim(),
-                    ),
-                );
-
-                const externalsConvocati = matchConvocati.filter(
-                  (name) =>
-                    !activeRoster.some(
-                      (g) =>
-                        g.nome.toLowerCase().trim() ===
-                        name.toLowerCase().trim(),
-                    ),
-                );
-
-                return (
-                  <div className="space-y-6 animate-fade-in">
-                    {/* Imminent Match details card */}
-                    <div className="bg-indigo-950/80 border border-indigo-800 rounded-3xl p-5 sm:p-6 shadow-xl backdrop-blur-md space-y-4">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-yellow-400/10 text-yellow-300 border border-yellow-500/20 rounded-2xl shrink-0">
-                          <Calendar className="h-6 w-6 text-yellow-400" />
-                        </div>
-                        <div className="min-w-0 flex-1 text-left">
-                          <span className="text-[9px] uppercase font-black text-indigo-400 tracking-wider flex items-center gap-2">
-                            Turno di Gioco Attivo
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setInstructionsTab("guida");
-                                setShowInstructionsModal(true);
-                              }}
-                              className="text-indigo-400 hover:text-yellow-400 transition-colors"
-                              title="Vedi info su blocchi formazioni"
-                            >
-                              <BookOpen className="h-3.5 w-3.5" />
-                            </button>
-                          </span>
-                          {activeMatch ? (
-                            <>
-                              <h2 className="text-base sm:text-lg font-black text-white mt-0.5 leading-tight truncate">
-                                ⚔️{" "}
-                                {activeMatch.dettagli.split(" - ")[0] ||
-                                  activeMatch.dettagli}
-                              </h2>
-                              {activeMatch.dettagli.includes(" - ") && (
-                                <p className="text-[10px] text-indigo-300 font-bold mt-1 uppercase tracking-wide">
-                                  📍{" "}
-                                  {activeMatch.dettagli
-                                    .split(" - ")
-                                    .slice(1)
-                                    .join(" - ")}
-                                </p>
-                              )}
-                              <div className="inline-flex items-center gap-1.5 bg-indigo-900/40 border border-indigo-800 px-2.5 py-1 rounded-lg text-[10px] text-indigo-300 mt-2.5 font-bold uppercase">
-                                <span>Stato:</span>
-                                <span
-                                  className={
-                                    lockStatus.isLocked
-                                      ? "text-red-400 font-extrabold"
-                                      : "text-indigo-400 font-extrabold animate-pulse"
-                                  }
-                                >
-                                  {lockStatus.isLocked
-                                    ? "🔒 Formazioni Bloccate"
-                                    : "🔓 Formazioni Aperte"}
-                                </span>
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              <h2 className="text-base sm:text-lg font-black text-white mt-0.5 leading-tight">
-                                Nessun turno programmato
-                              </h2>
-                              <p className="text-[10.5px] text-indigo-300/80 font-bold leading-relaxed mt-1">
-                                Non ci sono partite imminenti attive. Contatta
-                                gli amministratori per programmare il prossimo
-                                incontro di campionato o amichevole!
-                              </p>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {activeMatch && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* CONVOCATI COLUMN */}
-                        <div className="bg-indigo-950/85 border border-indigo-800 p-5 rounded-3xl shadow-xl flex flex-col space-y-4">
-                          <div className="border-b border-indigo-900 pb-3 flex justify-between items-center text-left">
-                            <div className="text-left">
-                              <h3 className="font-extrabold text-xs text-white uppercase tracking-wider flex items-center gap-1.5">
-                                <span className="text-indigo-400 font-sans">
-                                  🟢
-                                </span>{" "}
-                                GIOCATORI CONVOCATI
-                              </h3>
-                              <p className="text-[9px] text-indigo-400 font-black uppercase tracking-wider mt-0.5">
-                                Disponibili per la partita
-                              </p>
-                            </div>
-                            <span className="bg-indigo-900/65 border border-indigo-800 text-yellow-300 text-[11px] font-black px-3 py-1 rounded-xl shadow-inner font-mono">
-                              {convocatiGiocatori.length +
-                                externalsConvocati.length}
-                            </span>
-                          </div>
-
-                          <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
-                            {convocatiGiocatori.length === 0 &&
-                            externalsConvocati.length === 0 ? (
-                              <div className="text-center py-10 text-indigo-500 text-xs italic font-medium">
-                                Nessun giocatore attualmente convocato.
-                              </div>
-                            ) : (
-                              <>
-                                {convocatiGiocatori.map((p) => (
-                                  <div
-                                    key={p.nome}
-                                    className="flex items-center justify-between bg-indigo-900/15 border border-indigo-850 p-3 rounded-2xl hover:bg-indigo-900/30 transition-all text-left animate-fadeIn"
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-8 h-8 rounded-xl bg-yellow-400 text-indigo-950 flex items-center justify-center font-black font-mono text-xs shadow-md">
-                                        #{p.numeroMaglia || "N/A"}
-                                      </div>
-                                      <div>
-                                        <p className="font-black text-xs text-gray-100">
-                                          {getLastName(p.nome)}
-                                        </p>
-                                        <span className="text-[8px] uppercase tracking-wider font-extrabold text-indigo-400/90 block mt-0.5 text-left">
-                                          🛡️ {p.ultimoRuolo || "Calciatore"}
-                                        </span>
-                                      </div>
-                                    </div>
-                                    <span className="bg-indigo-500/15 border border-indigo-500/25 text-indigo-350 text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg">
-                                      Attivo
-                                    </span>
-                                  </div>
-                                ))}
-
-                                {externalsConvocati.map((extName) => (
-                                  <div
-                                    key={extName}
-                                    className="flex items-center justify-between bg-indigo-900/20 border border-sky-900/25 p-3 rounded-2xl transition-all text-left animate-fadeIn"
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-8 h-8 rounded-xl bg-sky-500 text-white flex items-center justify-center font-bold font-mono text-xs shadow-md">
-                                        EXT
-                                      </div>
-                                      <div>
-                                        <p className="font-black text-xs text-sky-200">
-                                          {getLastName(extName)}
-                                        </p>
-                                        <span className="text-[8px] uppercase tracking-wider font-extrabold text-sky-400 block mt-0.5 text-left">
-                                          👤 Esterno
-                                        </span>
-                                      </div>
-                                    </div>
-                                    <span className="bg-sky-500/15 border border-sky-500/25 text-sky-300 text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg">
-                                      Esterno
-                                    </span>
-                                  </div>
-                                ))}
-                              </>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* NON CONVOCATI COLUMN */}
-                        <div className="bg-indigo-950/85 border border-indigo-800 p-5 rounded-3xl shadow-xl flex flex-col space-y-4">
-                          <div className="border-b border-indigo-900 pb-3 flex justify-between items-center text-left">
-                            <div className="text-left">
-                              <h3 className="font-extrabold text-xs text-white uppercase tracking-wider flex items-center gap-1.5">
-                                <span className="text-red-400 font-sans">
-                                  🚫
-                                </span>{" "}
-                                NON CONVOCATI / ASSENTI
-                              </h3>
-                              <p className="text-[9px] text-red-400 font-black uppercase tracking-wider mt-0.5">
-                                Non selezionati o indisponibili
-                              </p>
-                            </div>
-                            <span className="bg-indigo-900/65 border border-indigo-800 text-red-300 text-[11px] font-black px-3 py-1 rounded-xl shadow-inner font-mono">
-                              {nonConvocatiGiocatori.length}
-                            </span>
-                          </div>
-
-                          <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
-                            {nonConvocatiGiocatori.length === 0 ? (
-                              <div className="text-center py-10 text-indigo-500 text-xs italic font-medium">
-                                Tutti i tesserati della rosa risultano inseriti
-                                convocati!
-                              </div>
-                            ) : (
-                              nonConvocatiGiocatori.map((p) => (
-                                <div
-                                  key={p.nome}
-                                  className="flex items-center justify-between bg-indigo-900/10 border border-indigo-850 p-3 rounded-2xl opacity-65 hover:opacity-100 transition-all hover:bg-indigo-900/20 text-left animate-fadeIn"
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-xl bg-indigo-950 text-indigo-400 flex items-center justify-center font-bold font-mono text-xs border border-indigo-850">
-                                      #{p.numeroMaglia || "N/A"}
-                                    </div>
-                                    <div>
-                                      <p className="font-extrabold text-xs text-gray-300 line-through decoration-red-900">
-                                        {getLastName(p.nome)}
-                                      </p>
-                                      <span className="text-[8px] uppercase tracking-wider font-extrabold text-indigo-500 block mt-0.5 text-left">
-                                        {p.ultimoRuolo || "Calciatore"}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <span className="bg-red-500/10 border border-red-900/20 text-red-350 text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg">
-                                    Assente
-                                  </span>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
-          ) : activePublicTab === "mercato" ? (
-            <form
-              onSubmit={handleRegisterSubmit}
-              className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-12 gap-6 font-sans pb-32 md:pb-6"
-            >
-              <div className="lg:col-span-12 xl:col-span-12">
-                <div className="bg-indigo-900/30 border-l-4 border-yellow-500 p-4 rounded-r-xl font-sans shadow-sm mb-4">
-                  <p className="text-xs text-indigo-200 leading-relaxed font-medium">
-                    <strong className="text-yellow-400">ℹ️ Creazione Squadra / Mercato:</strong> Scegli un Nome per il Team, un indirizzo email ed un <strong>PIN segreto</strong> per proteggere la tua rosa. <br/>Il budget massimo al primo accesso è <strong>60 Izycoin</strong> per 4 giocatori. Successivamente potrai effettuare solo <strong>1 cambio a settimana</strong> per massimizzare le plusvalenze!
-                  </p>
-                </div>
-              </div>
-              {/* Left controls column */}
-              <div className="lg:col-span-4 xl:col-span-3 space-y-4">
-                <div className="bg-indigo-950/80 border border-indigo-800 rounded-2xl p-5 space-y-4 shadow-xl backdrop-blur-md">
-                  <h3 className="font-extrabold text-[11px] uppercase tracking-wider text-yellow-300 flex items-center justify-between">
-                    <span className="flex items-center gap-1.5">
-                      <User className="h-4.5 w-4.5 text-yellow-400" />{" "}
-                      Informazioni Generali
-                    </span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setInstructionsTab("guida");
-                        setShowInstructionsModal(true);
-                      }}
-                      className="text-indigo-400 hover:text-yellow-400 transition-colors bg-indigo-900/40 p-1.5 rounded-lg border border-indigo-800"
-                      title="Vedi info su crediti e mercato"
-                    >
-                      <BookOpen className="h-4 w-4" />
-                    </button>
-                  </h3>
-
-                  {errorMsg && (
-                    <div className="bg-red-950/40 border border-red-900/50 text-red-250 text-[11px] p-3 rounded-lg font-bold leading-relaxed animate-fadeIn">
-                      ⚠️ {errorMsg}
-                    </div>
-                  )}
-
-                  <div className="space-y-4">
-                    {/* Nome Fantasquadra Display */}
-                    <div className="space-y-1 bg-indigo-900/40 border border-indigo-900 rounded-xl p-3.5 relative">
-                      <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
-                        <span className="text-[9px] text-indigo-300 font-extrabold uppercase tracking-wider">
-                          Online
-                        </span>
-                      </div>
-                      <label className="block text-[9px] font-black uppercase tracking-widest text-indigo-400">
-                        La tua Fantasquadra
-                      </label>
-                      <div className="flex items-center justify-between py-0.5">
-                        <p className="text-sm font-black text-white">
-                          ⚽ {nomeFantasquadra || "Senza Nome"}
-                        </p>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setNuovoNomeSquadra(nomeFantasquadra);
-                            setShowRenameModal(true);
-                          }}
-                          className="bg-indigo-800/60 hover:bg-indigo-700/80 text-indigo-300 p-1.5 rounded-lg transition-colors"
-                          title="Rinomina squadra"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Nome Presidente Display */}
-                    <div className="space-y-1 bg-indigo-900/40 border border-indigo-900 rounded-xl p-3.5">
-                      <label className="block text-[9px] font-black uppercase tracking-widest text-indigo-400">
-                        Presidente della Squadra
-                      </label>
-                      <p className="text-xs font-bold text-gray-200 py-0.5">
-                        👤 {nomePartecipante || "Senza Presidente"}
-                      </p>
-                    </div>
-
-                    {/* Email Associata */}
-                    {(() => {
-                      const matched = fantasquadre.find(
-                        (fs) =>
-                          fs.id === authenticatedTeamId ||
-                          fs.nomeFantasquadra.toLowerCase().trim() ===
-                            nomeFantasquadra.toLowerCase().trim(),
-                      );
-                      if (matched && matched.email) {
-                        return (
-                          <div className="space-y-1 bg-indigo-900/40 border border-indigo-900 rounded-xl p-3.5">
-                            <label className="block text-[9px] font-black uppercase tracking-widest text-indigo-400">
-                              Email Associata
-                            </label>
-                            <p className="text-xs font-bold text-gray-300 font-mono py-0.5 truncate">
-                              ✉️ {matched.email}
-                            </p>
-                          </div>
-                        );
-                      }
-                      return null;
-                    })()}
-
-                    {/* Disconnect Button */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (
-                          confirm(
-                            "Sei sicuro di voler effettuare la disconnessione dal portale? Potrai accedere nuovamente tramite login.",
-                          )
-                        ) {
-                          // Clear active session and local cache coordinates
-                          localStorage.removeItem("fantaEmail");
-                          localStorage.removeItem("fantaPassword");
-                          setAuthenticatedTeamId(null);
-                          setNomeFantasquadra("");
-                          setNomePartecipante("");
-                          setPin("");
-                          setSelectedPlayers([]);
-                          setHasInteracted(false);
-                          setSyncDone(false);
-                          setSyncProgress(0);
-                        }
-                      }}
-                      className="w-full bg-indigo-950/60 hover:bg-red-950/20 hover:text-red-400 border border-indigo-900 hover:border-red-900/40 text-[10px] text-indigo-300 font-extrabold uppercase py-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 mt-2"
-                    >
-                      🔌 Cambia Squadra / Esci
-                    </button>
-                  </div>
-
-                  {/* Selected Players list (PITCH VIEW) */}
-                  <div className="pt-2 border-t border-indigo-900 space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-indigo-400">
-                        Visuale in Campo
-                      </span>
-                      <span
-                        className={`text-[11px] px-2.5 py-0.5 rounded-full font-black font-mono transition-all ${
-                          selectedPlayers.length === 4
-                            ? "bg-indigo-500 text-indigo-950"
-                            : "bg-indigo-800 text-indigo-200 animate-pulse"
-                        }`}
-                      >
-                        {selectedPlayers.length}/4
-                      </span>
-                    </div>
-
-                    <div className="bg-green-900 border-4 border-green-700/80 rounded-2xl p-4 sm:p-6 min-h-[340px] sm:min-h-[380px] relative overflow-hidden flex flex-col justify-between shadow-[inset_0_0_30px_rgba(0,0,0,0.6)]">
-                      {/* Field lines simulation */}
-                      <div className="absolute inset-0 opacity-20 pointer-events-none">
-                        <div className="absolute top-1/2 left-0 right-0 border-t-2 border-white"></div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 border-2 border-white rounded-full flex items-center justify-center">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
-                        </div>
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-16 border-2 border-t-0 border-white"></div>
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-32 h-16 border-2 border-b-0 border-white"></div>
-                      </div>
-
-                      {selectedPlayers.length === 0 ? (
-                        <div className="text-[10px] text-green-200 text-center py-10 font-bold leading-relaxed relative z-10 flex h-full items-center justify-center flex-col">
-                          <span>Seleziona esattamente 4 giocatori dalla lista.</span>
-                          <span className="text-[9px] text-green-300/70 mt-1 block uppercase tracking-widest font-black bg-green-950/40 px-2 py-1 rounded">
-                            (3 Titolari + 1 Subentro)
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="h-full w-full relative z-10 flex flex-col justify-between pt-2 pb-1 sm:pt-4 sm:pb-2 gap-4">
-                          {/* Area Titolari */}
-                          <div className="flex flex-col w-full relative gap-4">
-                            <div className="absolute -top-3 sm:-top-5 left-1/2 -translate-x-1/2 flex justify-center z-0 pointer-events-none">
-                              <span className="text-[12px] sm:text-xs bg-indigo-950/90 font-black uppercase tracking-widest text-indigo-300 px-6 py-1.5 rounded-bl-3xl rounded-br-3xl border-x-2 border-b-2 border-indigo-500/70 shadow-lg backdrop-blur-md">
-                                Titolari
-                              </span>
-                            </div>
-
-                            <div className="flex justify-center mt-6 sm:mt-8 z-10">
-                              {selectedPlayers[0] && renderPlayerOnPitch(selectedPlayers[0], 0, giocatori, selectedPlayers, setSelectedPlayers, handleTogglePlayer)}
-                            </div>
-                            <div className="flex justify-between px-2 sm:px-10 z-10">
-                              {selectedPlayers[1] && renderPlayerOnPitch(selectedPlayers[1], 1, giocatori, selectedPlayers, setSelectedPlayers, handleTogglePlayer)}
-                              {selectedPlayers[2] && renderPlayerOnPitch(selectedPlayers[2], 2, giocatori, selectedPlayers, setSelectedPlayers, handleTogglePlayer)}
-                            </div>
-                          </div>
-
-                          {/* Area Panchina */}
-                          <div className="mt-4 pt-6 sm:pt-8 border-t-4 border-dashed border-white/60 flex flex-col items-center relative w-full">
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0">
-                              <span className="text-[12px] sm:text-xs bg-sky-700 font-black uppercase tracking-widest text-white px-8 py-1.5 flex items-center justify-center rounded-full shadow-xl border-4 border-sky-300">
-                                Panchina
-                              </span>
-                            </div>
-                            <div className="flex justify-center w-full z-10 mt-1 sm:mt-2">
-                              {selectedPlayers[3] && renderPlayerOnPitch(selectedPlayers[3], 3, giocatori, selectedPlayers, setSelectedPlayers, handleTogglePlayer)}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* REAL-TIME COST & LEDGER CALCULATOR */}
-                  {(() => {
-                    const matchedTeam = fantasquadre.find(
-                      (fs) =>
-                        fs.id === authenticatedTeamId ||
-                        fs.nomeFantasquadra.toLowerCase().trim() ===
-                          nomeFantasquadra.toLowerCase().trim(),
-                    );
-
-                    if (
-                      !matchedTeam ||
-                      (matchedTeam.giocatoriSelezionati || []).length < 4
-                    ) {
-                      // NEW TEAM ENROLLMENT
-                      let totalCost = 0;
-                      selectedPlayers.forEach((pName) => {
-                        totalCost += getPlayerPriceForRoster(
-                          pName,
-                          partiteChiuse || [],
-                          bonuses,
-                        );
-                      });
-                      const remaining = MAX_BUDGET - totalCost;
-                      const overBudget = remaining < 0;
-
-                      return (
-                        <div className="bg-indigo-950/40 border border-indigo-900/60 rounded-xl p-3.5 space-y-2 mt-2 leading-tight">
-                          <div className="flex justify-between items-center text-[11px]">
-                            <span className="font-extrabold text-indigo-300">
-                              Costo Roster Scelto:
-                            </span>
-                            <span
-                              className={`font-mono font-black border px-2 py-0.5 rounded ${overBudget ? "text-red-400 bg-red-950/20 border-red-900/40" : "text-yellow-300 bg-indigo-950 border-indigo-900"}`}
-                            >
-                              {totalCost} / {MAX_BUDGET} Izycoin 🪙
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center text-[11px]">
-                            <span className="font-extrabold text-indigo-300">
-                              Monete Restanti:
-                            </span>
-                            <span
-                              className={`font-mono font-black ${overBudget ? "text-red-400 animate-pulse font-extrabold" : "text-indigo-400"}`}
-                            >
-                              {remaining} Izycoin 🪙
-                            </span>
-                          </div>
-                          {overBudget && (
-                            <div className="text-[9px] text-red-300 font-medium border border-red-900/30 bg-red-950/20 p-2 rounded-lg text-left">
-                              ⚠️ Attenzione: Hai superato il tetto salariale di{" "}
-                              {MAX_BUDGET} Izycoin! Cambia alcuni campioni con
-                              dei low-cost.
-                            </div>
-                          )}
-                        </div>
-                      );
-                    } else {
-                      // MODIFYING EXISTING TEAM
-                      const economyPrevPlayers =
-                        matchedTeam.giocatoriSelezionati || [];
-                      const rulePrevPlayers =
-                        matchedTeam.rosaOriginaria ||
-                        matchedTeam.giocatoriSelezionati ||
-                        [];
-
-                      const isLegacy = !matchedTeam.valoriAcquisto;
-
-                      let teamValoriAcquisto = matchedTeam.valoriAcquisto || {};
-                      let teamCreditoResiduo = matchedTeam.creditoResiduo ?? 0;
-
-                      if (isLegacy) {
-                        teamValoriAcquisto = {};
-                        let totalCost = 0;
-                        economyPrevPlayers.forEach((pName) => {
-                          const ip = getPlayerPriceForRoster(
-                            pName,
-                            partiteChiuse || [],
-                            bonuses,
-                          );
-                          teamValoriAcquisto[pName] = ip;
-                          totalCost += ip;
-                        });
-                        teamCreditoResiduo = Math.max(
-                          0,
-                          MAX_BUDGET - totalCost,
-                        );
-                      }
-
-                      const soldPlayers = economyPrevPlayers.filter(
-                        (p) => !selectedPlayers.includes(p),
-                      );
-                      const boughtPlayers = selectedPlayers.filter(
-                        (p) => !economyPrevPlayers.includes(p),
-                      );
-
-                      const keptFromOrigin = rulePrevPlayers.filter((p) =>
-                        selectedPlayers.includes(p),
-                      );
-                      const numChangesFromOrigin =
-                        rulePrevPlayers.length - keptFromOrigin.length;
-                      const hasTooManyChanges =
-                        !isAdminMode &&
-                        !isMercatoLiberoValido &&
-                        rulePrevPlayers.length === 4 &&
-                        numChangesFromOrigin > 1;
-
-                      let soldPrice = 0;
-                      let boughtPrice = 0;
-                      let plusvalenzaReale = 0;
-
-                      soldPlayers.forEach((pName) => {
-                        const price = getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses);
-                        soldPrice += price;
-                        const buyCost = teamValoriAcquisto[pName] ?? price;
-                        plusvalenzaReale += (price - buyCost);
-                      });
-
-                      boughtPlayers.forEach((pName) => {
-                        boughtPrice += getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses);
-                      });
-
-                      const finalCredits =
-                        teamCreditoResiduo + soldPrice - boughtPrice;
-                      const overBudget = !isAdminMode && finalCredits < 0;
-
-                      return (
-                        <div className="bg-indigo-950/45 border border-indigo-990 rounded-xl p-3.5 space-y-2.5 mt-2 leading-tight text-left">
-                          <h5 className="text-[9px] font-black uppercase text-yellow-300 border-b border-indigo-900/60 pb-1">
-                            📊 BILANCIO CAMBIO ROSA {isMercatoLiberoValido ? "(Mercato Libero)" : "(Max 1)"}
-                          </h5>
-
-                          <div className="grid grid-cols-2 gap-2 text-[10px]">
-                            <div>
-                              <p className="text-indigo-400 font-bold">
-                                Credito Residuo Iniziale:
-                              </p>
-                              <p className="font-mono font-black text-white">
-                                {teamCreditoResiduo} Izycoin 🪙
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-indigo-400 font-bold">
-                                Sostituzioni Rilevate:
-                              </p>
-                              <p
-                                className={`font-black ${hasTooManyChanges ? "text-red-400 font-black animate-pulse" : "text-indigo-300"}`}
-                              >
-                                {numChangesFromOrigin} {isMercatoLiberoValido ? "cambi" : "/ 1 cambio"}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Swap Details ledger */}
-                          {numChangesFromOrigin > 0 && (
-                            <div className="bg-indigo-950/60 border border-indigo-900 p-2.5 rounded-lg space-y-1 text-[9.5px]">
-                              <div className="flex justify-between items-center">
-                                <span className="text-emerald-400 font-extrabold truncate max-w-[65%]">
-                                  🟢 Cessione: {soldPlayers.join(", ")}
-                                </span>
-                                <span className="font-mono text-emerald-450 font-black transition-all">
-                                  +{soldPrice} 🪙
-                                </span>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-red-400 font-extrabold truncate max-w-[65%]">
-                                  🔴 Acquisto: {boughtPlayers.join(", ")}
-                                </span>
-                                <span className="font-mono text-red-450 font-black transition-all">
-                                  -{boughtPrice} 🪙
-                                </span>
-                              </div>
-                              {plusvalenzaReale !== 0 && (
-                                <div className="flex justify-between border-t border-indigo-900/40 pt-1 text-[8.5px]">
-                                  <span className="text-yellow-300 font-extrabold">
-                                    📈 Plusvalenza Finanziaria:
-                                  </span>
-                                  <span
-                                    className={`font-mono font-black border px-1.5 py-0.5 rounded transition-all ${plusvalenzaReale > 0 ? "text-emerald-400 border-emerald-900 bg-emerald-950/30" : "text-red-400 border-red-900 bg-red-950/30"}`}
-                                  >
-                                    {plusvalenzaReale > 0
-                                      ? `+${plusvalenzaReale}`
-                                      : plusvalenzaReale}{" "}
-                                    Izycoin 🪙
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          <div className="flex justify-between items-center text-xs border-t border-indigo-900/40 pt-1.5">
-                            <span className="font-extrabold text-indigo-300 font-sans">
-                              Nuovo Tesoretto Residuo:
-                            </span>
-                            <span
-                              className={`font-mono font-black text-sm px-2 py-0.5 rounded border ${overBudget ? "text-red-400 bg-red-950/20 border-red-900/40" : "text-indigo-350 bg-indigo-950 border-indigo-900"}`}
-                            >
-                              {finalCredits} Izycoin 🪙
-                            </span>
-                          </div>
-
-                          {hasTooManyChanges && (
-                            <p className="text-[9px] text-sky-300 font-semibold border border-sky-900/30 bg-sky-950/20 p-2 rounded-lg">
-                              ⚠️ Errore: Puoi fare al massimo 1 cambio alla
-                              volta rispetto alla rosa precedente! Ripristina i
-                              giocatori originari.
-                            </p>
-                          )}
-
-                          {overBudget && (
-                            <p className="text-[9px] text-red-400 font-semibold border border-red-900/30 bg-red-950/20 p-2 rounded-lg">
-                              ⚠️ Errore: Credito insufficiente! Non possiedi
-                              abbastanza Izycoin 🪙 per concludere questa
-                              operazione di mercato.
-                            </p>
-                          )}
-                        </div>
-                      );
-                    }
-                  })()}
-
-                  <button
-                    type="submit"
-                    disabled={submitting || lockStatus.isLocked}
-                    className="w-full bg-yellow-400 hover:bg-yellow-350 disabled:bg-indigo-900 font-extrabold text-xs uppercase text-indigo-950 py-3 rounded-xl shadow-lg transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    {submitting
-                      ? "Invio della squadra..."
-                      : lockStatus.isLocked
-                        ? "🔒 Formazioni Bloccate"
-                        : "Invia Iscrizione Roster"}
-                  </button>
-                </div>
-
-                {/* Sezione Consigli/Miglioramenti per il Presidente o l'Amico */}
-                <div className="bg-indigo-950/80 border border-indigo-800 rounded-2xl p-5 space-y-4 shadow-xl backdrop-blur-md">
-                  <h3 className="font-extrabold text-[11px] uppercase tracking-wider text-yellow-300 flex items-center gap-1.5">
-                    <Lightbulb className="h-4.5 w-4.5 text-yellow-400 animate-pulse" />
-                    💡 Proponi un Miglioramento
-                  </h3>
-                  <p className="text-[10px] text-indigo-300/90 font-medium leading-relaxed">
-                    Hai idee per questa app o l'organizzazione del
-                    Fantacalcetto? Invia una proposta! Comparirà direttamente
-                    sulla bacheca dell'amministratore.
-                  </p>
-
-                  {consiglioInviatoConSuccesso ? (
-                    <div className="bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-[10.5px] rounded-xl p-3.5 font-semibold text-center leading-relaxed">
-                      ✨ Grazie! Il tuo suggerimento è stato inviato
-                      all'organizzatore con successo.
-                      <button
-                        type="button"
-                        onClick={() => setConsiglioInviatoConSuccesso(false)}
-                        className="block mx-auto text-yellow-400 underline font-bold mt-1 text-[9.5px] cursor-pointer"
-                      >
-                        Invia un'altra proposta
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {consiglioError && (
-                        <div className="bg-red-950/40 border border-red-900/50 text-red-300 text-[10px] rounded-xl p-2.5 font-semibold text-center leading-tight">
-                          {consiglioError}
-                        </div>
-                      )}
-                      <div className="space-y-1">
-                        <label className="block text-[8.5px] font-black uppercase tracking-wider text-indigo-400 leading-none">
-                          Tuo Nome / Mittente
-                        </label>
-                        <input
-                          type="text"
-                          value={consiglioAutore}
-                          onChange={(e) => setConsiglioAutore(e.target.value)}
-                          placeholder="Es. Marco R."
-                          className="w-full bg-indigo-900/40 border border-indigo-850 focus:border-yellow-400 focus:ring-0 rounded-lg px-3 py-2 outline-none text-xs text-white placeholder-indigo-600 font-bold"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="block text-[8.5px] font-black uppercase tracking-wider text-indigo-400 leading-none">
-                          La tua idea / consiglio
-                        </label>
-                        <textarea
-                          value={consiglioTesto}
-                          rows={3}
-                          onChange={(e) => setConsiglioTesto(e.target.value)}
-                          placeholder="Es. Vorrei poter vedere la media punti delle fantasquadre..."
-                          className="w-full bg-indigo-900/40 border border-indigo-850 focus:border-yellow-400 focus:ring-0 rounded-lg px-3 py-2 outline-none text-xs text-white placeholder-indigo-600 font-medium"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        disabled={invioConsiglioInCorso}
-                        onClick={async () => {
-                          if (
-                            !consiglioAutore.trim() ||
-                            !consiglioTesto.trim()
-                          ) {
-                            setConsiglioError(
-                              "Compila sia il nome che il consiglio!",
-                            );
-                            return;
-                          }
-                          setInvioConsiglioInCorso(true);
-                          setConsiglioError("");
-                          try {
-                            if (onCreaConsiglio) {
-                              await onCreaConsiglio(
-                                consiglioAutore,
-                                consiglioTesto,
-                              );
-                            } else {
-                              // Fallback to fetch
-                              const response = await fetch(
-                                "/api/consigli/crea",
-                                {
-                                  method: "POST",
-                                  headers: {
-                                    "Content-Type": "application/json",
-                                  },
-                                  body: JSON.stringify({
-                                    autore: consiglioAutore,
-                                    testo: consiglioTesto,
-                                  }),
-                                },
-                              );
-                              if (!response.ok)
-                                throw new Error("Errore di rete");
-                            }
-                            setConsiglioAutore("");
-                            setConsiglioTesto("");
-                            setConsiglioInviatoConSuccesso(true);
-                          } catch (err: any) {
-                            setConsiglioError(
-                              "Impossibile inviare: " + err.message,
-                            );
-                          } finally {
-                            setInvioConsiglioInCorso(false);
-                          }
-                        }}
-                        className="w-full bg-indigo-800 hover:bg-indigo-700 active:bg-indigo-900 text-yellow-300 hover:text-white font-extrabold text-[10.5px] uppercase py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-                      >
-                        {invioConsiglioInCorso
-                          ? "Invio..."
-                          : "Invia Proposta ✨"}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Right pool selection Column */}
-              <div className="lg:col-span-8 xl:col-span-6 flex flex-col space-y-4">
-                <div className="bg-indigo-950/80 border border-indigo-800 rounded-3xl p-5 shadow-xl flex-1 flex flex-col min-h-[400px]">
-                  {!isUnlocked ? (
-                    <div className="flex-1 flex flex-col justify-center items-center py-10 text-center space-y-6 animate-fadeIn">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-yellow-400/10 rounded-full blur-xl animate-pulse"></div>
-                        <div className="bg-indigo-900/40 border-2 border-yellow-400/30 p-5 rounded-full relative">
-                          <Lock className="h-10 w-10 text-yellow-400" />
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5 max-w-sm">
-                        <h4 className="font-extrabold text-sm text-white uppercase tracking-wider font-sans">
-                          Operazioni di Mercato Protette 🔒
-                        </h4>
-                        <p className="text-[10px] text-indigo-300 font-medium leading-relaxed font-sans px-2">
-                          Per poter modificare la tua fantasquadra, rimpiazzare
-                          i calciatori ed effettuare trasferimenti, effettua
-                          prima l'accesso digitando il PIN segreto nel pannello
-                          a sinistra.
-                        </p>
-                      </div>
-
-                      {matchedTeam && (
-                        <div className="w-full max-w-xs bg-indigo-900/20 border border-indigo-850 rounded-2xl p-4 space-y-3 text-left">
-                          <div className="border-b border-indigo-900/50 pb-2 flex justify-between items-center">
-                            <span className="text-[9px] font-black uppercase tracking-wider text-indigo-400 font-sans">
-                              Rosa Attualmente nel Database
-                            </span>
-                            <span className="text-[8px] font-bold text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded border border-yellow-400/20">
-                              Protetto
-                            </span>
-                          </div>
-
-                          <div className="space-y-1.5">
-                            {(matchedTeam.giocatoriSelezionati || []).map(
-                              (pName, idx) => {
-                                const isPanchinaro = idx === 3;
-                                return (
-                                  <div
-                                    key={idx}
-                                    className={`flex items-center justify-between px-3 py-1.5 rounded-xl border text-[11px] font-bold ${
-                                      isPanchinaro
-                                        ? "bg-sky-500/5 border-sky-500/20 text-sky-300/90"
-                                        : "bg-indigo-900/30 border-indigo-850 text-white/95"
-                                    }`}
-                                  >
-                                    <span>
-                                      {idx + 1}. {getLastName(pName)}
-                                    </span>
-                                    <span className="text-[8px] font-bold uppercase tracking-wider opacity-60 text-indigo-400">
-                                      {isPanchinaro ? "Panc." : "Titolare"}
-                                    </span>
-                                  </div>
-                                );
-                              },
-                            )}
-
-                            {(!matchedTeam.giocatoriSelezionati ||
-                              matchedTeam.giocatoriSelezionati.length ===
-                                0) && (
-                              <p className="text-[10px] text-indigo-500 text-center py-4 italic font-medium">
-                                Nessun giocatore registrato per questa squadra.
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <>
-                      {/* Search / filter bar */}
-                      <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between pb-4 border-b border-indigo-900">
-                        <div className="space-y-1">
-                          <h4 className="font-extrabold text-sm sm:text-base text-white uppercase tracking-wider">
-                            Scegli i tuoi Campioni (max 4)
-                          </h4>
-                          <p className="text-xs text-indigo-400 font-medium">
-                            Pool dei giocatori reali attivi tesserati
-                          </p>
-                        </div>
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                          {lockStatus.match && currentConvocati.length > 0 && (
-                            <label className="flex items-center justify-center sm:justify-start gap-2 cursor-pointer select-none text-xs font-black uppercase text-indigo-300 bg-indigo-900/40 border border-indigo-800 px-4 py-3 sm:py-2.5 rounded-xl transition-all hover:bg-indigo-900/60 active:scale-95 shadow-sm">
-                              <input
-                                type="checkbox"
-                                checked={filterConvocati}
-                                onChange={(e) =>
-                                  setFilterConvocati(e.target.checked)
-                                }
-                                className="rounded text-yellow-500 focus:ring-0 cursor-pointer accent-yellow-400 h-4 w-4"
-                              />
-                              <span>Solo Convocati</span>
-                            </label>
-                          )}
-                          <div className="relative flex-grow">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-indigo-400" />
-                            <input
-                              type="text"
-                              value={searchQuery}
-                              onChange={(e) => setSearchQuery(e.target.value)}
-                              placeholder="Cerca giocatore..."
-                              className="pl-11 pr-4 py-3 sm:py-2.5 bg-indigo-900/60 border-2 border-indigo-800 rounded-xl text-sm font-bold focus:border-yellow-400 outline-none w-full sm:w-56 text-white placeholder-indigo-400 shadow-inner"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Convocati Quick Ref panel */}
-                      {lockStatus.match && currentConvocati.length > 0 && (
-                        <div className="mt-5 bg-indigo-900/15 border border-indigo-850/70 rounded-2xl p-4 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-yellow-300 flex items-center gap-1.5">
-                              🏃 CONVOCATI DELLA SETTIMANA ({currentConvocati.length})
-                            </span>
-                            <span className="text-xs text-indigo-400/80 font-bold hidden sm:inline">
-                              Tocca i giocatori sotto per selezionarli
-                            </span>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
-                            {currentConvocati.map((name, idx) => {
-                              const isSelected = selectedPlayers.includes(name);
-                              return (
-                                <button
-                                  key={idx}
-                                  type="button"
-                                  disabled={lockStatus.isLocked}
-                                  onClick={() => handleTogglePlayer(name)}
-                                  className={`text-[10px] h-6 font-bold px-2.5 rounded-lg transition-all cursor-pointer select-none border ${
-                                    isSelected
-                                      ? "bg-yellow-400 border-yellow-300 text-indigo-950 font-black shadow-md scale-95"
-                                      : "bg-indigo-950/60 border-indigo-850 text-indigo-200 hover:bg-indigo-900/50"
-                                  }`}
-                                >
-                                  {getLastName(name)}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Grid selectors */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 overflow-y-auto max-h-[460px] pt-4 pr-1">
-                        {filteredPool.length === 0 ? (
-                          <div className="col-span-2 text-center text-xs text-indigo-500 py-20 font-medium">
-                            Nessun giocatore corrisponde alla ricerca ed ai
-                            filtri attivi.
-                          </div>
-                        ) : (
-                          filteredPool.map((p) => {
-                            const isSelected = selectedPlayers.includes(p.nome);
-                            const isConvocato = currentConvocati.some(
-                              (name) =>
-                                name.toLowerCase().trim() ===
-                                p.nome.toLowerCase().trim(),
-                            );
-                            
-                            const roleColorClass = getRoleColor(p.ultimoRuolo || "");
-
-                            return (
-                              <div
-                                key={p.nome}
-                                onClick={() => handleTogglePlayer(p.nome)}
-                                className={`border rounded-2xl p-4 sm:p-5 flex flex-col xl:flex-row items-stretch xl:items-center justify-between cursor-pointer select-none transition-all gap-4 ${
-                                  isSelected
-                                    ? "bg-yellow-450/15 border-yellow-400 text-white shadow-lg ring-2 ring-yellow-400/50 scale-[1.01]"
-                                    : "bg-indigo-900/20 border-indigo-850 text-indigo-100 hover:bg-indigo-900/40 active:scale-[0.98]"
-                                }`}
-                              >
-                                <div className="flex items-center gap-4 min-w-0 flex-1">
-                                  {/* Maglia Jersey indicator */}
-                                  <div
-                                    className={`w-12 h-12 rounded-xl flex items-center justify-center font-mono font-black text-base shrink-0 shadow-lg border-2 border-opacity-50 ${roleColorClass}`}
-                                  >
-                                    #{p.numeroMaglia || "??"}
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <p className="text-base font-black text-left flex items-center gap-2 truncate">
-                                      {getLastName(p.nome)}
-                                    </p>
-                                    <div className="flex flex-wrap items-center gap-2 mt-1">
-                                      <span className="inline-block bg-indigo-950/80 border-2 border-indigo-800/50 text-[10px] sm:text-xs uppercase font-black tracking-widest text-indigo-300 px-2 py-0.5 rounded-md">
-                                        {p.ultimoRuolo || "N/D"}
-                                      </span>
-                                      {lockStatus.match && (
-                                        <span
-                                          className={`inline-block text-[9px] sm:text-[10px] uppercase font-black tracking-widest px-2 py-0.5 rounded-md ${
-                                            isConvocato
-                                              ? "bg-emerald-500/20 text-emerald-300 border-2 border-emerald-500/30"
-                                              : "bg-red-500/15 text-red-300 border-2 border-red-800/25 opacity-70"
-                                          }`}
-                                        >
-                                          {isConvocato ? "🟢 Convocato" : "🚫 Fuori Lista"}
-                                        </span>
-                                      )}
-                                    </div>
-                                    
-                                    {/* Bonus personali */}
-                                    {(() => {
-                                      const bonusKey = getPlayerBonusKey(p.nome);
-                                      const baseBonuses = bonusKey
-                                        ? (bonuses || DEFAULT_BONUSES).filter(
-                                            (b) => b.isPersonale && b.giocatoreId === bonusKey,
-                                          )
-                                        : [];
-                                      if (!baseBonuses || baseBonuses.length === 0) return null;
-                                      return (
-                                        <div className="mt-2 space-y-1 bg-yellow-950/35 border border-yellow-900/35 p-2 rounded-lg text-[10px] sm:text-xs leading-tight text-yellow-300">
-                                          <span className="font-extrabold text-[9px] sm:text-[10px] uppercase tracking-wider block text-yellow-400 text-left">
-                                            🎒 Bonus Personali:
-                                          </span>
-                                          {baseBonuses.map((b) => (
-                                            <div key={b.id} className="leading-tight text-left">
-                                              ⭐ <span className="font-bold text-yellow-250">{b.nome}</span>: <span className="text-indigo-200/90">{b.descrizione}</span>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      );
-                                    })()}
-                                  </div>
-                                </div>
-                                
-                                {/* Right side: Fanta-Borsa Quotes + Action Button */}
-                                <div className="flex items-center xl:items-end justify-between xl:justify-center border-t xl:border-t-0 border-indigo-900/50 pt-3 xl:pt-0 mt-3 xl:mt-0 gap-4">
-                                  {(() => {
-                                    const playerStats = getPlayerStatsObj(p.nome);
-                                    const pPrice = getPlayerCurrentPrice(p.nome, playerStats.fantaScore, partiteChiuse, bonuses, giocatori);
-                                    const basePrice = getPlayerBasePrice(p.nome);
-                                    const diff = pPrice - basePrice;
-                                    return (
-                                      <div className="flex flex-col items-start xl:items-end gap-1.5 flex-shrink-0">
-                                        <span className={`inline-flex items-center bg-indigo-950 border-2 border-indigo-800/80 text-sm font-black px-3 py-1.5 rounded-lg font-mono shadow-sm tracking-wider ${isSelected ? 'text-yellow-300' : 'text-indigo-200'}`}>
-                                          🪙 {pPrice} cr.
-                                        </span>
-                                        <span
-                                          className={`text-[10px] sm:text-xs px-2 py-0.5 rounded font-black flex items-center border shadow-sm ${
-                                            diff > 0 
-                                              ? "text-emerald-400 bg-emerald-950/30 border-emerald-900/50" 
-                                            : diff < 0 
-                                              ? "text-red-400 bg-red-950/30 border-red-900/50" 
-                                            : "text-gray-400 bg-gray-900/40 border-gray-800"}`}
-                                        >
-                                          {diff > 0 ? `▲ +${diff}` : diff < 0 ? `▼ ${diff}` : "➖ st."}
-                                        </span>
-                                      </div>
-                                    );
-                                  })()}
-                                  
-                                  <div className="shrink-0 flex items-center justify-center pl-2 border-l border-indigo-800/50 xl:border-none xl:pl-0">
-                                    {isSelected ? (
-                                      <span className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-yellow-400 text-indigo-950 flex items-center justify-center font-black shadow-lg ring-4 ring-yellow-400/30 transition-transform">
-                                        <CheckCircle className="w-5 h-5 sm:w-7 sm:h-7" />
-                                      </span>
-                                    ) : (
-                                      <span className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-indigo-700 hover:bg-indigo-600 border-2 border-indigo-500/50 text-white flex items-center justify-center font-black text-2xl transition-colors shadow-lg active:scale-90">
-                                        +
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Right Market Values Column */}
-              <div className="xl:col-span-3 lg:col-span-12 flex flex-col space-y-4">
-                <div className="bg-indigo-950/80 border border-indigo-800 rounded-3xl p-5 shadow-xl flex-1 flex flex-col min-h-[400px]">
-                  <h3 className="font-extrabold text-[11px] uppercase tracking-wider text-yellow-300 flex items-center gap-1.5 mb-3 pb-3 border-b border-indigo-900">
-                    💰 Tabellone Quotazioni
-                  </h3>
-                  <p className="text-[9px] text-indigo-400 font-medium mb-3 leading-tight">
-                    Prezzo base (10) + Valore forma in base alla media degli
-                    ultimi 3 voti e bonus passati.
-                  </p>
-                  <div className="flex-1 overflow-y-auto max-h-[440px] pr-1 space-y-2.5">
-                    {marketValuations.map((p, idx) => (
-                      <div
-                        key={idx}
-                        className="flex justify-between items-center bg-indigo-900/20 border border-indigo-850 p-2 rounded-xl transition hover:bg-indigo-900/40"
-                      >
-                        <div className="flex flex-col min-w-0 pr-2">
-                          <span className="text-[10.5px] font-black text-white truncate">
-                            {getLastName(p.nome)}
-                          </span>
-                          <span className="text-[8px] text-indigo-400 font-bold uppercase tracking-wider">
-                            {p.ruolo || "N/D"}
-                          </span>
-                        </div>
-                        <div className="font-mono text-yellow-400 text-[10px] font-black bg-yellow-450/10 px-2 py-1 rounded-lg border border-yellow-400/20 shrink-0">
-                          {p.price} 🪙
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* STICKY BOTTOM BAR FOR MOBILE LAYOUT */}
-              <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 bg-indigo-950/95 backdrop-blur-xl border-t border-b-2 border-indigo-800 p-3 px-4 sm:hidden flex items-center justify-between shadow-[0_-10px_30px_rgba(0,0,0,0.5)] transform translate-y-0 transition-transform">
-                <div className="flex flex-col">
-                  {(() => {
-                    let totalCost = 0;
-                    selectedPlayers.forEach((pName) => {
-                      totalCost += getPlayerPriceForRoster(
-                        pName,
-                        partiteChiuse || [],
-                        bonuses,
-                      );
-                    });
-                    const remaining = MAX_BUDGET - totalCost;
-                    const overBudget = remaining < 0;
-                    return (
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[10px] uppercase font-black tracking-widest text-indigo-400">
-                          Scelti: <span className={selectedPlayers.length === 4 ? "text-emerald-400" : "text-yellow-400"}>{selectedPlayers.length}/4</span>
-                        </span>
-                        <span className={`text-base font-black font-mono leading-none mt-0.5 ${overBudget ? 'text-red-400' : 'text-indigo-100'}`}>
-                          🪙 {remaining} cr.
-                        </span>
-                      </div>
-                    )
-                  })()}
-                </div>
-                
-                <button
-                  type="submit"
-                  disabled={submitting || (lockStatus.isLocked && !isAdminMode)}
-                  className="bg-yellow-400 hover:bg-yellow-350 disabled:bg-indigo-800 disabled:text-indigo-400 text-indigo-950 font-black uppercase tracking-wider text-xs px-5 py-2.5 rounded-xl shadow-lg active:scale-95 transition-transform shrink-0 disabled:border disabled:border-indigo-700"
-                >
-                  {submitting ? "Invio..." : "Salva Rosa"}
-                </button>
-              </div>
-            </form>
-          ) : activePublicTab === "regolamento" ? (
-            <div className="space-y-6 animate-fade-in font-sans p-6 text-left border border-indigo-800 bg-indigo-900/20 rounded-3xl mt-6">
-              <h2 className="text-xl font-black text-yellow-300 uppercase tracking-widest text-center border-b border-indigo-800/50 pb-4 mb-4">Regolamento & Gestione Bonus</h2>
-              
-              <div className="space-y-4 text-indigo-100 text-sm leading-relaxed">
-                <h3 className="font-extrabold text-indigo-300 text-base flex items-center gap-2"><span>📌</span> Gestione Punteggi in Panchina</h3>
-                <p>
-                  I giocatori schierati in <strong>panchina</strong> (il quarto giocatore della rosa) sono fondamentali non solo per subentrare in caso di assenza di un titolare, ma anche per portare <strong>punti descrittivi supplementari</strong> alla tua squadra. Tuttavia, esistono delle regole rigide su quali bonus possono essere attribuiti a chi non gioca.
-                </p>
-                <div className="bg-indigo-950/50 border border-indigo-800/60 rounded-xl p-4 space-y-3 mt-2">
-                  <p className="font-bold text-emerald-300">✅ Bonus Validi in Panchina:</p>
-                  <ul className="list-disc pl-5 space-y-1 text-xs font-medium">
-                     <li><strong>Bonus Extra/Comportamentali automatici</strong> che non prevedono discesa in campo (es. comportamento in panchina, presenza al campo senza giocare).</li>
-                     <li><strong>Bonus Social</strong> come post, tag, e story su Instagram.</li>
-                     <li><strong>Bonus Speciali Personali (Ad Personam)</strong> legati ad azioni esterne alla contesa agonistica vera e propria (es. portare le borracce, confermare la presenza in chat, o bonus papà).</li>
-                  </ul>
-                  
-                  <p className="font-bold text-red-300 mt-4">❌ Bonus NON Validi in Panchina:</p>
-                  <ul className="list-disc pl-5 space-y-1 text-xs font-medium">
-                     <li><strong>Tutti i Bonus Manuali</strong> derivanti da azioni di gioco (es. gol, assist, salvataggi, rigori).</li>
-                     <li><strong>Tutti i Bonus legati all'ingresso in campo</strong> (es. Bonus Lazzaro, Bonus ingresso redivivo, ecc...). Tali bonus vengono annullati d'ufficio per i panchinari.</li>
-                     <li>Qualsiasi moltiplicatore sui voti standard.</li>
-                  </ul>
-                </div>
-                
-                <p className="text-xs text-indigo-300/80 italic pt-2">
-                  Nota tecnica: Se un panchinaro subentra a un titolare (perché quest'ultimo ha preso "S.V." o non si è presentato), smette di essere considerato "panchinaro" e per lui varranno nuovamente <strong>tutti i bonus</strong> maturati sul campo.
-                </p>
-              </div>
-            </div>
-          ) : activePublicTab === "statistiche" ? (
-            <div className="mt-6 animate-fade-in">
-              <StatsHub
-                giocatori={giocatori}
-                fantasquadre={fantasquadre}
-                partiteChiuse={partiteChiuse || []}
-                bonuses={bonuses}
-                getTeamMatchBreakdownList={getTeamMatchBreakdownList}
-              />
-            </div>
-          ) : null}
-        </div>
-
-        {/* Custom Transfer Confirmation Modal */}
-        {showConfirmModal && proposedTransfer && (
-          <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="bg-indigo-950 border-2 border-indigo-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-6 animate-fadeIn relative">
-              <div className="text-center space-y-2">
-                <div className="bg-yellow-450/15 border border-yellow-500/30 p-3 rounded-full inline-block">
-                  <AlertCircle className="h-8 w-8 text-yellow-400 animate-pulse" />
-                </div>
-                <h3 className="text-sm font-black uppercase tracking-wider text-yellow-300">
-                  Riepilogo e Conferma Cambio
-                </h3>
-                <p className="text-[10px] text-indigo-300 font-bold leading-normal">
-                  Controlla i dettagli del movimento di mercato prima di inviare
-                  e bloccare la rosa.
-                </p>
-              </div>
-
-              {/* Dettaglio Movimento */}
-              <div className="bg-indigo-900/40 border border-indigo-800/50 rounded-2xl p-4 space-y-3">
-                <div className="flex items-center justify-between gap-2.5">
-                  <div className="bg-emerald-950/40 border border-emerald-900/30 rounded-xl p-3 shrink-1 flex-1 text-center">
-                    <span className="block text-[8px] font-black uppercase text-emerald-400 tracking-wider">
-                      Cessione
-                    </span>
-                    <span className="block text-xs font-bold text-white truncate">
-                      {proposedTransfer.sold}
-                    </span>
-                    <span className="block text-[10px] text-emerald-300 font-mono mt-0.5 font-black">
-                      +{proposedTransfer.soldPrice} Izycoin 🪙
-                    </span>
-                  </div>
-
-                  <div className="font-black text-yellow-400 text-lg">➔</div>
-
-                  <div className="bg-red-950/40 border border-red-900/30 rounded-xl p-3 shrink-1 flex-1 text-center">
-                    <span className="block text-[8px] font-black uppercase text-red-400 tracking-wider">
-                      Acquisto
-                    </span>
-                    <span className="block text-xs font-bold text-white truncate">
-                      {proposedTransfer.bought}
-                    </span>
-                    <span className="block text-[10px] text-red-300 font-mono mt-0.5 font-black">
-                      -{proposedTransfer.boughtPrice} Izycoin 🪙
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-indigo-900 flex justify-between items-center text-[11px] font-semibold text-indigo-300">
-                  <span>Credito finale rimanente:</span>
-                  <span className="text-yellow-400 font-mono font-bold text-xs">
-                    {proposedTransfer.remainingCredits} Izycoin 🪙
-                  </span>
-                </div>
-              </div>
-
-              {/* Warning Block */}
-              <div className="bg-indigo-950/40 border-2 border-indigo-900/50 rounded-2xl p-4 text-center space-y-1.5">
-                <p className="text-[10.5px] text-indigo-300 font-extrabold leading-relaxed uppercase">
-                  ATTENZIONE: Stai utilizzando il tuo slot di mercato
-                </p>
-                <p className="text-[9px] text-indigo-400/90 font-bold leading-normal">
-                  Il regolamento prevede al massimo un solo cambio per turno di
-                  gioco. I 3 giocatori non sostituiti resteranno bloccati,
-                  mentre potrai eventualmente ripensarci su quest'ultimo slot
-                  scambiandolo con altri svincolati fino ad un'ora dall'inizio
-                  della partita.
-                </p>
-              </div>
-
-              {/* Modal Actions */}
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowConfirmModal(false);
-                    setProposedTransfer(null);
-                  }}
-                  className="w-full bg-indigo-900/50 hover:bg-indigo-900 border border-indigo-800 hover:border-indigo-700 font-black text-[10.5px] uppercase text-indigo-300 py-3 rounded-lg transition-all cursor-pointer"
-                >
-                  Annulla
-                </button>
-                <button
-                  type="button"
-                  disabled={submitting}
-                  onClick={executeRosterUpdate}
-                  className="w-full bg-yellow-450 hover:bg-yellow-400 disabled:bg-indigo-900 font-black text-[10.5px] uppercase text-indigo-950 py-3 rounded-lg shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer"
-                >
-                  {submitting ? "Invio..." : "Sì, Conferma"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Foot footer info */}
-        <div className="text-center text-[10px] text-indigo-600 font-bold select-none pt-6 shrink-0">
-          Easy Rigging © {new Date().getFullYear()} • Portale protetto e
-          criptato
-        </div>
-
-        {selectedMatchBreakdown && (
-          <MatchBreakdownModal
-            mb={selectedMatchBreakdown.mb}
-            teamName={selectedMatchBreakdown.teamName}
-            onClose={() => setSelectedMatchBreakdown(null)}
-            generateMatchPdf={generateMatchPdf}
-          />
-        )}
-        
-        {/* Success Toast Notification */}
-        {toastMessage && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <div className="bg-emerald-500 text-white font-bold text-[11px] px-5 py-3 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.4)] flex items-center gap-2.5 border border-emerald-400">
-              <CheckCircle className="w-4 h-4 text-emerald-100" />
-              <span>{toastMessage}</span>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // -------------------------------------------------------------
-  // VIEW RENDER 2: ADMINISTRATOR DASHBOARD & LEADERBOARD
-  // -------------------------------------------------------------
-  return (
-    <div className="space-y-6">
-      {/* Visual Header card */}
-      <div className="bg-indigo-900/10 border border-indigo-800/15 rounded-3xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xs">
-        <div className="space-y-1">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2">
-              <span className="p-1.5 bg-yellow-450/15 text-yellow-500 rounded-lg shrink-0">
-                <Sparkles className="h-5 w-5 animate-pulse" />
-              </span>
-              <h2 className="text-lg sm:text-xl font-black text-gray-900 uppercase tracking-tight">
-                Pannello di Controllo Fantacalcetto
-              </h2>
-            </div>
-            {isEditor && onToggleMercatoLibero && (
-              <label className="flex items-center gap-2 cursor-pointer bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-800 px-3 py-1.5 rounded-lg text-xs font-bold tracking-wider transition-colors shadow-sm ml-4">
-                <input
-                  type="checkbox"
-                  checked={sessioneMercatoLibero}
-                  onChange={async (e) => {
-                    const isEnabling = e.target.checked;
-                    if (isEnabling) {
-                      setShowMercatoModal(true);
-                      setMercatoDateString("");
-                    } else {
-                      if (window.confirm("Disattivare la Sessione di Mercato Libero (ripristina limite 1 cambio)?")) {
-                        await onToggleMercatoLibero(false, null);
-                      }
-                    }
-                  }}
-                  className="w-4 h-4 rounded text-blue-600 focus:ring-0 cursor-pointer"
-                />
-                Mercato Libero: {sessioneMercatoLibero ? (isMercatoLiberoValido ? "ATTIVO" : "SCADUTO") : "OFF"}
-              </label>
-            )}
-          </div>
-          <p className="text-xs text-gray-500 font-medium leading-relaxed max-w-xl">
-            Gestisci le tessere iscritte, monitora l'andamento in tempo reale,
-            ottieni la classifica pesata con punteggio dinamico ricavato dai
-            referti reali di campionato!
-          </p>
-        </div>
-
-        {/* Private Sharing Link trigger widget */}
-        <div className="bg-white border border-gray-150 p-4 rounded-2xl flex flex-col gap-2.5 shadow-xs shrink-0 max-w-sm w-full">
-          <div>
-            <h4 className="text-[10px] uppercase font-black tracking-wider text-indigo-700 leading-none">
-              Canale Pubblico
-            </h4>
-            <p className="text-[10px] text-gray-400 mt-0.5 leading-tight">
-              Accedi o condividi con i partecipanti per ricevere iscrizioni
-              fanta
-            </p>
-          </div>
-          <input
-            type="text"
-            readOnly
-            value={`${window.location.origin}${window.location.pathname}?portal=true`}
-            className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 text-[10px] font-mono font-bold select-all outline-none text-gray-500"
-          />
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={handleCopyLink}
-              className={`py-1.5 font-bold text-[10.5px] uppercase rounded-lg shadow-2xs cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0 ${
-                copied
-                  ? "bg-green-600 text-white"
-                  : "bg-gray-100 hover:bg-gray-150 text-gray-800 border border-gray-200"
-              }`}
-            >
-              <Copy className="h-3 w-3" />
-              <span>{copied ? "Copiato" : "Copia Link"}</span>
-            </button>
-            <a
-              href={`${window.location.origin}${window.location.pathname}?portal=true`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="py-1.5 font-bold text-[10.5px] uppercase bg-indigo-900 hover:bg-indigo-800 text-white rounded-lg shadow-2xs transition-all flex items-center justify-center gap-1.5 text-center border border-indigo-950"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-              <span>Apri Portale</span>
-            </a>
-          </div>
-          {isEditor && (
-            <button
-              onClick={() => onTogglePortaleBlocco && onTogglePortaleBlocco(!portale1Bloccato)}
-              className={`w-full mt-2 py-1.5 font-bold text-[10.5px] uppercase rounded-lg shadow-2xs cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0 ${
-                portale1Bloccato
-                  ? "bg-red-100 text-red-800 border border-red-200 hover:bg-red-200"
-                  : "bg-slate-100 text-slate-800 border border-slate-200 hover:bg-slate-200"
-              }`}
-            >
-              {portale1Bloccato ? <Lock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5 opacity-50" />}
-              <span>{portale1Bloccato ? "Sblocca Portale" : "Blocca Portale"}</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Grid summarizing stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="bg-white border border-gray-150 rounded-2xl p-4.5 shadow-2xs flex items-center gap-4">
-          <div className="w-11 h-11 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-700">
-            <Users className="h-6 w-6" />
-          </div>
-          <div>
-            <span className="block text-[10px] uppercase font-black text-gray-400 tracking-wider">
-              Fantasquadre Iscritte
-            </span>
-            <span className="text-xl sm:text-2xl font-black text-gray-900 font-mono">
-              {fantasquadre.length}
-            </span>
-          </div>
-        </div>
-
-        <div className="bg-white border border-gray-150 rounded-2xl p-4.5 shadow-2xs flex items-center gap-4">
-          <div className="w-11 h-11 bg-yellow-50 rounded-xl flex items-center justify-center text-yellow-650">
-            <Trophy className="h-6 w-6" />
-          </div>
-          <div>
-            <span className="block text-[10px] uppercase font-black text-gray-400 tracking-wider">
-              Punteggio Massimo Reale
-            </span>
-            <span className="text-xl sm:text-2xl font-black text-gray-900 font-mono">
-              {rankedTeams.length > 0 ? rankedTeams[0].score : 0} p.ti
-            </span>
-          </div>
-        </div>
-
-        <div className="bg-white border border-gray-150 rounded-2xl p-4.5 shadow-2xs flex items-center gap-4 col-span-1 sm:col-span-2 md:col-span-1">
-          <div className="w-11 h-11 bg-sky-50 rounded-xl flex items-center justify-center text-sky-700">
-            <Award className="h-6 w-6" />
-          </div>
-          <div>
-            <span className="block text-[10px] uppercase font-black text-gray-400 tracking-wider">
-              Formula Fantacalcetto
-            </span>
-            <span className="text-xs font-bold text-gray-600">
-              Punti base disattivati. Calcolo tramite Bonus/Malus Extra e Ruoli.
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Grid: Classification Table (Left) and Registrations listing (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Leaderboard classifications column */}
-        <div className="lg:col-span-7 space-y-4">
-          <div className="bg-white border border-gray-150 rounded-2xl shadow-2xs overflow-hidden">
-            <div className="bg-gray-50 border-b border-gray-150 px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <h3 className="font-extrabold text-sm text-gray-900 uppercase tracking-wide">
-                  Classifica Fantacalcetto
-                </h3>
-                <p className="text-[10px] text-gray-400 leading-tight">
-                  Generata in tempo reale dalle statistiche della Rosa dei
-                  giocatori
-                </p>
-              </div>
-              <div className="flex items-center gap-2 select-none">
-                {rankedTeams.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setShowGeneralReportModal(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase px-3.5 py-1.5 rounded-lg shadow-sm flex items-center gap-1 cursor-pointer transition-transform hover:-translate-y-0.5"
-                    title="Vedi referto con tutti i voti assegnati in tutte le partite"
-                  >
-                    <span>📄 Referto Generale (Tutti i Voti)</span>
-                  </button>
-                )}
-                <span className="bg-indigo-100 text-indigo-850 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shrink-0">
-                  Ufficiale
-                </span>
-              </div>
-            </div>
-
-            {rankedTeams.length === 0 ? (
-              <div className="p-8 text-center text-xs text-gray-400 font-medium">
-                Nessun team iscritto al Fantacalcetto. Condividi il link di
-                iscrizione per accumulare partecipanti!
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-100">
-                {/* Podiums visuals for top 3 if available */}
-                <div className="p-5 bg-gradient-to-b from-gray-50/50 to-white border-b border-gray-100 flex flex-wrap gap-4 items-center justify-around select-none">
-                  {rankedTeams.slice(0, 3).map((item, index) => {
-                    const badgeColor =
-                      index === 0
-                        ? "bg-yellow-100 text-yellow-800 border-yellow-250 animate-bounce"
-                        : index === 1
-                          ? "bg-slate-100 text-slate-800 border-slate-250"
-                          : "bg-sky-100 text-sky-800 border-sky-250";
-                    const subtitleLabel =
-                      index === 0
-                        ? "🥇 Primo"
-                        : index === 1
-                          ? "🥈 Secondo"
-                          : "🥉 Terzo";
-                    return (
-                      <div
-                        key={item.id}
-                        className="text-center bg-white border border-gray-150 p-3 rounded-2xl shadow-3xs flex flex-col items-center justify-center min-w-[130px]"
-                      >
-                        <span
-                          className={`text-[9px] uppercase font-black px-2 py-0.5 rounded-full border ${badgeColor}`}
-                        >
-                          {subtitleLabel}
-                        </span>
-                        <p
-                          className="font-black text-xs text-gray-800 mt-2 truncate max-w-[110px]"
-                          title={item.nomeFantasquadra}
-                        >
-                          {item.nomeFantasquadra}
-                        </p>
-                        <p className="text-[10px] text-gray-400 truncate max-w-[115px]">
-                          Da {item.nomePartecipante}
-                        </p>
-                        <span className="text-base font-black font-mono text-indigo-800 mt-1">
-                          {item.score}{" "}
-                          <span className="text-[10px] text-gray-400 font-bold">
-                            pnt
-                          </span>
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Classification standard listing table */}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs text-gray-500 font-medium">
-                    <thead className="bg-gray-55/60 text-[9px] font-black uppercase tracking-wider text-gray-450 border-b border-gray-150">
-                      <tr>
-                        <th className="px-5 py-2.5 text-center w-12">Pos</th>
-                        <th className="px-3 py-2.5">
-                          Fantasquadra & Presidente
-                        </th>
-                        <th className="px-3 py-2.5 text-right font-mono w-28">
-                          Punteggio Totale
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 font-semibold text-gray-750">
-                      {rankedTeams.map((team, index) => {
-                        const isTop = index < 3;
-                        return (
-                          <tr key={team.id || team.nomeFantasquadra} className="hover:bg-gray-50/40">
-                            <td className="px-5 py-3 text-center">
-                              <span
-                                className={`inline-flex items-center justify-center w-6 h-6 rounded-full font-mono text-xs font-bold ${
-                                  index === 0
-                                    ? "bg-yellow-400 text-yellow-950 font-black h-6.5 w-6.5"
-                                    : index === 1
-                                      ? "bg-slate-200 text-slate-800"
-                                      : index === 2
-                                        ? "bg-sky-650 text-white"
-                                        : "text-gray-500 bg-gray-100"
-                                }`}
-                              >
-                                {index + 1}
-                              </span>
-                            </td>
-                            <td className="px-3 py-3">
-                              <p className="font-extrabold text-gray-850 truncate max-w-[200px]">
-                                {team.nomeFantasquadra}
-                              </p>
-                              <p className="text-[10px] text-gray-400 font-medium font-sans">
-                                Presidente:{" "}
-                                <strong className="font-bold text-gray-500">
-                                  {team.nomePartecipante}
-                                </strong>
-                              </p>
-                            </td>
-                            <td className="px-3 py-3 text-right">
-                              <span className="text-sm font-black font-mono text-indigo-700">
-                                {team.score}
-                              </span>
-                              <span className="text-[10px] font-bold text-gray-400 ml-1">
-                                p
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* List of Registrations and detail expansion Column */}
-        <div className="lg:col-span-5 space-y-4">
-          <div className="bg-white border border-gray-150 rounded-2xl shadow-2xs overflow-hidden">
-            <div className="bg-gray-50 border-b border-gray-150 px-5 py-4 flex items-center justify-between">
-              <div>
-                <h3 className="font-extrabold text-sm text-gray-900 uppercase tracking-wide">
-                  Rose & Organigrammi
-                </h3>
-                <p className="text-[10px] text-gray-400 leading-tight">
-                  Roster completati e opzioni ammnistrative
-                </p>
-              </div>
-              <span className="text-[11px] font-black font-mono bg-gray-200 text-gray-700 px-2 py-0.5 rounded">
-                {fantasquadre.length} Team
-              </span>
-            </div>
-
-            {fantasquadre.length === 0 ? (
-              <div className="p-8 text-center text-xs text-gray-400 font-medium">
-                Nessuna fantasquadra registrata.
-              </div>
-            ) : (
-              (() => {
-                const sortedTeams = [...fantasquadre].sort((a, b) =>
-                  a.nomeFantasquadra.localeCompare(b.nomeFantasquadra),
-                );
-                const selectedTeamToView =
-                  sortedTeams.find((t) => (t.id || t.nomeFantasquadra) === expandedTeamId) ||
-                  sortedTeams[0];
-                const score = calculateTeamScore(selectedTeamToView);
-
-                return (
-                  <div className="p-4 space-y-4">
-                    {/* DROPDOWN & GRID SELECTION FOR TEAM */}
-                    <div>
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3 mb-3">
-                        <div className="flex items-center gap-1.5 text-[10px] uppercase font-black tracking-wide text-gray-500 pl-1">
-                          <span>📋</span>
-                          <span>
-                            Seleziona Squadra Menu a Tendina (
-                            {fantasquadre.length})
-                          </span>
-                        </div>
-                        <div className="relative">
-                          <select
-                            id="team-select-dropdown"
-                            value={selectedTeamToView.id || selectedTeamToView.nomeFantasquadra}
-                            onChange={(e) => setExpandedTeamId(e.target.value)}
-                            className="w-full sm:w-64 px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-extrabold text-blue-950 shadow-xs focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 cursor-pointer"
-                          >
-                            {sortedTeams.map((team) => (
-                              <option key={team.id || team.nomeFantasquadra} value={team.id || team.nomeFantasquadra}>
-                                {team.nomeFantasquadra.toUpperCase()} —{" "}
-                                {team.nomePartecipante}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 text-[10px] uppercase font-black tracking-wide text-gray-500 mb-2 pl-1">
-                        <span>🏷️</span>
-                        <span>
-                          Squadre Iscritte (Griglia da 3 colonne con a capo
-                          automatico)
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pb-2">
-                        {sortedTeams.map((team) => (
-                          <button
-                            id={`team-btn-${team.id || team.nomeFantasquadra}`}
-                            key={team.id || team.nomeFantasquadra}
-                            type="button"
-                            onClick={() => setExpandedTeamId(team.id || team.nomeFantasquadra)}
-                            className={`px-3.5 py-2.5 rounded-xl border text-left flex flex-col transition-all cursor-pointer ${
-                              (selectedTeamToView.id || selectedTeamToView.nomeFantasquadra) === (team.id || team.nomeFantasquadra)
-                                ? "bg-indigo-950 border-indigo-800 text-white shadow-md ring-2 ring-indigo-500/30 scale-100"
-                                : "bg-white border-gray-200 text-gray-600 hover:bg-indigo-50 hover:border-indigo-200 scale-95 opacity-80"
-                            }`}
-                          >
-                            <span className="font-black text-xs uppercase tracking-wider truncate mb-0.5">
-                              {team.nomeFantasquadra}
-                            </span>
-                            <span
-                              className={`text-[9px] font-bold truncate ${(selectedTeamToView.id || selectedTeamToView.nomeFantasquadra) === (team.id || team.nomeFantasquadra) ? "text-indigo-400" : "text-gray-400"}`}
-                            >
-                              👤 {team.nomePartecipante}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* MASTER DETAIL VIEW FOR SELECTED TEAM */}
-                    <div className="border border-indigo-100 bg-indigo-50/40 rounded-2xl p-4 sm:p-5 space-y-5 animate-fadeIn shadow-sm">
-                      {/* Header */}
-                      <div className="flex justify-between items-start border-b border-indigo-100 pb-4">
-                        <div className="min-w-0 pr-4">
-                          <h2 className="text-base sm:text-lg font-black text-indigo-950 mb-1 truncate">
-                            {selectedTeamToView.nomeFantasquadra}
-                          </h2>
-                          <p className="text-[10px] text-indigo-700 font-bold uppercase tracking-widest flex items-center gap-2 flex-wrap">
-                            <span>
-                              👤 {selectedTeamToView.nomePartecipante}
-                            </span>
-                            <span className="text-indigo-300 hidden sm:inline">
-                              •
-                            </span>
-                            <span className="bg-indigo-100/50 px-1.5 py-0.5 rounded text-indigo-800">
-                              Iscritto il{" "}
-                              {new Date(
-                                selectedTeamToView.dataInserimento,
-                              ).toLocaleDateString("it-IT")}
-                            </span>
-                          </p>
-                        </div>
-                        <div className="text-right shrink-0 bg-white border border-indigo-100 rounded-xl px-3 py-2 shadow-xs">
-                          <span className="text-xl font-black font-mono text-indigo-700 block leading-none">
-                            {score}
-                          </span>
-                          <span className="text-[8px] uppercase tracking-wider font-extrabold text-indigo-500/80 block mt-1 leading-none">
-                            Punti Fanta
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Roster & Bonuses */}
-                      <div>
-                        <div className="flex items-center justify-between border-b border-indigo-200 pb-1.5 mb-3">
-                          <h4 className="text-[10px] uppercase font-black tracking-widest text-indigo-800 flex items-center gap-1.5">
-                            <span>👥</span> Roster & Statistiche
-                          </h4>
-                          <span className="text-[9px] font-bold text-indigo-600 bg-indigo-200/50 px-2 py-0.5 rounded-full">
-                            {selectedTeamToView.giocatoriSelezionati.length}/4
-                          </span>
-                        </div>
-
-                        {(() => {
-                          const matchBreakdownForSeparation = getTeamMatchBreakdownList(selectedTeamToView);
-                          let totalStartersPoints = 0;
-                          let totalBenchPoints = 0;
-
-                          matchBreakdownForSeparation.forEach(mb => {
-                            mb.giocatoriKpi.forEach(kpi => {
-                              const isSostituito = kpi.stato === "Sostituito";
-                              const isAssente = kpi.stato === "Assente";
-                              const displayPts = isSostituito || isAssente ? 0 : kpi.fantaScore;
-                              
-                              if (kpi.stato === "Panchina") {
-                                totalBenchPoints += displayPts;
-                              } else {
-                                totalStartersPoints += displayPts;
-                              }
-                            });
-                          });
-
-                          totalStartersPoints = parseFloat(totalStartersPoints.toFixed(1));
-                          totalBenchPoints = parseFloat(totalBenchPoints.toFixed(1));
-
-                          return (
-                            <div className="bg-white border border-indigo-100 rounded-2xl p-4 space-y-3.5 shadow-xs mb-4">
-                              <p className="text-[10px] text-indigo-900 font-extrabold uppercase tracking-widest flex items-center gap-1.5 border-b border-indigo-100 pb-1.5">
-                                <span>⚖️</span> Punteggi Separati (Titolari vs Panchina)
-                              </p>
-                              <div className="grid grid-cols-2 gap-3 text-center">
-                                <div className="bg-indigo-50/60 border border-indigo-100 rounded-xl p-2.5">
-                                  <span className="block text-[8px] text-indigo-800 font-black uppercase tracking-wider mb-1">Titolari e Subentri</span>
-                                  <span className="text-sm font-black font-mono text-indigo-700">+{totalStartersPoints} pt</span>
-                                </div>
-                                <div className="bg-sky-50/60 border border-sky-150 rounded-xl p-2.5">
-                                  <span className="block text-[8px] text-sky-800 font-black uppercase tracking-wider mb-1">Panchina</span>
-                                  <span className="text-sm font-black font-mono text-sky-700">+{totalBenchPoints} pt</span>
-                                </div>
-                              </div>
-                              <p className="text-[9.5px] text-gray-500 font-medium leading-relaxed bg-indigo-50/20 p-3 rounded-xl border border-indigo-100/60">
-                                💡 <strong>Regola Panchina Descrittiva:</strong> Un giocatore in panchina (se non subentrato ai titolari) contribuisce alla squadra esclusivamente con i suoi <strong>bonus non manuali</strong> (es. bonus di presenza, bonus social o speciali personali automatici). I suoi <strong>bonus manuali</strong> (es. gol o assist speciali) non vengono conteggiati. La somma totale di questi punti in panchina descrittivi è di <strong>{totalBenchPoints} pt</strong>.
-                              </p>
-                            </div>
-                          );
-                        })()}
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-semibold text-gray-700 text-[11px]">
-                          {selectedTeamToView.giocatoriSelezionati.map(
-                            (pName, index) => {
-                              const stats = getPlayerStatsObj(pName);
-                              const isBench = index === 3;
-                              const bKey = getPlayerBonusKey(pName);
-                              const userBonuses = bKey
-                                ? (bonuses || DEFAULT_BONUSES).filter(
-                                    (b) =>
-                                      b.isPersonale && b.giocatoreId === bKey,
-                                  )
-                                : [];
-
-                              return (
-                                <div
-                                  key={index}
-                                  className={`border p-3 rounded-xl flex flex-col gap-2 ${
-                                    isBench
-                                      ? "bg-sky-50/80 border-sky-200 shadow-xs"
-                                      : "bg-white border-indigo-100 shadow-xs"
-                                  }`}
-                                >
-                                  <div className="flex justify-between items-start">
-                                    <div className="min-w-0 pr-2">
-                                      <p className="truncate font-extrabold text-gray-800 text-xs flex items-center gap-2">
-                                        <span>
-                                          {index + 1}. {getLastName(pName)}
-                                        </span>
-                                        <span
-                                          className={`text-[8px] px-1.5 py-0.5 rounded leading-none font-bold font-mono tracking-wide ${isBench ? "bg-sky-100 text-sky-900" : "bg-indigo-100 text-indigo-900"}`}
-                                        >
-                                          {isBench ? "Panchina" : "Titolare"}
-                                        </span>
-                                      </p>
-                                    </div>
-                                    <span
-                                      className="font-mono text-[10px] bg-indigo-900 text-yellow-300 border border-indigo-800 rounded-lg px-2 py-1 shrink-0 font-black shadow-xs"
-                                      title="Fantascore campionato"
-                                    >
-                                      {stats.fantaScore > 0 ? "+" : ""}
-                                      {stats.fantaScore} pt
-                                    </span>
-                                  </div>
-
-                                  <div className="text-[9.5px] leading-relaxed">
-                                    <p className="text-indigo-700 font-black mb-1.5">
-                                      STATISTICHE GENERALI (
-                                      {stats.campionato.gol +
-                                        stats.campionato.assist +
-                                        stats.campionato.ammonizioni +
-                                        stats.campionato.espulsioni >
-                                      0
-                                        ? "Attive"
-                                        : "Vuote"}
-                                      )
-                                    </p>
-                                    <div className="grid grid-cols-4 gap-1 text-center bg-gray-50 rounded-lg p-1.5 border border-gray-100">
-                                      <div>
-                                        <span className="block text-gray-400 font-bold uppercase text-[8px]">
-                                          Gol
-                                        </span>
-                                        <span className="font-black text-indigo-600">
-                                          {stats.campionato.gol}{" "}
-                                          <span className="text-[8px] font-mono opacity-60">
-                                            (+
-                                            {stats.campionato.gol * GOAL_POINTS}
-                                            )
-                                          </span>
-                                        </span>
-                                      </div>
-                                      <div>
-                                        <span className="block text-gray-400 font-bold uppercase text-[8px]">
-                                          Assist
-                                        </span>
-                                        <span className="font-black text-indigo-600">
-                                          {stats.campionato.assist}{" "}
-                                          <span className="text-[8px] font-mono opacity-60">
-                                            (+
-                                            {stats.campionato.assist *
-                                              ASSIST_POINTS}
-                                            )
-                                          </span>
-                                        </span>
-                                      </div>
-                                      <div>
-                                        <span className="block text-gray-400 font-bold uppercase text-[8px]">
-                                          Gialli
-                                        </span>
-                                        <span className="font-black text-sky-600">
-                                          {stats.campionato.ammonizioni}{" "}
-                                          <span className="text-[8px] font-mono opacity-60">
-                                            (
-                                            {stats.campionato.ammonizioni *
-                                              AMMO_POINTS}
-                                            )
-                                          </span>
-                                        </span>
-                                      </div>
-                                      <div>
-                                        <span className="block text-gray-400 font-bold uppercase text-[8px]">
-                                          Rossi
-                                        </span>
-                                        <span className="font-black text-red-600">
-                                          {stats.campionato.espulsioni}{" "}
-                                          <span className="text-[8px] font-mono opacity-60">
-                                            (
-                                            {stats.campionato.espulsioni *
-                                              ESPU_POINTS}
-                                            )
-                                          </span>
-                                        </span>
-                                      </div>
-                                    </div>
-
-                                    {/* Bonus Visibility Block */}
-                                    {userBonuses.length > 0 ? (
-                                      <div className="mt-2.5">
-                                        <p className="text-sky-700 font-black mb-1 uppercase text-[8.5px] tracking-wider">
-                                          🌟 Bonus Univoci Assegnati:
-                                        </p>
-                                        <div className="flex flex-wrap gap-1">
-                                          {userBonuses.map((b, i) => (
-                                            <div
-                                              key={i}
-                                              className="text-[8.5px] font-bold text-sky-900 bg-sky-100/60 px-1.5 py-1 rounded-md border border-sky-200/60 inline-flex items-center gap-1"
-                                              title={b.descrizione}
-                                            >
-                                              <span>🎒</span>{" "}
-                                              <span>{b.nome}</span>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    ) : (
-                                      <div className="mt-2 flex flex-wrap gap-1">
-                                        <span className="text-[8.5px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-md inline-flex items-center gap-1 border border-gray-200">
-                                          <span>🎒</span>{" "}
-                                          <span>Nessun bonus dedicato</span>
-                                        </span>
-                                      </div>
-                                    )}
-
-                                    {/* Unassigned Bench Bonuses List */}
-                                    {(() => {
-                                      const matchBreakdownForSeparation = getTeamMatchBreakdownList(selectedTeamToView);
-                                      const unassignedItems: { matchDetails: string; description: string; points: number }[] = [];
-                                      
-                                      matchBreakdownForSeparation.forEach(mb => {
-                                        const kpi = mb.giocatoriKpi.find(k => k.nome.trim().toLowerCase() === pName.trim().toLowerCase());
-                                        if (kpi && kpi.stato === "Panchina") {
-                                          const golPts = kpi.gol * GOAL_POINTS;
-                                          const assistPts = kpi.assist * ASSIST_POINTS;
-                                          const lostBonus = (kpi.originalBonusPts || 0) - kpi.bonusPts;
-                                          
-                                          if (golPts > 0 || assistPts > 0 || lostBonus > 0) {
-                                            const exclusions: string[] = [];
-                                            if (golPts > 0) exclusions.push(`${kpi.gol} Gol (+${golPts} pt)`);
-                                            if (assistPts > 0) exclusions.push(`${kpi.assist} Assist (+${assistPts} pt)`);
-                                            
-                                            // Find specific manual/legendary/presidential bonuses that were not assigned
-                                            const matchRef = (partiteChiuse || []).find(x => x.id === mb.matchId)?.referto?.find(x => (x.snapshotGiocatore?.nome || x.nome).trim().toLowerCase() === pName.trim().toLowerCase());
-                                            if (matchRef && matchRef.bonusAttivi) {
-                                              matchRef.bonusAttivi.forEach(bId => {
-                                                const bDef = (bonuses || DEFAULT_BONUSES).find(x => x.id === bId);
-                                                if (bDef && isBonusManuale(bDef)) {
-                                                  exclusions.push(`${bDef.nome} (+${bDef.punti} pt)`);
-                                                }
-                                              });
-                                            }
-                                            
-                                            const totalLostForMatch = golPts + assistPts + lostBonus;
-                                            if (totalLostForMatch > 0) {
-                                              unassignedItems.push({
-                                                matchDetails: mb.dettagli || `Partita #${mb.matchId}`,
-                                                description: exclusions.join(", ") || "Bonus manuali",
-                                                points: parseFloat(totalLostForMatch.toFixed(1))
-                                              });
-                                            }
-                                          }
-                                        }
-                                      });
-                                      
-                                      if (unassignedItems.length > 0) {
-                                        return (
-                                          <div className="mt-2.5 bg-red-50/75 border border-red-150 rounded-xl p-2.5 space-y-1.5 shadow-2xs">
-                                            <p className="text-red-800 font-extrabold uppercase text-[8.5px] tracking-wider flex items-center gap-1">
-                                              <span>⚠️</span> Bonus Non Attribuiti (Panchina):
-                                            </p>
-                                            <div className="space-y-1">
-                                              {unassignedItems.map((item, idx) => (
-                                                <div key={idx} className="text-[8.5px] text-gray-600 font-semibold border-l-2 border-red-300 pl-2 py-0.5">
-                                                  <span className="font-extrabold text-red-950">-{item.points} pt</span> in <em>{item.matchDetails}</em>: <span className="text-red-700">{item.description}</span>
-                                                </div>
-                                              ))}
-                                            </div>
-                                          </div>
-                                        );
-                                      }
-                                      return null;
-                                    })()}
-                                  </div>
-                                </div>
-                              );
-                            },
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Dettaglio Match Reports */}
-                      {(() => {
-                        const matchBreakdown =
-                          getTeamMatchBreakdownList(selectedTeamToView);
-                        return (
-                          <div className="pt-2">
-                            <h4 className="text-[10px] uppercase font-black tracking-widest text-indigo-800 flex items-center gap-1.5 border-b border-indigo-200 pb-1.5 mb-3">
-                              <span>📈</span> DETTAGLIO PARTITE REFERTATE (
-                              {matchBreakdown.length})
-                            </h4>
-                            {matchBreakdown.length === 0 ? (
-                              <div className="bg-white border border-gray-150 rounded-xl p-5 text-center shadow-xs">
-                                <p className="text-[10px] text-gray-400 font-medium">
-                                  Nessun match di campionato refertato finora
-                                  per questa squadra.
-                                </p>
-                              </div>
-                            ) : (
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3">
-                                {matchBreakdown.map((mb, mbIdx) => (
-                                  <div
-                                    key={mbIdx}
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      setSelectedMatchBreakdown({
-                                        mb,
-                                        teamName:
-                                          selectedTeamToView.nomeFantasquadra,
-                                      });
-                                    }}
-                                    className="bg-white border border-indigo-100/60 rounded-xl p-3.5 flex items-center justify-between shadow-sm hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer group"
-                                  >
-                                    <div className="min-w-0 pr-2">
-                                      <p
-                                        className="text-[11px] font-black text-indigo-950 truncate group-hover:text-indigo-700 transition-colors"
-                                        title={mb.dettagli}
-                                      >
-                                        ⚔️{" "}
-                                        {mb.dettagli.split(" - ")[0] ||
-                                          mb.dettagli}
-                                      </p>
-                                      {mb.dettagli.includes(" - ") && (
-                                        <p className="text-[8.5px] text-gray-400 font-extrabold truncate mt-0.5 text-left uppercase tracking-wide">
-                                          {mb.dettagli
-                                            .split(" - ")
-                                            .slice(1)
-                                            .join(" - ")}
-                                        </p>
-                                      )}
-                                    </div>
-                                    <div className="text-right shrink-0 flex items-center gap-2.5">
-                                      <span className="font-mono text-[11px] font-black bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-1 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                                        {mb.puntiTotaliMatch > 0 ? "+" : ""}
-                                        {mb.puntiTotaliMatch} pt
-                                      </span>
-                                      <span className="text-[10px] text-gray-300 group-hover:text-indigo-500 font-bold transition-colors">
-                                        ➔
-                                      </span>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })()}
-
-                      {/* Delete & Edit Admin Action */}
-                      {isEditor && (
-                        <div className="flex justify-end gap-2 pt-3 border-t border-indigo-200 mt-4">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setNomeFantasquadra(selectedTeamToView.nomeFantasquadra);
-                              setAuthenticatedTeamId(selectedTeamToView.id);
-                              
-                              if (isMercatoLiberoValido || !(partiteChiuse && partiteChiuse.length > 0)) {
-                                setSelectedPlayers(selectedTeamToView.giocatoriSelezionati || []);
-                              } else {
-                                // Rule prev players logic will be triggered in the form via active tabs
-                              }
-                              
-                              setActivePublicTab("formazione");
-                              window.scrollTo({ top: 0, behavior: "smooth" });
-                            }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-100 hover:bg-yellow-200 border border-yellow-300 rounded-lg text-yellow-800 font-extrabold text-[10px] uppercase cursor-pointer transition-colors"
-                          >
-                            <Pencil className="h-3 w-3" />
-                            <span>Modifica Fantasquadra</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              if (
-                                confirm(
-                                  `Sei sicuro di voler eliminare la fantasquadra '${selectedTeamToView.nomeFantasquadra}'? Questa azione è irreversibile.`,
-                                )
-                              ) {
-                                try {
-                                  await onEliminaFantasquadra(
-                                    selectedTeamToView.id,
-                                  );
-                                  setExpandedTeamId(null);
-                                } catch (err: any) {
-                                  alert(err.message || "Errore rimozione.");
-                                }
-                              }
-                            }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-100 hover:bg-red-200 border border-red-300 rounded-lg text-red-800 font-extrabold text-[10px] uppercase cursor-pointer transition-colors"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                            <span>Rimuovi Fantasquadra</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })()
-            )}
-          </div>
-        </div>
-      </div>
-
-      {selectedMatchBreakdown && (
-        <MatchBreakdownModal
-          mb={selectedMatchBreakdown.mb}
-          teamName={selectedMatchBreakdown.teamName}
-          onClose={() => setSelectedMatchBreakdown(null)}
-          generateMatchPdf={generateMatchPdf}
-        />
-      )}
-
-      {showRenameModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm px-4">
-          <div className="bg-indigo-950 border border-indigo-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-4 font-sans text-center">
-            <h3 className="text-lg font-black text-white uppercase tracking-wider">
-              Rinomina Squadra
-            </h3>
-            <p className="text-xs text-indigo-200">
-              Inserisci il nuovo nome da assegnare alla tua squadra. L'azione sarà immediata.
-            </p>
-            <input
-              type="text"
-              className="w-full bg-indigo-900 border border-indigo-700 rounded-xl px-4 py-3 text-white text-sm font-bold uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Es. Atletico Fanta"
-              value={nuovoNomeSquadra}
-              onChange={(e) => setNuovoNomeSquadra(e.target.value)}
-            />
-            <div className="flex gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowRenameModal(false)}
-                className="flex-1 bg-indigo-900/60 hover:bg-indigo-800/80 text-indigo-200 py-3 rounded-xl font-bold uppercase text-xs transition-colors"
-                disabled={submitting}
-              >
-                Annulla
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (!nuovoNomeSquadra.trim() || !authenticatedTeamId) return;
-                  setSubmitting(true);
-                  try {
-                    await onRinominaFantasquadra(authenticatedTeamId, nuovoNomeSquadra);
-                    // L'aggiornamento avverrà tramite stream o reload dati
-                    setShowRenameModal(false);
-                    // Sync the local state
-                    setNomeFantasquadra(nuovoNomeSquadra);
-                  } catch (e: any) {
-                    alert(e.message || "Errore durante la rinominazione");
-                  } finally {
-                    setSubmitting(false);
-                  }
-                }}
-                disabled={submitting || !nuovoNomeSquadra.trim() || nuovoNomeSquadra.trim() === nomeFantasquadra}
-                className="flex-1 bg-indigo-500 hover:bg-indigo-400 disabled:opacity-50 text-indigo-950 py-3 rounded-xl font-black uppercase text-xs transition-colors"
-              >
-                {submitting ? "Salvataggio..." : "Salva Nuove Info"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showMercatoModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-indigo-950/80 backdrop-blur-sm px-4">
-          <div className="bg-white border-2 border-blue-900 rounded-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto shadow-2xl relative p-5 font-sans">
-            <h3 className="text-lg font-black text-blue-900 uppercase mb-2">Attiva Sessione Libera</h3>
-            <p className="text-xs text-gray-600 mb-4 font-medium leading-relaxed">
-              Il mercato libero sospenderà temporaneamente i limiti ai cambi sulle rose.
-              Puoi impostare una scadenza automatica (opzionale):
-            </p>
-            <div className="mb-4">
-              <label className="block text-xs font-bold text-gray-700 mb-1">Scadenza (Opzionale)</label>
-              <input
-                type="datetime-local"
-                value={mercatoDateString}
-                onChange={(e) => setMercatoDateString(e.target.value)}
-                className="w-full text-xs font-bold p-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-800"
-              />
-            </div>
-            <div className="flex gap-2 justify-end">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowMercatoModal(false);
-                  setMercatoDateString("");
-                }}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-               >
-                Annulla
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (onToggleMercatoLibero) {
-                    let finalDate = null;
-                    if (mercatoDateString) {
-                      const d = new Date(mercatoDateString);
-                      if (!isNaN(d.getTime())) {
-                        finalDate = d.toISOString();
-                      }
-                    }
-                    await onToggleMercatoLibero(true, finalDate);
-                  }
-                  setShowMercatoModal(false);
-                  setMercatoDateString("");
-                }}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                >
-                Conferma Attivazione
-               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 📊 SEZIONE REPORT E STATISTICHE CENTRALIZZATA PER L'ADMIN */}
-      <div className="pt-8 border-t border-gray-200">
-        <StatsHub
-          giocatori={giocatori}
-          fantasquadre={fantasquadre}
-          partiteChiuse={partiteChiuse || []}
-          bonuses={bonuses}
-          getTeamMatchBreakdownList={getTeamMatchBreakdownList}
-        />
-      </div>
-
-      {showGeneralReportModal && (
-        <GeneralReportModal
-          rankedTeams={rankedTeams}
-          partiteChiuse={partiteChiuse || []}
-          getTeamMatchBreakdownList={getTeamMatchBreakdownList}
-          onClose={() => setShowGeneralReportModal(false)}
-          generateGeneralReportPdf={generateGeneralReportPdf}
-        />
-      )}
-
-      {matchForPlayerChoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-indigo-950/80 backdrop-blur-sm">
-          <div className="bg-white border-2 border-indigo-900 rounded-2xl w-full max-w-sm p-5 shadow-2xl relative">
-            <button onClick={() => setMatchForPlayerChoice(null)} className="absolute top-3 right-3 text-indigo-900 hover:text-red-600 bg-indigo-100 hover:bg-indigo-200 p-1.5 rounded-full transition-colors z-10"><X className="w-4 h-4" /></button>
-            <h3 className="font-extrabold text-indigo-900 text-lg mb-3">Seleziona Giocatore</h3>
-            <p className="text-xs text-gray-600 mb-4">Scegli per quale giocatore generare il report individuale in questa partita.</p>
-            <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
-              {(matchForPlayerChoice.referto || []).map((r: any) => (
-                <button
-                  key={r.nome}
-                  onClick={() => {
-                    generatePartitaSingoloGiocatorePdf(matchForPlayerChoice, r.nome);
-                    setMatchForPlayerChoice(null);
-                  }}
-                  className="w-full text-left bg-gray-50 hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 p-3 rounded-xl font-bold text-sm text-indigo-900 flex justify-between items-center transition-colors"
-                >
-                  {r.nome}
-                  <Download className="w-4 h-4 text-indigo-500" />
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {matchForTeamChoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-indigo-950/80 backdrop-blur-sm">
-          <div className="bg-white border-2 border-indigo-900 rounded-2xl w-full max-w-sm p-5 shadow-2xl relative">
-            <button onClick={() => setMatchForTeamChoice(null)} className="absolute top-3 right-3 text-indigo-900 hover:text-red-600 bg-indigo-100 hover:bg-indigo-200 p-1.5 rounded-full transition-colors z-10"><X className="w-4 h-4" /></button>
-            <h3 className="font-extrabold text-indigo-900 text-lg mb-3">Seleziona Fantasquadra</h3>
-            <p className="text-xs text-gray-600 mb-4">Scegli per quale fantasquadra generare il dettaglio punti di questa partita.</p>
-            <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
-              {rankedTeams.map((team: any) => {
-                const matchBreakdowns = getTeamMatchBreakdownList(team);
-                const breakdown = matchBreakdowns.find((b: any) => b.matchId === matchForTeamChoice.id);
-                if (!breakdown) return null;
-
-                return (
-                  <button
-                    key={team.id || team.nomeFantasquadra}
-                    onClick={() => {
-                       generatePartitaSquadraPdf(matchForTeamChoice, team.nomeFantasquadra, breakdown);
-                       setMatchForTeamChoice(null);
-                    }}
-                    className="w-full text-left bg-gray-50 hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 p-3 rounded-xl font-bold text-sm text-indigo-900 flex justify-between items-center transition-colors"
-                  >
-                    <div>
-                      <span className="block truncate max-w-[220px]">{team.nomeFantasquadra}</span>
-                      <span className="block text-[10px] text-gray-500 font-medium">({team.nomePartecipante})</span>
-                    </div>
-                    <Download className="w-4 h-4 text-indigo-500 shrink-0" />
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function GeneralReportModal({ rankedTeams, getTeamMatchBreakdownList, onClose, generateGeneralReportPdf, partiteChiuse }: any) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-indigo-950/80 backdrop-blur-sm px-4">
-      <div className="bg-white border-2 border-indigo-900 rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-3 right-3 text-indigo-900 hover:text-red-600 bg-indigo-100 hover:bg-indigo-200 p-1.5 rounded-full transition-colors z-10">
-          <X className="w-5 h-5" />
-        </button>
-
-        <div className="p-5 font-sans">
-          <div className="border-b border-indigo-100 pb-4 mb-4 pr-6">
-            <h3 className="text-lg font-black text-indigo-950 mb-1 leading-tight uppercase tracking-tight">
-              📄 Referto Generale
-            </h3>
-            <p className="text-xs text-indigo-700 font-extrabold flex items-center justify-between">
-              Classifica e Punteggi di tutte le squadre
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            <div>
-              <h4 className="text-xs font-black uppercase text-indigo-900 bg-indigo-100 px-2 py-1 rounded inline-block mb-3">1. Classifica Generale</h4>
-              <div className="overflow-x-auto rounded-xl border border-indigo-200 shadow-sm">
-                <table className="w-full text-[10px] text-left border-collapse">
-                  <thead>
-                    <tr className="bg-indigo-800 text-white font-extrabold uppercase tracking-wider">
-                      <th className="p-2 border-b border-indigo-900">Pos</th>
-                      <th className="p-2 border-b border-indigo-900">Squadra</th>
-                      <th className="p-2 border-b border-indigo-900">Presidente</th>
-                      <th className="p-2 border-b border-indigo-900 text-right">Punti Fanta</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rankedTeams.map((team: any, idx: number) => (
-                      <tr key={team.id || team.nomeFantasquadra} className="border-b border-indigo-100 hover:bg-indigo-50 text-gray-800">
-                        <td className="p-2 font-black">{idx + 1}°</td>
-                        <td className="p-2 font-extrabold truncate max-w-[120px]">{team.nomeFantasquadra}</td>
-                        <td className="p-2 font-semibold truncate max-w-[100px]">{team.nomePartecipante}</td>
-                        <td className="p-2 font-mono font-black text-right text-indigo-700">{team.score} pt</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="text-xs font-black uppercase text-indigo-900 bg-indigo-100 px-2 py-1 rounded inline-block mb-3">2. Dettagli per Squadra</h4>
-              <div className="space-y-4">
-                {rankedTeams.map((team: any) => {
-                  const breakdowns = getTeamMatchBreakdownList(team);
-                  return (
-                    <div key={team.id || team.nomeFantasquadra} className="bg-indigo-50 border border-indigo-200 rounded-xl p-3">
-                      <h5 className="font-extrabold text-[11px] text-indigo-900 uppercase border-b border-indigo-200 pb-1 mb-2">⚽ {team.nomeFantasquadra} ({team.score} pt)</h5>
-                      {breakdowns.length === 0 ? (
-                        <p className="text-[10px] italic text-indigo-600">Nessuna partita refertata</p>
-                      ) : (
-                        <div className="space-y-2">
-                          {breakdowns.map((mb: any, mIdx: number) => (
-                           <div key={mIdx} className="bg-white border border-indigo-100 rounded-lg p-2 text-[9px] flexflex-col gap-1">
-                             <div className="flex justify-between items-center bg-gray-50 p-1 rounded font-bold mb-1 border-b border-gray-100">
-                               <span className="text-gray-800 uppercase tracking-widest">{mb.dettagli.split(" - ")[0]}</span>
-                               <span className="text-indigo-700 bg-indigo-100 px-1 rounded">+{mb.puntiTotaliMatch} pt</span>
-                             </div>
-                             <div className="flex flex-wrap gap-1.5">
-                               {mb.giocatoriKpi.map((kpi: any, kIdx: number) => {
-                                 const isOut = kpi.stato === "Sostituito" || kpi.stato === "Assente";
-                                 return (
-                                   <div key={kIdx} className={`px-1.5 py-0.5 rounded border ${isOut ? "bg-red-50 text-red-700 border-red-200 line-through opacity-70" : "bg-indigo-50 text-indigo-800 border-indigo-200 font-bold"}`}>
-                                      {kpi.nome}: {isOut ? "0" : kpi.fantaScore}pt
-                                   </div>
-                                 )
-                               })}
-                             </div>
-                           </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 flex justify-center">
-            <button
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); generateGeneralReportPdf(rankedTeams, partiteChiuse, getTeamMatchBreakdownList); }}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-[11px] px-4 py-2 flex items-center justify-center gap-2 rounded-xl shadow w-full font-extrabold uppercase transition-transform hover:-translate-y-0.5"
-            >
-              <Download className="w-4 h-4" />
-              Scarica PDF Ufficiale
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MatchBreakdownModal({
-  mb,
-  onClose,
-  generateMatchPdf,
-  teamName,
-}: {
-  mb: any;
-  onClose: () => void;
-  generateMatchPdf: any;
-  teamName: string;
-}) {
-  if (!mb) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-indigo-950/80 backdrop-blur-sm px-4">
-      <div
-        className="bg-white border-2 border-indigo-900 rounded-2xl w-full max-w-sm max-h-[85vh] overflow-y-auto shadow-2xl relative"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-indigo-900 hover:text-red-600 bg-indigo-100 hover:bg-indigo-200 p-1.5 rounded-full transition-colors z-10"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        <div className="p-5 font-sans">
-          <div className="border-b border-indigo-100 pb-3 mb-4 pr-6">
-            <h3 className="text-sm font-black text-indigo-950 mb-1 leading-tight uppercase tracking-tight">
-              ⚔️ {mb.dettagli}
-            </h3>
-            <div className="flex flex-col gap-1 mb-2">
-              <p className="text-xs text-indigo-700 font-extrabold flex items-center justify-between">
-                <span>
-                  Risultato:{" "}
-                  <span className="text-indigo-900 bg-indigo-100 px-1.5 py-0.5 rounded ml-1">
-                    {mb.risultato}
-                  </span>
-                </span>
-                <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-lg border border-yellow-300 font-black">
-                  + {mb.puntiTotaliMatch} pt
-                </span>
-              </p>
-              {mb.note && (
-                <div className="text-[10px] text-indigo-600/80 italic mt-0.5 max-h-16 overflow-y-auto w-full break-words">
-                  <span className="font-semibold not-italic">Note:</span> {mb.note}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            {mb.giocatoriKpi.map((kpi: any, kIdx: number) => {
-              const highlights: string[] = [];
-              if (kpi.gol > 0)
-                highlights.push(`⚽ ${kpi.gol} Gol (+${kpi.gol * GOAL_POINTS})`);
-              if (kpi.assist > 0)
-                highlights.push(`🤝 ${kpi.assist} Assist (+${kpi.assist * ASSIST_POINTS})`);
-              if (kpi.amm > 0)
-                highlights.push(`🟨 ${kpi.amm} Amm (-${kpi.amm * 0.5})`);
-              if (kpi.rossi > 0)
-                highlights.push(`🟥 ${kpi.rossi} Esp (-${kpi.rossi * 1})`);
-              if (kpi.bonusBreakdownStr) {
-                highlights.push(`🎒 Bonus: ${kpi.bonusBreakdownStr}`);
-              } else if (kpi.bonusPts !== 0) {
-                highlights.push(
-                  `🎒 ${kpi.bonusPts > 0 ? "+" : ""}${kpi.bonusPts} Bonus`,
-                );
-              }
-              if (kpi.malusBrt) {
-                highlights.push(`📦 Malus BRT (-1 Izycoin)`);
-              }
-              const malusSubiti = kpi.subitiAzione + kpi.subitiPiazzato + kpi.subitiRigore;
-              if (malusSubiti > 0) {
-                highlights.push(`🥅 ${malusSubiti} Gol Subiti`);
-              }
-
-              const isSostituito = kpi.stato === "Sostituito";
-              const isSubentrato = kpi.stato === "Subentrato";
-              const isAssente = kpi.stato === "Assente";
-              const displayPoints =
-                isSostituito || isAssente ? "0.0" : kpi.fantaScore;
-
-              let statusBadge = "";
-              const isPanchina =
-                kpi.stato === "Panchina" || kpi.ruolo === "Panchina";
-              if (isSostituito) statusBadge = " 🔄 Uscito";
-              else if (isSubentrato) statusBadge = " ➡️ Entrato";
-              else if (isAssente) statusBadge = " ❌ Assente";
-              else if (isPanchina && !isSubentrato) statusBadge = " 🎽 Pan.";
-
-              return (
-                <div
-                  key={kIdx}
-                  className={`p-3 rounded-xl border ${isSubentrato ? "bg-sky-50 border-sky-200" : isSostituito || isAssente ? "bg-red-50 border-red-200 opacity-60" : "bg-indigo-50 border-indigo-100"}`}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-extrabold text-xs text-gray-900 truncate pr-2">
-                      {kpi.nome}{" "}
-                      {statusBadge && (
-                        <span className="font-bold text-[9px] text-gray-500 uppercase ml-1 tracking-wider">
-                          {statusBadge}
-                        </span>
-                      )}
-                    </span>
-                    <div className="flex items-center gap-2">
-                       {!(isSostituito || isAssente) && kpi.matchChange !== undefined && (
-                          <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md border ${kpi.matchChange > 0 ? "bg-green-100 text-green-700 border-green-300" : kpi.matchChange < 0 ? "bg-red-100 text-red-700 border-red-300" : "bg-gray-100 text-gray-600 border-gray-300"}`}>
-                            {kpi.matchChange > 0 ? `📈 +${kpi.matchChange}` : kpi.matchChange < 0 ? `📉 ${kpi.matchChange}` : `➖ ${kpi.matchChange}`} Valore
-                          </span>
-                       )}
-                      <span
-                        className={`font-mono font-black text-sm ${isSubentrato ? "text-sky-700" : isSostituito || isAssente ? "text-red-700" : "text-indigo-700"}`}
-                      >
-                        {displayPoints} pt
-                      </span>
-                    </div>
-                  </div>
-
-                  {highlights.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5 mt-2 transition-all">
-                      {highlights.map((h, hIdx) => {
-                        let colorClass =
-                          "bg-gray-100 text-gray-700 border-gray-200";
-                        if (h.includes("⚽"))
-                          colorClass =
-                            "bg-indigo-100 text-indigo-800 border-indigo-300 shadow-[0_0_6px_rgba(52,211,153,0.3)]";
-                        if (h.includes("🤝"))
-                          colorClass =
-                            "bg-blue-100 text-blue-800 border-blue-300";
-                        if (h.includes("🟨"))
-                          colorClass =
-                            "bg-yellow-100 text-yellow-800 border-yellow-300";
-                        if (h.includes("🟥"))
-                          colorClass = "bg-red-100 text-red-800 border-red-300";
-                        if (h.includes("🎒"))
-                          colorClass =
-                            "bg-purple-100 text-purple-800 border-purple-300";
-                        if (h.includes("📦"))
-                          colorClass =
-                            "bg-amber-100 text-amber-805 border-amber-300";
-                        if (h.includes("🥅"))
-                          colorClass =
-                            "bg-orange-100 text-orange-800 border-orange-300";
-
-                        return (
-                          <span
-                            key={hIdx}
-                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${colorClass}`}
-                          >
-                            {h}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    !isSostituito &&
-                    !isAssente && (
-                      <div className="text-[10px] text-gray-400 italic">
-                        Nessun bonus/malus
-                      </div>
-                    )
-                  )}
-
-                  {kpi.stato === "Panchina" && kpi.unassignedBonuses && kpi.unassignedBonuses.length > 0 && (
-                    <div className="mt-3 pt-2.5 border-t border-red-100 flex flex-col gap-1">
-                      <span className="text-[9px] font-black text-red-650 uppercase tracking-wide flex items-center gap-1.5">
-                        ⚠️ Bonus Non Assegnati (Panchina):
-                      </span>
-                      <div className="flex flex-wrap gap-1 mt-0.5">
-                        {kpi.unassignedBonuses.map((ub: string, ubIdx: number) => (
-                          <span
-                            key={ubIdx}
-                            className="bg-red-50 text-red-700 border border-red-200 text-[9px] font-extrabold px-1.5 py-0.5 rounded inline-block"
-                          >
-                            {ub}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                 </div>
-              );
-            })}
-          </div>
-
-          <div className="mt-5 flex justify-center">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                generateMatchPdf(teamName, mb);
-              }}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-[11px] px-4 py-2 rounded-xl shadow mt-1 font-extrabold uppercase transition-transform hover:-translate-y-0.5 flex items-center justify-center gap-2 w-full cursor-pointer"
-            >
-              <Download className="w-4 h-4" />
-              Scarica Referto Completo PDF
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  ],
+  "consigli": [
+    {
+      "autore": "per aigoogle",
+      "letto": true,
+      "id": "c-1780868292204-fb9jn",
+      "data": "07/06/2026, 21:38:12",
+      "testo": "sezione ricarica, adesso c'è un menu a tendina, voglio poter selezionare i giocatori da un elenco con caselle da spuntare, per ogni giocatore che spunto deve comparire la casellina nella quale indicare l'importo (va bene la storia dei 5 10 15 , ma voglio poter inserire anche altri importi manualmente. poi salvo e mandi tutto insiema, i giocatori no selezionati devono considerarsi non versanti e non aggiungere niente al saldo. cosa ne dici, no coding - questo messaggio di errore: Attenzione / Errore\n\nAzione bloccata: è obbligatorio verificare tutti i giocatori per i bonus generici e personali. Riassunto giocatori mancanti: • Per i Bonus Generici mancano 1 giocatori all'appello. Attenzione: usa il tasto 'Assegna Nessun Bonus/Malus a tutti i rimanenti' in fondo alla tab corrispondente per velocizzare la procedura. deve contenere la sezione e il nome del giocatore - ricordati che nella sezione referto gara devono essere valorizzati tutti i giocatori, nel senso che se qualcuno non fa gol, non fa assit non prende giallo o rosso, io devo poter dire che non neha preso pspuntando una casella, il controllo prima del referto deve considerare anche questo aspetto."
+    },
+    {
+      "testo": "Frocio",
+      "data": "08/06/2026, 21:25:41",
+      "id": "c-1780953941673-qidu2",
+      "letto": true,
+      "autore": "Essegua"
+    },
+    {
+      "testo": "Assegna bonus presidenziale semplice a Pinna anche se non dovrebbe: correggi",
+      "data": "11/06/2026, 13:50:31",
+      "id": "c-1781185831233-3ptp0",
+      "autore": "Roberto",
+      "letto": false
+    }
+  ],
+  "bonuses": [
+    {
+      "punti": 0,
+      "descrizione": "0 punti per gol segnato in posizione di Pivot",
+      "id": "gen_gol_pivot",
+      "nome": "⚽ Gol Pivot 🎯"
+    },
+    {
+      "punti": 2,
+      "descrizione": "+2 punti per gol segnato dalla zona centrale",
+      "id": "gen_gol_centrale",
+      "nome": "⚽ Gol Centrale 💣"
+    },
+    {
+      "punti": 1,
+      "descrizione": "+1 punto extra per gol segnato dalla fascia laterale",
+      "id": "gen_gol_laterale",
+      "nome": "⚽ Gol Laterale 🚀",
+      "isManuale": true
+    },
+    {
+      "punti": 5,
+      "descrizione": "+5 punti per gol segnato dal portiere",
+      "nome": "🧤 Gol Portiere 🥅🦅",
+      "id": "gen_gol_portiere"
+    },
+    {
+      "descrizione": "+2 punti per assist per gol a porta (quasi) spalancata",
+      "id": "gen_assist_merda",
+      "nome": "👼 Assist per gol facile 📉",
+      "punti": 2
+    },
+    {
+      "punti": 5,
+      "descrizione": "+5 punti per rete inviolata (Clean Sheet)",
+      "nome": "🧤 Portiere Imbattuto 🛑",
+      "id": "gen_imbattuto"
+    },
+    {
+      "punti": 2,
+      "descrizione": "+2 punti se il portiere subisce meno di 3 gol nel match",
+      "id": "gen_subisce_meno_3",
+      "nome": "🧤 Portiere subisce 2 gol 🛡️"
+    },
+    {
+      "nome": "🧤 Rigore Parato 🧤🥅",
+      "id": "gen_rigore_parato",
+      "descrizione": "+5 punti per rigore parato dal portiere",
+      "punti": 5
+    },
+    {
+      "punti": 3,
+      "descrizione": "+3 punti per tiro libero parato dal portiere",
+      "nome": "🧤 Tiro Libero Parato ⛔",
+      "id": "gen_tiro_libero_parato"
+    },
+    {
+      "punti": 3,
+      "nome": "👑 MVP Uccheddu 🥇",
+      "id": "gen_mvp_uccheddu",
+      "descrizione": "+3 punti come miglior giocatore eletto d'ufficio"
+    },
+    {
+      "punti": 3,
+      "descrizione": "+3 punti come miglior giocatore votato sui canali social",
+      "id": "gen_mvp_social",
+      "nome": "📱 MVP Social 🗳️"
+    },
+    {
+      "punti": 1,
+      "nome": "📰 Nominato nelle Pagelle 📝",
+      "id": "gen_pagelle",
+      "descrizione": "+1 punto per menzione d'onore o alta valutazione in pagella"
+    },
+    {
+      "punti": 1,
+      "nome": "🎬 Nominato negli Highlights 📽️",
+      "id": "gen_highlights",
+      "descrizione": "+1 punto per presenza nelle azioni salienti del video"
+    },
+    {
+      "punti": 2,
+      "id": "gen_porta_tifosi",
+      "nome": "👥 Porta tifosi alla partita 📢",
+      "descrizione": "+2 punti per aver portato amici o supporter sugli spalti"
+    },
+    {
+      "punti": 3,
+      "nome": "👩 Porta tifosa alla partita 💖",
+      "id": "gen_porta_tifosa",
+      "descrizione": "+3 punti per aver portato supporter femminile al campo"
+    },
+    {
+      "punti": -5,
+      "descrizione": "-5 punti per mancato pagamento della quota campo in giornata (Malus)",
+      "id": "gen_malus_quota",
+      "nome": "💸 Dimentica la Quota ❌"
+    },
+    {
+      "id": "gen_malus_indumento",
+      "nome": "👕 Sbaglia completino (cumulativo) ⚠️",
+      "descrizione": "-5 punti per indumento scompagnato o errato (Malus)",
+      "punti": -5
+    },
+    {
+      "punti": -3,
+      "id": "gen_malus_ritardo",
+      "nome": "⏰ Ritardo > 5 minuti ⏳",
+      "descrizione": "-3 punti per arrivo in ritardo oltre l'orario di convocazione (Malus)"
+    },
+    {
+      "nome": "💥 Rigore Sbagliato 🥅❌",
+      "id": "gen_malus_rigore_sbagliato",
+      "descrizione": "-5 punti per rigore calciato fuori o parato (Malus)",
+      "punti": -5
+    },
+    {
+      "punti": -3,
+      "descrizione": "-3 punti per tiro libero fallito o parato (Malus)",
+      "nome": "💥 Tiro Libero Sbagliato ❌",
+      "id": "gen_malus_tiro_libero_sbagliato"
+    },
+    {
+      "punti": -1,
+      "id": "gen_malus_ammonizione",
+      "nome": "🟨 Ammonizione Extra ⚠️",
+      "descrizione": "-1 punto per ammonizione (Malus addizionale/correttivo)"
+    },
+    {
+      "punti": -3,
+      "nome": "🟥 Espulsione Extra 🔴",
+      "id": "gen_malus_espulsione",
+      "descrizione": "-3 punti per cartellino rosso diretto o doppia ammonizione (Malus addizionale/correttivo)"
+    },
+    {
+      "id": "gen_protesta_arbitro",
+      "nome": "🗣️ Protesta con Arbitro 🦓",
+      "descrizione": "-2 punti per proteste plateali col direttore di gara (Malus)",
+      "punti": -2
+    },
+    {
+      "punti": -2,
+      "descrizione": "-5 punti per scenate o tensioni con compagni/allenatore (Malus)",
+      "nome": "🤬 Protesta contro propria panchina 📣",
+      "id": "gen_protesta_panchina"
+    },
+    {
+      "punti": -3,
+      "descrizione": "-3 punti per gesti violenti, insolenze o danni (calci alle porte/panchine) (Malus)",
+      "id": "gen_comportamento_non_easy",
+      "nome": "🔨 Comportamento Non Easy 🚫🥊"
+    },
+    {
+      "descrizione": "+5 punti se viene a tifare a bordo campo anche se non è stato convocato.",
+      "nome": "❤️ Bonus Vecchio Cuore",
+      "id": "gen_vecchio_cuore",
+      "punti": 5
+    },
+    {
+      "id": "gen_esultanza",
+      "nome": "🎉 Bonus Esultanza",
+      "descrizione": "+1 punto se festeggia dopo aver segnato un gol.",
+      "punti": 1
+    },
+    {
+      "descrizione": "+2 punti se abbraccia o dà il cinque a un compagno dopo un gol.",
+      "nome": "🫂 Bonus Esultanza di Gruppo",
+      "id": "gen_esultanza_gruppo",
+      "punti": 2
+    },
+    {
+      "descrizione": "+2 punti se mette like al post del Match Day.",
+      "id": "gen_social_reaction",
+      "nome": "👍 Bonus Reaction (Social)",
+      "punti": 2
+    },
+    {
+      "punti": 3,
+      "descrizione": "+3 punti se ricondivide il post del Match Day nelle proprie storie IG.",
+      "nome": "📤 Bonus Share Base (Social)",
+      "id": "gen_social_share"
+    },
+    {
+      "id": "gen_social_motivation",
+      "nome": "🔥 Bonus Influencer (Social)",
+      "descrizione": "+5 punti se ricondivide il post nelle storie aggiungendo un dettaglio (testo, emoji o GIF).",
+      "punti": 5
+    },
+    {
+      "punti": 2,
+      "nome": "🏷️ Bonus #adv (Social)",
+      "id": "gen_social_adv",
+      "descrizione": "+2 punti se pubblica una storia usando l'hashtag #FantaEasyRigging."
+    },
+    {
+      "punti": 3,
+      "descrizione": "+3 punti se pubblica una storia in cui dà il cinque al Presidente Pinna (+1 pt extra al Presidente se reposta la storia).",
+      "id": "gen_social_highfive",
+      "nome": "🖐️ Bonus High Five (Social)"
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Pinna",
+      "descrizione": "+3 punti. I Gol o gli Assist speciali presidenziali",
+      "id": "pinna_presidenziale",
+      "punti": 3,
+      "nome": "Bonus presidenziali 👑"
+    },
+    {
+      "descrizione": "+5 punti se gioca almeno 1’ nonostante gli infortuni",
+      "punti": 5,
+      "id": "pinna_lazzaro",
+      "nome": "Bonus Lazzaro 🩹",
+      "giocatoreId": "Pinna",
+      "isPersonale": true
+    },
+    {
+      "id": "orlandini_leggenda",
+      "nome": "Bonus Leggende 🌟",
+      "descrizione": "+3 punti per ogni Gol segnato",
+      "punti": 3,
+      "giocatoreId": "Orlandini",
+      "isPersonale": true
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Orlandini",
+      "descrizione": "+2 punti se ci degna della sua presenza al campo",
+      "id": "orlandini_buon_pastore",
+      "punti": 2,
+      "nome": "Bonus buon pastore 🐑"
+    },
+    {
+      "isPersonale": true,
+      "punti": 2,
+      "descrizione": "+2 punti se posta foto in fast food nei giorni antecedenti la partita (tag alla squadra)",
+      "nome": "McBonus 🍟",
+      "id": "pittiu_mcbonus",
+      "giocatoreId": "Pittiu"
+    },
+    {
+      "giocatoreId": "Pittiu",
+      "punti": 1,
+      "nome": "Bonus survivor 🛡️",
+      "descrizione": "+1 punto se conclude partita senza infortuni",
+      "id": "pittiu_survivor",
+      "isPersonale": true
+    },
+    {
+      "id": "pippia_papa",
+      "punti": 2,
+      "descrizione": "+2 punti se si presenta al campo in qualsiasi veste dopo la nascita del figlio",
+      "nome": "Bonus papà 🍼",
+      "giocatoreId": "Pippia",
+      "isPersonale": true
+    },
+    {
+      "giocatoreId": "Pippia",
+      "nome": "Bonus baby supporter 👶",
+      "punti": 5,
+      "descrizione": "+5 punti se pubblica story del figlio e tagga la società",
+      "id": "pippia_baby_supporter",
+      "isPersonale": true
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Pippia",
+      "nome": "Bonus baby supporter + Maglia/Logo 👕👕",
+      "punti": 10,
+      "descrizione": "+10 punti se compaiono maglia o logo della squadra",
+      "id": "pippia_baby_supporter_jersey"
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Scarpellini",
+      "descrizione": "+1 punto se si presenta al campo con ginocchiera",
+      "id": "scarpellini_tutela",
+      "punti": 1,
+      "nome": "Bonus tutela 🦵"
+    },
+    {
+      "descrizione": "+1 punto se cita Aldo, Giovanni e Giacomo prima, durante o dopo la partita",
+      "nome": "Bonus Tu lo conosci il trio 🎭",
+      "id": "scarpellini_trio",
+      "punti": 1,
+      "giocatoreId": "Scarpellini",
+      "isPersonale": true
+    },
+    {
+      "isPersonale": true,
+      "nome": "Bonus contabile 📊",
+      "id": "palmas_contabile",
+      "punti": 3,
+      "descrizione": "+3 punti se i calcoli a fine partita sono corretti e corrispondono coi saldi",
+      "giocatoreId": "Palmas"
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Palmas",
+      "descrizione": "+1 punto se sta in panchina senza lamentarsi del minutaggio",
+      "id": "palmas_reietto",
+      "punti": 1,
+      "nome": "Bonus serafico 🥱"
+    },
+    {
+      "giocatoreId": "Mulas",
+      "id": "mulas_chiquita",
+      "punti": 3,
+      "descrizione": "+3 punti se addenta una banana durante la partita",
+      "nome": "Bonus Chiquita 🍌",
+      "isPersonale": true
+    },
+    {
+      "giocatoreId": "Mulas",
+      "nome": "Bonus Michael Phelps 🏊🏻‍♂️ ",
+      "id": "mulas_levissima",
+      "descrizione": "+1 punto se si presenta al campo con i suoi occhialini da nuotatore",
+      "punti": 1,
+      "isPersonale": true
+    },
+    {
+      "id": "alimonda_mediterraneo",
+      "punti": 1,
+      "nome": "Bonus Mediterraneo 🫂",
+      "descrizione": "+1 punto se abbraccia Mulas dopo il gol",
+      "giocatoreId": "Alimonda",
+      "isPersonale": true
+    },
+    {
+      "isPersonale": true,
+      "id": "alimonda_fabrillazione",
+      "punti": 1,
+      "descrizione": "+1 punto se manda almeno 3 messaggi nella chat della squadra nel match day",
+      "nome": "Bonus Fabrillazione 💬",
+      "giocatoreId": "Alimonda"
+    },
+    {
+      "giocatoreId": "Lauro",
+      "punti": 1,
+      "nome": "Bonus Altissima, Purissima, Levissima 🪣",
+      "descrizione": "+1 punto se porta in panchina la sua borraccia da 10 litri",
+      "id": "lauro_bibitone",
+      "isPersonale": true
+    },
+    {
+      "nome": "Bonus divo della grigliata 😎",
+      "descrizione": "+1 punto se si presenta al campo con gli occhiali da sole",
+      "id": "lauro_divo",
+      "punti": 1,
+      "giocatoreId": "Lauro",
+      "isPersonale": true
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Addis",
+      "descrizione": "+3 punti se si presenta al campo dopo le ore 21:00",
+      "punti": 3,
+      "id": "addis_coprifuoco",
+      "nome": "Bonus coprifuoco 🌃"
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Addis",
+      "nome": "Bonus rischiatutto 🎲",
+      "id": "addis_rischiatutto",
+      "punti": 5,
+      "descrizione": "+5 punti se si trattiene al campo dopo il match"
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Scattu",
+      "punti": 1,
+      "id": "scattu_arrotino",
+      "descrizione": "+1 punto se carica la squadra con un suo classico urlaccio prima, durante o dopo la partita",
+      "nome": "Bonus È arrivato l'arrotino 📢"
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Scattu",
+      "descrizione": "+3 punti se si presenta al campo sobrio sorseggiando una bottiglietta d’acqua",
+      "nome": "Bonus sobrietà 🥛",
+      "id": "scattu_sobrieta",
+      "punti": 3
+    },
+    {
+      "giocatoreId": "Bayre",
+      "id": "bayre_jeff_turner",
+      "descrizione": "+5 punti se si presenta in panchina in qualsiasi veste con una birra in mano",
+      "punti": 5,
+      "nome": "Bonus Jeff Turner 🍺",
+      "isPersonale": true
+    },
+    {
+      "giocatoreId": "Bayre",
+      "punti": 10,
+      "descrizione": "+10 punti se gioca almeno 1’",
+      "nome": "Bonus redivivo 🧟",
+      "id": "bayre_redivivo",
+      "isPersonale": true
+    },
+    {
+      "giocatoreId": "Carrone",
+      "id": "carrone_polemichele",
+      "descrizione": "+7 punti se chiude una partita senza lamentarsi con l’arbitro",
+      "punti": 7,
+      "nome": "Bonus PoleMichele 🤬🚫",
+      "isPersonale": true
+    },
+    {
+      "isPersonale": true,
+      "punti": 1,
+      "descrizione": "+1 punto se nel riscaldamento, anziché tirare, fa almeno 2 giri di campo di corsa",
+      "nome": "Bonus atleta provetto 🏃‍♂️",
+      "id": "carrone_atleta",
+      "giocatoreId": "Carrone"
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Conti",
+      "nome": "Bonus memoria di ferro 🧠",
+      "id": "conti_memoria_ferro",
+      "punti": 1,
+      "descrizione": "+1 punto se chiude una partita senza sbagliare nomi dei compagni"
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Conti",
+      "descrizione": "+1 punto se nel match day conferma la sua presenza con messaggio in chat",
+      "nome": "Bonus fedeltà 🫡",
+      "punti": 1,
+      "id": "conti_fedelta"
+    },
+    {
+      "giocatoreId": "Mattana",
+      "punti": 1,
+      "descrizione": "+1 punto se si presenta al campo in bicicletta",
+      "id": "mattana_pogacar",
+      "nome": "Bonus Pogačar 🚲",
+      "isPersonale": true
+    },
+    {
+      "giocatoreId": "Mattana",
+      "punti": 1,
+      "descrizione": "+1 punto se prima o dopo il match effettua un riepilogo delle sue statistiche",
+      "nome": "Bonus Opta(na) 📊",
+      "id": "mattana_optana",
+      "isPersonale": true
+    },
+    {
+      "isPersonale": true,
+      "punti": 5,
+      "nome": "Bonus Piscina 🏊‍♂️",
+      "descrizione": "+5 punti se invita un compagno a non 'buttarsi' o simulare in partita",
+      "id": "garau_piscina",
+      "giocatoreId": "Garau"
+    },
+    {
+      "giocatoreId": "Garau",
+      "id": "garau_fedelta",
+      "nome": "Bonus Fedeltà 🤝",
+      "punti": 3,
+      "descrizione": "+3 punti se dà la disponibilità a giocare, anche se c'è già l'adesione di Mulas",
+      "isPersonale": true
+    },
+    {
+      "isPersonale": false,
+      "id": "bonus_1780841558931",
+      "descrizione": "-1 punto se cronista/pagellista sbaglia nome e/o cognome",
+      "punti": -1,
+      "nome": "Di Malus in peggio 😢"
+    },
+    {
+      "punti": -1,
+      "descrizione": "-1 punto se cronista/pagellista sbaglia nome della squadra (valido solo per i convocati)",
+      "nome": "Malus IzyReggae 🚫",
+      "id": "bonus_1780841561568",
+      "isPersonale": false
+    },
+    {
+      "isPersonale": false,
+      "nome": "As pigau malus 🤬",
+      "descrizione": "-5 punti se litiga con un compagno di squadra e lascia il campo senza chiarire",
+      "punti": -5,
+      "id": "bonus_1780842086000"
+    },
+    {
+      "isPersonale": false,
+      "punti": 1,
+      "nome": "Bonus Disponibilità ❤️🖤",
+      "id": "bonus_1780863339587",
+      "descrizione": "+1 punto se dà la disponibilità per la partita nel sondaggio presente nella chat di squadra (la disponibilità deve essere effettiva)"
+    },
+    {
+      "isPersonale": false,
+      "nome": "Malus Sbadatelli 🤦‍♂️",
+      "descrizione": "-3 punti se dopo il reminder in chat del presidente chiede quando e/o dove si gioca",
+      "id": "bonus_1780917716152",
+      "punti": -3
+    },
+    {
+      "punti": -5,
+      "nome": "Malusaldo 💸",
+      "id": "bonus_1780917901081",
+      "descrizione": "-5 punti se dimentica la quota a casa e va in rosso",
+      "isPersonale": false
+    },
+    {
+      "id": "bonus_1780917980734",
+      "descrizione": "-10 punti se rifila un pacco dopo la pubblicazione della lista dei convocati",
+      "nome": "Malus BRT 📦",
+      "punti": -10,
+      "isPersonale": false
+    },
+    {
+      "isPersonale": false,
+      "nome": "Google Malus 📍",
+      "id": "bonus_1780918082492",
+      "descrizione": "-5 punti se sostiene di aver sbagliato campo",
+      "punti": -5
+    },
+    {
+      "isPersonale": false,
+      "descrizione": "-5 punti se sostiene di aver sbagliato orario del match",
+      "punti": -5,
+      "id": "bonus_1780918144185",
+      "nome": "Malus o'clock ⏰"
+    },
+    {
+      "nome": "Bonus All you need is love ❣️",
+      "punti": 2,
+      "descrizione": "+2 punti se dedica il gol a fidanzata presente in tribuna (cumulativo col bonus esultanza)",
+      "id": "bonus_1780918615852",
+      "isPersonale": false
+    },
+    {
+      "isPersonale": false,
+      "id": "bonus_1780918799128",
+      "nome": "Bonus Miguel Ángel Guerrero 🥅📹",
+      "punti": 2,
+      "descrizione": "+2 punti se coinvolge i compagni in esultanza davanti alla telecamera (l'esultanza deve comparire negli highlights, cumulativo col bonus esultanza)"
+    },
+    {
+      "isPersonale": false,
+      "punti": 1,
+      "nome": "Bonus trenino del Bari ",
+      "id": "bonus_1780918869813",
+      "descrizione": "+1 punto se si lascia coinvolgere da compagno in esultanza davanti alla telecamera (l'esultanza deve comparire negli highlights, cumulativo col bonus esultanza)"
+    },
+    {
+      "isPersonale": false,
+      "punti": 2,
+      "nome": "Bonus terzo tempo 🍻",
+      "descrizione": "+2 punti se offre da bere dopo la partita (se offre in compagnia di altri compagni, il bonus viene esteso a tutti i generosi)",
+      "id": "bonus_1780918968021"
+    },
+    {
+      "isPersonale": false,
+      "descrizione": "+4 punti se si trattiene al campo dopo la partita",
+      "punti": 4,
+      "nome": "Bonus Més que un club 😎",
+      "id": "bonus_1780919041304"
+    },
+    {
+      "isPersonale": false,
+      "id": "bonus_1780919055788",
+      "nome": "Bonus Guardiano della notte 🌝",
+      "descrizione": "+1 punto se è l'ultimo o uno degli ultimi insieme ai compagni ad andarsene dal centro sportivo",
+      "punti": 1
+    },
+    {
+      "id": "bonus_1780919206691",
+      "nome": "Bonusaldo 😇",
+      "descrizione": "+1 punto se è in attivo nel saldo dopo il match",
+      "punti": 1,
+      "isPersonale": false
+    },
+    {
+      "punti": 3,
+      "descrizione": "+3 punti se il suo saldo dopo il match arriva almeno a € 5,00",
+      "nome": "Bonus cashback",
+      "id": "bonus_1780919270439",
+      "isPersonale": false
+    },
+    {
+      "isPersonale": false,
+      "id": "bonus_1780919271374",
+      "descrizione": "+5 punti se il suo saldo dopo il match arriva almeno a € 10,00",
+      "punti": 5,
+      "nome": "Bonus cashback gold"
+    },
+    {
+      "punti": -3,
+      "descrizione": "-3 punti se esulta in modo polemico verso un compagno dopo il gol",
+      "id": "bonus_1780919272646",
+      "nome": "Malus Porcella 👂👋",
+      "isPersonale": false
+    },
+    {
+      "isPersonale": false,
+      "id": "bonus_1780920233875",
+      "punti": 3,
+      "descrizione": "+3 al portiere se subisce un solo gol",
+      "nome": "Portiere (quasi) imbattuto 🧤"
+    },
+    {
+      "id": "bonus_1780920234719",
+      "descrizione": "-2 al portiere se subisce 4 gol",
+      "punti": -2,
+      "nome": "Portiere mani bucate 😵‍💫",
+      "isPersonale": false
+    },
+    {
+      "isPersonale": false,
+      "descrizione": "-3 punti al portiere se subisce 5 o più gol",
+      "punti": -3,
+      "nome": "Portiere paperetta 🦆",
+      "id": "bonus_1780920403037"
+    },
+    {
+      "isPersonale": false,
+      "nome": "Bonus VIP 👑 ",
+      "descrizione": "+2 punti se viene nominato nel resoconto settimanale di AT League",
+      "id": "bonus_1780951036015",
+      "punti": 2
+    },
+    {
+      "isPersonale": false,
+      "punti": 1,
+      "nome": "Bonus motivazionale 💪",
+      "descrizione": "+1 punto se motiva la squadra con un messaggio in chat nel giorno della partita",
+      "id": "bonus_1781001237055"
+    },
+    {
+      "isPersonale": false,
+      "descrizione": "+2 punti se viene a fare riscaldamento attivo con la squadra e poi non entra in campo per scelta tecnica",
+      "punti": 2,
+      "nome": "Bonus preparazione atletica 🏋️‍♀️",
+      "id": "bonus_1781001504715"
+    },
+    {
+      "descrizione": "+10 punti se viene richiamato all'ultimo momento e accetta di far parte della lista convocati, pronto a scendere in campo",
+      "nome": "Bonus salvagente 🛟 ",
+      "id": "bonus_1781028245748",
+      "punti": 10,
+      "isPersonale": false
+    },
+    {
+      "id": "bonus_1781028581619",
+      "punti": 1,
+      "nome": "Bonus vice cassiere 🪙 ",
+      "descrizione": "+1 punto a chi, in assenza del cassiere, raccoglie le quote, le dà all'arbitro e non sbaglia i saldi",
+      "isPersonale": false
+    },
+    {
+      "id": "bonus_1781075580791",
+      "descrizione": "+3 punti se eletto miglior portiere del match da AT League",
+      "punti": 3,
+      "nome": "Bonus Best GK AT League ⭐🧤",
+      "isPersonale": false
+    },
+    {
+      "isPersonale": false,
+      "descrizione": " +1 gol laterale",
+      "nome": "⚽ Gol Laterale 🚀",
+      "punti": 1,
+      "id": "bonus_1781113120417"
+    },
+    {
+      "isPersonale": false,
+      "giocatoreId": "",
+      "descrizione": "+3 punti al presidente che raddoppia i suoi bonus",
+      "nome": "1° Bonus Presidenziale ",
+      "id": "bonus_1781113156113",
+      "punti": 3
+    },
+    {
+      "isPersonale": false,
+      "punti": 2,
+      "id": "bonus_1781188431024",
+      "descrizione": "+2 punti a chi trasforma un calcio di rigore",
+      "nome": "Bonus rigore trasformato ⛳"
+    },
+    {
+      "isPersonale": false,
+      "id": "bonus_1781188432165",
+      "nome": "Bonus libero trasformato 🏌️",
+      "descrizione": "+4 punti a chi trasforma un tiro libero",
+      "punti": 4
+    }
+  ],
+  "sessioneMercatoLibero": false,
+  "scadenzaMercatoLibero": null,
+  "backupsBozze": [
+    {
+      "id": "backup_1781164219752",
+      "createdAt": "11/06/2026, 09:50:19",
+      "idPartita": "rr7v8hx-mq4yvx2m",
+      "dettagliPartita": "09/06/2026 20:45, Le Serre vs SOS Auto",
+      "presents": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre",
+        "Alberto Garau",
+        "Federico Addis",
+        "Mario Conti",
+        "Matteo Scattu",
+        "Nicola Orlandini",
+        "Sergio Pippia"
+      ],
+      "payers": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre"
+      ],
+      "costo": "40",
+      "risultato": "6-2 (V)",
+      "note": "Primo tempo non particolarmente brillante, ma Carrone e Mattana, autore di una doppietta su due assist perfetti di Pittiu, permettono ai nostri di chiudere la prima frazione avanti 3-2.\nNella ripresa, complice la maggiore profondità della rosa, arrivati al campo con appena cinque uomini a disposizione, i nostri prendono il largo. A segno ancora Pittiu e Mattana, entrambi ottimamente serviti da Lauro. Il definitivo 6-2 porta la firma di Mulas, che dopo un irresistibile coast to coast deve solo spingere in rete un preciso assist di Pinna, per il più classico dei \"gol della merda\".",
+      "goals": {
+        "Enrico Mulas": "1",
+        "Giampaolo Mattana": "3",
+        "Lorenzo Pittiu": "1",
+        "Michele Carrone": "1"
+      },
+      "assists": {
+        "Lorenzo Pittiu": "2",
+        "Salvatore Roberto Pinna": "1",
+        "Stefano Michele Lauro": "2"
+      },
+      "yellows": {},
+      "reds": {},
+      "subAzione": {
+        "Enrico Mulas": "2"
+      },
+      "subRigore": {},
+      "subPiazzato": {},
+      "selectedBonuses": {
+        "Enrico Mulas": [
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "gen_gol_portiere",
+          "gen_subisce_meno_3",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919206691",
+          "mulas_chiquita",
+          "mulas_levissima",
+          "bonus_1781075580791"
+        ],
+        "Fabrizio Alimonda": [
+          "bonus_1780863339587",
+          "alimonda_fabrillazione",
+          "gen_porta_tifosa",
+          "bonus_1780919270439"
+        ],
+        "Giampaolo Mattana": [
+          "bonus_1780863339587",
+          "gen_gol_laterale",
+          "gen_mvp_social",
+          "gen_esultanza_gruppo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "mattana_optana",
+          "bonus_1780919206691",
+          "gen_mvp_uccheddu"
+        ],
+        "Lorenzo Pittiu": [
+          "bonus_1780863339587",
+          "pittiu_mcbonus",
+          "gen_social_adv",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_gol_laterale",
+          "gen_assist_extra",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "pittiu_survivor",
+          "bonus_1781113120417"
+        ],
+        "Manuel Palmas": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_share",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "palmas_reietto"
+        ],
+        "Marco Scarpellini": [
+          "bonus_1780863339587",
+          "gen_malus_ritardo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "scarpellini_tutela",
+          "scarpellini_trio"
+        ],
+        "Michele Carrone": [
+          "bonus_1780863339587",
+          "gen_social_share",
+          "gen_social_reaction",
+          "gen_gol_laterale",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "carrone_polemichele",
+          "bonus_1781113120417"
+        ],
+        "Salvatore Roberto Pinna": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "bonus_1780919271374",
+          "gen_assist_merda",
+          "gen_porta_tifosa",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1781028581619",
+          "pinna_presidenziale",
+          "pinna_lazzaro"
+        ],
+        "Stefano Michele Lauro": [
+          "bonus_1780917716152",
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_assist_extra",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "bonus_1780919270439",
+          "lauro_bibitone",
+          "lauro_divo"
+        ],
+        "Davide Bayre": [
+          "bonus_1780919041304",
+          "bonus_1780919270439",
+          "bonus_1781028245748",
+          "bayre_redivivo"
+        ],
+        "Matteo Scattu": [
+          "gen_social_reaction"
+        ],
+        "Sergio Pippia": [
+          "gen_social_adv",
+          "gen_social_motivation",
+          "gen_vecchio_cuore",
+          "gen_porta_tifosa",
+          "bonus_1780919041304",
+          "bonus_1781001237055"
+        ]
+      },
+      "malusBrtPlayers": {},
+      "statoPresenza": {
+        "Enrico Mulas": "giocato",
+        "Fabrizio Alimonda": "giocato",
+        "Giampaolo Mattana": "giocato",
+        "Lorenzo Pittiu": "giocato",
+        "Manuel Palmas": "giocato",
+        "Marco Scarpellini": "giocato",
+        "Michele Carrone": "giocato",
+        "Salvatore Roberto Pinna": "giocato",
+        "Stefano Michele Lauro": "giocato",
+        "Davide Bayre": "giocato",
+        "Alberto Garau": "assente",
+        "Federico Addis": "assente",
+        "Mario Conti": "assente",
+        "Matteo Scattu": "assente",
+        "Nicola Orlandini": "assente",
+        "Sergio Pippia": "assente"
+      },
+      "sostitutoDa": {
+        "Enrico Mulas": "",
+        "Fabrizio Alimonda": "",
+        "Giampaolo Mattana": "",
+        "Lorenzo Pittiu": "",
+        "Manuel Palmas": "",
+        "Marco Scarpellini": "",
+        "Michele Carrone": "",
+        "Salvatore Roberto Pinna": "",
+        "Stefano Michele Lauro": "",
+        "Davide Bayre": "",
+        "Alberto Garau": "",
+        "Federico Addis": "",
+        "Mario Conti": "",
+        "Matteo Scattu": "",
+        "Nicola Orlandini": "",
+        "Sergio Pippia": ""
+      },
+      "noEventsPlayers": {
+        "Fabrizio Alimonda": true,
+        "Manuel Palmas": true,
+        "Marco Scarpellini": true,
+        "Davide Bayre": true
+      },
+      "verifiedGeneric": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Nicola Orlandini": true
+      },
+      "verifiedPersonal": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Matteo Scattu": true,
+        "Nicola Orlandini": true,
+        "Sergio Pippia": true
+      }
+    },
+    {
+      "id": "backup_1781163504121",
+      "createdAt": "11/06/2026, 09:38:24",
+      "idPartita": "rr7v8hx-mq4yvx2m",
+      "dettagliPartita": "09/06/2026 20:45, Le Serre vs SOS Auto",
+      "presents": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre",
+        "Alberto Garau",
+        "Federico Addis",
+        "Mario Conti",
+        "Matteo Scattu",
+        "Nicola Orlandini",
+        "Sergio Pippia"
+      ],
+      "payers": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre"
+      ],
+      "costo": "40",
+      "risultato": "6-2 (V)",
+      "note": "Primo tempo non particolarmente brillante, ma Carrone e Mattana, autore di una doppietta su due assist perfetti di Pittiu, permettono ai nostri di chiudere la prima frazione avanti 3-2.\nNella ripresa, complice la maggiore profondità della rosa, arrivati al campo con appena cinque uomini a disposizione, i nostri prendono il largo. A segno ancora Pittiu e Mattana, entrambi ottimamente serviti da Lauro. Il definitivo 6-2 porta la firma di Mulas, che dopo un irresistibile coast to coast deve solo spingere in rete un preciso assist di Pinna, per il più classico dei \"gol della merda\".",
+      "goals": {
+        "Enrico Mulas": "1",
+        "Giampaolo Mattana": "3",
+        "Lorenzo Pittiu": "1",
+        "Michele Carrone": "1"
+      },
+      "assists": {
+        "Lorenzo Pittiu": "2",
+        "Salvatore Roberto Pinna": "1",
+        "Stefano Michele Lauro": "2"
+      },
+      "yellows": {},
+      "reds": {},
+      "subAzione": {
+        "Enrico Mulas": "2"
+      },
+      "subRigore": {},
+      "subPiazzato": {},
+      "selectedBonuses": {
+        "Enrico Mulas": [
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "gen_gol_portiere",
+          "gen_subisce_meno_3",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919206691",
+          "mulas_chiquita",
+          "mulas_levissima",
+          "bonus_1781075580791"
+        ],
+        "Fabrizio Alimonda": [
+          "bonus_1780863339587",
+          "alimonda_fabrillazione",
+          "gen_porta_tifosa",
+          "bonus_1780919270439"
+        ],
+        "Giampaolo Mattana": [
+          "bonus_1780863339587",
+          "gen_gol_laterale",
+          "gen_mvp_social",
+          "gen_esultanza_gruppo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "mattana_optana",
+          "bonus_1780919206691",
+          "gen_mvp_uccheddu"
+        ],
+        "Lorenzo Pittiu": [
+          "bonus_1780863339587",
+          "pittiu_mcbonus",
+          "gen_social_adv",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_gol_laterale",
+          "gen_assist_extra",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "pittiu_survivor",
+          "bonus_1781113120417"
+        ],
+        "Manuel Palmas": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_share",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "palmas_reietto"
+        ],
+        "Marco Scarpellini": [
+          "bonus_1780863339587",
+          "gen_malus_ritardo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "scarpellini_tutela",
+          "scarpellini_trio"
+        ],
+        "Michele Carrone": [
+          "bonus_1780863339587",
+          "gen_social_share",
+          "gen_social_reaction",
+          "gen_gol_laterale",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "carrone_polemichele",
+          "bonus_1781113120417"
+        ],
+        "Salvatore Roberto Pinna": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "bonus_1780919271374",
+          "gen_assist_merda",
+          "gen_porta_tifosa",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1781028581619",
+          "pinna_presidenziale",
+          "pinna_lazzaro"
+        ],
+        "Stefano Michele Lauro": [
+          "bonus_1780917716152",
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_assist_extra",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "bonus_1780919270439",
+          "lauro_bibitone",
+          "lauro_divo"
+        ],
+        "Davide Bayre": [
+          "bonus_1780919041304",
+          "bonus_1780919270439",
+          "bonus_1781028245748",
+          "bayre_redivivo"
+        ],
+        "Matteo Scattu": [
+          "gen_social_reaction"
+        ],
+        "Sergio Pippia": [
+          "gen_social_adv",
+          "gen_social_motivation",
+          "gen_vecchio_cuore",
+          "gen_porta_tifosa",
+          "bonus_1780919041304",
+          "bonus_1781001237055"
+        ]
+      },
+      "malusBrtPlayers": {},
+      "statoPresenza": {
+        "Enrico Mulas": "giocato",
+        "Fabrizio Alimonda": "giocato",
+        "Giampaolo Mattana": "giocato",
+        "Lorenzo Pittiu": "giocato",
+        "Manuel Palmas": "giocato",
+        "Marco Scarpellini": "giocato",
+        "Michele Carrone": "giocato",
+        "Salvatore Roberto Pinna": "giocato",
+        "Stefano Michele Lauro": "giocato",
+        "Davide Bayre": "giocato",
+        "Alberto Garau": "assente",
+        "Federico Addis": "assente",
+        "Mario Conti": "assente",
+        "Matteo Scattu": "assente",
+        "Nicola Orlandini": "assente",
+        "Sergio Pippia": "assente"
+      },
+      "sostitutoDa": {
+        "Enrico Mulas": "",
+        "Fabrizio Alimonda": "",
+        "Giampaolo Mattana": "",
+        "Lorenzo Pittiu": "",
+        "Manuel Palmas": "",
+        "Marco Scarpellini": "",
+        "Michele Carrone": "",
+        "Salvatore Roberto Pinna": "",
+        "Stefano Michele Lauro": "",
+        "Davide Bayre": "",
+        "Alberto Garau": "",
+        "Federico Addis": "",
+        "Mario Conti": "",
+        "Matteo Scattu": "",
+        "Nicola Orlandini": "",
+        "Sergio Pippia": ""
+      },
+      "noEventsPlayers": {
+        "Fabrizio Alimonda": true,
+        "Manuel Palmas": true,
+        "Marco Scarpellini": true,
+        "Davide Bayre": true
+      },
+      "verifiedGeneric": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Nicola Orlandini": true
+      },
+      "verifiedPersonal": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Matteo Scattu": true,
+        "Nicola Orlandini": true,
+        "Sergio Pippia": true
+      }
+    },
+    {
+      "id": "backup_1781163217185",
+      "createdAt": "11/06/2026, 09:33:37",
+      "idPartita": "rr7v8hx-mq4yvx2m",
+      "dettagliPartita": "09/06/2026 20:45, Le Serre vs SOS Auto",
+      "presents": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre",
+        "Alberto Garau",
+        "Federico Addis",
+        "Mario Conti",
+        "Matteo Scattu",
+        "Nicola Orlandini",
+        "Sergio Pippia"
+      ],
+      "payers": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre"
+      ],
+      "costo": "40",
+      "risultato": "6-2 (V)",
+      "note": "Primo tempo non particolarmente brillante, ma Carrone e Mattana, autore di una doppietta su due assist perfetti di Pittiu, permettono ai nostri di chiudere la prima frazione avanti 3-2.\nNella ripresa, complice la maggiore profondità della rosa, arrivati al campo con appena cinque uomini a disposizione, i nostri prendono il largo. A segno ancora Pittiu e Mattana, entrambi ottimamente serviti da Lauro. Il definitivo 6-2 porta la firma di Mulas, che dopo un irresistibile coast to coast deve solo spingere in rete un preciso assist di Pinna, per il più classico dei \"gol della merda\".",
+      "goals": {
+        "Enrico Mulas": "1",
+        "Giampaolo Mattana": "3",
+        "Lorenzo Pittiu": "1",
+        "Michele Carrone": "1"
+      },
+      "assists": {
+        "Lorenzo Pittiu": "2",
+        "Salvatore Roberto Pinna": "1",
+        "Stefano Michele Lauro": "2"
+      },
+      "yellows": {},
+      "reds": {},
+      "subAzione": {
+        "Enrico Mulas": "2"
+      },
+      "subRigore": {},
+      "subPiazzato": {},
+      "selectedBonuses": {
+        "Enrico Mulas": [
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "gen_gol_portiere",
+          "gen_subisce_meno_3",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919206691",
+          "mulas_chiquita",
+          "mulas_levissima",
+          "bonus_1781075580791"
+        ],
+        "Fabrizio Alimonda": [
+          "bonus_1780863339587",
+          "alimonda_fabrillazione",
+          "gen_porta_tifosa",
+          "bonus_1780919270439"
+        ],
+        "Giampaolo Mattana": [
+          "bonus_1780863339587",
+          "gen_gol_laterale",
+          "gen_mvp_social",
+          "gen_esultanza_gruppo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "mattana_optana",
+          "bonus_1780919206691",
+          "gen_mvp_uccheddu"
+        ],
+        "Lorenzo Pittiu": [
+          "bonus_1780863339587",
+          "pittiu_mcbonus",
+          "gen_social_adv",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_gol_laterale",
+          "gen_assist_extra",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "pittiu_survivor",
+          "bonus_1781113120417"
+        ],
+        "Manuel Palmas": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_share",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "palmas_reietto"
+        ],
+        "Marco Scarpellini": [
+          "bonus_1780863339587",
+          "gen_malus_ritardo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "scarpellini_tutela",
+          "scarpellini_trio"
+        ],
+        "Michele Carrone": [
+          "bonus_1780863339587",
+          "gen_social_share",
+          "gen_social_reaction",
+          "gen_gol_laterale",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "carrone_polemichele",
+          "bonus_1781113120417"
+        ],
+        "Salvatore Roberto Pinna": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "bonus_1780919271374",
+          "gen_assist_merda",
+          "gen_porta_tifosa",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1781028581619",
+          "pinna_presidenziale",
+          "pinna_lazzaro"
+        ],
+        "Stefano Michele Lauro": [
+          "bonus_1780917716152",
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_assist_extra",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "bonus_1780919270439",
+          "lauro_bibitone",
+          "lauro_divo"
+        ],
+        "Davide Bayre": [
+          "bonus_1780919041304",
+          "bonus_1780919270439",
+          "bonus_1781028245748",
+          "bayre_redivivo"
+        ],
+        "Matteo Scattu": [
+          "gen_social_reaction"
+        ],
+        "Sergio Pippia": [
+          "gen_social_adv",
+          "gen_social_motivation",
+          "gen_vecchio_cuore",
+          "gen_porta_tifosa",
+          "bonus_1780919041304",
+          "bonus_1781001237055"
+        ]
+      },
+      "malusBrtPlayers": {},
+      "statoPresenza": {
+        "Enrico Mulas": "giocato",
+        "Fabrizio Alimonda": "giocato",
+        "Giampaolo Mattana": "giocato",
+        "Lorenzo Pittiu": "giocato",
+        "Manuel Palmas": "giocato",
+        "Marco Scarpellini": "giocato",
+        "Michele Carrone": "giocato",
+        "Salvatore Roberto Pinna": "giocato",
+        "Stefano Michele Lauro": "giocato",
+        "Davide Bayre": "giocato",
+        "Alberto Garau": "assente",
+        "Federico Addis": "assente",
+        "Mario Conti": "assente",
+        "Matteo Scattu": "assente",
+        "Nicola Orlandini": "assente",
+        "Sergio Pippia": "assente"
+      },
+      "sostitutoDa": {
+        "Enrico Mulas": "",
+        "Fabrizio Alimonda": "",
+        "Giampaolo Mattana": "",
+        "Lorenzo Pittiu": "",
+        "Manuel Palmas": "",
+        "Marco Scarpellini": "",
+        "Michele Carrone": "",
+        "Salvatore Roberto Pinna": "",
+        "Stefano Michele Lauro": "",
+        "Davide Bayre": "",
+        "Alberto Garau": "",
+        "Federico Addis": "",
+        "Mario Conti": "",
+        "Matteo Scattu": "",
+        "Nicola Orlandini": "",
+        "Sergio Pippia": ""
+      },
+      "noEventsPlayers": {
+        "Fabrizio Alimonda": true,
+        "Manuel Palmas": true,
+        "Marco Scarpellini": true,
+        "Davide Bayre": true
+      },
+      "verifiedGeneric": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Nicola Orlandini": true
+      },
+      "verifiedPersonal": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Matteo Scattu": true,
+        "Nicola Orlandini": true,
+        "Sergio Pippia": true
+      }
+    },
+    {
+      "id": "backup_1781162955845",
+      "createdAt": "11/06/2026, 09:29:15",
+      "idPartita": "rr7v8hx-mq4yvx2m",
+      "dettagliPartita": "09/06/2026 20:45, Le Serre vs SOS Auto",
+      "presents": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre",
+        "Alberto Garau",
+        "Federico Addis",
+        "Mario Conti",
+        "Matteo Scattu",
+        "Nicola Orlandini",
+        "Sergio Pippia"
+      ],
+      "payers": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre"
+      ],
+      "costo": "40",
+      "risultato": "6-2 (V)",
+      "note": "Primo tempo non particolarmente brillante, ma Carrone e Mattana, autore di una doppietta su due assist perfetti di Pittiu, permettono ai nostri di chiudere la prima frazione avanti 3-2.\nNella ripresa, complice la maggiore profondità della rosa, arrivati al campo con appena cinque uomini a disposizione, i nostri prendono il largo. A segno ancora Pittiu e Mattana, entrambi ottimamente serviti da Lauro. Il definitivo 6-2 porta la firma di Mulas, che dopo un irresistibile coast to coast deve solo spingere in rete un preciso assist di Pinna, per il più classico dei \"gol della merda\".",
+      "goals": {
+        "Enrico Mulas": "1",
+        "Giampaolo Mattana": "3",
+        "Lorenzo Pittiu": "1",
+        "Michele Carrone": "1"
+      },
+      "assists": {
+        "Lorenzo Pittiu": "2",
+        "Salvatore Roberto Pinna": "1",
+        "Stefano Michele Lauro": "2"
+      },
+      "yellows": {},
+      "reds": {},
+      "subAzione": {
+        "Enrico Mulas": "2"
+      },
+      "subRigore": {},
+      "subPiazzato": {},
+      "selectedBonuses": {
+        "Enrico Mulas": [
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "gen_gol_portiere",
+          "gen_subisce_meno_3",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919206691",
+          "mulas_chiquita",
+          "mulas_levissima",
+          "bonus_1781075580791"
+        ],
+        "Fabrizio Alimonda": [
+          "bonus_1780863339587",
+          "alimonda_fabrillazione",
+          "gen_porta_tifosa",
+          "bonus_1780919270439"
+        ],
+        "Giampaolo Mattana": [
+          "bonus_1780863339587",
+          "gen_gol_laterale",
+          "gen_mvp_social",
+          "gen_esultanza_gruppo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "mattana_optana",
+          "bonus_1780919206691",
+          "gen_mvp_uccheddu"
+        ],
+        "Lorenzo Pittiu": [
+          "bonus_1780863339587",
+          "pittiu_mcbonus",
+          "gen_social_adv",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_gol_laterale",
+          "gen_assist_extra",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "pittiu_survivor",
+          "bonus_1781113120417"
+        ],
+        "Manuel Palmas": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_share",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "palmas_reietto"
+        ],
+        "Marco Scarpellini": [
+          "bonus_1780863339587",
+          "gen_malus_ritardo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "scarpellini_tutela",
+          "scarpellini_trio"
+        ],
+        "Michele Carrone": [
+          "bonus_1780863339587",
+          "gen_social_share",
+          "gen_social_reaction",
+          "gen_gol_laterale",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "carrone_polemichele",
+          "bonus_1781113120417"
+        ],
+        "Salvatore Roberto Pinna": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "bonus_1780919271374",
+          "gen_assist_merda",
+          "gen_porta_tifosa",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1781028581619",
+          "pinna_presidenziale",
+          "pinna_lazzaro"
+        ],
+        "Stefano Michele Lauro": [
+          "bonus_1780917716152",
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_assist_extra",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "bonus_1780919270439",
+          "lauro_bibitone",
+          "lauro_divo"
+        ],
+        "Davide Bayre": [
+          "bonus_1780919041304",
+          "bonus_1780919270439",
+          "bonus_1781028245748",
+          "bayre_redivivo"
+        ],
+        "Matteo Scattu": [
+          "gen_social_reaction"
+        ],
+        "Sergio Pippia": [
+          "gen_social_adv",
+          "gen_social_motivation",
+          "gen_vecchio_cuore",
+          "gen_porta_tifosa",
+          "bonus_1780919041304",
+          "bonus_1781001237055"
+        ]
+      },
+      "malusBrtPlayers": {},
+      "statoPresenza": {
+        "Enrico Mulas": "giocato",
+        "Fabrizio Alimonda": "giocato",
+        "Giampaolo Mattana": "giocato",
+        "Lorenzo Pittiu": "giocato",
+        "Manuel Palmas": "giocato",
+        "Marco Scarpellini": "giocato",
+        "Michele Carrone": "giocato",
+        "Salvatore Roberto Pinna": "giocato",
+        "Stefano Michele Lauro": "giocato",
+        "Davide Bayre": "giocato",
+        "Alberto Garau": "assente",
+        "Federico Addis": "assente",
+        "Mario Conti": "assente",
+        "Matteo Scattu": "assente",
+        "Nicola Orlandini": "assente",
+        "Sergio Pippia": "assente"
+      },
+      "sostitutoDa": {
+        "Enrico Mulas": "",
+        "Fabrizio Alimonda": "",
+        "Giampaolo Mattana": "",
+        "Lorenzo Pittiu": "",
+        "Manuel Palmas": "",
+        "Marco Scarpellini": "",
+        "Michele Carrone": "",
+        "Salvatore Roberto Pinna": "",
+        "Stefano Michele Lauro": "",
+        "Davide Bayre": "",
+        "Alberto Garau": "",
+        "Federico Addis": "",
+        "Mario Conti": "",
+        "Matteo Scattu": "",
+        "Nicola Orlandini": "",
+        "Sergio Pippia": ""
+      },
+      "noEventsPlayers": {
+        "Fabrizio Alimonda": true,
+        "Manuel Palmas": true,
+        "Marco Scarpellini": true,
+        "Davide Bayre": true
+      },
+      "verifiedGeneric": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Nicola Orlandini": true
+      },
+      "verifiedPersonal": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Matteo Scattu": true,
+        "Nicola Orlandini": true,
+        "Sergio Pippia": true
+      }
+    },
+    {
+      "id": "backup_1781162633569",
+      "createdAt": "11/06/2026, 09:23:53",
+      "idPartita": "rr7v8hx-mq4yvx2m",
+      "dettagliPartita": "09/06/2026 20:45, Le Serre vs SOS Auto",
+      "presents": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre",
+        "Alberto Garau",
+        "Federico Addis",
+        "Mario Conti",
+        "Matteo Scattu",
+        "Nicola Orlandini",
+        "Sergio Pippia"
+      ],
+      "payers": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre"
+      ],
+      "costo": "40",
+      "risultato": "6-2 (V)",
+      "note": "Primo tempo non particolarmente brillante, ma Carrone e Mattana, autore di una doppietta su due assist perfetti di Pittiu, permettono ai nostri di chiudere la prima frazione avanti 3-2.\nNella ripresa, complice la maggiore profondità della rosa, arrivati al campo con appena cinque uomini a disposizione, i nostri prendono il largo. A segno ancora Pittiu e Mattana, entrambi ottimamente serviti da Lauro. Il definitivo 6-2 porta la firma di Mulas, che dopo un irresistibile coast to coast deve solo spingere in rete un preciso assist di Pinna, per il più classico dei \"gol della merda\".",
+      "goals": {
+        "Enrico Mulas": "1",
+        "Giampaolo Mattana": "3",
+        "Lorenzo Pittiu": "1",
+        "Michele Carrone": "1"
+      },
+      "assists": {
+        "Lorenzo Pittiu": "2",
+        "Salvatore Roberto Pinna": "1",
+        "Stefano Michele Lauro": "2"
+      },
+      "yellows": {},
+      "reds": {},
+      "subAzione": {
+        "Enrico Mulas": "2"
+      },
+      "subRigore": {},
+      "subPiazzato": {},
+      "selectedBonuses": {
+        "Enrico Mulas": [
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "gen_gol_portiere",
+          "gen_subisce_meno_3",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919206691",
+          "mulas_chiquita",
+          "mulas_levissima",
+          "bonus_1781075580791"
+        ],
+        "Fabrizio Alimonda": [
+          "bonus_1780863339587",
+          "alimonda_fabrillazione",
+          "gen_porta_tifosa",
+          "bonus_1780919270439"
+        ],
+        "Giampaolo Mattana": [
+          "bonus_1780863339587",
+          "gen_gol_laterale",
+          "gen_mvp_social",
+          "gen_esultanza_gruppo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "mattana_optana",
+          "bonus_1780919206691",
+          "gen_mvp_uccheddu"
+        ],
+        "Lorenzo Pittiu": [
+          "bonus_1780863339587",
+          "pittiu_mcbonus",
+          "gen_social_adv",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_gol_laterale",
+          "gen_assist_extra",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "pittiu_survivor",
+          "bonus_1781113120417"
+        ],
+        "Manuel Palmas": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_share",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "palmas_reietto"
+        ],
+        "Marco Scarpellini": [
+          "bonus_1780863339587",
+          "gen_malus_ritardo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "scarpellini_tutela",
+          "scarpellini_trio"
+        ],
+        "Michele Carrone": [
+          "bonus_1780863339587",
+          "gen_social_share",
+          "gen_social_reaction",
+          "gen_gol_laterale",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "carrone_polemichele",
+          "bonus_1781113120417"
+        ],
+        "Salvatore Roberto Pinna": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "bonus_1780919271374",
+          "gen_assist_merda",
+          "gen_porta_tifosa",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1781028581619",
+          "pinna_presidenziale",
+          "pinna_lazzaro"
+        ],
+        "Stefano Michele Lauro": [
+          "bonus_1780917716152",
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_assist_extra",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "bonus_1780919270439",
+          "lauro_bibitone",
+          "lauro_divo"
+        ],
+        "Davide Bayre": [
+          "bonus_1780919041304",
+          "bonus_1780919270439",
+          "bonus_1781028245748",
+          "bayre_redivivo"
+        ],
+        "Matteo Scattu": [
+          "gen_social_reaction"
+        ],
+        "Sergio Pippia": [
+          "gen_social_adv",
+          "gen_social_motivation",
+          "gen_vecchio_cuore",
+          "gen_porta_tifosa",
+          "bonus_1780919041304",
+          "bonus_1781001237055"
+        ]
+      },
+      "malusBrtPlayers": {},
+      "statoPresenza": {
+        "Enrico Mulas": "giocato",
+        "Fabrizio Alimonda": "giocato",
+        "Giampaolo Mattana": "giocato",
+        "Lorenzo Pittiu": "giocato",
+        "Manuel Palmas": "giocato",
+        "Marco Scarpellini": "giocato",
+        "Michele Carrone": "giocato",
+        "Salvatore Roberto Pinna": "giocato",
+        "Stefano Michele Lauro": "giocato",
+        "Davide Bayre": "giocato",
+        "Alberto Garau": "assente",
+        "Federico Addis": "assente",
+        "Mario Conti": "assente",
+        "Matteo Scattu": "assente",
+        "Nicola Orlandini": "assente",
+        "Sergio Pippia": "assente"
+      },
+      "sostitutoDa": {
+        "Enrico Mulas": "",
+        "Fabrizio Alimonda": "",
+        "Giampaolo Mattana": "",
+        "Lorenzo Pittiu": "",
+        "Manuel Palmas": "",
+        "Marco Scarpellini": "",
+        "Michele Carrone": "",
+        "Salvatore Roberto Pinna": "",
+        "Stefano Michele Lauro": "",
+        "Davide Bayre": "",
+        "Alberto Garau": "",
+        "Federico Addis": "",
+        "Mario Conti": "",
+        "Matteo Scattu": "",
+        "Nicola Orlandini": "",
+        "Sergio Pippia": ""
+      },
+      "noEventsPlayers": {
+        "Fabrizio Alimonda": true,
+        "Manuel Palmas": true,
+        "Marco Scarpellini": true,
+        "Davide Bayre": true
+      },
+      "verifiedGeneric": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Nicola Orlandini": true
+      },
+      "verifiedPersonal": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Matteo Scattu": true,
+        "Nicola Orlandini": true,
+        "Sergio Pippia": true
+      }
+    },
+    {
+      "id": "backup_1781162629138",
+      "createdAt": "11/06/2026, 09:23:49",
+      "idPartita": "rr7v8hx-mq4yvx2m",
+      "dettagliPartita": "09/06/2026 20:45, Le Serre vs SOS Auto",
+      "presents": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre",
+        "Alberto Garau",
+        "Federico Addis",
+        "Mario Conti",
+        "Matteo Scattu",
+        "Nicola Orlandini",
+        "Sergio Pippia"
+      ],
+      "payers": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre"
+      ],
+      "costo": "40",
+      "risultato": "6-2 (V)",
+      "note": "Primo tempo non particolarmente brillante, ma Carrone e Mattana, autore di una doppietta su due assist perfetti di Pittiu, permettono ai nostri di chiudere la prima frazione avanti 3-2.\nNella ripresa, complice la maggiore profondità della rosa, arrivati al campo con appena cinque uomini a disposizione, i nostri prendono il largo. A segno ancora Pittiu e Mattana, entrambi ottimamente serviti da Lauro. Il definitivo 6-2 porta la firma di Mulas, che dopo un irresistibile coast to coast deve solo spingere in rete un preciso assist di Pinna, per il più classico dei \"gol della merda\".",
+      "goals": {
+        "Enrico Mulas": "1",
+        "Giampaolo Mattana": "3",
+        "Lorenzo Pittiu": "1",
+        "Michele Carrone": "1"
+      },
+      "assists": {
+        "Lorenzo Pittiu": "2",
+        "Salvatore Roberto Pinna": "1",
+        "Stefano Michele Lauro": "2"
+      },
+      "yellows": {},
+      "reds": {},
+      "subAzione": {
+        "Enrico Mulas": "2"
+      },
+      "subRigore": {},
+      "subPiazzato": {},
+      "selectedBonuses": {
+        "Enrico Mulas": [
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "gen_gol_portiere",
+          "gen_subisce_meno_3",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919206691",
+          "mulas_chiquita",
+          "mulas_levissima",
+          "bonus_1781075580791"
+        ],
+        "Fabrizio Alimonda": [
+          "bonus_1780863339587",
+          "alimonda_fabrillazione",
+          "gen_porta_tifosa",
+          "bonus_1780919270439"
+        ],
+        "Giampaolo Mattana": [
+          "bonus_1780863339587",
+          "gen_gol_laterale",
+          "gen_mvp_social",
+          "gen_esultanza_gruppo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "mattana_optana",
+          "bonus_1780919206691",
+          "gen_mvp_uccheddu"
+        ],
+        "Lorenzo Pittiu": [
+          "bonus_1780863339587",
+          "pittiu_mcbonus",
+          "gen_social_adv",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_gol_laterale",
+          "gen_assist_extra",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "pittiu_survivor",
+          "bonus_1781113120417"
+        ],
+        "Manuel Palmas": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_share",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "palmas_reietto"
+        ],
+        "Marco Scarpellini": [
+          "bonus_1780863339587",
+          "gen_malus_ritardo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "scarpellini_tutela",
+          "scarpellini_trio"
+        ],
+        "Michele Carrone": [
+          "bonus_1780863339587",
+          "gen_social_share",
+          "gen_social_reaction",
+          "gen_gol_laterale",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "carrone_polemichele",
+          "bonus_1781113120417"
+        ],
+        "Salvatore Roberto Pinna": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "bonus_1780919271374",
+          "gen_assist_merda",
+          "gen_porta_tifosa",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1781028581619",
+          "pinna_presidenziale",
+          "pinna_lazzaro"
+        ],
+        "Stefano Michele Lauro": [
+          "bonus_1780917716152",
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_assist_extra",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "bonus_1780919270439",
+          "lauro_bibitone",
+          "lauro_divo"
+        ],
+        "Davide Bayre": [
+          "bonus_1780919041304",
+          "bonus_1780919270439",
+          "bonus_1781028245748",
+          "bayre_redivivo"
+        ],
+        "Matteo Scattu": [
+          "gen_social_reaction"
+        ],
+        "Sergio Pippia": [
+          "gen_social_adv",
+          "gen_social_motivation",
+          "gen_vecchio_cuore",
+          "gen_porta_tifosa",
+          "bonus_1780919041304",
+          "bonus_1781001237055"
+        ]
+      },
+      "malusBrtPlayers": {},
+      "statoPresenza": {
+        "Enrico Mulas": "giocato",
+        "Fabrizio Alimonda": "giocato",
+        "Giampaolo Mattana": "giocato",
+        "Lorenzo Pittiu": "giocato",
+        "Manuel Palmas": "giocato",
+        "Marco Scarpellini": "giocato",
+        "Michele Carrone": "giocato",
+        "Salvatore Roberto Pinna": "giocato",
+        "Stefano Michele Lauro": "giocato",
+        "Davide Bayre": "giocato",
+        "Alberto Garau": "assente",
+        "Federico Addis": "assente",
+        "Mario Conti": "assente",
+        "Matteo Scattu": "assente",
+        "Nicola Orlandini": "assente",
+        "Sergio Pippia": "assente"
+      },
+      "sostitutoDa": {
+        "Enrico Mulas": "",
+        "Fabrizio Alimonda": "",
+        "Giampaolo Mattana": "",
+        "Lorenzo Pittiu": "",
+        "Manuel Palmas": "",
+        "Marco Scarpellini": "",
+        "Michele Carrone": "",
+        "Salvatore Roberto Pinna": "",
+        "Stefano Michele Lauro": "",
+        "Davide Bayre": "",
+        "Alberto Garau": "",
+        "Federico Addis": "",
+        "Mario Conti": "",
+        "Matteo Scattu": "",
+        "Nicola Orlandini": "",
+        "Sergio Pippia": ""
+      },
+      "noEventsPlayers": {
+        "Fabrizio Alimonda": true,
+        "Manuel Palmas": true,
+        "Marco Scarpellini": true,
+        "Davide Bayre": true
+      },
+      "verifiedGeneric": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Nicola Orlandini": true
+      },
+      "verifiedPersonal": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Matteo Scattu": true,
+        "Nicola Orlandini": true,
+        "Sergio Pippia": true
+      }
+    },
+    {
+      "id": "backup_1781161774759",
+      "createdAt": "11/06/2026, 09:09:34",
+      "idPartita": "rr7v8hx-mq4yvx2m",
+      "dettagliPartita": "09/06/2026 20:45, Le Serre vs SOS Auto",
+      "presents": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre",
+        "Alberto Garau",
+        "Federico Addis",
+        "Mario Conti",
+        "Matteo Scattu",
+        "Nicola Orlandini",
+        "Sergio Pippia"
+      ],
+      "payers": [
+        "Enrico Mulas",
+        "Fabrizio Alimonda",
+        "Giampaolo Mattana",
+        "Lorenzo Pittiu",
+        "Manuel Palmas",
+        "Marco Scarpellini",
+        "Michele Carrone",
+        "Salvatore Roberto Pinna",
+        "Stefano Michele Lauro",
+        "Davide Bayre"
+      ],
+      "costo": "40",
+      "risultato": "6-2 (V)",
+      "note": "Primo tempo non particolarmente brillante, ma Carrone e Mattana, autore di una doppietta su due assist perfetti di Pittiu, permettono ai nostri di chiudere la prima frazione avanti 3-2.\nNella ripresa, complice la maggiore profondità della rosa, arrivati al campo con appena cinque uomini a disposizione, i nostri prendono il largo. A segno ancora Pittiu e Mattana, entrambi ottimamente serviti da Lauro. Il definitivo 6-2 porta la firma di Mulas, che dopo un irresistibile coast to coast deve solo spingere in rete un preciso assist di Pinna, per il più classico dei \"gol della merda\".",
+      "goals": {
+        "Enrico Mulas": "1",
+        "Giampaolo Mattana": "3",
+        "Lorenzo Pittiu": "1",
+        "Michele Carrone": "1"
+      },
+      "assists": {
+        "Lorenzo Pittiu": "2",
+        "Salvatore Roberto Pinna": "1",
+        "Stefano Michele Lauro": "2"
+      },
+      "yellows": {},
+      "reds": {},
+      "subAzione": {
+        "Enrico Mulas": "2"
+      },
+      "subRigore": {},
+      "subPiazzato": {},
+      "selectedBonuses": {
+        "Enrico Mulas": [
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "gen_gol_portiere",
+          "gen_subisce_meno_3",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919206691",
+          "mulas_chiquita",
+          "mulas_levissima",
+          "bonus_1781075580791"
+        ],
+        "Fabrizio Alimonda": [
+          "bonus_1780863339587",
+          "alimonda_fabrillazione",
+          "gen_porta_tifosa",
+          "bonus_1780919270439"
+        ],
+        "Giampaolo Mattana": [
+          "bonus_1780863339587",
+          "gen_gol_laterale",
+          "gen_mvp_social",
+          "gen_esultanza_gruppo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "mattana_optana",
+          "bonus_1780919206691",
+          "gen_mvp_uccheddu",
+          "gen_gol_pivot"
+        ],
+        "Lorenzo Pittiu": [
+          "bonus_1780863339587",
+          "pittiu_mcbonus",
+          "gen_social_adv",
+          "gen_social_reaction",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_gol_laterale",
+          "gen_assist_extra",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "pittiu_survivor",
+          "bonus_1781113120417"
+        ],
+        "Manuel Palmas": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_share",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "palmas_reietto"
+        ],
+        "Marco Scarpellini": [
+          "bonus_1780863339587",
+          "gen_malus_ritardo",
+          "bonus_1780919041304",
+          "bonus_1780919271374",
+          "scarpellini_tutela",
+          "scarpellini_trio"
+        ],
+        "Michele Carrone": [
+          "bonus_1780863339587",
+          "gen_social_share",
+          "gen_social_reaction",
+          "gen_gol_laterale",
+          "gen_malus_ritardo",
+          "gen_esultanza_gruppo",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "carrone_polemichele",
+          "bonus_1781113120417"
+        ],
+        "Salvatore Roberto Pinna": [
+          "bonus_1780863339587",
+          "gen_social_adv",
+          "gen_social_motivation",
+          "bonus_1781001237055",
+          "gen_social_reaction",
+          "bonus_1780919271374",
+          "gen_assist_merda",
+          "gen_porta_tifosa",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1781028581619",
+          "pinna_presidenziale",
+          "pinna_lazzaro"
+        ],
+        "Stefano Michele Lauro": [
+          "bonus_1780917716152",
+          "bonus_1780863339587",
+          "bonus_1781001237055",
+          "gen_assist_extra",
+          "gen_malus_ritardo",
+          "bonus_1780918968021",
+          "bonus_1780919041304",
+          "bonus_1780919206691",
+          "bonus_1780919270439",
+          "lauro_bibitone",
+          "lauro_divo"
+        ],
+        "Davide Bayre": [
+          "bonus_1780919041304",
+          "bonus_1780919270439",
+          "bonus_1781028245748",
+          "bayre_redivivo"
+        ],
+        "Matteo Scattu": [
+          "gen_social_reaction"
+        ],
+        "Sergio Pippia": [
+          "gen_social_adv",
+          "gen_social_motivation",
+          "gen_vecchio_cuore",
+          "gen_porta_tifosa",
+          "bonus_1780919041304",
+          "bonus_1781001237055"
+        ]
+      },
+      "malusBrtPlayers": {},
+      "statoPresenza": {
+        "Enrico Mulas": "giocato",
+        "Fabrizio Alimonda": "giocato",
+        "Giampaolo Mattana": "giocato",
+        "Lorenzo Pittiu": "giocato",
+        "Manuel Palmas": "giocato",
+        "Marco Scarpellini": "giocato",
+        "Michele Carrone": "giocato",
+        "Salvatore Roberto Pinna": "giocato",
+        "Stefano Michele Lauro": "giocato",
+        "Davide Bayre": "giocato",
+        "Alberto Garau": "assente",
+        "Federico Addis": "assente",
+        "Mario Conti": "assente",
+        "Matteo Scattu": "assente",
+        "Nicola Orlandini": "assente",
+        "Sergio Pippia": "assente"
+      },
+      "sostitutoDa": {
+        "Enrico Mulas": "",
+        "Fabrizio Alimonda": "",
+        "Giampaolo Mattana": "",
+        "Lorenzo Pittiu": "",
+        "Manuel Palmas": "",
+        "Marco Scarpellini": "",
+        "Michele Carrone": "",
+        "Salvatore Roberto Pinna": "",
+        "Stefano Michele Lauro": "",
+        "Davide Bayre": "",
+        "Alberto Garau": "",
+        "Federico Addis": "",
+        "Mario Conti": "",
+        "Matteo Scattu": "",
+        "Nicola Orlandini": "",
+        "Sergio Pippia": ""
+      },
+      "noEventsPlayers": {
+        "Fabrizio Alimonda": true,
+        "Manuel Palmas": true,
+        "Marco Scarpellini": true,
+        "Davide Bayre": true
+      },
+      "verifiedGeneric": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Nicola Orlandini": true
+      },
+      "verifiedPersonal": {
+        "Alberto Garau": true,
+        "Federico Addis": true,
+        "Mario Conti": true,
+        "Matteo Scattu": true,
+        "Nicola Orlandini": true,
+        "Sergio Pippia": true
+      }
+    }
+  ]
 }
