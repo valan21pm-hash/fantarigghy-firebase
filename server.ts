@@ -215,6 +215,15 @@ function parsePartite(values: any[][]): Partita[] {
         rosterSnapshot = {};
       }
 
+      let bonusesSnapshot = undefined;
+      try {
+        if (row[11]) {
+          bonusesSnapshot = JSON.parse(row[11] as string);
+        }
+      } catch (e) {
+        bonusesSnapshot = undefined;
+      }
+
       return {
         id,
         dataInserimento,
@@ -227,6 +236,7 @@ function parsePartite(values: any[][]): Partita[] {
         formazione,
         inviatoFanta,
         rosterSnapshot,
+        bonusesSnapshot,
       };
     })
     .filter((p) => p.id !== "");
@@ -578,6 +588,7 @@ async function saveToSheetsInternal(
     JSON.stringify(p.formazione || { titolari: [], panchina: [] }),
     p.inviatoFanta ? "TRUE" : "FALSE",
     JSON.stringify(p.rosterSnapshot || {}),
+    p.bonusesSnapshot ? JSON.stringify(p.bonusesSnapshot) : "",
   ]);
 
   const logsRows = (db.logs || []).map((l) => [
@@ -2760,6 +2771,10 @@ async function startServer() {
           : Number(costoFinale || 0);
       rigaPartita.note = note || "";
       rigaPartita.inviatoFanta = tipoInvio === "definitivo";
+
+      if (tipoInvio === "definitivo") {
+        rigaPartita.bonusesSnapshot = db.bonuses || DEFAULT_BONUSES;
+      }
 
       // Take a snapshot of all current fantasquadre rosters at the point of closing this match report
       // Also update the baseline (rosaOriginaria) for each team so the next market phase uses the newly locked roster
