@@ -633,21 +633,12 @@ export default function StatsHub({
   };
 
   const handleExportClassifica = async () => {
-    let text = `🏆 *CLASSIFICA FANTASQUADRE (${currentPeriodLabel.toUpperCase()})* 🏆\n\n`;
+    let text = `🏆 *CLASSIFICA FANTASQUADRE* 🏆\n\n`;
     sortedTeamStats.forEach((t, idx) => {
-      const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "📋";
-      text += `${medal} *${idx + 1}° ${t.nomeFantasquadra}* (${t.nomePartecipante})\n`;
-      text += `   ⚽ Punti: *${t.score} pts* in ${t.numMatches} G.\n`;
-      
-      const topBonusList = Object.entries(t.bonusFrequencies || {})
-        .sort((a, b) => Number(b[1]) - Number(a[1]));
-      if (topBonusList.length > 0) {
-        const bonusStr = topBonusList.map(([bName, bCnt]) => `${bName} (x${bCnt})`).join(", ");
-        text += `   📌 Bonus del Team: ${bonusStr}\n`;
-      }
-      text += `\n`;
+      const medal = idx === 0 ? "🥇 " : idx === 1 ? "🥈 " : idx === 2 ? "🥉 " : "📋 ";
+      text += `${medal}*${idx + 1}° ${t.nomeFantasquadra}* - *${t.score} pts*\n`;
     });
-    text += `⚽ #FantaEasyRigging #Fantacalcetto #Izycoin 🪙`;
+    text += `\n⚽ #FantaEasyRigging #Fantacalcetto`;
 
     try {
       await navigator.clipboard.writeText(text);

@@ -2695,10 +2695,31 @@ export default function Fantacalcetto({
 
           {activePublicTab === "classifica" ? (
             <div className="space-y-6 animate-fade-in font-sans">
-              <div className="bg-emerald-900/30 border-l-4 border-emerald-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm">
+              <div className="bg-emerald-900/30 border-l-4 border-emerald-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <p className="text-xs text-emerald-200 leading-relaxed font-medium">
                   <strong className="text-emerald-400">ℹ️ Punto Informativo:</strong> Qui puoi monitorare l'andamento del campionato. Clicca su ciascun team per vedere nel dettaglio il valore attuale della rosa, il tesoretto residuo e le scelte dei giocatori fatte dagli altri partecipanti!
                 </p>
+                <button
+                  id="btn-export-classifica-v1-classifica-tab"
+                  type="button"
+                  onClick={async () => {
+                    let text = `🏆 *CLASSIFICA FANTASQUADRE* 🏆\n\n`;
+                    rankedTeams.forEach((t, idx) => {
+                      const medal = idx === 0 ? "🥇 " : idx === 1 ? "🥈 " : idx === 2 ? "🥉 " : "📋 ";
+                      text += `${medal}*${idx + 1}° ${t.nomeFantasquadra}* - *${t.score} pts*\n`;
+                    });
+                    text += `\n⚽ #FantaEasyRigging #Fantacalcetto`;
+                    try {
+                      await navigator.clipboard.writeText(text);
+                      alert("Classifica copiata negli appunti! 🚀");
+                    } catch (err) {
+                      alert("Errore nella copia.");
+                    }
+                  }}
+                  className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-black text-xs uppercase px-4.5 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md select-none shrink-0"
+                >
+                  <Trophy className="h-4 w-4" /> Esporta Classifica 🏆
+                </button>
               </div>
               {/* Podium View if any */}
               {rankedTeams.length > 0 && (
