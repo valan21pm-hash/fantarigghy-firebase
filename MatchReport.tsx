@@ -58,6 +58,7 @@ export default function StatsHub({
   const [sortOrder, setSortOrder] = useState<"crescente" | "decrescente">("crescente");
   const [searchQuery, setSearchQuery] = useState("");
   const [copied, setCopied] = useState(false);
+  const [copiedClassifica, setCopiedClassifica] = useState(false);
   const [selectedTeamFilter, setSelectedTeamFilter] = useState<string>("Tutte");
   const [selectedPlayerFilter, setSelectedPlayerFilter] = useState<string>("Tutti");
   const [selectedBonusFilter, setSelectedBonusFilter] = useState<string>("Tutti");
@@ -631,6 +632,32 @@ export default function StatsHub({
     }
   };
 
+  const handleExportClassifica = async () => {
+    let text = `🏆 *CLASSIFICA FANTASQUADRE (${currentPeriodLabel.toUpperCase()})* 🏆\n\n`;
+    sortedTeamStats.forEach((t, idx) => {
+      const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "📋";
+      text += `${medal} *${idx + 1}° ${t.nomeFantasquadra}* (${t.nomePartecipante})\n`;
+      text += `   ⚽ Punti: *${t.score} pts* in ${t.numMatches} G.\n`;
+      
+      const topBonusList = Object.entries(t.bonusFrequencies || {})
+        .sort((a, b) => Number(b[1]) - Number(a[1]));
+      if (topBonusList.length > 0) {
+        const bonusStr = topBonusList.map(([bName, bCnt]) => `${bName} (x${bCnt})`).join(", ");
+        text += `   📌 Bonus del Team: ${bonusStr}\n`;
+      }
+      text += `\n`;
+    });
+    text += `⚽ #FantaEasyRigging #Fantacalcetto #Izycoin 🪙`;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedClassifica(true);
+      setTimeout(() => setCopiedClassifica(false), 2500);
+    } catch (err) {
+      alert("Copia non riuscita, impossibile copiare negli appunti.");
+    }
+  };
+
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-7 text-white shadow-xl space-y-6 font-sans">
       
@@ -652,6 +679,22 @@ export default function StatsHub({
             </p>
           </div>
         </div>
+
+        <button
+          id="btn-export-classifica"
+          onClick={handleExportClassifica}
+          className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-black text-xs uppercase px-4.5 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md select-none shrink-0"
+        >
+          {copiedClassifica ? (
+            <>
+              <Check className="h-4 w-4" /> Classifica Copiata! 🚀
+            </>
+          ) : (
+            <>
+              <Trophy className="h-4 w-4" /> Esporta Classifica Attuale 🏆
+            </>
+          )}
+        </button>
       </div>
 
       {/* 🛠️ FILTRO CENTRALE DI CONTROLLO */}
