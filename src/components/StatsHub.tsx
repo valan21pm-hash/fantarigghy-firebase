@@ -579,8 +579,7 @@ export default function StatsHub({
         textForCopy += `   🪙 Valore: ${p.currentPrice} (${changeSign} Izycoin) | 👕 Presenze: ${p.matchesPlayed}\n`;
         
         const topBonusList = Object.entries(p.bonusImpacts || {})
-          .sort((a, b) => Math.abs(b[1] as number) - Math.abs(a[1] as number))
-          .slice(0, 3);
+          .sort((a, b) => Math.abs(b[1] as number) - Math.abs(a[1] as number));
         if (topBonusList.length > 0) {
           const bonusStr = topBonusList.map(([bName, bPts]) => `${bName} (${(bPts as number) > 0 ? "+" : ""}${bPts} pt)`).join(", ");
           textForCopy += `   ✨ Eventi e Bonus: ${bonusStr}\n`;
@@ -594,8 +593,7 @@ export default function StatsHub({
         textForCopy += `   ⚽ Punti: *${t.score} pts* in ${t.numMatches} G.\n`;
 
         const topBonusList = Object.entries(t.bonusFrequencies)
-          .sort((a, b) => Number(b[1]) - Number(a[1]))
-          .slice(0, 3);
+          .sort((a, b) => Number(b[1]) - Number(a[1]));
         if (topBonusList.length > 0) {
           const bonusStr = topBonusList.map(([bName, bCnt]) => `${bName} (x${bCnt})`).join(", ");
           textForCopy += `   📌 Bonus del Team: ${bonusStr}\n`;
