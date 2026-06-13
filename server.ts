@@ -944,9 +944,15 @@ async function getDb(
   // serve the local write state immediately (essential to prevent data race loops)
   if (
     memoryCache &&
-    !bypassCache &&
-    (now - lastCacheFetchTime < CACHE_TTL_MS || pendingSyncTask !== null)
+    (pendingSyncTask !== null ||
+      pendingFirestoreSyncTask !== null ||
+      firestoreSyncInProgress ||
+      sheetsSyncInProgress ||
+      (!bypassCache && now - lastCacheFetchTime < CACHE_TTL_MS))
   ) {
+    // Se ci sono task di sync in sospeso, NON bypassare la cache.
+    // Leggere dal database remoto in questo momento sovrascriverebbe
+    // i cambiamenti locali appena fatti con la versione vecchia.
     return memoryCache;
   }
 
