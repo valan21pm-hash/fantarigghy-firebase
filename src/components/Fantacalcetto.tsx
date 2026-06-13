@@ -111,6 +111,18 @@ interface FantacalcettoProps {
   ) => Promise<any>;
   onEliminaFantasquadra: (id: string) => Promise<any>;
   onRinominaFantasquadra: (id: string, nuovoNome: string) => Promise<any>;
+  onAggiornaFantasquadra?: (
+    id: string,
+    payload: {
+      nomePartecipante?: string;
+      nomeFantasquadra?: string;
+      email?: string;
+      pin?: string;
+      creditoResiduo?: number;
+      giocatoriSelezionati?: string[];
+      valoriAcquisto?: Record<string, number>;
+    }
+  ) => Promise<any>;
   onCreaConsiglio?: (autore: string, testo: string) => Promise<any>;
   onUpdateBonuses?: (bonuses: CustomBonusDef[]) => Promise<any>;
   onToggleMercatoLibero?: (attivo: boolean, scadenza?: string | null) => Promise<any>;
@@ -140,6 +152,7 @@ export default function Fantacalcetto({
   onIscriviFantasquadra,
   onEliminaFantasquadra,
   onRinominaFantasquadra,
+  onAggiornaFantasquadra,
   onCreaConsiglio,
   onUpdateBonuses,
   onToggleMercatoLibero,
@@ -258,6 +271,73 @@ export default function Fantacalcetto({
   const [showGeneralReportModal, setShowGeneralReportModal] = useState(false);
   const [matchForPlayerChoice, setMatchForPlayerChoice] = useState<Partita | null>(null);
   const [matchForTeamChoice, setMatchForTeamChoice] = useState<Partita | null>(null);
+
+  // Manual Team Editor State
+  const [editingTeam, setEditingTeam] = useState<Fantasquadra | null>(null);
+  const [editNomePartecipante, setEditNomePartecipante] = useState("");
+  const [editNomeFantasquadra, setEditNomeFantasquadra] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editPin, setEditPin] = useState("");
+  const [editCreditoResiduo, setEditCreditoResiduo] = useState(0);
+  const [editGiocatoriIds, setEditGiocatoriIds] = useState<string[]>([]);
+  const [editValoriAcquisto, setEditValoriAcquisto] = useState<Record<string, number>>({});
+  const [isSubmitEditLoading, setIsSubmitEditLoading] = useState(false);
+  const [editError, setEditError] = useState("");
+
+  const handleSaveManualEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!onAggiornaFantasquadra || !editingTeam) return;
+
+    // Validation
+    const cleanGiocatori = editGiocatoriIds.filter(Boolean);
+    if (cleanGiocatori.length < 4) {
+      setEditError("La fantasquadra deve comprendere esattamente 4 giocatori!");
+      return;
+    }
+
+    // Check duplicates inside team
+    const uniqueG = new Set(cleanGiocatori);
+    if (uniqueG.size !== cleanGiocatori.length) {
+      setEditError("Non puoi selezionare lo stesso giocatore più volte!");
+      return;
+    }
+
+    // Validate PIN length
+    if (editPin.length !== 4) {
+      setEditError("Il PIN deve essere composto da esattamente 4 cifre.");
+      return;
+    }
+
+    setIsSubmitEditLoading(true);
+    setEditError("");
+
+    try {
+      // Build final values of purchase dictionary with only selected players
+      const finalValori: Record<string, number> = {};
+      cleanGiocatori.forEach(name => {
+        finalValori[name] = editValoriAcquisto[name] !== undefined ? editValoriAcquisto[name] : 0;
+      });
+
+      await onAggiornaFantasquadra(editingTeam.id, {
+        nomePartecipante: editNomePartecipante,
+        nomeFantasquadra: editNomeFantasquadra,
+        email: editEmail,
+        pin: editPin,
+        creditoResiduo: editCreditoResiduo,
+        giocatoriSelezionati: cleanGiocatori,
+        valoriAcquisto: finalValori
+      });
+
+      setEditingTeam(null);
+      if (onRefreshData) {
+        await onRefreshData();
+      }
+    } catch (err: any) {
+      setEditError(err.message || "Qualcosa è andato storto durante l'aggiornamento.");
+    } finally {
+      setIsSubmitEditLoading(false);
+    }
+  };
 
   // Auto-login all'avvio se già registrati in localStorage
   useEffect(() => {
@@ -5230,6 +5310,25 @@ export default function Fantacalcetto({
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
+                              setEditingTeam(selectedTeamToView);
+                              setEditNomePartecipante(selectedTeamToView.nomePartecipante || "");
+                              setEditNomeFantasquadra(selectedTeamToView.nomeFantasquadra || "");
+                              setEditEmail(selectedTeamToView.email || "");
+                              setEditPin(selectedTeamToView.pin || "");
+                              setEditCreditoResiduo(selectedTeamToView.creditoResiduo !== undefined ? selectedTeamToView.creditoResiduo : 100);
+                              setEditGiocatoriIds(selectedTeamToView.giocatoriSelezionati || []);
+                              setEditValoriAcquisto(selectedTeamToView.valoriAcquisto || {});
+                              setEditError("");
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 hover:bg-blue-200 border border-blue-300 rounded-lg text-blue-800 font-extrabold text-[10px] uppercase cursor-pointer transition-colors"
+                          >
+                            <Shield className="h-3 w-3" />
+                            <span>Modifica Manuale (Admin)</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setNomeFantasquadra(selectedTeamToView.nomeFantasquadra);
                               setAuthenticatedTeamId(selectedTeamToView.id);
                               
@@ -5242,7 +5341,7 @@ export default function Fantacalcetto({
                               setActivePublicTab("formazione");
                               window.scrollTo({ top: 0, behavior: "smooth" });
                             }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-100 hover:bg-yellow-200 border border-yellow-300 rounded-lg text-yellow-800 font-extrabold text-[10px] uppercase cursor-pointer transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-105 hover:bg-yellow-205 border border-yellow-350 rounded-lg text-yellow-805 font-extrabold text-[10px] uppercase cursor-pointer transition-colors"
                           >
                             <Pencil className="h-3 w-3" />
                             <span>Modifica Fantasquadra</span>
@@ -5475,6 +5574,230 @@ export default function Fantacalcetto({
           targetId={podiumSquadraTarget}
           onClose={() => setShowPodiumAnimation(false)}
         />
+      )}
+
+      {editingTeam && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] overflow-y-auto animate-fadeIn">
+          <div className="bg-emerald-950 border border-emerald-700 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col my-8">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-emerald-900 to-emerald-950 px-6 py-4 border-b border-emerald-800 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Shield className="h-5 w-5 text-yellow-400" />
+                <div>
+                  <h3 className="font-sans font-black text-sm text-yellow-400 uppercase tracking-wider">
+                    Modifica Manuale Squadra (Admin)
+                  </h3>
+                  <p className="text-[10px] text-emerald-400 font-bold">
+                    Forza dati su Firebase bypassando limiti di mercato e budget
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingTeam(null)}
+                className="text-emerald-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleSaveManualEdit} className="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
+              {editError && (
+                <div className="bg-red-950/80 border border-red-700 rounded-xl p-3 flex items-center gap-2 text-red-350 text-[11px] font-bold">
+                  <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
+                  <span>{editError}</span>
+                </div>
+              )}
+
+              {/* Anagrafica Section */}
+              <div className="space-y-4">
+                <h4 className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider border-b border-emerald-800/80 pb-1">
+                  1. Informazioni Generali & Credenziali
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-gray-305 mb-1">
+                      Presidente / Partecipante
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editNomePartecipante}
+                      onChange={(e) => setEditNomePartecipante(e.target.value)}
+                      className="w-full bg-emerald-900/40 border border-emerald-800 rounded-xl px-3 py-2 text-xs text-white placeholder-emerald-600 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-gray-305 mb-1">
+                      Nome Fantasquadra
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editNomeFantasquadra}
+                      onChange={(e) => setEditNomeFantasquadra(e.target.value)}
+                      className="w-full bg-emerald-900/40 border border-emerald-800 rounded-xl px-3 py-2 text-xs text-white placeholder-emerald-600 focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-gray-305 mb-1">
+                      Contatto Email
+                    </label>
+                    <input
+                      type="email"
+                      value={editEmail}
+                      onChange={(e) => setEditEmail(e.target.value)}
+                      className="w-full bg-emerald-900/40 border border-emerald-800 rounded-xl px-3 py-2 text-xs text-white placeholder-emerald-600 focus:outline-none focus:border-emerald-500"
+                      placeholder="Email opzionale"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-gray-305 mb-1">
+                      PIN di Accesso (4 cifre)
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={4}
+                      value={editPin}
+                      onChange={(e) => setEditPin(e.target.value.replace(/\D/g, ""))}
+                      className="w-full bg-emerald-900/40 border border-emerald-800 rounded-xl px-3 py-2 text-xs text-white placeholder-emerald-600 font-mono tracking-widest text-center focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-gray-305 mb-1">
+                      Credito Residuo (Izycoin)
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min={0}
+                      max={100}
+                      value={editCreditoResiduo}
+                      onChange={(e) => setEditCreditoResiduo(Number(e.target.value))}
+                      className="w-full bg-emerald-900/40 border border-emerald-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Roster Players Section */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center border-b border-emerald-800/80 pb-1">
+                  <h4 className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
+                    2. Selezione Roster & Valori di Acquisto
+                  </h4>
+                  <span className="text-[9px] text-emerald-300 font-mono">
+                    Budget Speso: {Object.values(editValoriAcquisto).reduce((sum: number, v: any) => sum + Number(v || 0), 0)} / {MAX_BUDGET} Izycoin
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {[0, 1, 2, 3].map((index) => {
+                    const label = index === 3 ? "Panchina (Giocatore 4)" : `Titolare ${index + 1}`;
+                    const currentPlayerNome = editGiocatoriIds[index] || "";
+
+                    return (
+                      <div
+                        key={index}
+                        className={`p-3.5 rounded-2xl border flex flex-col md:flex-row gap-3 items-start md:items-center justify-between ${
+                          index === 3
+                            ? "bg-amber-955/35 border-amber-900/60"
+                            : "bg-emerald-900/10 border-emerald-800/60"
+                        }`}
+                      >
+                        <div className="min-w-0 flex-1 w-full">
+                          <label className="block text-[9px] uppercase font-black tracking-wider text-emerald-405 mb-1 font-sans">
+                            {label}
+                          </label>
+                          <select
+                            value={currentPlayerNome}
+                            onChange={(e) => {
+                              const newNome = e.target.value;
+                              const updated = [...editGiocatoriIds];
+                              updated[index] = newNome;
+                              setEditGiocatoriIds(updated);
+
+                              // Copy standard/current price as default base if not set
+                              if (newNome && !editValoriAcquisto[newNome]) {
+                                const defaultVal = getPlayerPriceForRoster(newNome, partiteChiuse || [], bonuses);
+                                setEditValoriAcquisto(prev => ({
+                                  ...prev,
+                                  [newNome]: defaultVal
+                                }));
+                              }
+                            }}
+                            className="w-full bg-emerald-950 border border-emerald-850 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500 font-sans"
+                          >
+                            <option value="">-- Seleziona Giocatore --</option>
+                            {giocatori.map((g) => {
+                              const dynamicVal = getPlayerPriceForRoster(g.nome, partiteChiuse || [], bonuses);
+                              return (
+                                <option key={g.nome} value={g.nome}>
+                                  {g.nome} ({g.ultimoRuolo}) - Valore: {dynamicVal} Izycoin
+                                </option>
+                              );
+                            })}
+                          </select>
+                        </div>
+
+                        {currentPlayerNome && (
+                          <div className="w-full md:w-32 shrink-0">
+                            <label className="block text-[9px] uppercase font-black tracking-wider text-emerald-405 mb-1 md:text-right font-sans">
+                              Prezzo Acquisto (Izycoin)
+                            </label>
+                            <input
+                              type="number"
+                              min={0}
+                              required
+                              value={editValoriAcquisto[currentPlayerNome] !== undefined ? editValoriAcquisto[currentPlayerNome] : 0}
+                              onChange={(e) => {
+                                const val = Number(e.target.value);
+                                setEditValoriAcquisto(prev => ({
+                                  ...prev,
+                                  [currentPlayerNome]: val
+                                }));
+                              }}
+                              className="w-full bg-emerald-950 border border-emerald-855 rounded-xl px-3 py-1.5 text-xs text-white font-mono text-center focus:outline-none focus:border-emerald-500"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-emerald-855">
+                <button
+                  type="button"
+                  onClick={() => setEditingTeam(null)}
+                  className="px-4 py-2 bg-emerald-900 hover:bg-emerald-850 rounded-xl text-xs font-black text-gray-300 uppercase tracking-widest cursor-pointer transition-colors"
+                >
+                  Annulla
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitEditLoading}
+                  className="px-5 py-2 bg-yellow-400 hover:bg-yellow-500 disabled:bg-yellow-400/50 rounded-xl text-xs font-black text-emerald-950 uppercase tracking-widest flex items-center gap-2 cursor-pointer transition-colors"
+                >
+                  {isSubmitEditLoading ? (
+                    <span>Salvataggio...</span>
+                  ) : (
+                    <>
+                      <span>Salva Modifiche</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

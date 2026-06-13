@@ -114,6 +114,18 @@ interface FantacalcettoProps {
   ) => Promise<any>;
   onEliminaFantasquadra: (id: string) => Promise<any>;
   onRinominaFantasquadra: (id: string, nuovoNome: string) => Promise<any>;
+  onAggiornaFantasquadra?: (
+    id: string,
+    payload: {
+      nomePartecipante?: string;
+      nomeFantasquadra?: string;
+      email?: string;
+      pin?: string;
+      creditoResiduo?: number;
+      giocatoriSelezionati?: string[];
+      valoriAcquisto?: Record<string, number>;
+    }
+  ) => Promise<any>;
   onCreaConsiglio?: (autore: string, testo: string) => Promise<any>;
   onUpdateBonuses?: (bonuses: CustomBonusDef[]) => Promise<any>;
   onToggleMercatoLibero?: (attivo: boolean, scadenza?: string | null) => Promise<any>;
@@ -226,6 +238,7 @@ export default function FantacalcettoV2({
   onIscriviFantasquadra,
   onEliminaFantasquadra,
   onRinominaFantasquadra,
+  onAggiornaFantasquadra,
   onCreaConsiglio,
   onUpdateBonuses,
   onToggleMercatoLibero,

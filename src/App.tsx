@@ -411,6 +411,21 @@ export default function App() {
     return await executePostAction("/api/fantasquadre/rinomina", { id, nuovoNome });
   };
 
+  const handleAggiornaFantasquadra = async (
+    id: string,
+    payload: {
+      nomePartecipante?: string;
+      nomeFantasquadra?: string;
+      email?: string;
+      pin?: string;
+      creditoResiduo?: number;
+      giocatoriSelezionati?: string[];
+      valoriAcquisto?: Record<string, number>;
+    }
+  ) => {
+    return await executePostAction("/api/fantasquadre/aggiorna", { id, ...payload });
+  };
+
   const handleUpdateBonuses = async (bonuses: CustomBonusDef[]) => {
     return await executePostAction("/api/update_bonuses", { bonuses });
   };
@@ -489,6 +504,7 @@ export default function App() {
         scadenzaMercatoLibero={data?.scadenzaMercatoLibero}
         onIscriviFantasquadra={handleIscriviFantasquadra}
         onRinominaFantasquadra={handleRinominaFantasquadra}
+        onAggiornaFantasquadra={handleAggiornaFantasquadra}
         onEliminaFantasquadra={handleEliminaFantasquadra}
         onCreaConsiglio={handleCreaConsiglio}
         onUpdateBonuses={handleUpdateBonuses}
@@ -528,6 +544,7 @@ export default function App() {
         portale1Bloccato={data?.portale1Bloccato}
         onIscriviFantasquadra={handleIscriviFantasquadra}
         onRinominaFantasquadra={handleRinominaFantasquadra}
+        onAggiornaFantasquadra={handleAggiornaFantasquadra}
         onEliminaFantasquadra={handleEliminaFantasquadra}
         onCreaConsiglio={handleCreaConsiglio}
         onUpdateBonuses={handleUpdateBonuses}
@@ -945,6 +962,7 @@ export default function App() {
               portale1Bloccato={data?.portale1Bloccato}
               onIscriviFantasquadra={handleIscriviFantasquadra}
               onRinominaFantasquadra={handleRinominaFantasquadra}
+              onAggiornaFantasquadra={handleAggiornaFantasquadra}
               onEliminaFantasquadra={handleEliminaFantasquadra}
               onCreaConsiglio={handleCreaConsiglio}
               onUpdateBonuses={handleUpdateBonuses}

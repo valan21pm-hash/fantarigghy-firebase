@@ -1784,6 +1784,63 @@ async function startServer() {
     }
   });
 
+  // Aggiornamento manuale di una fantasquadra (Admin API)
+  app.post("/api/fantasquadre/aggiorna", async (req, res) => {
+    try {
+      const { id, nomePartecipante, nomeFantasquadra, email, pin, creditoResiduo, giocatoriSelezionati, valoriAcquisto } = req.body;
+      if (!id) {
+        return res.status(400).json({ err: "ID fantasquadra mancante per aggiornare" });
+      }
+
+      const token = getAuthToken(req);
+      const db = await getDb(token);
+
+      if (!db.fantasquadre) {
+        db.fantasquadre = [];
+      }
+
+      const targetTeam = db.fantasquadre.find((fs) => fs.id === id);
+      if (!targetTeam) {
+        return res.status(404).json({ err: "Fantasquadra non trovata" });
+      }
+
+      // If name is altered, check for unique constraints
+      if (nomeFantasquadra && nomeFantasquadra.trim().toLowerCase() !== targetTeam.nomeFantasquadra.toLowerCase().trim()) {
+        const nomeEsiste = db.fantasquadre.some(
+          (fs) => fs.id !== id && fs.nomeFantasquadra.toLowerCase().trim() === nomeFantasquadra.toLowerCase().trim()
+        );
+        if (nomeEsiste) {
+          return res.status(400).json({ err: "Nome Fantasquadra già in uso da un'altra squadra" });
+        }
+      }
+
+      const oldName = targetTeam.nomeFantasquadra;
+      
+      // Manual modifications
+      if (nomePartecipante !== undefined) targetTeam.nomePartecipante = nomePartecipante.trim();
+      if (nomeFantasquadra !== undefined) targetTeam.nomeFantasquadra = nomeFantasquadra.trim();
+      if (email !== undefined) targetTeam.email = email.trim().toLowerCase();
+      if (pin !== undefined) targetTeam.pin = pin.trim();
+      if (creditoResiduo !== undefined) targetTeam.creditoResiduo = Number(creditoResiduo);
+      if (giocatoriSelezionati !== undefined) targetTeam.giocatoriSelezionati = giocatoriSelezionati;
+      if (valoriAcquisto !== undefined) targetTeam.valoriAcquisto = valoriAcquisto;
+
+      db.logs.push({
+        data: new Date().toLocaleString("it-IT"),
+        operazione: "Fantacalcetto",
+        importo: "-",
+        dettagli: `Fantasquadra modificata manualmente da admin: '${oldName}' (${targetTeam.nomePartecipante})`,
+      });
+
+      await saveDb(db, token);
+
+      sendDbResponse(res, db);
+    } catch (e: any) {
+      console.error(e);
+      res.status(500).json({ err: e.message });
+    }
+  });
+
   // Eliminazione di una fantasquadra (Admin API)
   app.post("/api/fantasquadre/elimina", async (req, res) => {
     try {
