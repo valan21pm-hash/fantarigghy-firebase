@@ -2099,6 +2099,9 @@ export default function Fantacalcetto({
                         <strong>subentreranno i voti del tuo Panchinaro</strong>{" "}
                         d'ufficio, salvando il punteggio della giornata.
                       </p>
+                      <p className="bg-sky-950/30 border border-sky-900/40 rounded-xl p-3 text-[11px] text-sky-200 mt-2">
+                        💡 <strong>Regola Panchina Punteggi:</strong> Un giocatore in panchina contribuisce alla squadra esclusivamente con i suoi <strong>bonus non manuali</strong> (es. bonus di presenza, bonus social o speciali) e <strong>che non richiedono l'ingresso in campo</strong>. I suoi bonus derivanti dal gioco effettivo (es. gol o bonus legati al minutaggio) <strong>non vengono conteggiati</strong> a meno che non subentri per assenza di un titolare.
+                      </p>
                     </div>
 
                     <div className="space-y-3 border-t border-emerald-900/40 pt-4">

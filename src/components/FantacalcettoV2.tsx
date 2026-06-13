@@ -2232,6 +2232,9 @@ export default function FantacalcettoV2({
                         <strong>subentreranno i voti del tuo Panchinaro</strong>{" "}
                         d'ufficio, salvando il punteggio della giornata.
                       </p>
+                      <p className="bg-sky-950/30 border border-sky-900/40 rounded-xl p-3 text-[11px] text-sky-200 mt-2">
+                        💡 <strong>Regola Panchina Punteggi:</strong> Un giocatore in panchina contribuisce alla squadra esclusivamente con i suoi <strong>bonus non manuali</strong> (es. bonus di presenza, bonus social o speciali) e <strong>che non richiedono l'ingresso in campo</strong>. I suoi bonus derivanti dal gioco effettivo (es. gol o bonus legati al minutaggio) <strong>non vengono conteggiati</strong> a meno che non subentri per assenza di un titolare.
+                      </p>
                     </div>
 
                     <div className="space-y-3 border-t border-indigo-900/40 pt-4">
@@ -4415,9 +4418,34 @@ export default function FantacalcettoV2({
               </div>
             </form>
           ) : activePublicTab === "regolamento" ? (
-            <div className="space-y-6 animate-fade-in font-sans p-6 text-center border-2 border-dashed border-indigo-800 rounded-3xl mt-6">
-              <h2 className="text-xl font-black text-yellow-300 uppercase tracking-widest">Regolamento & Modificatori</h2>
-              <p className="text-indigo-300 text-sm font-medium">Qui troverai presto il riepilogo della gestione bonus/malus personalizzati e il calcolo dei modificatori della fanta-lega.</p>
+            <div className="space-y-6 animate-fade-in font-sans p-6 text-left border border-indigo-800 bg-indigo-900/20 rounded-3xl mt-6">
+              <h2 className="text-xl font-black text-yellow-300 uppercase tracking-widest text-center border-b border-indigo-800/50 pb-4 mb-4">Regolamento & Gestione Bonus</h2>
+              
+              <div className="space-y-4 text-indigo-100 text-sm leading-relaxed">
+                <h3 className="font-extrabold text-indigo-300 text-base flex items-center gap-2"><span>📌</span> Gestione Punteggi in Panchina</h3>
+                <p>
+                  I giocatori schierati in <strong>panchina</strong> (il quarto giocatore della rosa) sono fondamentali non solo per subentrare in caso di assenza di un titolare, ma anche per portare <strong>punti descrittivi supplementari</strong> alla tua squadra. Tuttavia, esistono delle regole rigide su quali bonus possono essere attribuiti a chi non gioca.
+                </p>
+                <div className="bg-indigo-950/50 border border-indigo-800/60 rounded-xl p-4 space-y-3 mt-2">
+                  <p className="font-bold text-emerald-300">✅ Bonus Validi in Panchina:</p>
+                  <ul className="list-disc pl-5 space-y-1 text-xs font-medium">
+                     <li><strong>Bonus Extra/Comportamentali automatici</strong> che non prevedono discesa in campo (es. comportamento in panchina, presenza al campo senza giocare).</li>
+                     <li><strong>Bonus Social</strong> come post, tag, e story su Instagram.</li>
+                     <li><strong>Bonus Speciali Personali (Ad Personam)</strong> legati ad azioni esterne alla contesa agonistica vera e propria (es. portare le borracce, confermare la presenza in chat, o bonus papà).</li>
+                  </ul>
+                  
+                  <p className="font-bold text-red-300 mt-4">❌ Bonus NON Validi in Panchina:</p>
+                  <ul className="list-disc pl-5 space-y-1 text-xs font-medium">
+                     <li><strong>Tutti i Bonus Manuali</strong> derivanti da azioni di gioco (es. gol, assist, salvataggi, rigori).</li>
+                     <li><strong>Tutti i Bonus legati all'ingresso in campo</strong> (es. Bonus Lazzaro, Bonus ingresso redivivo, ecc...). Tali bonus vengono annullati d'ufficio per i panchinari.</li>
+                     <li>Qualsiasi moltiplicatore sui voti standard.</li>
+                  </ul>
+                </div>
+                
+                <p className="text-xs text-indigo-300/80 italic pt-2">
+                  Nota tecnica: Se un panchinaro subentra a un titolare (perché quest'ultimo ha preso "S.V." o non si è presentato), smette di essere considerato "panchinaro" e per lui varranno nuovamente <strong>tutti i bonus</strong> maturati sul campo.
+                </p>
+              </div>
             </div>
           ) : activePublicTab === "statistiche" ? (
             <div className="mt-6 animate-fade-in">
