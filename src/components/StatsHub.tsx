@@ -115,7 +115,7 @@ export default function StatsHub({
       // Calculate state for player
       validMatches.forEach((m) => {
         if (!m.referto) return;
-        const r = m.referto.find((x) => x.nome.toLowerCase() === g.nome.toLowerCase());
+        const r = m.referto.find((x) => (x.snapshotGiocatore?.nome || x.nome).toLowerCase().trim() === g.nome.toLowerCase().trim());
         if (!r) return;
 
         const isPresente = r.statoPresenza === "giocato";
@@ -191,7 +191,7 @@ export default function StatsHub({
       // Compute actual view score, stats & bonus frequencies for the selected period
       targetMatches.forEach((m) => {
         if (!m.referto) return;
-        const r = m.referto.find((x) => x.nome.toLowerCase() === g.nome.toLowerCase());
+        const r = m.referto.find((x) => (x.snapshotGiocatore?.nome || x.nome).toLowerCase().trim() === g.nome.toLowerCase().trim());
         if (!r) return;
 
         const isPresente = r.statoPresenza === "giocato";
@@ -316,7 +316,7 @@ export default function StatsHub({
           m.giocatoriKpi.forEach((kpi: any) => {
             // Re-fetch individual match referto to see specific bonuses
             const matchObj = validMatches.find((v) => v.id === m.matchId);
-            const r = matchObj?.referto?.find((x) => x.nome.toLowerCase() === kpi.nome.toLowerCase());
+            const r = matchObj?.referto?.find((x) => (x.snapshotGiocatore?.nome || x.nome).toLowerCase().trim() === kpi.nome.toLowerCase().trim());
             if (r) {
               const rGol = r.statoPresenza === "giocato" ? (Number(r.gol) || 0) : 0;
               const rAssist = r.statoPresenza === "giocato" ? (Number(r.assist) || 0) : 0;
@@ -391,6 +391,7 @@ export default function StatsHub({
     targetMatches.forEach((m) => {
       if (!m.referto) return;
       m.referto.forEach((r) => {
+        const playerName = (r.snapshotGiocatore?.nome || r.nome).trim();
         const isPresente = r.statoPresenza === "giocato";
         const rGol = isPresente ? (Number(r.gol) || 0) : 0;
         const rAssist = isPresente ? (Number(r.assist) || 0) : 0;
@@ -399,7 +400,7 @@ export default function StatsHub({
         const rBonusAttivi = r.bonusAttivi || [];
 
         const breakdown = getPlayerBonusBreakdownForMatch(
-          r.nome,
+          playerName,
           rBonusAttivi,
           rGol,
           rAssist,
@@ -420,7 +421,7 @@ export default function StatsHub({
             };
           }
           counts[b.nome].totalCount++;
-          counts[b.nome].activatedBy[r.nome] = (counts[b.nome].activatedBy[r.nome] || 0) + 1;
+          counts[b.nome].activatedBy[playerName] = (counts[b.nome].activatedBy[playerName] || 0) + 1;
         });
       });
     });
@@ -462,7 +463,7 @@ export default function StatsHub({
     const history: any[] = [];
     validMatches.forEach((m) => {
       if (!m.referto) return;
-      const r = m.referto.find((x) => x.nome.toLowerCase() === selectedPlayerFilter.toLowerCase());
+      const r = m.referto.find((x) => (x.snapshotGiocatore?.nome || x.nome).toLowerCase().trim() === selectedPlayerFilter.toLowerCase().trim());
       if (!r) return;
 
       const isPresente = r.statoPresenza === "giocato";

@@ -124,7 +124,7 @@ export const getPlayerCurrentPrice = (
     const inviatoFanta = m.inviatoFanta === true;
 
     if (!isAmichevole && inviatoFanta && m.referto) {
-      const r = m.referto.find(x => (x.snapshotGiocatore?.nome || x.nome).toLowerCase() === nome.toLowerCase());
+      const r = m.referto.find(x => (x.snapshotGiocatore?.nome || x.nome).toLowerCase().trim() === nome.toLowerCase().trim());
       const isPresente = r ? r.statoPresenza === "giocato" : false;
       let matchScore = 0;
 
@@ -227,7 +227,7 @@ export const calculatePlayerChampionshipStats = (nome: string, partiteChiuse: Pa
     const inviatoFanta = m.inviatoFanta === true;
     
     if (!isAmichevole && inviatoFanta && m.referto) {
-      const r = m.referto.find(x => (x.snapshotGiocatore?.nome || x.nome).toLowerCase() === nome.toLowerCase());
+      const r = m.referto.find(x => (x.snapshotGiocatore?.nome || x.nome).toLowerCase().trim() === nome.toLowerCase().trim());
       if (r) {
         // If player didn't play ("assente"), exclude game points (goals, assists, cards)
         const isPresente = r.statoPresenza === "giocato";

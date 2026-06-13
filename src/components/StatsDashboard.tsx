@@ -38,7 +38,7 @@ export default function StatsDashboard({ giocatori, partiteChiuse = [] }: StatsD
       for (const m of partiteChiuse) {
         const isFriendly = m.dettagli ? m.dettagli.toLowerCase().includes("amichevole") : false;
         if (isFriendly && m.referto) {
-          const r = m.referto.find(x => x.nome.toLowerCase() === g.nome.toLowerCase());
+          const r = m.referto.find(x => (x.snapshotGiocatore?.nome || x.nome).trim().toLowerCase() === g.nome.trim().toLowerCase());
           if (r) {
             amichevoleGol += Number(r.gol) || 0;
             amichevoleAssist += Number(r.assist) || 0;

@@ -290,7 +290,7 @@ export default function ArchivioMatches({
                         {(() => {
                           const grouped: Record<string, string[]> = {};
                           p.convocati.forEach(name => {
-                            const g = giocatori.find(x => x.nome.toLowerCase() === name.toLowerCase());
+                            const g = giocatori.find(x => x.nome.trim().toLowerCase() === name.trim().toLowerCase());
                             const role = g?.ultimoRuolo || "Altri";
                             if (!grouped[role]) grouped[role] = [];
                             grouped[role].push(name);
@@ -414,7 +414,7 @@ export default function ArchivioMatches({
                   <span className="font-bold text-slate-800 uppercase text-[9px] block mb-1">Elenco Convocati per Gara:</span>
                   <div className="flex flex-wrap gap-1">
                     {activeReviewMatch.convocati.map((name) => {
-                      const present = activeReviewMatch.referto.some(r => r.nome.toLowerCase() === name.toLowerCase());
+                      const present = activeReviewMatch.referto.some(r => (r.snapshotGiocatore?.nome || r.nome).trim().toLowerCase() === name.trim().toLowerCase());
                       return (
                         <span key={name} className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${present ? "bg-slate-100 text-slate-900" : "bg-gray-100 text-gray-400 line-through"}`}>
                           {name}

@@ -154,7 +154,7 @@ export default function PlayerList({
     // 2. Parse from partiteChiuse
     if (partiteChiuse && Array.isArray(partiteChiuse)) {
       partiteChiuse.forEach(match => {
-        const rGioc = match.referto?.find(r => r.nome.toLowerCase() === playerName.toLowerCase());
+        const rGioc = match.referto?.find(r => (r.snapshotGiocatore?.nome || r.nome).trim().toLowerCase() === playerName.trim().toLowerCase());
         if (rGioc && rGioc.pagaQuota) {
           const amt = rGioc.quotaMaturata !== undefined ? rGioc.quotaMaturata : (match.costo / (match.referto.filter(x => x.pagaQuota).length || 1));
           const matchDate = match.dataInserimento || (match.dettagli ? match.dettagli.split(",")[0] : "") || "Gara Chiusa";
@@ -813,7 +813,7 @@ export default function PlayerList({
             for (const m of partiteChiuse) {
               const isFriendly = m.dettagli ? m.dettagli.toLowerCase().includes("amichevole") : false;
               if (isFriendly && m.referto) {
-                const r = m.referto.find(x => x.nome.toLowerCase() === g.nome.toLowerCase());
+                const r = m.referto.find(x => (x.snapshotGiocatore?.nome || x.nome).trim().toLowerCase() === g.nome.trim().toLowerCase());
                 if (r) {
                   amichevoleGol += Number(r.gol) || 0;
                   amichevoleAssist += Number(r.assist) || 0;

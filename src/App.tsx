@@ -396,7 +396,8 @@ export default function App() {
       nomeFantasquadra,
       giocatoriSelezionati,
       pin,
-      email
+      email,
+      isAdminMode: isAdminAuthenticated,
     });
   };
 

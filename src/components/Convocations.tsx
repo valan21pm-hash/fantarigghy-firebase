@@ -89,7 +89,7 @@ export default function Convocations({
     const nomeLibero = nuovoEsterno.trim();
     if (!nomeLibero) return;
     const nomeCompleto = `${nomeLibero} (Esterno)`;
-    if (esterni.includes(nomeCompleto) || giocatori.some(g => g.nome.toLowerCase() === nomeLibero.toLowerCase())) {
+    if (esterni.includes(nomeCompleto) || giocatori.some(g => g.nome.trim().toLowerCase() === nomeLibero.toLowerCase())) {
       alert("Questo nome è già presente in lista!");
       return;
     }

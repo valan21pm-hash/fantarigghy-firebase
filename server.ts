@@ -1306,6 +1306,15 @@ function sendDbResponse(res: express.Response, db: DatabaseSchema) {
     fondoCassa += g.saldo;
   }
 
+  // Ensure all fantasquadre have an ID to avoid React key errors and backend lookup issues
+  if (db.fantasquadre) {
+    for (const fs of db.fantasquadre) {
+      if (!fs.id) {
+        fs.id = Math.random().toString(36).substring(2, 9);
+      }
+    }
+  }
+
   const partiteAperte = db.partite.filter((p) => p.stato === "Aperta");
   const partiteChiuse = db.partite.filter((p) => p.stato === "Chiusa");
 
@@ -1428,6 +1437,7 @@ async function startServer() {
         giocatoriSelezionati,
         pin,
         email,
+        isAdminMode,
       } = req.body;
       if (!nomeFantasquadra || !nomeFantasquadra.trim()) {
         return res
@@ -1508,7 +1518,7 @@ async function startServer() {
           const matchTime = new Date(year, month, day, hour, minute);
 
           const lockoutTime = matchTime.getTime() - 60 * 60 * 1000; // 1 hour before
-          if (now.getTime() >= lockoutTime) {
+          if (now.getTime() >= lockoutTime && !isAdminMode) {
             return res.status(400).json({
               err: `Modifiche bloccate! Mancano meno di un'ora all'inizio della partita di campionato del ${matchRes[1]}/${matchRes[2]} alle ${matchRes[4]}:${matchRes[5]} (o il match è già in corso).`,
             });
@@ -1582,7 +1592,8 @@ async function startServer() {
           if (
             !isMercatoLiberoValido &&
             rulePrevPlayers.length === 4 &&
-            keptFromOrigin.length < 3
+            keptFromOrigin.length < 3 &&
+            !isAdminMode
           ) {
             return res
               .status(400)
@@ -1626,7 +1637,7 @@ async function startServer() {
               totalSoldPrice -
               totalBoughtPrice;
 
-            if (newCreditoResiduo < 0) {
+            if (newCreditoResiduo < 0 && !isAdminMode) {
               return res.status(400).json({
                 err: `Crediti insufficienti! Operazione di mercato respinta (Credito Mancante: ${Math.abs(newCreditoResiduo)} Izycoin).`,
               });
@@ -1642,7 +1653,7 @@ async function startServer() {
             totalCost += pPrice;
           }
 
-          if (totalCost > MAX_BUDGET) {
+          if (totalCost > MAX_BUDGET && !isAdminMode) {
             return res.status(400).json({
               err: `Budget iniziale massimo superato! Il limite è di ${MAX_BUDGET} Izycoin, ma la rosa scelta costa complessivamente ${totalCost} Izycoin.`,
             });

@@ -615,7 +615,7 @@ export default function FantacalcettoV2({
 
       const getPlayerInfo = (pName: string) => {
         const r = m.referto.find(
-          (x) => x.nome.toLowerCase() === pName.toLowerCase(),
+          (x) => (x.snapshotGiocatore?.nome || x.nome).trim().toLowerCase() === pName.trim().toLowerCase(),
         );
 
         let played = false;
@@ -1012,7 +1012,7 @@ export default function FantacalcettoV2({
 
     if (selectedTeam && economyPrevPlayers.length === 4) {
       // Modify existing roster check: MUST be authenticated!
-      if (authenticatedTeamId !== selectedTeam.id) {
+      if (authenticatedTeamId !== selectedTeam.id && !isAdminMode) {
         alert(
           "Devi sbloccare la tua squadra con il PIN per poter modificare la formazione.",
         );
@@ -1086,7 +1086,7 @@ export default function FantacalcettoV2({
         });
 
         const finalCredits = teamCreditoResiduo + soldPrice - boughtPrice;
-        if (finalCredits < 0) {
+        if (finalCredits < 0 && !isAdminMode) {
           alert(
             `Credito non sufficiente! Ti costerebbe troppo di mercato: sforeresti di ${Math.abs(finalCredits)} Izycoin.`,
           );
@@ -1097,7 +1097,7 @@ export default function FantacalcettoV2({
       }
     } else {
       // New Team Enrollment flow or composing first-time roster (just keep max 4 players)
-      if (selectedTeam && authenticatedTeamId !== selectedTeam.id) {
+      if (selectedTeam && authenticatedTeamId !== selectedTeam.id && !isAdminMode) {
         alert(
           "Devi sbloccare la tua squadra con il PIN per poter completare la formazione.",
         );
@@ -1123,7 +1123,7 @@ export default function FantacalcettoV2({
             bonuses,
           );
         });
-        if (totalCost > MAX_BUDGET) {
+        if (totalCost > MAX_BUDGET && !isAdminMode) {
           alert(
             `Sfora il budget! La rosa scelta sforerebbe il tetto di ${MAX_BUDGET} Izycoin (costerebbe ${totalCost} Izycoin).`,
           );
@@ -1139,7 +1139,7 @@ export default function FantacalcettoV2({
     e.preventDefault();
     setErrorMsg(null);
 
-    if (lockStatus.isLocked) {
+    if (lockStatus.isLocked && !isAdminMode) {
       setErrorMsg(
         "Impossibile procedere: le iscrizioni e variazioni sono bloccate per l'imminente turno di campionato.",
       );
@@ -1191,7 +1191,7 @@ export default function FantacalcettoV2({
           bonuses,
         );
       });
-      if (totalCost > MAX_BUDGET) {
+      if (totalCost > MAX_BUDGET && !isAdminMode) {
         setErrorMsg(
           `Il costo totale della rosa scelto (${totalCost} pinne 🐟) supera il limite consentito di ${MAX_BUDGET} pinne 🐟!`,
         );
@@ -1230,7 +1230,7 @@ export default function FantacalcettoV2({
         const numChangesFromOrigin =
           rulePrevPlayers.length - keptFromOrigin.length;
 
-        if (!isMercatoLiberoValido && numChangesFromOrigin > 1) {
+        if (!isMercatoLiberoValido && numChangesFromOrigin > 1 && !isAdminMode) {
           setErrorMsg(
             `Errore di mercato: puoi effettuare al massimo 1 cambio rispetto alla tua rosa originaria post-partita! (A meno di Sessione Speciale)`,
           );
@@ -1256,7 +1256,7 @@ export default function FantacalcettoV2({
         });
 
         const finalCredits = teamCreditoResiduo + soldPrice - boughtPrice;
-        if (finalCredits < 0) {
+        if (finalCredits < 0 && !isAdminMode) {
           setErrorMsg(
             `Credito non sufficiente per l'operazione! Hai a disposizione ${teamCreditoResiduo} Izycoin residui. Cedendo ottenieni ${soldPrice} Izycoin, ma gli acquisti costano ${boughtPrice} Izycoin. Ti mancano ${Math.abs(finalCredits)} Izycoin.`,
           );
@@ -1289,7 +1289,7 @@ export default function FantacalcettoV2({
             bonuses,
           );
         });
-        if (totalCost > MAX_BUDGET) {
+        if (totalCost > MAX_BUDGET && !isAdminMode) {
           setErrorMsg(
             `Il costo totale della rosa scelto (${totalCost} Izycoin) supera il limite consentito di ${MAX_BUDGET} Izycoin!`,
           );
@@ -2895,7 +2895,7 @@ export default function FantacalcettoV2({
                       const isExpanded = expandedTeamId === team.id;
                       return (
                         <div
-                          key={team.id}
+                          key={team.id || team.nomeFantasquadra}
                           className={`border rounded-2xl transition-all font-sans ${
                             isExpanded
                               ? "border-yellow-400 bg-indigo-900/45"
@@ -3840,6 +3840,7 @@ export default function FantacalcettoV2({
                       const numChangesFromOrigin =
                         rulePrevPlayers.length - keptFromOrigin.length;
                       const hasTooManyChanges =
+                        !isAdminMode &&
                         !isMercatoLiberoValido &&
                         rulePrevPlayers.length === 4 &&
                         numChangesFromOrigin > 1;
@@ -3861,7 +3862,7 @@ export default function FantacalcettoV2({
 
                       const finalCredits =
                         teamCreditoResiduo + soldPrice - boughtPrice;
-                      const overBudget = finalCredits < 0;
+                      const overBudget = !isAdminMode && finalCredits < 0;
 
                       return (
                         <div className="bg-indigo-950/45 border border-indigo-990 rounded-xl p-3.5 space-y-2.5 mt-2 leading-tight text-left">
@@ -4421,7 +4422,7 @@ export default function FantacalcettoV2({
                 
                 <button
                   type="submit"
-                  disabled={submitting || lockStatus.isLocked}
+                  disabled={submitting || (lockStatus.isLocked && !isAdminMode)}
                   className="bg-yellow-400 hover:bg-yellow-350 disabled:bg-indigo-800 disabled:text-indigo-400 text-indigo-950 font-black uppercase tracking-wider text-xs px-5 py-2.5 rounded-xl shadow-lg active:scale-95 transition-transform shrink-0 disabled:border disabled:border-indigo-700"
                 >
                   {submitting ? "Invio..." : "Salva Rosa"}
@@ -4841,7 +4842,7 @@ export default function FantacalcettoV2({
                       {rankedTeams.map((team, index) => {
                         const isTop = index < 3;
                         return (
-                          <tr key={team.id} className="hover:bg-gray-50/40">
+                          <tr key={team.id || team.nomeFantasquadra} className="hover:bg-gray-50/40">
                             <td className="px-5 py-3 text-center">
                               <span
                                 className={`inline-flex items-center justify-center w-6 h-6 rounded-full font-mono text-xs font-bold ${
@@ -4914,7 +4915,7 @@ export default function FantacalcettoV2({
                   a.nomeFantasquadra.localeCompare(b.nomeFantasquadra),
                 );
                 const selectedTeamToView =
-                  sortedTeams.find((t) => t.id === expandedTeamId) ||
+                  sortedTeams.find((t) => (t.id || t.nomeFantasquadra) === expandedTeamId) ||
                   sortedTeams[0];
                 const score = calculateTeamScore(selectedTeamToView);
 
@@ -4933,12 +4934,12 @@ export default function FantacalcettoV2({
                         <div className="relative">
                           <select
                             id="team-select-dropdown"
-                            value={selectedTeamToView.id}
+                            value={selectedTeamToView.id || selectedTeamToView.nomeFantasquadra}
                             onChange={(e) => setExpandedTeamId(e.target.value)}
                             className="w-full sm:w-64 px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-extrabold text-blue-950 shadow-xs focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 cursor-pointer"
                           >
                             {sortedTeams.map((team) => (
-                              <option key={team.id} value={team.id}>
+                              <option key={team.id || team.nomeFantasquadra} value={team.id || team.nomeFantasquadra}>
                                 {team.nomeFantasquadra.toUpperCase()} —{" "}
                                 {team.nomePartecipante}
                               </option>
@@ -4958,12 +4959,12 @@ export default function FantacalcettoV2({
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 pb-2">
                         {sortedTeams.map((team) => (
                           <button
-                            id={`team-btn-${team.id}`}
-                            key={team.id}
+                            id={`team-btn-${team.id || team.nomeFantasquadra}`}
+                            key={team.id || team.nomeFantasquadra}
                             type="button"
-                            onClick={() => setExpandedTeamId(team.id)}
+                            onClick={() => setExpandedTeamId(team.id || team.nomeFantasquadra)}
                             className={`px-3.5 py-2.5 rounded-xl border text-left flex flex-col transition-all cursor-pointer ${
-                              selectedTeamToView.id === team.id
+                              (selectedTeamToView.id || selectedTeamToView.nomeFantasquadra) === (team.id || team.nomeFantasquadra)
                                 ? "bg-indigo-950 border-indigo-800 text-white shadow-md ring-2 ring-indigo-500/30 scale-100"
                                 : "bg-white border-gray-200 text-gray-600 hover:bg-indigo-50 hover:border-indigo-200 scale-95 opacity-80"
                             }`}
@@ -4972,7 +4973,7 @@ export default function FantacalcettoV2({
                               {team.nomeFantasquadra}
                             </span>
                             <span
-                              className={`text-[9px] font-bold truncate ${selectedTeamToView.id === team.id ? "text-indigo-400" : "text-gray-400"}`}
+                              className={`text-[9px] font-bold truncate ${(selectedTeamToView.id || selectedTeamToView.nomeFantasquadra) === (team.id || team.nomeFantasquadra) ? "text-indigo-400" : "text-gray-400"}`}
                             >
                               👤 {team.nomePartecipante}
                             </span>
@@ -5217,7 +5218,7 @@ export default function FantacalcettoV2({
                                       const unassignedItems: { matchDetails: string; description: string; points: number }[] = [];
                                       
                                       matchBreakdownForSeparation.forEach(mb => {
-                                        const kpi = mb.giocatoriKpi.find(k => k.nome.toLowerCase() === pName.toLowerCase());
+                                        const kpi = mb.giocatoriKpi.find(k => k.nome.trim().toLowerCase() === pName.trim().toLowerCase());
                                         if (kpi && kpi.stato === "Panchina") {
                                           const golPts = kpi.gol * GOAL_POINTS;
                                           const assistPts = kpi.assist * ASSIST_POINTS;
@@ -5229,7 +5230,7 @@ export default function FantacalcettoV2({
                                             if (assistPts > 0) exclusions.push(`${kpi.assist} Assist (+${assistPts} pt)`);
                                             
                                             // Find specific manual/legendary/presidential bonuses that were not assigned
-                                            const matchRef = (partiteChiuse || []).find(x => x.id === mb.matchId)?.referto?.find(x => x.nome.toLowerCase() === pName.toLowerCase());
+                                            const matchRef = (partiteChiuse || []).find(x => x.id === mb.matchId)?.referto?.find(x => (x.snapshotGiocatore?.nome || x.nome).trim().toLowerCase() === pName.trim().toLowerCase());
                                             if (matchRef && matchRef.bonusAttivi) {
                                               matchRef.bonusAttivi.forEach(bId => {
                                                 const bDef = (bonuses || DEFAULT_BONUSES).find(x => x.id === bId);
@@ -5345,9 +5346,30 @@ export default function FantacalcettoV2({
                         );
                       })()}
 
-                      {/* Delete Admin Action */}
+                      {/* Delete & Edit Admin Action */}
                       {isEditor && (
-                        <div className="flex justify-end pt-3 border-t border-indigo-200 mt-4">
+                        <div className="flex justify-end gap-2 pt-3 border-t border-indigo-200 mt-4">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setNomeFantasquadra(selectedTeamToView.nomeFantasquadra);
+                              setAuthenticatedTeamId(selectedTeamToView.id);
+                              
+                              if (isMercatoLiberoValido || !(partiteChiuse && partiteChiuse.length > 0)) {
+                                setSelectedPlayers(selectedTeamToView.giocatoriSelezionati || []);
+                              } else {
+                                // Rule prev players logic will be triggered in the form via active tabs
+                              }
+                              
+                              setActivePublicTab("formazione");
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-100 hover:bg-yellow-200 border border-yellow-300 rounded-lg text-yellow-800 font-extrabold text-[10px] uppercase cursor-pointer transition-colors"
+                          >
+                            <Pencil className="h-3 w-3" />
+                            <span>Modifica Fantasquadra</span>
+                          </button>
                           <button
                             type="button"
                             onClick={async (e) => {
@@ -5557,7 +5579,7 @@ export default function FantacalcettoV2({
 
                 return (
                   <button
-                    key={team.id}
+                    key={team.id || team.nomeFantasquadra}
                     onClick={() => {
                        generatePartitaSquadraPdf(matchForTeamChoice, team.nomeFantasquadra, breakdown);
                        setMatchForTeamChoice(null);
@@ -5613,7 +5635,7 @@ function GeneralReportModal({ rankedTeams, getTeamMatchBreakdownList, onClose, g
                   </thead>
                   <tbody>
                     {rankedTeams.map((team: any, idx: number) => (
-                      <tr key={team.id} className="border-b border-indigo-100 hover:bg-indigo-50 text-gray-800">
+                      <tr key={team.id || team.nomeFantasquadra} className="border-b border-indigo-100 hover:bg-indigo-50 text-gray-800">
                         <td className="p-2 font-black">{idx + 1}°</td>
                         <td className="p-2 font-extrabold truncate max-w-[120px]">{team.nomeFantasquadra}</td>
                         <td className="p-2 font-semibold truncate max-w-[100px]">{team.nomePartecipante}</td>
@@ -5631,7 +5653,7 @@ function GeneralReportModal({ rankedTeams, getTeamMatchBreakdownList, onClose, g
                 {rankedTeams.map((team: any) => {
                   const breakdowns = getTeamMatchBreakdownList(team);
                   return (
-                    <div key={team.id} className="bg-indigo-50 border border-indigo-200 rounded-xl p-3">
+                    <div key={team.id || team.nomeFantasquadra} className="bg-indigo-50 border border-indigo-200 rounded-xl p-3">
                       <h5 className="font-extrabold text-[11px] text-indigo-900 uppercase border-b border-indigo-200 pb-1 mb-2">⚽ {team.nomeFantasquadra} ({team.score} pt)</h5>
                       {breakdowns.length === 0 ? (
                         <p className="text-[10px] italic text-indigo-600">Nessuna partita refertata</p>
