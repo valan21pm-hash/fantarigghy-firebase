@@ -911,65 +911,133 @@ export default function FantacalcettoV2({
     );
     const now = new Date();
 
+    // Roster (Cambio Rosa) lock check (23:59 of day before)
+    let isRosterLocked = false;
+    let rosterDeadline: Date | null = null;
+    let rosterMatch: Partita | null = null;
+
+    for (const m of campMatches) {
+      const matchTime = parseMatchDate(m.dettagli);
+      if (matchTime) {
+        const matchDay = new Date(matchTime.getTime());
+        const dayBefore = new Date(matchDay.getFullYear(), matchDay.getMonth(), matchDay.getDate() - 1);
+        dayBefore.setHours(23, 59, 0, 0);
+        const lockoutTime = dayBefore.getTime();
+
+        if (now.getTime() >= lockoutTime) {
+          isRosterLocked = true;
+          rosterDeadline = new Date(lockoutTime);
+          rosterMatch = m;
+          break;
+        }
+      }
+    }
+
+    if (!isRosterLocked) {
+      // Find closest upcoming match's dayBefore 23:59
+      let closestMatch: Partita | null = null;
+      let closestTime = Infinity;
+
+      for (const m of campMatches) {
+        const matchTime = parseMatchDate(m.dettagli);
+        if (matchTime) {
+          const t = matchTime.getTime();
+          if (t > now.getTime() && t < closestTime) {
+            closestTime = t;
+            closestMatch = m;
+          }
+        }
+      }
+
+      if (closestMatch) {
+        const mTime = parseMatchDate(closestMatch.dettagli);
+        if (mTime) {
+          const matchDay = new Date(mTime.getTime());
+          const dayBefore = new Date(matchDay.getFullYear(), matchDay.getMonth(), matchDay.getDate() - 1);
+          dayBefore.setHours(23, 59, 0, 0);
+          rosterDeadline = dayBefore;
+          rosterMatch = closestMatch;
+        }
+      }
+    }
+
+    // Lineup (Formazione / Titolari-Panchina) lock check (1 hour before match)
+    let isLineupLocked = false;
+    let lineupDeadline: Date | null = null;
+    let lineupMatch: Partita | null = null;
+
     for (const m of campMatches) {
       const matchTime = parseMatchDate(m.dettagli);
       if (matchTime) {
         const lockoutTime = matchTime.getTime() - 60 * 60 * 1000; // 1 hour before
+
         if (now.getTime() >= lockoutTime) {
-          return {
-            isLocked: true,
-            match: m,
-            matchTime,
-            deadline: new Date(lockoutTime),
-            timeLeftString: "",
-          };
+          isLineupLocked = true;
+          lineupDeadline = new Date(lockoutTime);
+          lineupMatch = m;
+          break;
         }
       }
     }
 
-    // Also look for the most imminent future championship match
-    let closestMatch: Partita | null = null;
-    let closestTime = Infinity;
+    if (!isLineupLocked) {
+      // Find closest upcoming match's 1-hour before deadline
+      let closestMatch: Partita | null = null;
+      let closestTime = Infinity;
 
-    for (const m of campMatches) {
-      const matchTime = parseMatchDate(m.dettagli);
-      if (matchTime) {
-        const t = matchTime.getTime();
-        if (t > now.getTime() && t < closestTime) {
-          closestTime = t;
-          closestMatch = m;
+      for (const m of campMatches) {
+        const matchTime = parseMatchDate(m.dettagli);
+        if (matchTime) {
+          const t = matchTime.getTime();
+          if (t > now.getTime() && t < closestTime) {
+            closestTime = t;
+            closestMatch = m;
+          }
+        }
+      }
+
+      if (closestMatch) {
+        const mTime = parseMatchDate(closestMatch.dettagli);
+        if (mTime) {
+          lineupDeadline = new Date(mTime.getTime() - 60 * 60 * 1000);
+          lineupMatch = closestMatch;
         }
       }
     }
 
-    if (closestMatch) {
-      const mTime = parseMatchDate(closestMatch.dettagli);
-      if (mTime) {
-        const deadline = new Date(mTime.getTime() - 60 * 60 * 1000);
-        // Time left string
-        const diffMs = deadline.getTime() - now.getTime();
-        let timeLeftString = "";
-        if (diffMs > 0) {
-          const hours = Math.floor(diffMs / (1000 * 60 * 60));
-          const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-          timeLeftString = `${hours}h ${minutes}m`;
-        }
-        return {
-          isLocked: false,
-          match: closestMatch,
-          matchTime: mTime,
-          deadline,
-          timeLeftString,
-        };
+    // Format time left string for roster
+    let timeLeftRosterString = "";
+    if (rosterDeadline) {
+      const diffMs = rosterDeadline.getTime() - now.getTime();
+      if (diffMs > 0) {
+        const hours = Math.floor(diffMs / (1000 * 60 * 60));
+        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        timeLeftRosterString = `${hours}h ${minutes}m`;
+      }
+    }
+
+    // Format time left string for lineup
+    let timeLeftLineupString = "";
+    if (lineupDeadline) {
+      const diffMs = lineupDeadline.getTime() - now.getTime();
+      if (diffMs > 0) {
+        const hours = Math.floor(diffMs / (1000 * 60 * 60));
+        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        timeLeftLineupString = `${hours}h ${minutes}m`;
       }
     }
 
     return {
-      isLocked: false,
-      match: null,
-      matchTime: null,
-      deadline: null,
-      timeLeftString: "",
+      isLocked: isRosterLocked, // Old generic isLocked maps to roster lock
+      isRosterLocked,
+      isLineupLocked,
+      rosterDeadline,
+      lineupDeadline,
+      timeLeftRosterString,
+      timeLeftLineupString,
+      match: rosterMatch || lineupMatch,
+      deadline: rosterDeadline,
+      timeLeftString: timeLeftRosterString, // backward compatibility
     };
   };
 
@@ -1007,18 +1075,33 @@ export default function FantacalcettoV2({
 
   // Handle Player select toggle
   const handleTogglePlayer = (nome: string) => {
-    if (lockStatus.isLocked) {
-      alert(
-        "Operazione non consentita: le formazioni sono attualmente bloccate per l'imminente turno di campionato.",
-      );
-      return;
-    }
-
     const selectedTeam = fantasquadre.find(
       (fs) =>
         fs.nomeFantasquadra.toLowerCase().trim() ===
         nomeFantasquadra.toLowerCase().trim(),
     );
+    const originalRoster = selectedTeam ? selectedTeam.giocatoriSelezionati || [] : [];
+
+    // 1. If lineup is completely locked (1 hour before match), nothing can be changed
+    if (lockStatus.isLineupLocked && !isAdminMode) {
+      alert("La consegna della formazione (titolari/panchina) per questo turno di campionato è chiusa! Non è più possibile fare modifiche.");
+      return;
+    }
+
+    // 2. If roster is locked (23:59 day before match)
+    if (lockStatus.isRosterLocked && !isAdminMode) {
+      // If we don't have a team yet or the team has < 4 players, they can't register/add players during the lock
+      if (originalRoster.length < 4) {
+        alert("Il mercato e le iscrizioni sono chiusi per questo turno di campionato (chiudono alle 23:59 del giorno prima).");
+        return;
+      }
+      // If the clicked player is NOT in our original roster, we cannot add them (because roster is locked!)
+      if (!originalRoster.includes(nome) && !selectedPlayers.includes(nome)) {
+        alert("Il mercato e i cambi rosa sono bloccati per questo turno di campionato! Puoi solo riordinare i tuoi 4 giocatori esistenti modificando l'ordine di titolari e panchina.");
+        return;
+      }
+    }
+
     const economyPrevPlayers = selectedTeam
       ? selectedTeam.giocatoriSelezionati || []
       : [];
@@ -1155,11 +1238,27 @@ export default function FantacalcettoV2({
     e.preventDefault();
     setErrorMsg(null);
 
-    if (lockStatus.isLocked && !isAdminMode) {
-      setErrorMsg(
-        "Impossibile procedere: le iscrizioni e variazioni sono bloccate per l'imminente turno di campionato.",
-      );
-      return;
+    const existingTeamForLockCheck = fantasquadre.find(
+      (fs) =>
+        fs.nomeFantasquadra.toLowerCase().trim() ===
+        nomeFantasquadra.toLowerCase().trim(),
+    );
+    const originalRoster = existingTeamForLockCheck ? existingTeamForLockCheck.giocatoriSelezionati || [] : [];
+    const isOnlyLineupSwap = (() => {
+      if (originalRoster.length !== 4 || selectedPlayers.length !== 4) return false;
+      return selectedPlayers.every((p) => originalRoster.includes(p));
+    })();
+
+    if (isOnlyLineupSwap) {
+      if (lockStatus.isLineupLocked && !isAdminMode) {
+        setErrorMsg("Impossibile procedere: la consegna della formazione per questo turno di campionato è chiusa! (Chiude 1 ora prima della partita)");
+        return;
+      }
+    } else {
+      if (lockStatus.isRosterLocked && !isAdminMode) {
+        setErrorMsg("Impossibile procedere: le iscrizioni e i cambi rosa per questo turno di campionato sono chiusi! (Chiudono alle 23:59 del giorno prima)");
+        return;
+      }
     }
 
     // Validate inputs
@@ -1336,6 +1435,32 @@ export default function FantacalcettoV2({
     setShowConfirmModal(false);
     setSubmitting(true);
     setErrorMsg(null);
+
+    const existingTeamForLockCheck = fantasquadre.find(
+      (fs) =>
+        fs.nomeFantasquadra.toLowerCase().trim() ===
+        nomeFantasquadra.toLowerCase().trim(),
+    );
+    const originalRoster = existingTeamForLockCheck ? existingTeamForLockCheck.giocatoriSelezionati || [] : [];
+    const isOnlyLineupSwap = (() => {
+      if (originalRoster.length !== 4 || selectedPlayers.length !== 4) return false;
+      return selectedPlayers.every((p) => originalRoster.includes(p));
+    })();
+
+    if (isOnlyLineupSwap) {
+      if (lockStatus.isLineupLocked && !isAdminMode) {
+        setErrorMsg("Impossibile procedere: la consegna della formazione per questo turno di campionato è chiusa! (Chiude 1 ora prima della partita)");
+        setSubmitting(false);
+        return;
+      }
+    } else {
+      if (lockStatus.isRosterLocked && !isAdminMode) {
+        setErrorMsg("Impossibile procedere: le iscrizioni e i cambi rosa per questo turno di campionato sono chiusi! (Chiudono alle 23:59 del giorno prima)");
+        setSubmitting(false);
+        return;
+      }
+    }
+
     try {
       const trimmedPin = (pin ? pin.trim() : "") || "12345678";
       await onIscriviFantasquadra(
@@ -2792,73 +2917,103 @@ export default function FantacalcettoV2({
 
           {/* Lock Status Banner */}
           {lockStatus.match ? (
-            <div
-              className={`rounded-xl p-4 border flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-sans shadow-lg ${
-                lockStatus.isLocked
-                  ? "bg-red-950/70 border-red-900 text-red-200"
-                  : "bg-indigo-950/60 border-indigo-800/80 text-indigo-100"
-              }`}
-            >
-              <div className="flex items-start gap-3">
-                <div
-                  className={`p-2 rounded-xl shrink-0 mt-0.5 ${
-                    lockStatus.isLocked
-                      ? "bg-red-900/30 text-red-400 animate-pulse"
-                      : "bg-indigo-900/40 text-indigo-400"
-                  }`}
-                >
-                  <AlertCircle className="h-5 w-5" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans">
+              {/* CAMBIO ROSA (MERCATO) BANNER */}
+              <div
+                className={`rounded-xl p-4 border flex flex-col justify-between gap-3 shadow-lg ${
+                  lockStatus.isRosterLocked
+                    ? "bg-red-950/40 border-red-900/60 text-red-200"
+                    : "bg-indigo-950/60 border-indigo-800/80 text-indigo-100"
+                }`}
+              >
+                <div className="flex items-start gap-2.5">
+                  <div
+                    className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${
+                      lockStatus.isRosterLocked
+                        ? "bg-red-900/30 text-red-400"
+                        : "bg-indigo-950/50 border border-indigo-800 text-indigo-400"
+                    }`}
+                  >
+                    <AlertCircle className="h-4.5 w-4.5" />
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] font-black uppercase tracking-wider text-white">
+                      {lockStatus.isRosterLocked
+                        ? "🔒 Mercato & Cambi Rosa: CHIUSO"
+                        : "🔓 Mercato & Cambi Rosa: APERTO"}
+                    </h4>
+                    <p className="text-[10px] mt-0.5 leading-relaxed text-indigo-200/90">
+                      L'acquisto o la vendita di nuovi giocatori nel proprio team di 4 elementi (chiude alle 23:59 del giorno prima).
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-1.5">
-                    {lockStatus.isLocked
-                      ? "🔒 Formazioni Bloccate"
-                      : "🔓 Formazioni Aperte"}
-                  </h4>
-                  <p className="text-[11px] mt-0.5 leading-relaxed">
-                    {lockStatus.isLocked ? (
-                      <>
-                        Le iscrizioni e variazioni sono chiuse per questa
-                        settimana. Prossimo turno di campionato:{" "}
-                        <span className="font-extrabold text-white">
-                          {lockStatus.match.dettagli.split(",")[0]}
-                        </span>
-                        . Rimangono in vigore le formazioni salvate
-                        precedentemente!
-                      </>
-                    ) : (
-                      <>
-                        Puoi inserire o aggiornare la tua formazione per il
-                        turno di campionato del{" "}
-                        <span className="font-extrabold text-white">
-                          {lockStatus.match.dettagli.split(",")[0]}
-                        </span>
-                        .
-                      </>
-                    )}
-                  </p>
+
+                <div className="flex items-center justify-between mt-1 pt-2 border-t border-indigo-800/40">
+                  <span className="text-[9px] uppercase font-bold tracking-wider text-indigo-300">
+                    Chiusura: {lockStatus.rosterDeadline?.toLocaleDateString("it-IT")} {lockStatus.rosterDeadline?.toLocaleTimeString("it-IT", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                  {!lockStatus.isRosterLocked && lockStatus.timeLeftRosterString ? (
+                    <span className="text-[9px] text-yellow-300 font-extrabold uppercase tracking-wider animate-pulse bg-yellow-500/10 px-2 py-0.5 rounded-md border border-yellow-500/20">
+                      Entro: {lockStatus.timeLeftRosterString}
+                    </span>
+                  ) : (
+                    <span className="text-[9px] text-red-400 font-extrabold uppercase tracking-wider bg-red-950/50 px-2 py-0.5 rounded-md border border-red-850">
+                      BLOCCATO
+                    </span>
+                  )}
                 </div>
               </div>
 
-              <div className="text-left sm:text-right shrink-0">
-                <span
-                  className={`text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded-lg inline-block ${
-                    lockStatus.isLocked
-                      ? "bg-red-850 text-white"
-                      : "bg-sky-500/10 text-sky-300 border border-sky-500/25"
-                  }`}
-                >
-                  Scadenza: {lockStatus.deadline?.toLocaleDateString("it-IT")}{" "}
-                  {lockStatus.deadline?.toLocaleTimeString("it-IT", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-                {!lockStatus.isLocked && lockStatus.timeLeftString && (
-                  <p className="text-[10px] text-yellow-300 font-extrabold uppercase tracking-wider mt-1.5 animate-pulse">
-                    Mancano: {lockStatus.timeLeftString}
-                  </p>
-                )}
+              {/* FORMAZIONE (TITOLARI-PANCHINA) BANNER */}
+              <div
+                className={`rounded-xl p-4 border flex flex-col justify-between gap-3 shadow-lg ${
+                  lockStatus.isLineupLocked
+                    ? "bg-red-950/40 border-red-900/60 text-red-200"
+                    : "bg-indigo-950/60 border-indigo-800/80 text-indigo-100"
+                }`}
+              >
+                <div className="flex items-start gap-2.5">
+                  <div
+                    className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${
+                      lockStatus.isLineupLocked
+                        ? "bg-red-900/30 text-red-400"
+                        : "bg-indigo-950/50 border border-indigo-800 text-indigo-400"
+                    }`}
+                  >
+                    <AlertCircle className="h-4.5 w-4.5" />
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] font-black uppercase tracking-wider text-white">
+                      {lockStatus.isLineupLocked
+                        ? "🔒 Schieramento Formazione: CHIUSO"
+                        : "🔓 Schieramento Formazione: APERTO"}
+                    </h4>
+                    <p className="text-[10px] mt-0.5 leading-relaxed text-indigo-200/90">
+                      Consente di scambiare titolari e panchina tra i tuoi 4 giocatori esistenti (chiude 1 ora prima della partita).
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-1 pt-2 border-t border-indigo-800/40">
+                  <span className="text-[9px] uppercase font-bold tracking-wider text-indigo-300">
+                    Chiusura: {lockStatus.lineupDeadline?.toLocaleDateString("it-IT")} {lockStatus.lineupDeadline?.toLocaleTimeString("it-IT", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                  {!lockStatus.isLineupLocked && lockStatus.timeLeftLineupString ? (
+                    <span className="text-[9px] text-emerald-400 font-extrabold uppercase tracking-wider animate-pulse bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                      Entro: {lockStatus.timeLeftLineupString}
+                    </span>
+                  ) : (
+                    <span className="text-[9px] text-red-400 font-extrabold uppercase tracking-wider bg-red-950/50 px-2 py-0.5 rounded-md border border-red-850">
+                      CHIUSO
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           ) : (
