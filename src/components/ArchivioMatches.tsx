@@ -105,7 +105,23 @@ export default function ArchivioMatches({
       }
       if (r.malusBrt) statsList.push(`📦 Malus BRT (-1)`);
       if (r.bonusAttivi && r.bonusAttivi.length > 0) {
-        statsList.push(`✨ ${r.bonusAttivi.length} Bonus`);
+        const allBonuses = bonuses || DEFAULT_BONUSES;
+        const activeNames = r.bonusAttivi.map(id => {
+          const b = allBonuses.find(x => x.id === id);
+          if (b) {
+            const pts = b.punti;
+            const sign = pts >= 0 ? "+" : "";
+            const isProg = r.bonusGolAccreditati?.[b.id];
+            if (isProg && isProg > 1) {
+              return `${b.nome} (${sign}${pts * isProg} pt, x${isProg})`;
+            }
+            return `${b.nome} (${sign}${pts} pt)`;
+          }
+          return null;
+        }).filter((name): name is string => name !== null);
+        if (activeNames.length > 0) {
+          statsList.push(`✨ Bonus: ${activeNames.join(", ")}`);
+        }
       }
 
       if (statsList.length > 0) {

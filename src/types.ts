@@ -89,7 +89,7 @@ export const getPlayerBasePrice = (nome: string): number => {
   if (n.includes("mulas")) return 17;
   if (n.includes("scarpellini")) return 16;
   if (n.includes("pittiu") || n.includes("mattana")) return 15;
-  if (n.includes("pinna") || n.includes("orlandini")) return 14;
+  if (n.includes("pinna") || n.includes("orlandini") || n.includes("cuccu")) return 14;
   if (n.includes("palmas") || n.includes("carrone") || n.includes("scattu") || n.includes("pippia")) return 13;
   if (n.includes("addis") || n.includes("bayre")) return 12;
   return 10;

@@ -269,6 +269,21 @@
       "attivo": true,
       "saldo": 9.4,
       "assist": 0
+    },
+    {
+      "gol": 0,
+      "golSubitiRigore": 0,
+      "numeroMaglia": 14,
+      "ultimoRuolo": "Laterale",
+      "golSubitiPiazzato": 0,
+      "nome": "Gabriele Cuccu",
+      "ammonizioni": 0,
+      "espulsioni": 0,
+      "quotaIscrizione": 10,
+      "golSubitiAzione": 0,
+      "attivo": true,
+      "saldo": 0,
+      "assist": 0
     }
   ],
   "campi": [
@@ -847,8 +862,7 @@
             "bonus_1780919041304",
             "mattana_optana",
             "bonus_1780919206691",
-            "gen_mvp_uccheddu",
-            "bonus_1781113120417"
+            "gen_mvp_uccheddu"
           ],
           "snapshotGiocatore": {
             "ultimoRuolo": "Laterale",
@@ -891,8 +905,7 @@
             "gen_esultanza_gruppo",
             "bonus_1780919041304",
             "bonus_1780919271374",
-            "pittiu_survivor",
-            "bonus_1781113120417"
+            "pittiu_survivor"
           ],
           "snapshotGiocatore": {
             "ultimoRuolo": "Laterale",
@@ -1044,8 +1057,7 @@
             "gen_esultanza_gruppo",
             "bonus_1780919041304",
             "bonus_1780919206691",
-            "carrone_polemichele",
-            "bonus_1781113120417"
+            "carrone_polemichele"
           ],
           "sostitutoDa": "",
           "nome": "Michele Carrone",

@@ -286,6 +286,9 @@ export default function FantacalcettoV2({
   const [showInstagramPopup, setShowInstagramPopup] = useState(() => {
     return localStorage.getItem("fantaInstagramFollowed_v1") !== "true";
   });
+  const [showCuccuPopup, setShowCuccuPopup] = useState(() => {
+    return typeof window !== "undefined" && localStorage.getItem("cuccuNotificationDismissed") !== "true";
+  });
   const [instagramLinkCopied, setInstagramLinkCopied] = useState(false);
 
   const [showReRegistrationPopup, setShowReRegistrationPopup] = useState(() => {
@@ -1921,6 +1924,77 @@ export default function FantacalcettoV2({
             </div>
           </div>
         )}
+        {showCuccuPopup && (
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-[9990] animate-fade-in font-sans">
+            <div className="bg-gradient-to-b from-slate-900 via-indigo-950/95 to-slate-950 border border-amber-500/30 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCuccuPopup(false);
+                  localStorage.setItem("cuccuNotificationDismissed", "true");
+                }}
+                className="absolute top-4 right-4 text-white/50 hover:text-white bg-white/10 hover:bg-white/20 p-1.5 rounded-full transition-colors cursor-pointer"
+                title="Chiudi"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-amber-500 via-yellow-400 to-orange-500 text-slate-900 flex items-center justify-center border border-white/20 shadow-lg animate-pulse">
+                <AlertCircle className="h-7 w-7 text-indigo-950" />
+              </div>
+
+              <div className="space-y-2 font-sans">
+                <h3 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-orange-400 uppercase tracking-widest leading-snug">
+                  Novità Quotazioni! ⚽
+                </h3>
+                <div className="bg-indigo-950/50 border border-slate-800/80 rounded-2xl p-4.5 space-y-2 text-left">
+                  <p className="text-[13px] text-indigo-100 font-semibold leading-relaxed">
+                    Il giocatore <strong className="text-yellow-400">Gabriele Cuccu</strong> è stato inserito ufficialmente nella lista dei tesserati del fantacalcetto.
+                  </p>
+                  <div className="flex items-center gap-3 bg-indigo-900/40 p-2.5 rounded-xl border border-indigo-800/30">
+                    <span className="text-2xl">🐟</span>
+                    <p className="text-[12px] text-indigo-200 font-bold leading-normal">
+                      Valore Iniziale: <span className="text-yellow-400 font-black text-sm">14 Pinne (Izycoin)</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-red-950/40 border border-red-900/30 rounded-2xl p-4 space-y-2 text-left">
+                  <p className="text-[10px] text-red-300 font-black uppercase tracking-wider flex items-center gap-1.5">
+                    ⚠️ ALERT CAMBIO ROSA
+                  </p>
+                  <p className="text-[11px] text-indigo-100 leading-relaxed font-medium">
+                    Tutti i fanta-allenatori sono invitati a verificare il budget e la composizione della propria squadra! Procedi subito a fare un cambio rosa se intendi acquistarlo o se devi rivedere il tuo team.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCuccuPopup(false);
+                    localStorage.setItem("cuccuNotificationDismissed", "true");
+                    setActivePublicTab("mercato");
+                  }}
+                  className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 active:from-amber-600 active:to-yellow-500 text-slate-950 font-black uppercase text-xs py-3 rounded-xl transition-all shadow-md hover:scale-[1.02] duration-150 cursor-pointer"
+                >
+                  Procedi al Cambio Rosa 🔄
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCuccuPopup(false);
+                    localStorage.setItem("cuccuNotificationDismissed", "true");
+                  }}
+                  className="w-full text-zinc-400 hover:text-white font-bold text-[10.5px] uppercase py-2 text-center hover:underline cursor-pointer"
+                >
+                  Sì, ho già verificato / Chiudi
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {showInstagramPopup && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-[9990] animate-fade-in">
             <div className="bg-gradient-to-b from-purple-950 via-indigo-950/95 to-indigo-990 border border-pink-500/30 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-center">
@@ -2799,10 +2873,31 @@ export default function FantacalcettoV2({
 
           {activePublicTab === "classifica" ? (
             <div className="space-y-6 animate-fade-in font-sans">
-              <div className="bg-indigo-900/30 border-l-4 border-indigo-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm">
+              <div className="bg-indigo-900/30 border-l-4 border-indigo-500 p-4 rounded-r-xl font-sans mt-2 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <p className="text-xs text-indigo-200 leading-relaxed font-medium">
                   <strong className="text-indigo-400">ℹ️ Punto Informativo:</strong> Qui puoi monitorare l'andamento del campionato. Clicca su ciascun team per vedere nel dettaglio il valore attuale della rosa, il tesoretto residuo e le scelte dei giocatori fatte dagli altri partecipanti!
                 </p>
+                <button
+                  id="btn-export-classifica-v2-classifica-tab"
+                  type="button"
+                  onClick={async () => {
+                    let text = `🏆 *CLASSIFICA FANTASQUADRE* 🏆\n\n`;
+                    rankedTeams.forEach((t, idx) => {
+                      const medal = idx === 0 ? "🥇 " : idx === 1 ? "🥈 " : idx === 2 ? "🥉 " : "📋 ";
+                      text += `${medal}*${idx + 1}° ${t.nomeFantasquadra}* - *${t.score} pts*\n`;
+                    });
+                    text += `\n⚽ #FantaEasyRigging #Fantacalcetto`;
+                    try {
+                      await navigator.clipboard.writeText(text);
+                      alert("Classifica copiata negli appunti! 🚀");
+                    } catch (err) {
+                      alert("Errore nella copia.");
+                    }
+                  }}
+                  className="bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 text-white font-black text-xs uppercase px-4.5 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md select-none shrink-0"
+                >
+                  <Trophy className="h-4 w-4" /> Esporta Classifica 🏆
+                </button>
               </div>
 
               {/* Podium View if any */}
