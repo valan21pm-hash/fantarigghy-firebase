@@ -5757,6 +5757,22 @@
       "nome": "Bonus libero trasformato 🏌️",
       "descrizione": "+4 punti a chi trasforma un tiro libero",
       "punti": 4
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Cuccu",
+      "id": "cuccu_chi_cumanna_ca",
+      "nome": "Bonus Chi cumanna ca' 👑",
+      "descrizione": "+4 punti se a fine partita ha fatto più bonus in classifica generale di Alimonda",
+      "punti": 4
+    },
+    {
+      "isPersonale": true,
+      "giocatoreId": "Cuccu",
+      "id": "cuccu_colori_sociali",
+      "nome": "Bonus colori sociali 👕",
+      "descrizione": "+1 punto se riesce a giocare con la maglia ufficiale della squadra",
+      "punti": 1
     }
   ],
   "sessioneMercatoLibero": false,

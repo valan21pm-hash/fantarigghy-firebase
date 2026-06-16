@@ -330,6 +330,7 @@ export const getPlayerBonusKey = (nomeCompleto: string): string | null => {
   if (n.includes("conti")) return "Conti";
   if (n.includes("mattana")) return "Mattana";
   if (n.includes("garau")) return "Garau";
+  if (n.includes("cuccu")) return "Cuccu";
   return null;
 };
 
@@ -648,6 +649,24 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       punti: 3,
       isPersonale: true,
       giocatoreId: "Garau"
+    },
+  ],
+  Cuccu: [
+    {
+      id: "cuccu_chi_cumanna_ca",
+      nome: "Bonus Chi cumanna ca' 👑",
+      descrizione: "+4 punti se a fine partita ha fatto più bonus in classifica generale di Alimonda",
+      punti: 4,
+      isPersonale: true,
+      giocatoreId: "Cuccu"
+    },
+    {
+      id: "cuccu_colori_sociali",
+      nome: "Bonus colori sociali 👕",
+      descrizione: "+1 punto se riesce a giocare con la maglia ufficiale della squadra",
+      punti: 1,
+      isPersonale: true,
+      giocatoreId: "Cuccu"
     },
   ],
 };
