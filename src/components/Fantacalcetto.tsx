@@ -232,6 +232,13 @@ export default function Fantacalcetto({
     remainingCredits: number;
   } | null>(null);
 
+  const [showLineupSuccessModal, setShowLineupSuccessModal] = useState(false);
+  const [lineupSummary, setLineupSummary] = useState<{
+    teamName: string;
+    titolari: string[];
+    panchina: string;
+  } | null>(null);
+
   // Security Authentication states for modifying existing rosters
   const [authenticatedTeamId, setAuthenticatedTeamId] = useState<string | null>(
     null,
@@ -972,6 +979,28 @@ export default function Fantacalcetto({
     ..._actualLockStatus,
   };
 
+  const checkIsSubmitLocked = () => {
+    if (isAdminMode) return false;
+    
+    const existingTeam = fantasquadre.find(
+      (fs) =>
+        fs.nomeFantasquadra.toLowerCase().trim() ===
+        nomeFantasquadra.toLowerCase().trim(),
+    );
+    const originalRoster = existingTeam ? existingTeam.giocatoriSelezionati || [] : [];
+    
+    const isOnlyLineupSwap = (() => {
+      if (originalRoster.length !== 4 || selectedPlayers.length !== 4) return false;
+      return selectedPlayers.every((p) => originalRoster.includes(p));
+    })();
+
+    if (isOnlyLineupSwap) {
+      return lockStatus.isLineupLocked;
+    } else {
+      return lockStatus.isRosterLocked;
+    }
+  };
+
   // Handle verification and login of an existing team
   const handleUnlockTeam = () => {
     if (!enteredPin.trim()) {
@@ -1403,6 +1432,67 @@ export default function Fantacalcetto({
       window.location.reload();
     } catch (err: any) {
       setErrorMsg(err.message || "Errore sconosciuto di convalida server.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleSaveLineup = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!authenticatedTeamId) {
+      setErrorMsg("Devi aver sbloccato la tua squadra col PIN prima di poter salvare la formazione!");
+      return;
+    }
+
+    if (selectedPlayers.length !== 4) {
+      setErrorMsg(`Devi selezionare esattamente 4 giocatori per la tua rosa (3 titolari e 1 panchinaro). Attualmente ne hai selezionati ${selectedPlayers.length}.`);
+      return;
+    }
+
+    const existingTeam = fantasquadre.find(
+      (fs) => fs.id === authenticatedTeamId
+    );
+    const originalRoster = existingTeam ? existingTeam.giocatoriSelezionati || [] : [];
+    
+    // Check if it's strictly a swap without any actual roster additions/subtractions
+    const isOnlyLineupSwap = (() => {
+      if (originalRoster.length !== 4) return false;
+      return selectedPlayers.every((p) => originalRoster.includes(p));
+    })();
+
+    if (!isOnlyLineupSwap) {
+      setErrorMsg("Il pulsante 'Salva Formazione' serve solo per scambiare titolari e panchina tra i tuoi 4 giocatori esistenti. Se hai effettuato degli acquisti o cessioni di mercato, usa il pulsante 'Invia Iscrizione Roster' / 'Salva Rosa'!");
+      return;
+    }
+
+    if (lockStatus.isLineupLocked && !isAdminMode) {
+      setErrorMsg("La consegna della formazione per questo turno di campionato è chiusa! (Chiude 1 ora prima della partita)");
+      return;
+    }
+
+    setSubmitting(true);
+    setErrorMsg(null);
+
+    try {
+      const trimmedPin = (pin ? pin.trim() : "") || "12345678";
+      await onIscriviFantasquadra(
+        nomePartecipante,
+        nomeFantasquadra,
+        selectedPlayers,
+        trimmedPin,
+        undefined,
+      );
+
+      setLineupSummary({
+        teamName: nomeFantasquadra,
+        titolari: [selectedPlayers[0], selectedPlayers[1], selectedPlayers[2]],
+        panchina: selectedPlayers[3],
+      });
+      setShowLineupSuccessModal(true);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Errore sconosciuto nel salvataggio della formazione.");
     } finally {
       setSubmitting(false);
     }
@@ -4148,17 +4238,30 @@ export default function Fantacalcetto({
                     }
                   })()}
 
-                  <button
-                    type="submit"
-                    disabled={submitting || (lockStatus.isLocked && !isAdminMode)}
-                    className="w-full bg-yellow-400 hover:bg-yellow-350 disabled:bg-emerald-900 font-extrabold text-xs uppercase text-emerald-950 py-3 rounded-xl shadow-lg transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    {submitting
-                      ? "Invio della squadra..."
-                      : lockStatus.isLocked
-                        ? "🔒 Formazioni Bloccate"
-                        : "Invia Iscrizione Roster"}
-                  </button>
+                  <div className="space-y-2">
+                    <button
+                      type="submit"
+                      disabled={submitting || checkIsSubmitLocked()}
+                      className="w-full bg-yellow-400 hover:bg-yellow-350 disabled:bg-emerald-900 font-extrabold text-xs uppercase text-emerald-950 py-3 rounded-xl shadow-lg transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      {submitting
+                        ? "Invio della squadra..."
+                        : checkIsSubmitLocked()
+                          ? "🔒 Formazione Chiusa"
+                          : "Invia Iscrizione Roster"}
+                    </button>
+
+                    {authenticatedTeamId && (
+                      <button
+                        type="button"
+                        onClick={handleSaveLineup}
+                        disabled={submitting || (lockStatus.isLineupLocked && !isAdminMode)}
+                        className="w-full bg-emerald-600 hover:bg-emerald-500 border border-emerald-500 text-white font-extrabold text-xs uppercase py-3 rounded-xl shadow-lg transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-1.5"
+                      >
+                        {submitting ? "Salvataggio..." : "Salva Formazione ⚽"}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Sezione Consigli/Miglioramenti per il Presidente o l'Amico */}
@@ -4405,7 +4508,7 @@ export default function Fantacalcetto({
                                 <button
                                   key={idx}
                                   type="button"
-                                  disabled={lockStatus.isLocked}
+                                  disabled={lockStatus.isLineupLocked && !isAdminMode}
                                   onClick={() => handleTogglePlayer(name)}
                                   className={`text-[10px] h-6 font-bold px-2.5 rounded-lg transition-all cursor-pointer select-none border ${
                                     isSelected
@@ -5620,6 +5723,62 @@ export default function Fantacalcetto({
           onClose={() => setSelectedMatchBreakdown(null)}
           generateMatchPdf={generateMatchPdf}
         />
+      )}
+
+      {showLineupSuccessModal && lineupSummary && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm px-4">
+          <div className="bg-indigo-950 border-2 border-indigo-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative space-y-6 text-center animate-fadeIn font-sans">
+            <div className="text-center space-y-2">
+              <div className="bg-emerald-950/45 border border-emerald-500/30 p-3 rounded-full inline-block">
+                <CheckCircle className="h-8 w-8 text-emerald-400 animate-bounce" />
+              </div>
+              <h3 className="text-base font-black uppercase tracking-wider text-emerald-300">
+                Formazione Salvata! ⚽
+              </h3>
+              <p className="text-[11px] text-indigo-200">
+                L'ordine sul campo e la panchina di <strong className="font-extrabold text-white">{lineupSummary.teamName}</strong> sono stati aggiornati.
+              </p>
+            </div>
+
+            {/* Riepilogo Campo */}
+            <div className="bg-indigo-900/30 border border-indigo-850 rounded-2xl p-4 space-y-3.5 text-left">
+              <div>
+                <span className="block text-[8px] font-black uppercase text-emerald-400 tracking-widest mb-1.5 font-mono">
+                  🟢 TITOLARI IN CAMPO (3)
+                </span>
+                <div className="space-y-1">
+                  {lineupSummary.titolari.map((p, idx) => (
+                    <div key={idx} className="flex items-center gap-2 bg-indigo-950/50 border border-indigo-900 px-3 py-1.5 rounded-xl text-xs font-bold text-white shadow-sm">
+                      <span className="text-emerald-400 font-mono text-[9px] w-4">{idx + 1}°</span>
+                      <span>{p}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-indigo-900/50">
+                <span className="block text-[8px] font-black uppercase text-indigo-400 tracking-widest mb-1.5 font-mono">
+                  💺 IN PANCHINA (1)
+                </span>
+                <div className="flex items-center gap-2 bg-indigo-950/50 border border-indigo-900 px-3 py-1.5 rounded-xl text-xs font-bold text-indigo-200 shadow-sm">
+                  <span className="text-indigo-400 font-mono text-[9px] w-4">R</span>
+                  <span className="font-extrabold">{lineupSummary.panchina}</span>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowLineupSuccessModal(false);
+                window.location.reload();
+              }}
+              className="w-full bg-yellow-400 hover:bg-yellow-350 text-indigo-950 font-black uppercase tracking-wider text-xs py-3 rounded-xl shadow-lg transition-all active:scale-95"
+            >
+              Ho capito ⚽
+            </button>
+          </div>
+        </div>
       )}
 
       {showRenameModal && (
