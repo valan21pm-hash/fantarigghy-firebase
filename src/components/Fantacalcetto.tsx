@@ -844,90 +844,66 @@ export default function Fantacalcetto({
     );
     const now = new Date();
 
-    // Roster (Cambio Rosa) lock check (1 hour before match instead of 23:59 of day before)
-    let isRosterLocked = false;
-    let rosterDeadline: Date | null = null;
-    let rosterMatch: Partita | null = null;
+    // Find the closest upcoming championship match (in the future)
+    let closestUpcomingMatch: Partita | null = null;
+    let closestUpcomingTime = Infinity;
 
     for (const m of campMatches) {
       const matchTime = parseMatchDate(m.dettagli);
       if (matchTime) {
+        const t = matchTime.getTime();
+        if (t > now.getTime() && t < closestUpcomingTime) {
+          closestUpcomingTime = t;
+          closestUpcomingMatch = m;
+        }
+      }
+    }
+
+    let isRosterLocked = false;
+    let isLineupLocked = false;
+    let rosterDeadline: Date | null = null;
+    let lineupDeadline: Date | null = null;
+    let rosterMatch: Partita | null = null;
+    let lineupMatch: Partita | null = null;
+
+    if (closestUpcomingMatch) {
+      const matchTime = parseMatchDate(closestUpcomingMatch.dettagli);
+      if (matchTime) {
         const lockoutTime = matchTime.getTime() - 60 * 60 * 1000; // 1 hour before
+        rosterDeadline = new Date(lockoutTime);
+        lineupDeadline = new Date(lockoutTime);
+        rosterMatch = closestUpcomingMatch;
+        lineupMatch = closestUpcomingMatch;
 
         if (now.getTime() >= lockoutTime) {
           isRosterLocked = true;
-          rosterDeadline = new Date(lockoutTime);
-          rosterMatch = m;
-          break;
-        }
-      }
-    }
-
-    if (!isRosterLocked) {
-      // Find closest upcoming match's 1-hour before deadline
-      let closestMatch: Partita | null = null;
-      let closestTime = Infinity;
-
-      for (const m of campMatches) {
-        const matchTime = parseMatchDate(m.dettagli);
-        if (matchTime) {
-          const t = matchTime.getTime();
-          if (t > now.getTime() && t < closestTime) {
-            closestTime = t;
-            closestMatch = m;
-          }
-        }
-      }
-
-      if (closestMatch) {
-        const mTime = parseMatchDate(closestMatch.dettagli);
-        if (mTime) {
-          rosterDeadline = new Date(mTime.getTime() - 60 * 60 * 1000);
-          rosterMatch = closestMatch;
-        }
-      }
-    }
-
-    // Lineup (Formazione / Titolari-Panchina) lock check (1 hour before match)
-    let isLineupLocked = false;
-    let lineupDeadline: Date | null = null;
-    let lineupMatch: Partita | null = null;
-
-    for (const m of campMatches) {
-      const matchTime = parseMatchDate(m.dettagli);
-      if (matchTime) {
-        const lockoutTime = matchTime.getTime() - 60 * 60 * 1000; // 1 hour before
-
-        if (now.getTime() >= lockoutTime) {
           isLineupLocked = true;
-          lineupDeadline = new Date(lockoutTime);
-          lineupMatch = m;
-          break;
         }
       }
-    }
-
-    if (!isLineupLocked) {
-      // Find closest upcoming match's 1-hour before deadline
-      let closestMatch: Partita | null = null;
-      let closestTime = Infinity;
-
+    } else {
+      // If there's no upcoming match, let's check if there's any active open match that started within the last 4 hours (currently in progress)
+      // to lock modifications while that match is being played
+      let activeMatchInProgress: Partita | null = null;
       for (const m of campMatches) {
         const matchTime = parseMatchDate(m.dettagli);
         if (matchTime) {
           const t = matchTime.getTime();
-          if (t > now.getTime() && t < closestTime) {
-            closestTime = t;
-            closestMatch = m;
+          if (now.getTime() >= t && now.getTime() < t + 4 * 60 * 60 * 1000) {
+            activeMatchInProgress = m;
+            break;
           }
         }
       }
 
-      if (closestMatch) {
-        const mTime = parseMatchDate(closestMatch.dettagli);
+      if (activeMatchInProgress) {
+        const mTime = parseMatchDate(activeMatchInProgress.dettagli);
         if (mTime) {
+          isRosterLocked = true;
+          isLineupLocked = true;
+          rosterDeadline = new Date(mTime.getTime() - 60 * 60 * 1000);
           lineupDeadline = new Date(mTime.getTime() - 60 * 60 * 1000);
-          lineupMatch = closestMatch;
+          rosterMatch = activeMatchInProgress;
+          lineupMatch = activeMatchInProgress;
         }
       }
     }
