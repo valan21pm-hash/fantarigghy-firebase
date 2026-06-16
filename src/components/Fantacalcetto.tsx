@@ -844,7 +844,7 @@ export default function Fantacalcetto({
     );
     const now = new Date();
 
-    // Roster (Cambio Rosa) lock check (23:59 of day before)
+    // Roster (Cambio Rosa) lock check (1 hour before match instead of 23:59 of day before)
     let isRosterLocked = false;
     let rosterDeadline: Date | null = null;
     let rosterMatch: Partita | null = null;
@@ -852,10 +852,7 @@ export default function Fantacalcetto({
     for (const m of campMatches) {
       const matchTime = parseMatchDate(m.dettagli);
       if (matchTime) {
-        const matchDay = new Date(matchTime.getTime());
-        const dayBefore = new Date(matchDay.getFullYear(), matchDay.getMonth(), matchDay.getDate() - 1);
-        dayBefore.setHours(23, 59, 0, 0);
-        const lockoutTime = dayBefore.getTime();
+        const lockoutTime = matchTime.getTime() - 60 * 60 * 1000; // 1 hour before
 
         if (now.getTime() >= lockoutTime) {
           isRosterLocked = true;
@@ -867,7 +864,7 @@ export default function Fantacalcetto({
     }
 
     if (!isRosterLocked) {
-      // Find closest upcoming match's dayBefore 23:59
+      // Find closest upcoming match's 1-hour before deadline
       let closestMatch: Partita | null = null;
       let closestTime = Infinity;
 
@@ -885,10 +882,7 @@ export default function Fantacalcetto({
       if (closestMatch) {
         const mTime = parseMatchDate(closestMatch.dettagli);
         if (mTime) {
-          const matchDay = new Date(mTime.getTime());
-          const dayBefore = new Date(matchDay.getFullYear(), matchDay.getMonth(), matchDay.getDate() - 1);
-          dayBefore.setHours(23, 59, 0, 0);
-          rosterDeadline = dayBefore;
+          rosterDeadline = new Date(mTime.getTime() - 60 * 60 * 1000);
           rosterMatch = closestMatch;
         }
       }
@@ -1043,11 +1037,11 @@ export default function Fantacalcetto({
       return;
     }
 
-    // 2. If roster is locked (23:59 day before match)
+    // 2. If roster is locked (1 hour before match)
     if (lockStatus.isRosterLocked && !isAdminMode) {
       // If we don't have a team yet or the team has < 4 players, they can't register/add players during the lock
       if (originalRoster.length < 4) {
-        alert("Il mercato e le iscrizioni sono chiusi per questo turno di campionato (chiudono alle 23:59 del giorno prima).");
+        alert("Il mercato e le iscrizioni sono chiusi per questo turno di campionato (chiudono 1 ora prima della partita).");
         return;
       }
       // If the clicked player is NOT in our original roster, we cannot add them (because roster is locked!)
@@ -1211,7 +1205,7 @@ export default function Fantacalcetto({
       }
     } else {
       if (lockStatus.isRosterLocked && !isAdminMode) {
-        setErrorMsg("Impossibile procedere: le iscrizioni e i cambi rosa per questo turno di campionato sono chiusi! (Chiudono alle 23:59 del giorno prima)");
+        setErrorMsg("Impossibile procedere: le iscrizioni e i cambi rosa per questo turno di campionato sono chiusi! (Chiudono 1 ora prima della partita)");
         return;
       }
     }
@@ -1410,7 +1404,7 @@ export default function Fantacalcetto({
       }
     } else {
       if (lockStatus.isRosterLocked && !isAdminMode) {
-        setErrorMsg("Impossibile procedere: le iscrizioni e i cambi rosa per questo turno di campionato sono chiusi! (Chiudono alle 23:59 del giorno prima)");
+        setErrorMsg("Impossibile procedere: le iscrizioni e i cambi rosa per questo turno di campionato sono chiusi! (Chiudono 1 ora prima della partita)");
         setSubmitting(false);
         return;
       }
@@ -2492,7 +2486,7 @@ export default function Fantacalcetto({
                         🔔 <strong>PRO-TIP:</strong> Le operazioni di mercato,
                         nuove iscrizioni e modifiche della formazione si{" "}
                         <strong>
-                          bloccano rigorosamente alle 23:59 del giorno prima
+                          bloccano rigorosamente 1 ora prima
                         </strong>{" "}
                         della partita controllata dall'Amministratore. Prepara la tua
                         mossa in tempo!
@@ -2929,7 +2923,7 @@ export default function Fantacalcetto({
                         : "🔓 Mercato & Cambi Rosa: APERTO"}
                     </h4>
                     <p className="text-[10px] mt-0.5 leading-relaxed text-emerald-200/90">
-                      L'acquisto o la vendita di nuovi giocatori nel proprio team di 4 elementi (chiude alle 23:59 del giorno prima).
+                      L'acquisto o la vendita di nuovi giocatori nel proprio team di 4 elementi (chiude 1 ora prima della partita).
                     </p>
                   </div>
                 </div>
