@@ -294,6 +294,7 @@ export interface DatabaseSchema {
   scadenzaMercatoLibero?: string | null;
   portale1Bloccato?: boolean;
   backupsBozze?: any[];
+  hasResetCambiJune16?: boolean;
 }
 
 export interface CustomBonusDef {

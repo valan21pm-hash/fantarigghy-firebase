@@ -1031,6 +1031,26 @@ async function getDb(
     });
   }
 
+  // One-time migration to reset everyone's rosaOriginaria to match current giocatoriSelezionati (giving them 1 new change)
+  if (!localDb.hasResetCambiJune16) {
+    if (localDb.fantasquadre && Array.isArray(localDb.fantasquadre)) {
+      console.log("[Migration] Resetting all fantasquadre rosaOriginaria to giocatoriSelezionati to enable 1 free change.");
+      for (const fs of localDb.fantasquadre) {
+        if (fs.giocatoriSelezionati && Array.isArray(fs.giocatoriSelezionati)) {
+          fs.rosaOriginaria = [...fs.giocatoriSelezionati];
+        }
+      }
+      localDb.hasResetCambiJune16 = true;
+      saveToFirestore(localDb).catch((err: any) => {
+        console.error("[Firestore] Error saving June 16 reset:", err);
+      });
+      // Save it locally as well
+      safeWriteDb(JSON.stringify(localDb, null, 2)).catch((err: any) => {
+        console.error("[LocalDB] Error saving June 16 reset locally:", err);
+      });
+    }
+  }
+
   let activeToken = token;
   if (!activeToken || activeToken.startsWith("local-admin-")) {
     activeToken = await getStoredGoogleToken();
