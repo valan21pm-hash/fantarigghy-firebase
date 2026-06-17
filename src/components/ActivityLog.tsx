@@ -18,6 +18,38 @@ interface ActivityLogProps {
   onClose: () => void;
 }
 
+function parseLogDate(dateStr: string | undefined | null): number {
+  if (!dateStr) return 0;
+  try {
+    const parts = dateStr.trim().split(/[,\s]+/);
+    if (parts.length === 0) return 0;
+
+    const dateParts = parts[0].split("/");
+    if (dateParts.length < 3) {
+      const t = Date.parse(dateStr);
+      return isNaN(t) ? 0 : t;
+    }
+
+    const day = parseInt(dateParts[0], 10);
+    const month = parseInt(dateParts[1], 10) - 1;
+    const year = parseInt(dateParts[2], 10);
+
+    let hours = 0, minutes = 0, seconds = 0;
+    if (parts.length > 1) {
+      const timeParts = parts[1].split(":");
+      if (timeParts.length > 0) hours = parseInt(timeParts[0], 10) || 0;
+      if (timeParts.length > 1) minutes = parseInt(timeParts[1], 10) || 0;
+      if (timeParts.length > 2) seconds = parseInt(timeParts[2], 10) || 0;
+    }
+
+    const parsedDate = new Date(year, month, day, hours, minutes, seconds);
+    return parsedDate.getTime();
+  } catch (e) {
+    const t = Date.parse(dateStr);
+    return isNaN(t) ? 0 : t;
+  }
+}
+
 export default function ActivityLog({ logs, onClose }: ActivityLogProps) {
   const [logSearch, setLogSearch] = useState("");
 
@@ -27,7 +59,7 @@ export default function ActivityLog({ logs, onClose }: ActivityLogProps) {
       const matchDet = l.dettagli.toLowerCase().includes(logSearch.toLowerCase());
       return matchOp || matchDet;
     })
-    .reverse(); // Newest first
+    .sort((a, b) => parseLogDate(b.data) - parseLogDate(a.data));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
