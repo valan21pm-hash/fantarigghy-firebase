@@ -747,17 +747,54 @@ export default function Fantacalcetto({
             ...inf,
             ruolo: "Titolare",
             stato: "Sostituito",
-            puntiConteggiati: inf.fantaScore,
+            puntiConteggiati: 0,
           });
-          puntiTotaliMatch += inf.fantaScore;
+          // Substituted starter points are 0 (replaced by bench player's fantaScore below)
         } else {
-          finalKpiList.push({
-            ...inf,
-            ruolo: "Titolare",
-            stato: inf.played ? "Titolare" : "Assente",
-            puntiConteggiati: inf.fantaScore,
-          });
-          puntiTotaliMatch += inf.fantaScore;
+          if (!inf.played) {
+            // Starter did not play and is NOT replaced (No sub available, or sub did not play either) -> Assente ("non convocato")
+            // Treat the "Assente" starter exactly the same as a non-subbed bench player ("Panchina")
+            const unassignedList: string[] = [];
+            if (inf.gol > 0) {
+              unassignedList.push(`${inf.gol} Gol (+${inf.gol * GOAL_POINTS} pt)`);
+            }
+            if (inf.assist > 0) {
+              unassignedList.push(`${inf.assist} Assist (+${inf.assist * ASSIST_POINTS} pt)`);
+            }
+            const iRef = m.referto?.find((ref) => ref.nome === inf.nome);
+            if (iRef && iRef.bonusAttivi) {
+              iRef.bonusAttivi.forEach((bId) => {
+                const bDef = (bonuses || DEFAULT_BONUSES).find((x) => x.id === bId);
+                if (bDef && isBonusManuale(bDef)) {
+                  unassignedList.push(`${bDef.nome} (+${bDef.punti} pt)`);
+                }
+              });
+            }
+
+            finalKpiList.push({
+              ...inf,
+              ruolo: "Titolare",
+              stato: "Assente",
+              originalFantaScore: inf.fantaScore,
+              originalBonusPts: inf.bonusPts,
+              originalBonusBreakdownStr: inf.bonusBreakdownStr,
+              bonusPts: inf.bonusPtsNonManuali,
+              bonusBreakdownStr: inf.bonusBreakdownStrNonManuali,
+              fantaScore: inf.bonusPtsNonManuali,
+              puntiConteggiati: inf.bonusPtsNonManuali,
+              unassignedBonuses: unassignedList,
+            });
+            puntiTotaliMatch += inf.bonusPtsNonManuali;
+          } else {
+            // Starter played normally
+            finalKpiList.push({
+              ...inf,
+              ruolo: "Titolare",
+              stato: "Titolare",
+              puntiConteggiati: inf.fantaScore,
+            });
+            puntiTotaliMatch += inf.fantaScore;
+          }
         }
       }
 
