@@ -816,13 +816,37 @@ export default function FantacalcettoV2({
         if (!inf.played && benchInfo && benchInfo.played && !subbedIn) {
           // Starter did not play, substitute is available, performs substitution!
           subbedIn = true;
+          const unassignedList: string[] = [];
+          if (inf.gol > 0) {
+            unassignedList.push(`${inf.gol} Gol (+${inf.gol * GOAL_POINTS} pt)`);
+          }
+          if (inf.assist > 0) {
+            unassignedList.push(`${inf.assist} Assist (+${inf.assist * ASSIST_POINTS} pt)`);
+          }
+          const iRef = m.referto?.find((ref) => ref.nome === inf.nome);
+          if (iRef && iRef.bonusAttivi) {
+            iRef.bonusAttivi.forEach((bId) => {
+              const bDef = (bonuses || DEFAULT_BONUSES).find((x) => x.id === bId);
+              if (bDef && isBonusManuale(bDef)) {
+                unassignedList.push(`${bDef.nome} (+${bDef.punti} pt)`);
+              }
+            });
+          }
+
           finalKpiList.push({
             ...inf,
             ruolo: "Titolare",
             stato: "Sostituito",
-            puntiConteggiati: 0,
+            originalFantaScore: inf.fantaScore,
+            originalBonusPts: inf.bonusPts,
+            originalBonusBreakdownStr: inf.bonusBreakdownStr,
+            bonusPts: inf.bonusPtsNonManuali,
+            bonusBreakdownStr: inf.bonusBreakdownStrNonManuali,
+            fantaScore: inf.bonusPtsNonManuali,
+            puntiConteggiati: inf.bonusPtsNonManuali,
+            unassignedBonuses: unassignedList,
           });
-          // Substituted starter points are 0 (replaced by bench player's fantaScore below)
+          puntiTotaliMatch += inf.bonusPtsNonManuali;
         } else {
           if (!inf.played) {
             // Starter did not play and is NOT replaced (No sub available, or sub did not play either) -> Assente ("non convocato")
@@ -5417,9 +5441,7 @@ export default function FantacalcettoV2({
 
                           matchBreakdownForSeparation.forEach(mb => {
                             mb.giocatoriKpi.forEach(kpi => {
-                              const isSostituito = kpi.stato === "Sostituito";
-                              const isAssente = kpi.stato === "Assente";
-                              const displayPts = isSostituito || isAssente ? 0 : kpi.fantaScore;
+                              const displayPts = kpi.fantaScore;
                               
                               if (kpi.stato === "Panchina") {
                                 totalBenchPoints += displayPts;
@@ -6109,8 +6131,8 @@ function GeneralReportModal({ rankedTeams, getTeamMatchBreakdownList, onClose, g
                                {mb.giocatoriKpi.map((kpi: any, kIdx: number) => {
                                  const isOut = kpi.stato === "Sostituito" || kpi.stato === "Assente";
                                  return (
-                                   <div key={kIdx} className={`px-1.5 py-0.5 rounded border ${isOut ? "bg-red-50 text-red-700 border-red-200 line-through opacity-70" : "bg-indigo-50 text-indigo-800 border-indigo-200 font-bold"}`}>
-                                      {kpi.nome}: {isOut ? "0" : kpi.fantaScore}pt
+                                   <div key={kIdx} className={`px-1.5 py-0.5 rounded border ${isOut ? "bg-red-50 text-red-700 border-red-200 opacity-70" : "bg-indigo-50 text-indigo-800 border-indigo-200 font-bold"}`}>
+                                      {kpi.nome}: {kpi.fantaScore}pt
                                    </div>
                                  )
                                })}
@@ -6221,8 +6243,7 @@ function MatchBreakdownModal({
               const isSostituito = kpi.stato === "Sostituito";
               const isSubentrato = kpi.stato === "Subentrato";
               const isAssente = kpi.stato === "Assente";
-              const displayPoints =
-                isSostituito || isAssente ? "0.0" : kpi.fantaScore;
+              const displayPoints = kpi.fantaScore;
 
               let statusBadge = "";
               const isPanchina =
@@ -6305,10 +6326,10 @@ function MatchBreakdownModal({
                     )
                   )}
 
-                  {kpi.stato === "Panchina" && kpi.unassignedBonuses && kpi.unassignedBonuses.length > 0 && (
+                  {(kpi.stato === "Panchina" || kpi.stato === "Sostituito" || kpi.stato === "Assente") && kpi.unassignedBonuses && kpi.unassignedBonuses.length > 0 && (
                     <div className="mt-3 pt-2.5 border-t border-red-100 flex flex-col gap-1">
                       <span className="text-[9px] font-black text-red-650 uppercase tracking-wide flex items-center gap-1.5">
-                        ⚠️ Bonus Non Assegnati (Panchina):
+                        ⚠️ Bonus Non Assegnati:
                       </span>
                       <div className="flex flex-wrap gap-1 mt-0.5">
                         {kpi.unassignedBonuses.map((ub: string, ubIdx: number) => (
