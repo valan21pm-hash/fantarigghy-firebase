@@ -35,6 +35,7 @@ import BonusManager from "./components/BonusManager";
 import StatsHub from "./components/StatsHub";
 import { DatabaseSchema, Formazione, Giocatore, RefertoGiocatore, CustomBonusDef, DEFAULT_BONUSES, getTeamMatchBreakdownList } from "./types";
 import { initAuth, googleSignIn, logout } from "./lib/firebase";
+import EasyRiggingLogo from "./components/EasyRiggingLogo";
 
 export default function App() {
   const [data, setData] = useState<DatabaseSchema | null>(null);
@@ -565,23 +566,23 @@ export default function App() {
   // ====================================================================================
   if (!isAdminAuthenticated) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex flex-col justify-center items-center p-4 sm:p-6 font-sans relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-zinc-900 to-black text-white flex flex-col justify-center items-center p-4 sm:p-6 font-sans relative overflow-hidden">
         {/* Elementi di sfondo decorativi */}
         <div className="absolute inset-0 select-none pointer-events-none overflow-hidden opacity-20">
-          <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-blue-500/10 blur-3xl"></div>
-          <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl"></div>
+          <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-red-600/10 blur-3xl"></div>
+          <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-red-500/10 blur-3xl"></div>
         </div>
 
-        <div className="max-w-md w-full relative z-10 bg-slate-900/95 border border-slate-800 rounded-3xl p-8 text-center space-y-6 shadow-2xl backdrop-blur-xl">
-          <div className="relative inline-block">
-            <div className="absolute inset-0 bg-yellow-400/10 rounded-full blur-xl animate-pulse"></div>
-            <div className="bg-slate-950 border border-slate-850 p-5 rounded-3xl inline-block relative">
-              <Shield className="h-12 w-12 text-yellow-400 animate-pulse" />
+        <div className="max-w-md w-full relative z-10 bg-zinc-900/95 border border-zinc-800 rounded-3xl p-8 text-center space-y-6 shadow-2xl backdrop-blur-xl">
+          <div className="flex justify-center">
+            <div className="relative group transition-transform duration-200 hover:scale-[1.03]">
+              <div className="absolute -inset-1.5 rounded-full bg-gradient-to-r from-red-600 to-red-500 opacity-20 blur-xl"></div>
+              <EasyRiggingLogo size={125} className="relative filter drop-shadow-[0_8px_16px_rgba(239,68,68,0.25)]" />
             </div>
           </div>
 
           <div className="space-y-2">
-            <span className="bg-slate-850 border border-slate-800 text-yellow-400 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full animate-pulse">
+            <span className="bg-red-500/10 border border-red-500/25 text-red-500 text-[10px] font-black uppercase tracking-widest px-3.5 py-1 rounded-full">
               ACCESSO RISERVATO SQUADRA
             </span>
             <h3 className="font-extrabold text-2xl text-white uppercase tracking-tight">

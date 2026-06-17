@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
+import EasyRiggingLogo from "./EasyRiggingLogo";
 import {
   Sparkles,
   Users,
@@ -1871,18 +1872,24 @@ export default function FantacalcettoV2({
 
     if (!syncDone) {
       return (
-        <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-indigo-990 text-white flex flex-col justify-center items-center p-4 sm:p-6 font-sans relative overflow-hidden">
+        <div className="min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-black text-white flex flex-col justify-center items-center p-4 sm:p-6 font-sans relative overflow-hidden">
           {/* Sfondo decorativo minimale */}
           <div className="absolute inset-0 select-none pointer-events-none overflow-hidden opacity-20">
-            <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-indigo-500/10 blur-3xl"></div>
-            <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-indigo-400/10 blur-3xl"></div>
+            <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-red-600/10 blur-3xl"></div>
+            <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-red-500/10 blur-3xl"></div>
           </div>
 
-          <div className="max-w-md w-full relative z-10 bg-indigo-950/90 border border-indigo-850 rounded-3xl p-8 text-center space-y-6 shadow-2xl backdrop-blur-xl">
-            <div className="space-y-1.5">
-              <h2 className="font-extrabold text-2xl text-white uppercase tracking-tight font-sans leading-tight pointer-events-none">
-                Vai a Fantacalcetto
-              </h2>
+          <div className="max-w-md w-full relative z-10 bg-zinc-900/90 border border-zinc-800 rounded-3xl p-8 text-center space-y-6 shadow-2xl backdrop-blur-xl">
+            <div className="flex flex-col items-center space-y-3">
+              <EasyRiggingLogo size={130} className="filter drop-shadow-[0_8px_16px_rgba(239,68,68,0.3)] animate-fade-in-down" />
+              <div className="space-y-1 mt-2">
+                <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-red-500 bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">
+                  Easy Rigging Futsal Club
+                </span>
+                <h2 className="font-black text-xl text-white uppercase tracking-tight font-sans leading-tight mt-1">
+                  Portale Fantacalcetto
+                </h2>
+              </div>
             </div>
 
             {!hasInteracted ? (
@@ -2083,7 +2090,7 @@ export default function FantacalcettoV2({
     }
 
     return (
-      <div className="min-h-screen bg-gradient-to-b from-indigo-950 to-indigo-990 text-white p-4 sm:p-6 lg:p-8 flex flex-col justify-between font-sans relative pb-28 md:pb-8">
+      <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-zinc-900 to-black text-white p-4 sm:p-6 lg:p-8 flex flex-col justify-between font-sans relative pb-28 md:pb-8">
         {/* Toast Notification */}
         {toastMessage && (
           <div className="fixed bottom-24 sm:bottom-12 left-1/2 -translate-x-1/2 z-[9999] animate-fade-in pointer-events-none">
@@ -2842,17 +2849,24 @@ export default function FantacalcettoV2({
         )}
         <div className="max-w-4xl w-full mx-auto space-y-6 my-auto">
           {/* Header */}
-          <div className="text-center space-y-2">
-            <span className="bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] sm:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full select-none font-sans">
-              🏆 FANTACALCETTO ASD
-            </span>
-            <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-indigo-300 font-sans">
-              Classifica & Portale Fantacalcetto
-            </h1>
-            <p className="text-xs sm:text-sm text-indigo-300 max-w-lg mx-auto font-medium leading-relaxed font-sans">
-              Dedicato ai tornei del lunedì! Guarda i punteggi in tempo reale ed
-              iscrivi la tua squadra.
-            </p>
+          <div className="text-center space-y-4 flex flex-col items-center justify-center">
+            {/* Embedded Corporate Logo with Ambient Spark */}
+            <div className="relative group transition-transform duration-200 hover:scale-[1.03] cursor-pointer">
+              <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-red-600 to-red-500 opacity-20 blur-xl group-hover:opacity-40 transition duration-300"></div>
+              <EasyRiggingLogo size={145} className="relative filter drop-shadow-[0_8px_16px_rgba(239,68,68,0.25)]" />
+            </div>
+
+            <div className="space-y-2 mt-2">
+              <span className="bg-red-500/10 text-red-500 border border-red-500/25 text-[10px] sm:text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full select-none font-sans">
+                🏆 EASY RIGGING FUTSAL CLUB
+              </span>
+              <h1 className="text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-white font-sans">
+                Classifica & Portale Fantacalcetto
+              </h1>
+              <p className="text-xs sm:text-sm text-zinc-400 max-w-lg mx-auto font-medium leading-relaxed font-sans">
+                Dedicato ai campioni dell'Easy Rigging Futsal Team! Guarda i punteggi in tempo reale, ricalcola le quotazioni e gestisci la tua fanta-squadra.
+              </p>
+            </div>
             <div className="flex flex-wrap justify-center gap-3 pt-2">
               <button
                 type="button"
