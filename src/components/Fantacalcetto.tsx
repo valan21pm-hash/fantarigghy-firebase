@@ -3301,9 +3301,9 @@ export default function Fantacalcetto({
                                           }`}
                                         >
                                           <div className="min-w-0 pr-1 flex-1 text-left">
-                                            <p className="font-black text-[11px] truncate text-gray-100 font-sans">
-                                              {pIdx + 1}. {getLastName(pName)}
-                                            </p>
+                                            <div className="font-black text-[11px] truncate text-gray-100 font-sans flex items-center justify-between">
+                                              <span>{pIdx + 1}. {getLastName(pName)}</span><span className="text-[10px] text-yellow-350 font-mono font-black ml-1 shrink-0 font-bold">🪙 {getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses)} cr.</span>
+                                            </div>
                                             <p className="text-[8px] text-emerald-400/80 font-extrabold uppercase mt-0.5 font-sans">
                                               #
                                               {originalPlayer?.numeroMaglia ||
@@ -4459,10 +4459,15 @@ export default function Fantacalcetto({
                                         : "bg-emerald-900/30 border-emerald-850 text-white/95"
                                     }`}
                                   >
-                                    <span>
-                                      {idx + 1}. {getLastName(pName)}
-                                    </span>
-                                    <span className="text-[8px] font-bold uppercase tracking-wider opacity-60 text-emerald-400">
+                                    <div className="min-w-0 pr-1 text-left">
+                                      <span>
+                                        {idx + 1}. {getLastName(pName)}
+                                      </span>
+                                      <p className="text-[8.5px] text-yellow-500/90 font-mono font-black mt-0.5 leading-none">
+                                        🪙 {getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses)} cr.
+                                      </p>
+                                    </div>
+                                    <span className="text-[8px] font-bold uppercase tracking-wider opacity-60 text-emerald-400 shrink-0">
                                       {isPanchinaro ? "Panc." : "Titolare"}
                                     </span>
                                   </div>
@@ -5414,7 +5419,7 @@ export default function Fantacalcetto({
                                   }`}
                                 >
                                   <div className="flex justify-between items-start">
-                                    <div className="min-w-0 pr-2">
+                                    <div className="min-w-0 pr-2 text-left">
                                       <p className="truncate font-extrabold text-gray-800 text-xs flex items-center gap-2">
                                         <span>
                                           {index + 1}. {getLastName(pName)}
@@ -5424,6 +5429,9 @@ export default function Fantacalcetto({
                                         >
                                           {isBench ? "Panchina" : "Titolare"}
                                         </span>
+                                      </p>
+                                      <p className="text-[9.5px] font-semibold text-emerald-700 font-mono mt-1">
+                                        Valore Attuale: {getPlayerPriceForRoster(pName, partiteChiuse || [], bonuses)} Izycoin 🪙
                                       </p>
                                     </div>
                                     <span
