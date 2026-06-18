@@ -265,7 +265,7 @@ export const calculatePlayerChampionshipStats = (nome: string, partiteChiuse: Pa
 
 export const getPlayerPriceForRoster = (nome: string, partiteChiuse: Partita[], allBonuses: CustomBonusDef[] = DEFAULT_BONUSES, globalGiocatori: Giocatore[] = []): number => {
   const stats = calculatePlayerChampionshipStats(nome, partiteChiuse, allBonuses, globalGiocatori);
-  return getPlayerCurrentPrice(nome, stats.fantaScore);
+  return getPlayerCurrentPrice(nome, stats.fantaScore, partiteChiuse, allBonuses, globalGiocatori);
 };
 
 export interface Consiglio {

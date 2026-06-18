@@ -1730,7 +1730,7 @@ export default function Fantacalcetto({
         price: getPlayerPriceForRoster(p.nome, partiteChiuse || [], bonuses),
       }))
       .sort((a, b) => b.price - a.price);
-  }, [realPlayersPool, partiteChiuse]);
+  }, [realPlayersPool, partiteChiuse, bonuses]);
 
   // -------------------------------------------------------------
   // VIEW RENDER 1: PUBLIC REGISTRATION PORTAL
