@@ -201,8 +201,8 @@ export default function Fantacalcetto({
   const [showInstagramPopup, setShowInstagramPopup] = useState(() => {
     return localStorage.getItem("fantaInstagramFollowed_v1") !== "true";
   });
-  const [showCuccuPopup, setShowCuccuPopup] = useState(() => {
-    return typeof window !== "undefined" && localStorage.getItem("cuccuNotificationDismissed") !== "true";
+  const [showNordioPopup, setShowNordioPopup] = useState(() => {
+    return typeof window !== "undefined" && localStorage.getItem("nordioNotificationDismissed") !== "true";
   });
   const [instagramLinkCopied, setInstagramLinkCopied] = useState(false);
 
@@ -1294,7 +1294,7 @@ export default function Fantacalcetto({
       });
       if (totalCost > MAX_BUDGET && !isAdminMode) {
         setErrorMsg(
-          `Il costo totale della rosa scelto (${totalCost} pinne 🐟) supera il limite consentito di ${MAX_BUDGET} pinne 🐟!`,
+          `Il costo totale della rosa scelto (${totalCost} Izycoin 🪙) supera il limite consentito di ${MAX_BUDGET} Izycoin 🪙!`,
         );
         return;
       }
@@ -2086,14 +2086,14 @@ export default function Fantacalcetto({
             </div>
           </div>
         )}
-        {showCuccuPopup && (
+        {showNordioPopup && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-[9990] animate-fade-in font-sans">
-            <div className="bg-gradient-to-b from-slate-900 via-indigo-950/95 to-slate-950 border border-amber-500/30 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-center">
+            <div className="bg-gradient-to-b from-slate-900 via-indigo-950/95 to-slate-950 border border-emerald-500/30 rounded-3xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-center">
               <button
                 type="button"
                 onClick={() => {
-                  setShowCuccuPopup(false);
-                  localStorage.setItem("cuccuNotificationDismissed", "true");
+                  setShowNordioPopup(false);
+                  localStorage.setItem("nordioNotificationDismissed", "true");
                 }}
                 className="absolute top-4 right-4 text-white/50 hover:text-white bg-white/10 hover:bg-white/20 p-1.5 rounded-full transition-colors cursor-pointer"
                 title="Chiudi"
@@ -2101,22 +2101,22 @@ export default function Fantacalcetto({
                 <X className="h-4 w-4" />
               </button>
 
-              <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-amber-500 via-yellow-400 to-orange-500 text-slate-900 flex items-center justify-center border border-white/20 shadow-lg animate-pulse">
+              <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-tr from-emerald-500 via-teal-400 to-green-500 text-slate-900 flex items-center justify-center border border-white/20 shadow-lg animate-pulse">
                 <AlertCircle className="h-7 w-7 text-indigo-950" />
               </div>
 
               <div className="space-y-2 font-sans">
-                <h3 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-orange-400 uppercase tracking-widest leading-snug">
-                  Novità Quotazioni! ⚽
+                <h3 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-green-400 uppercase tracking-widest leading-snug">
+                  Nuovo Acquisto! ⚽
                 </h3>
                 <div className="bg-indigo-950/50 border border-slate-800/80 rounded-2xl p-4.5 space-y-2 text-left">
                   <p className="text-[13px] text-indigo-100 font-semibold leading-relaxed">
-                    Il giocatore <strong className="text-yellow-400">Gabriele Cuccu</strong> è stato inserito ufficialmente nella lista dei tesserati del fantacalcetto.
+                    Il giocatore <strong className="text-emerald-400">Alessio Nordio</strong> è stato inserito ufficialmente nella lista dei tesserati del fantacalcetto ed è già disponibile in rosa!
                   </p>
                   <div className="flex items-center gap-3 bg-indigo-900/40 p-2.5 rounded-xl border border-indigo-800/30">
-                    <span className="text-2xl">🐟</span>
+                    <span className="text-2xl">🪙</span>
                     <p className="text-[12px] text-indigo-200 font-bold leading-normal">
-                      Valore Iniziale: <span className="text-yellow-400 font-black text-sm">14 Pinne (Izycoin)</span>
+                      Valore Iniziale: <span className="text-yellow-400 font-black text-xs sm:text-sm">14 Izycoin</span>
                     </p>
                   </div>
                 </div>
@@ -2135,19 +2135,19 @@ export default function Fantacalcetto({
                 <button
                   type="button"
                   onClick={() => {
-                    setShowCuccuPopup(false);
-                    localStorage.setItem("cuccuNotificationDismissed", "true");
+                    setShowNordioPopup(false);
+                    localStorage.setItem("nordioNotificationDismissed", "true");
                     setActivePublicTab("mercato");
                   }}
-                  className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 active:from-amber-600 active:to-yellow-500 text-slate-950 font-black uppercase text-xs py-3 rounded-xl transition-all shadow-md hover:scale-[1.02] duration-150 cursor-pointer"
+                  className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 active:from-emerald-600 active:to-teal-500 text-slate-950 font-black uppercase text-xs py-3 rounded-xl transition-all shadow-md hover:scale-[1.02] duration-150 cursor-pointer"
                 >
                   Procedi al Cambio Rosa 🔄
                 </button>
                 <button
                   type="button"
                   onClick={() => {
-                    setShowCuccuPopup(false);
-                    localStorage.setItem("cuccuNotificationDismissed", "true");
+                    setShowNordioPopup(false);
+                    localStorage.setItem("nordioNotificationDismissed", "true");
                   }}
                   className="w-full text-zinc-400 hover:text-white font-bold text-[10.5px] uppercase py-2 text-center hover:underline cursor-pointer"
                 >
