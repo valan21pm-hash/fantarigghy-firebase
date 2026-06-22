@@ -34,19 +34,25 @@ export default function StatsDashboard({ giocatori, partiteChiuse = [] }: StatsD
     let amichevoleSubitiRigore = 0;
     let amichevoleSubitiPiazzato = 0;
 
+    let campionatoGolSum = 0;
+
     if (partiteChiuse && partiteChiuse.length > 0) {
       for (const m of partiteChiuse) {
         const isFriendly = m.dettagli ? m.dettagli.toLowerCase().includes("amichevole") : false;
-        if (isFriendly && m.referto) {
+        if (m.referto) {
           const r = m.referto.find(x => (x.snapshotGiocatore?.nome || x.nome).trim().toLowerCase() === g.nome.trim().toLowerCase());
           if (r) {
-            amichevoleGol += Number(r.gol) || 0;
-            amichevoleAssist += Number(r.assist) || 0;
-            amichevoleAmm += Number(r.amm) || 0;
-            amichevoleEsp += Number(r.rossi) || 0;
-            amichevoleSubitiAzione += Number(r.subitiAzione) || 0;
-            amichevoleSubitiRigore += Number(r.subitiRigore) || 0;
-            amichevoleSubitiPiazzato += Number(r.subitiPiazzato) || 0;
+            if (isFriendly) {
+              amichevoleGol += Number(r.gol) || 0;
+              amichevoleAssist += Number(r.assist) || 0;
+              amichevoleAmm += Number(r.amm) || 0;
+              amichevoleEsp += Number(r.rossi) || 0;
+              amichevoleSubitiAzione += Number(r.subitiAzione) || 0;
+              amichevoleSubitiRigore += Number(r.subitiRigore) || 0;
+              amichevoleSubitiPiazzato += Number(r.subitiPiazzato) || 0;
+            } else {
+              campionatoGolSum += Number(r.gol) || 0;
+            }
           }
         }
       }
@@ -56,7 +62,7 @@ export default function StatsDashboard({ giocatori, partiteChiuse = [] }: StatsD
     const amichevoleMalus = amichevoleAmm + amichevoleEsp * 3;
 
     // 3. Campionato = Totale - Amichevole
-    const campionatoGol = Math.max(0, totalGol - amichevoleGol);
+    const campionatoGol = campionatoGolSum;
     const campionatoAssist = Math.max(0, totalAssist - amichevoleAssist);
     const campionatoAmm = Math.max(0, totalAmm - amichevoleAmm);
     const campionatoEsp = Math.max(0, totalEsp - amichevoleEsp);
@@ -65,6 +71,8 @@ export default function StatsDashboard({ giocatori, partiteChiuse = [] }: StatsD
     const campionatoSubitiPiazzato = Math.max(0, (g.golSubitiPiazzato || 0) - amichevoleSubitiPiazzato);
     const campionatoSubiti = campionatoSubitiAzione + campionatoSubitiRigore + campionatoSubitiPiazzato;
     const campionatoMalus = campionatoAmm + campionatoEsp * 3;
+
+    const totalGolFromSum = campionatoGol + amichevoleGol;
 
     return {
       nome: g.nome,
@@ -93,7 +101,7 @@ export default function StatsDashboard({ giocatori, partiteChiuse = [] }: StatsD
         malus: amichevoleMalus
       },
       totale: {
-        gol: totalGol,
+        gol: totalGolFromSum,
         assist: totalAssist,
         ammonizioni: totalAmm,
         espulsioni: totalEsp,

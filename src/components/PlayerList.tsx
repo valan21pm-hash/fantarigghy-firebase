@@ -803,29 +803,34 @@ export default function PlayerList({
           const isDebtor = g.saldo < 0;
           const isCreditor = g.saldo > 0;
 
-          // Calculate Amichevoli stats for player 'g' by scanning 'partiteChiuse'
+          // Calculate stats for player 'g' by scanning 'partiteChiuse'
           let amichevoleGol = 0;
           let amichevoleAssist = 0;
           let amichevoleAmm = 0;
           let amichevoleEsp = 0;
+          let campionatoGolSum = 0;
 
           if (partiteChiuse && partiteChiuse.length > 0) {
             for (const m of partiteChiuse) {
               const isFriendly = m.dettagli ? m.dettagli.toLowerCase().includes("amichevole") : false;
-              if (isFriendly && m.referto) {
+              if (m.referto) {
                 const r = m.referto.find(x => (x.snapshotGiocatore?.nome || x.nome).trim().toLowerCase() === g.nome.trim().toLowerCase());
                 if (r) {
-                  amichevoleGol += Number(r.gol) || 0;
-                  amichevoleAssist += Number(r.assist) || 0;
-                  amichevoleAmm += Number(r.amm) || 0;
-                  amichevoleEsp += Number(r.rossi) || 0;
+                  if (isFriendly) {
+                    amichevoleGol += Number(r.gol) || 0;
+                    amichevoleAssist += Number(r.assist) || 0;
+                    amichevoleAmm += Number(r.amm) || 0;
+                    amichevoleEsp += Number(r.rossi) || 0;
+                  } else {
+                    campionatoGolSum += Number(r.gol) || 0;
+                  }
                 }
               }
             }
           }
 
           // Campionato stats = Total stats - Amichevoli stats
-          const campionatoGol = Math.max(0, (g.gol || 0) - amichevoleGol);
+          const campionatoGol = campionatoGolSum;
           const campionatoAssist = Math.max(0, (g.assist || 0) - amichevoleAssist);
           const campionatoAmm = Math.max(0, (g.ammonizioni || 0) - amichevoleAmm);
           const campionatoEsp = Math.max(0, (g.espulsioni || 0) - amichevoleEsp);
