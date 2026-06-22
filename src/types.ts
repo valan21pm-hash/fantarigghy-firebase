@@ -332,6 +332,7 @@ export const getPlayerBonusKey = (nomeCompleto: string): string | null => {
   if (n.includes("mattana")) return "Mattana";
   if (n.includes("garau")) return "Garau";
   if (n.includes("cuccu")) return "Cuccu";
+  if (n.includes("nordio")) return "Nordio";
   return null;
 };
 
@@ -669,6 +670,24 @@ export const PLAYER_CUSTOM_BONUSES: Record<string, CustomBonusDef[]> = {
       isPersonale: true,
       giocatoreId: "Cuccu"
     },
+  ],
+  Nordio: [
+    {
+      id: "nordio_gymbro",
+      nome: "Bonus Gymbro 💪",
+      descrizione: "+4 punti bonus Gymbro",
+      punti: 4,
+      isPersonale: true,
+      giocatoreId: "Nordio"
+    },
+    {
+      id: "nordio_in_ginocchio",
+      nome: "In ginocchio da te 🩹",
+      descrizione: "+2 punti se chiude la partita senza infortuni",
+      punti: 2,
+      isPersonale: true,
+      giocatoreId: "Nordio"
+    }
   ],
 };
 

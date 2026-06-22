@@ -1181,7 +1181,7 @@ export default function MatchReport({
               const isCurrentlyPlaying = currentStato === "giocato";
               const isPayer = payers.includes(nome);
               const bonusKey = getPlayerBonusKey(nome);
-              const baseBonuses = bonusKey ? allBonuses.filter(b => b.isPersonale && b.giocatoreId === bonusKey) : [];
+              const baseBonuses = bonusKey ? allBonuses.filter(b => b.isPersonale && b.giocatoreId && (b.giocatoreId === bonusKey || b.giocatoreId.toLowerCase() === bonusKey.toLowerCase() || b.giocatoreId.toLowerCase().includes(bonusKey.toLowerCase()) || bonusKey.toLowerCase().includes(b.giocatoreId.toLowerCase()))) : [];
 
               return (
                 <div 
@@ -1619,7 +1619,7 @@ export default function MatchReport({
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[600px] overflow-y-auto pr-1">
                     {giocatori.filter(g => g.attivo).map(g => {
                       const bonusKey = getPlayerBonusKey(g.nome);
-                      const baseBonuses = bonusKey ? (bonuses || DEFAULT_BONUSES).filter(b => b.isPersonale && b.giocatoreId === bonusKey && !isBonusManuale(b)) : [];
+                      const baseBonuses = bonusKey ? (bonuses || DEFAULT_BONUSES).filter(b => b.isPersonale && b.giocatoreId && (b.giocatoreId === bonusKey || b.giocatoreId.toLowerCase() === bonusKey.toLowerCase() || b.giocatoreId.toLowerCase().includes(bonusKey.toLowerCase()) || bonusKey.toLowerCase().includes(b.giocatoreId.toLowerCase())) && !isBonusManuale(b)) : [];
                       
                       return (
                         <div key={`bp-${g.nome}`} className="bg-white border border-gray-200 rounded-lg p-3">

@@ -4707,7 +4707,7 @@ export default function FantacalcettoV2({
                                       const bonusKey = getPlayerBonusKey(p.nome);
                                       const baseBonuses = bonusKey
                                         ? (bonuses || DEFAULT_BONUSES).filter(
-                                            (b) => b.isPersonale && b.giocatoreId === bonusKey,
+                                            (b) => b.isPersonale && b.giocatoreId && (b.giocatoreId === bonusKey || b.giocatoreId.toLowerCase() === bonusKey.toLowerCase() || b.giocatoreId.toLowerCase().includes(bonusKey.toLowerCase()) || bonusKey.toLowerCase().includes(b.giocatoreId.toLowerCase())),
                                           )
                                         : [];
                                       if (!baseBonuses || baseBonuses.length === 0) return null;
@@ -5504,7 +5504,7 @@ export default function FantacalcettoV2({
                               const userBonuses = bKey
                                 ? (bonuses || DEFAULT_BONUSES).filter(
                                     (b) =>
-                                      b.isPersonale && b.giocatoreId === bKey,
+                                      b.isPersonale && b.giocatoreId && (b.giocatoreId === bKey || b.giocatoreId.toLowerCase() === bKey.toLowerCase() || b.giocatoreId.toLowerCase().includes(bKey.toLowerCase() || "_not_matched_") || bKey.toLowerCase().includes(b.giocatoreId.toLowerCase() || "_not_matched_")),
                                   )
                                 : [];
 

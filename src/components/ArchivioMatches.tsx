@@ -658,7 +658,7 @@ export default function ArchivioMatches({
                           const allBonuses = bonuses || DEFAULT_BONUSES;
                           const currentGenericBonuses = allBonuses.filter(b => !b.isPersonale);
                           const bonusKey = getPlayerBonusKey(r.nome);
-                          const baseBonuses = bonusKey ? allBonuses.filter(b => b.isPersonale && b.giocatoreId === bonusKey) : [];
+                          const baseBonuses = bonusKey ? allBonuses.filter(b => b.isPersonale && b.giocatoreId && (b.giocatoreId === bonusKey || b.giocatoreId.toLowerCase() === bonusKey.toLowerCase() || b.giocatoreId.toLowerCase().includes(bonusKey.toLowerCase()) || bonusKey.toLowerCase().includes(b.giocatoreId.toLowerCase()))) : [];
                           const currentActive = r.bonusAttivi || [];
 
                           return (
