@@ -141,7 +141,8 @@ export default function StatsHub({
           r.snapshotGiocatore?.ultimoRuolo || g.ultimoRuolo,
           rAmm,
           rEsp,
-          r.bonusGolAccreditati
+          r.bonusGolAccreditati,
+          isPresente
         );
 
         let matchBonusVal = breakdown.reduce((acc, curr) => acc + curr.puntiVal, 0);
@@ -221,7 +222,8 @@ export default function StatsHub({
           r.snapshotGiocatore?.ultimoRuolo || g.ultimoRuolo,
           rAmm,
           rEsp,
-          r.bonusGolAccreditati
+          r.bonusGolAccreditati,
+          isPresente
         );
 
         let matchBonusVal = breakdown.reduce((acc, curr) => acc + curr.puntiVal, 0);
@@ -350,10 +352,11 @@ export default function StatsHub({
             const matchObj = validMatches.find((v) => v.id === m.matchId);
             const r = matchObj?.referto?.find((x) => (x.snapshotGiocatore?.nome || x.nome).toLowerCase().trim() === kpi.nome.toLowerCase().trim());
             if (r) {
-              const rGol = r.statoPresenza === "giocato" ? (Number(r.gol) || 0) : 0;
-              const rAssist = r.statoPresenza === "giocato" ? (Number(r.assist) || 0) : 0;
-              const rAmm = r.statoPresenza === "giocato" ? (Number(r.amm) || 0) : 0;
-              const rEsp = r.statoPresenza === "giocato" ? (Number(r.rossi) || 0) : 0;
+              const isPresente = r.statoPresenza === "giocato";
+              const rGol = isPresente ? (Number(r.gol) || 0) : 0;
+              const rAssist = isPresente ? (Number(r.assist) || 0) : 0;
+              const rAmm = isPresente ? (Number(r.amm) || 0) : 0;
+              const rEsp = isPresente ? (Number(r.rossi) || 0) : 0;
               const rBonusAttivi = r.bonusAttivi || [];
 
               const breakdown = getPlayerBonusBreakdownForMatch(
@@ -365,7 +368,8 @@ export default function StatsHub({
                 r.snapshotGiocatore?.ultimoRuolo,
                 rAmm,
                 rEsp,
-                r.bonusGolAccreditati
+                r.bonusGolAccreditati,
+                isPresente
               );
 
               breakdown.forEach((b) => {
@@ -440,7 +444,8 @@ export default function StatsHub({
           r.snapshotGiocatore?.ultimoRuolo,
           rAmm,
           rEsp,
-          r.bonusGolAccreditati
+          r.bonusGolAccreditati,
+          isPresente
         );
 
         breakdown.forEach((b) => {
@@ -514,7 +519,8 @@ export default function StatsHub({
         r.snapshotGiocatore?.ultimoRuolo,
         rAmm,
         rEsp,
-        r.bonusGolAccreditati
+        r.bonusGolAccreditati,
+        isPresente
       );
 
       let matchBonusVal = breakdown.reduce((acc, curr) => acc + curr.puntiVal, 0);

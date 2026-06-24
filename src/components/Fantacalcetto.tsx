@@ -635,7 +635,8 @@ export default function Fantacalcetto({
               r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
               rAmm,
               rEsp,
-              r.bonusGolAccreditati
+              r.bonusGolAccreditati,
+              played
             )
           : 0;
 
@@ -654,7 +655,8 @@ export default function Fantacalcetto({
               r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
               rAmm,
               rEsp,
-              r.bonusGolAccreditati
+              r.bonusGolAccreditati,
+              false
             )
           : 0;
 
@@ -671,7 +673,8 @@ export default function Fantacalcetto({
             r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
             rAmm,
             rEsp,
-            r.bonusGolAccreditati
+            r.bonusGolAccreditati,
+            played
           );
           if (breakdown.length > 0) {
             bonusBreakdownStr =
@@ -692,7 +695,8 @@ export default function Fantacalcetto({
             r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
             rAmm,
             rEsp,
-            r.bonusGolAccreditati
+            r.bonusGolAccreditati,
+            false
           );
           if (breakdownNonManuali.length > 0) {
             bonusBreakdownStrNonManuali =
@@ -1572,10 +1576,11 @@ export default function Fantacalcetto({
             (x) => x.nome.toLowerCase() === nome.toLowerCase(),
           );
           if (r) {
-            const rGol = Number(r.gol) || 0;
-            const rAssist = Number(r.assist) || 0;
-            const rAmm = Number(r.amm) || 0;
-            const rEsp = Number(r.rossi) || 0;
+            const isPresente = r.statoPresenza === "giocato";
+            const rGol = isPresente ? (Number(r.gol) || 0) : 0;
+            const rAssist = isPresente ? (Number(r.assist) || 0) : 0;
+            const rAmm = isPresente ? (Number(r.amm) || 0) : 0;
+            const rEsp = isPresente ? (Number(r.rossi) || 0) : 0;
             const rBonusAttivi = r.bonusAttivi || [];
 
             const gInfo = giocatori.find(g => g.nome.toLowerCase() === nome.toLowerCase());
@@ -1589,7 +1594,8 @@ export default function Fantacalcetto({
               r.snapshotGiocatore?.ultimoRuolo || gInfo?.ultimoRuolo,
               rAmm,
               rEsp,
-              r.bonusGolAccreditati
+              r.bonusGolAccreditati,
+              isPresente
             );
 
             if (isAmichevole || m.inviatoFanta === true) {
@@ -1602,7 +1608,8 @@ export default function Fantacalcetto({
                 r.snapshotGiocatore?.ultimoRuolo || gInfo?.ultimoRuolo,
                 rAmm,
                 rEsp,
-                r.bonusGolAccreditati
+                r.bonusGolAccreditati,
+                isPresente
               );
               breakdown.forEach(b => {
                 const foundBonusDef = effectiveBonuses.find(def => def.nome === b.nome);

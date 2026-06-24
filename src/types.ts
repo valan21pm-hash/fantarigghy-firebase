@@ -145,7 +145,8 @@ export const getPlayerCurrentPrice = (
           r.snapshotGiocatore?.ultimoRuolo || fallbackPlayerInfo?.ultimoRuolo,
           rAmm,
           rEsp,
-          r.bonusGolAccreditati
+          r.bonusGolAccreditati,
+          isPresente
         );
 
         matchScore = parseFloat(
@@ -240,7 +241,7 @@ export const calculatePlayerChampionshipStats = (nome: string, partiteChiuse: Pa
 
         // Always include bonuses, but filter for game stats if not present
         const effectiveBonuses = m.bonusesSnapshot || allBonuses;
-        const matchBonus = getPlayerBonusPointsForMatch(nome, rBonusAttivi, rGol, rAssist, effectiveBonuses, r.snapshotGiocatore?.ultimoRuolo || fallbackPlayerInfo?.ultimoRuolo, rAmm, rEsp, r.bonusGolAccreditati);
+        const matchBonus = getPlayerBonusPointsForMatch(nome, rBonusAttivi, rGol, rAssist, effectiveBonuses, r.snapshotGiocatore?.ultimoRuolo || fallbackPlayerInfo?.ultimoRuolo, rAmm, rEsp, r.bonusGolAccreditati, isPresente);
 
         gol += rGol;
         assist += rAssist;
@@ -940,7 +941,8 @@ export const getPlayerBonusPointsForMatch = (
   ruolo?: string,
   amm: number = 0,
   rossi: number = 0,
-  bonusGolAccreditati?: Record<string, number>
+  bonusGolAccreditati?: Record<string, number>,
+  played: boolean = true
 ): number => {
   let tot = 0;
   
@@ -978,6 +980,13 @@ export const getPlayerBonusPointsForMatch = (
       );
       if (b.isPersonale && b.giocatoreId && !isPersonaleMatch) {
         continue;
+      }
+
+      // If player did not play, filter out pitch-required bonuses and Pinna's personal bonuses
+      if (!played) {
+        if (b.richiedeIngressoInCampo || isBonusManuale(b) || (key === "Pinna" && b.isPersonale)) {
+          continue;
+        }
       }
       
       let pts = b.punti || 0;
@@ -1021,7 +1030,8 @@ export const getPlayerBonusBreakdownForMatch = (
   ruolo?: string,
   amm: number = 0,
   rossi: number = 0,
-  bonusGolAccreditati?: Record<string, number>
+  bonusGolAccreditati?: Record<string, number>,
+  played: boolean = true
 ): { nome: string, puntiVal: number }[] => {
   const breakdown: { nome: string, puntiVal: number }[] = [];
   
@@ -1058,6 +1068,13 @@ export const getPlayerBonusBreakdownForMatch = (
       );
       if (b.isPersonale && b.giocatoreId && !isPersonaleMatch) {
         continue;
+      }
+
+      // If player did not play, filter out pitch-required bonuses and Pinna's personal bonuses
+      if (!played) {
+        if (b.richiedeIngressoInCampo || isBonusManuale(b) || (key === "Pinna" && b.isPersonale)) {
+          continue;
+        }
       }
       
       let pts = b.punti || 0;
@@ -1206,7 +1223,8 @@ export const getTeamMatchBreakdownList = (
             r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
             rAmm,
             rEsp,
-            r.bonusGolAccreditati
+            r.bonusGolAccreditati,
+            played
           )
         : 0;
 
@@ -1224,7 +1242,8 @@ export const getTeamMatchBreakdownList = (
             r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
             rAmm,
             rEsp,
-            r.bonusGolAccreditati
+            r.bonusGolAccreditati,
+            false
           )
         : 0;
 
@@ -1241,7 +1260,8 @@ export const getTeamMatchBreakdownList = (
           r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
           rAmm,
           rEsp,
-          r.bonusGolAccreditati
+          r.bonusGolAccreditati,
+          played
         );
         if (breakdown.length > 0) {
           bonusBreakdownStr =
@@ -1262,7 +1282,8 @@ export const getTeamMatchBreakdownList = (
           r.snapshotGiocatore?.ultimoRuolo || gInfoFallback?.ultimoRuolo,
           rAmm,
           rEsp,
-          r.bonusGolAccreditati
+          r.bonusGolAccreditati,
+          false
         );
         if (breakdownNonManuali.length > 0) {
           bonusBreakdownStrNonManuali =
