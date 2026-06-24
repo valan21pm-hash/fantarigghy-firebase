@@ -984,7 +984,14 @@ export const getPlayerBonusPointsForMatch = (
 
       // If player did not play, filter out pitch-required bonuses and Pinna's personal bonuses
       if (!played) {
-        if (b.richiedeIngressoInCampo || isBonusManuale(b) || (key === "Pinna" && b.isPersonale)) {
+        const isPinnaBonus = key === "Pinna" && (
+          b.isPersonale || 
+          b.id.toLowerCase().includes("presidenziale") || 
+          b.nome.toLowerCase().includes("presidenziale") || 
+          b.id.toLowerCase().includes("lazzaro") || 
+          b.nome.toLowerCase().includes("lazzaro")
+        );
+        if (b.richiedeIngressoInCampo || isBonusManuale(b) || isPinnaBonus) {
           continue;
         }
       }
@@ -1072,7 +1079,14 @@ export const getPlayerBonusBreakdownForMatch = (
 
       // If player did not play, filter out pitch-required bonuses and Pinna's personal bonuses
       if (!played) {
-        if (b.richiedeIngressoInCampo || isBonusManuale(b) || (key === "Pinna" && b.isPersonale)) {
+        const isPinnaBonus = key === "Pinna" && (
+          b.isPersonale || 
+          b.id.toLowerCase().includes("presidenziale") || 
+          b.nome.toLowerCase().includes("presidenziale") || 
+          b.id.toLowerCase().includes("lazzaro") || 
+          b.nome.toLowerCase().includes("lazzaro")
+        );
+        if (b.richiedeIngressoInCampo || isBonusManuale(b) || isPinnaBonus) {
           continue;
         }
       }
