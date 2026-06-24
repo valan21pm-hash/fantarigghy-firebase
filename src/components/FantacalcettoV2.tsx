@@ -837,6 +837,10 @@ export default function FantacalcettoV2({
               }
             });
           }
+          if (inf.nome.toLowerCase().includes("pinna")) {
+            unassignedList.push("Bonus presidenziali 👑 (+3 pt)");
+            unassignedList.push("Bonus Lazzaro 🩹 (+5 pt)");
+          }
 
           finalKpiList.push({
             ...inf,
@@ -871,6 +875,10 @@ export default function FantacalcettoV2({
                   unassignedList.push(`${bDef.nome} (+${bDef.punti} pt)`);
                 }
               });
+            }
+            if (inf.nome.toLowerCase().includes("pinna")) {
+              unassignedList.push("Bonus presidenziali 👑 (+3 pt)");
+              unassignedList.push("Bonus Lazzaro 🩹 (+5 pt)");
             }
 
             finalKpiList.push({
@@ -925,6 +933,10 @@ export default function FantacalcettoV2({
                 unassignedList.push(`${bDef.nome} (+${bDef.punti} pt)`);
               }
             });
+          }
+          if (benchPlayerName.toLowerCase().includes("pinna")) {
+            unassignedList.push("Bonus presidenziali 👑 (+3 pt)");
+            unassignedList.push("Bonus Lazzaro 🩹 (+5 pt)");
           }
 
           finalKpiList.push({

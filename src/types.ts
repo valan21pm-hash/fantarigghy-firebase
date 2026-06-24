@@ -1417,6 +1417,10 @@ export const getTeamMatchBreakdownList = (
             }
           });
         }
+        if (benchPlayerName.toLowerCase().includes("pinna")) {
+          unassignedList.push("Bonus presidenziali 👑 (+3 pt)");
+          unassignedList.push("Bonus Lazzaro 🩹 (+5 pt)");
+        }
 
         finalKpiList.push({
           ...benchInfo,
