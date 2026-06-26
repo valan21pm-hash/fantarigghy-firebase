@@ -5,7 +5,7 @@
 
 import { ClipboardCheck, Copy, Share2, Users, AlertCircle, RefreshCw, Star, Info, CheckCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Formazione, Giocatore, Partita, getLastName } from "../types";
+import { Formazione, Giocatore, Partita, getLastName, sortMatchesRecentFirst } from "../types";
 
 interface LineupEditorProps {
   giocatori: Giocatore[];
@@ -412,7 +412,7 @@ export default function LineupEditor({
             className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
           >
             <option value="">-- Seleziona Gara --</option>
-            {partiteAperte.map(p => (
+            {sortMatchesRecentFirst(partiteAperte).map(p => (
               <option key={p.id} value={p.id}>
                 {p.dettagli}
               </option>

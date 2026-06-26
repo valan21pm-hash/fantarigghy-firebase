@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { CheckCircle2, Trophy, AlertTriangle } from "lucide-react";
-import { Giocatore, Partita, RefertoGiocatore, getPlayerBonusKey, CustomBonusDef, DEFAULT_BONUSES, GOAL_POINTS, ASSIST_POINTS, AMMO_POINTS, ESPU_POINTS, isBonusManuale } from "../types";
+import { Giocatore, Partita, RefertoGiocatore, getPlayerBonusKey, CustomBonusDef, DEFAULT_BONUSES, GOAL_POINTS, ASSIST_POINTS, AMMO_POINTS, ESPU_POINTS, isBonusManuale, sortMatchesRecentFirst } from "../types";
 
 interface MatchReportProps {
   giocatori: Giocatore[];
@@ -705,7 +705,7 @@ export default function MatchReport({
             className="w-full text-sm p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-slate-500 outline-none"
           >
             <option value="">-- Seleziona Gara --</option>
-            {partiteAperte.map(p => (
+            {sortMatchesRecentFirst(partiteAperte).map(p => (
               <option key={p.id} value={p.id}>
                 {p.dettagli}
               </option>

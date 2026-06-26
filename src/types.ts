@@ -1455,3 +1455,68 @@ export const getTeamMatchBreakdownList = (
   return list;
 };
 
+export const parseDateRobust = (dateStr?: string): number => {
+  if (!dateStr) return 0;
+  // Check if format is like 'DD/MM/YYYY HH.mm.ss'
+  if (dateStr.includes("/")) {
+    const parts = dateStr.trim().split(/\s+/);
+    if (parts.length > 0) {
+      const dateParts = parts[0].split("/");
+      const day = parseInt(dateParts[0], 10);
+      const month = parseInt(dateParts[1], 10) - 1;
+      const year = parseInt(dateParts[2], 10);
+      if (parts[1]) {
+        const timeParts = parts[1].replace(/\./g, ":").split(":");
+        const hour = parseInt(timeParts[0], 10) || 0;
+        const min = parseInt(timeParts[1], 10) || 0;
+        const sec = parseInt(timeParts[2], 10) || 0;
+        return new Date(year, month, day, hour, min, sec).getTime();
+      }
+      return new Date(year, month, day).getTime();
+    }
+  }
+  // Otherwise try direct parsing of ISO
+  const parsed = Date.parse(dateStr);
+  return isNaN(parsed) ? 0 : parsed;
+};
+
+export const extractMatchDate = (m: Partita): number => {
+  if (m.dettagli) {
+    const dateMatch = m.dettagli.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (dateMatch) {
+      const day = parseInt(dateMatch[1], 10);
+      const month = parseInt(dateMatch[2], 10) - 1;
+      const year = parseInt(dateMatch[3], 10);
+      
+      let hour = 0;
+      let min = 0;
+      const timeMatch = m.dettagli.match(/(\d{2})[:\.](\d{2})/);
+      if (timeMatch) {
+        hour = parseInt(timeMatch[1], 10);
+        min = parseInt(timeMatch[2], 10);
+      }
+      return new Date(year, month, day, hour, min, 0).getTime();
+    }
+  }
+
+  if (m.dataInserimento) {
+    const t = parseDateRobust(m.dataInserimento);
+    if (t > 0) return t;
+  }
+
+  return 0;
+};
+
+export const sortMatchesRecentFirst = (matches: Partita[]): Partita[] => {
+  return [...matches].sort((a, b) => {
+    const tA = extractMatchDate(a);
+    const tB = extractMatchDate(b);
+    if (tA !== tB) {
+      return tB - tA; // descending
+    }
+    // fallback to ID locale comparison descending
+    return (b.id || "").localeCompare(a.id || "");
+  });
+};
+
+

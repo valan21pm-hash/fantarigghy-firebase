@@ -5,7 +5,7 @@
 
 import React, { useState } from "react";
 import { Calendar, Edit3, Trash2, Undo2, Award, Users, Share2, Eye, CheckCircle2, AlertTriangle } from "lucide-react";
-import { Giocatore, Partita, RefertoGiocatore, getPlayerBonusKey, CustomBonusDef, DEFAULT_BONUSES } from "../types";
+import { Giocatore, Partita, RefertoGiocatore, getPlayerBonusKey, CustomBonusDef, DEFAULT_BONUSES, sortMatchesRecentFirst } from "../types";
 
 interface ArchivioMatchesProps {
   giocatori: Giocatore[];
@@ -269,7 +269,7 @@ export default function ArchivioMatches({
 
         {partiteChiuse.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[...partiteChiuse].reverse().map(p => {
+            {sortMatchesRecentFirst(partiteChiuse).map(p => {
               const pagantiCount = p.referto.filter(r => r.pagaQuota).length;
               const isAmichevole = p.dettagli ? p.dettagli.toLowerCase().includes("amichevole") : false;
               return (

@@ -55,6 +55,7 @@ import {
   MAX_BUDGET,
   getLastName,
   isBonusManuale,
+  sortMatchesRecentFirst,
 } from "../types";
 
 // (Keep everything else mostly the same)
@@ -271,9 +272,10 @@ export default function FantacalcettoV2({
     "home" | "rosa" | "mercato" | "classifica" | "regolamento" | "statistiche"
   >("mercato");
   const allPartite = React.useMemo(() => {
-    return [...partiteAperte, ...partiteChiuse].filter(
+    const raw = [...partiteAperte, ...partiteChiuse].filter(
       (m) => !(m.dettagli || "").toLowerCase().includes("amichevole"),
     );
+    return sortMatchesRecentFirst(raw);
   }, [partiteAperte, partiteChiuse]);
   const [nomePartecipante, setNomePartecipante] = useState("");
   const [nomeFantasquadra, setNomeFantasquadra] = useState("");
@@ -606,11 +608,13 @@ export default function FantacalcettoV2({
       }[];
     }[] = [];
 
-    const nonAmichevoleMatches = (partiteChiuse || []).filter(
-      (m) =>
-        m.stato === "Chiusa" &&
-        m.inviatoFanta === true &&
-        !(m.dettagli || "").toLowerCase().includes("amichevole"),
+    const nonAmichevoleMatches = sortMatchesRecentFirst(
+      (partiteChiuse || []).filter(
+        (m) =>
+          m.stato === "Chiusa" &&
+          m.inviatoFanta === true &&
+          !(m.dettagli || "").toLowerCase().includes("amichevole"),
+      )
     );
 
     for (const m of nonAmichevoleMatches) {

@@ -17,7 +17,8 @@ import {
   Layers,
   ArrowUpDown,
   Hash,
-  Share2
+  Share2,
+  Coins
 } from "lucide-react";
 import {
   Giocatore,
@@ -33,7 +34,8 @@ import {
   GOAL_POINTS,
   ASSIST_POINTS,
   AMMO_POINTS,
-  ESPU_POINTS
+  ESPU_POINTS,
+  sortMatchesRecentFirst
 } from "../types";
 
 interface StatsHubProps {
@@ -62,15 +64,19 @@ export default function StatsHub({
   const [selectedTeamFilter, setSelectedTeamFilter] = useState<string>("Tutte");
   const [selectedPlayerFilter, setSelectedPlayerFilter] = useState<string>("Tutti");
   const [selectedBonusFilter, setSelectedBonusFilter] = useState<string>("Tutti");
+  const [exportType, setExportType] = useState<"standard" | "izycoin" | "punteggi">("standard");
+  const [copiedIzycoin, setCopiedIzycoin] = useState(false);
+  const [copiedPunteggi, setCopiedPunteggi] = useState(false);
 
   // Available valid Closed Matches for calculations (non-friendly)
   const validMatches = useMemo(() => {
-    return (partiteChiuse || []).filter(
+    const list = (partiteChiuse || []).filter(
       (m) =>
         m.stato === "Chiusa" &&
         m.inviatoFanta === true &&
         !(m.dettagli || "").toLowerCase().includes("amichevole")
     );
+    return sortMatchesRecentFirst(list);
   }, [partiteChiuse]);
 
   // Set default selected jornada if none is selected
@@ -638,6 +644,70 @@ export default function StatsHub({
     }
   };
 
+  // 5. GENERATING COPYABLE IZYCOIN VARIATIONS TEXT (no custom bonuses listed, only changes and values)
+  const izycoinExportText = useMemo(() => {
+    let textForCopy = `🪙 *VARIAZIONI IZYCOIN* 🪙\n`;
+    textForCopy += `📅 _Periodo: ${currentPeriodLabel}_\n`;
+    textForCopy += `📈 _Ordinamento: ${sortOrder === "crescente" ? "Crescente 📈" : "Decrescente 📉"}_\n\n`;
+
+    textForCopy += `👤 *VARIAZIONI VALORI GIOCATORI:*\n`;
+    filteredPlayerStats.forEach((p, idx) => {
+      const rankNum = idx + 1;
+      const changeSign = p.priceChange >= 0 ? `+${p.priceChange}` : `${p.priceChange}`;
+      textForCopy += `${rankNum}. *${p.nome}* (${p.ruolo.toUpperCase()})\n`;
+      textForCopy += `   🪙 Valore: *${p.currentPrice} cr.* (Variazione: *${changeSign} Izycoin*)\n`;
+    });
+
+    textForCopy += `\n⚽ #FantaEasyRigging #Izycoin #Quotazioni 🪙`;
+    return textForCopy;
+  }, [currentPeriodLabel, sortOrder, filteredPlayerStats]);
+
+  const handleCopyIzycoin = async () => {
+    try {
+      await navigator.clipboard.writeText(izycoinExportText);
+      setCopiedIzycoin(true);
+      setTimeout(() => setCopiedIzycoin(false), 2000);
+    } catch (err) {
+      alert("Copia non riuscita, per favore copia manualmente la casella di testo.");
+    }
+  };
+
+  // 6. GENERATING COPYABLE BONUS POINTS SYNTHESIS TEXT (only total points and bonus points)
+  const punteggiExportText = useMemo(() => {
+    let textForCopy = `✨ *SINTESI PUNTEGGI & BONUS GIOCATORI* ✨\n`;
+    textForCopy += `📅 _Periodo: ${currentPeriodLabel}_\n`;
+    textForCopy += `📈 _Ordinamento: ${sortOrder === "crescente" ? "Crescente 📈" : "Decrescente 📉"}_\n\n`;
+
+    textForCopy += `👤 *SINTESI PUNTI E BONUS:*\n`;
+    filteredPlayerStats.forEach((p, idx) => {
+      const rankNum = idx + 1;
+      // Calculate sum of positive bonus points
+      const positiveBonusSum = Object.entries(p.bonusImpacts || {}).reduce((acc, [bName, bPts]) => {
+        const pts = bPts as number;
+        if (pts > 0) {
+          return acc + pts;
+        }
+        return acc;
+      }, 0);
+
+      textForCopy += `${rankNum}. *${p.nome}* (${p.ruolo.toUpperCase()})\n`;
+      textForCopy += `   ⭐ Punti Totali: *${p.score} pts* | 🎁 Di cui da Bonus: *+${positiveBonusSum.toFixed(1)} pts* (👕 Presenze: ${p.matchesPlayed})\n`;
+    });
+
+    textForCopy += `\n⚽ #FantaEasyRigging #Fantacalcetto #BonusSintesi 🎁`;
+    return textForCopy;
+  }, [currentPeriodLabel, sortOrder, filteredPlayerStats]);
+
+  const handleCopyPunteggi = async () => {
+    try {
+      await navigator.clipboard.writeText(punteggiExportText);
+      setCopiedPunteggi(true);
+      setTimeout(() => setCopiedPunteggi(false), 2000);
+    } catch (err) {
+      alert("Copia non riuscita, per favore copia manualmente la casella di testo.");
+    }
+  };
+
   const handleExportClassifica = async () => {
     let text = `🏆 *CLASSIFICA FANTASQUADRE* 🏆\n\n`;
     sortedTeamStats.forEach((t, idx) => {
@@ -881,6 +951,107 @@ export default function StatsHub({
             Reset Filtri ❌
           </button>
         )}
+      </div>
+
+      {/* 📱 SOCIAL-READY EXPORT COMPONENT */}
+      <div className="bg-slate-950/80 p-5 rounded-2xl border border-slate-800 space-y-4">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 border-b border-slate-850 pb-4">
+          <div className="space-y-1">
+            <h3 className="text-sm font-black uppercase text-indigo-400 flex items-center gap-1.5">
+              <Share2 className="h-4 w-4 text-indigo-400" /> Esportatore Social (WhatsApp / IG Stories)
+            </h3>
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              Formatta e copia il testo per condividerlo sui gruppi o canali social!
+            </p>
+          </div>
+
+          {/* Tab Selector for Export Type */}
+          <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-855 self-start xl:self-auto gap-1">
+            <button
+              onClick={() => setExportType("standard")}
+              className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all uppercase flex items-center gap-1.5 cursor-pointer ${
+                exportType === "standard"
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Share2 className="h-3 w-3" /> Fanta-Stats & Bonus
+            </button>
+            <button
+              onClick={() => setExportType("izycoin")}
+              className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all uppercase flex items-center gap-1.5 cursor-pointer ${
+                exportType === "izycoin"
+                  ? "bg-amber-550 text-slate-950 shadow-sm font-bold"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Coins className="h-3 w-3 text-amber-500" /> Variazioni Izycoin 🪙
+            </button>
+            <button
+              onClick={() => setExportType("punteggi")}
+              className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all uppercase flex items-center gap-1.5 cursor-pointer ${
+                exportType === "punteggi"
+                  ? "bg-emerald-600 text-white shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Award className="h-3 w-3 text-emerald-300" /> Sintesi Punti & Bonus 🎁
+            </button>
+          </div>
+
+          {/* Copy Button corresponding to current selection */}
+          {exportType === "standard" ? (
+            <button
+              onClick={handleCopyClipboard}
+              className="bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-indigo-950 font-black text-xs uppercase px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md w-full xl:w-auto"
+            >
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4" /> Copiato! 🚀
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" /> Copia Report Completo 📋
+                </>
+              )}
+            </button>
+          ) : exportType === "izycoin" ? (
+            <button
+              onClick={handleCopyIzycoin}
+              className="bg-amber-500 hover:bg-amber-440 active:bg-amber-600 text-slate-950 font-black text-xs uppercase px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md w-full xl:w-auto"
+            >
+              {copiedIzycoin ? (
+                <>
+                  <Check className="h-4 w-4" /> Variazioni Copiate! 🚀
+                </>
+              ) : (
+                <>
+                  <Coins className="h-4 w-4" /> Copia Variazioni Izycoin 🪙
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={handleCopyPunteggi}
+              className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-white font-black text-xs uppercase px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md w-full xl:w-auto"
+            >
+              {copiedPunteggi ? (
+                <>
+                  <Check className="h-4 w-4" /> Sintesi Copiata! 🚀
+                </>
+              ) : (
+                <>
+                  <Award className="h-4 w-4" /> Copia Sintesi Punti &amp; Bonus 📋
+                </>
+              )}
+            </button>
+          )}
+        </div>
+
+        {/* Plain-text display area using elegant monospace alignment */}
+        <pre className="bg-slate-900 border border-slate-850 rounded-xl p-4 text-[11px] leading-relaxed text-indigo-200 overflow-x-auto font-mono max-h-72 overflow-y-auto whitespace-pre-wrap select-all">
+          {exportType === "standard" ? socialExportText : exportType === "izycoin" ? izycoinExportText : punteggiExportText}
+        </pre>
       </div>
 
       {/* 🔴 PANNELLO DETTAGLIO TIMELINE SINGOLO GIOCATORE */}
@@ -1231,39 +1402,6 @@ export default function StatsHub({
           </table>
         )}
 
-      </div>
-
-      {/* 📱 SOCIAL-READY EXPORT COMPONENT */}
-      <div className="bg-slate-950/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-850 pb-3">
-          <div className="space-y-1">
-            <h3 className="text-sm font-black uppercase text-indigo-400 flex items-center gap-1.5">
-              <Share2 className="h-4 w-4 text-indigo-400" /> Esportatore Social (WhatsApp / IG Stories)
-            </h3>
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              Copia il testo sotto, formattato in colonne perfette con emoji per pubblicarlo sui gruppi di gioco o canali social!
-            </p>
-          </div>
-          <button
-            onClick={handleCopyClipboard}
-            className="bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-indigo-950 font-black text-xs uppercase px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
-          >
-            {copied ? (
-              <>
-                <Check className="h-4 w-4" /> Copiato! 🚀
-              </>
-            ) : (
-              <>
-                <Copy className="h-4 w-4" /> Copia Negli Appunti 📋
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Plain-text display area using elegant monospace alignment */}
-        <pre className="bg-slate-900 border border-slate-850 rounded-xl p-4 text-[11px] leading-relaxed text-indigo-200 overflow-x-auto font-mono max-h-72 overflow-y-auto whitespace-pre-wrap select-all">
-          {socialExportText}
-        </pre>
       </div>
 
     </div>
