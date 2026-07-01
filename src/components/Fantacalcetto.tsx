@@ -4987,7 +4987,7 @@ export default function Fantacalcetto({
           </div>
 
           {/* Link Secondario: V2 */}
-          <div className="space-y-2">
+          <div className="space-y-2 mb-2 pb-2 border-b border-gray-100">
             <input
               type="text"
               readOnly
@@ -5012,6 +5012,36 @@ export default function Fantacalcetto({
               >
                 <ExternalLink className="h-3.5 w-3.5" />
                 <span>Fantacalcetto Prova (V2)</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Link Terziario: V3 */}
+          <div className="space-y-2">
+            <input
+              type="text"
+              readOnly
+              value={`${window.location.origin}${window.location.pathname}?portal=v3`}
+              className="w-full bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1.5 text-[10px] font-mono font-bold select-all outline-none text-emerald-600"
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}?portal=v3`);
+                }}
+                className={`py-1.5 font-bold text-[10.5px] uppercase rounded-lg shadow-2xs cursor-pointer transition-all flex items-center justify-center gap-1 shrink-0 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200`}
+              >
+                <Copy className="h-3 w-3" />
+                <span>Copia V3</span>
+              </button>
+              <a
+                href={`${window.location.origin}${window.location.pathname}?portal=v3`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="py-1.5 font-bold text-[10.5px] uppercase bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-2xs transition-all flex items-center justify-center gap-1.5 text-center"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                <span>App Leghe (V3)</span>
               </a>
             </div>
           </div>

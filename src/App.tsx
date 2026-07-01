@@ -159,7 +159,7 @@ export default function App() {
         const resEmail = (res.user.email || "").toLowerCase().trim();
         if (!authorizedEmails.includes(resEmail)) {
           await logout();
-          alert(`L'account Google selezionato (${resEmail}) non è autorizzato.`);
+          console.error(`L'account Google selezionato (${resEmail}) non è autorizzato.`);
           return;
         }
 
@@ -179,11 +179,11 @@ export default function App() {
         
         const freshData = await saveRes.json();
         setData(freshData);
-        alert("Collegamento Google Sheets attivato con successo! Sincronizzazione automatica attiva su tutti i dispositivi.");
+        console.error("Collegamento Google Sheets attivato con successo! Sincronizzazione automatica attiva su tutti i dispositivi.");
       }
     } catch (err: any) {
       console.error("Errore collegamento Google Sheets:", err);
-      alert(`Errore di collegamento: ${err.message || err.toString()}`);
+      console.error(`Errore di collegamento: ${err.message || err.toString()}`);
     } finally {
       setLoading(false);
     }
@@ -226,7 +226,7 @@ export default function App() {
       setData(updatedData);
       return updatedData;
     } catch (error: any) {
-      alert(`Errore: ${error.message}`);
+      console.error(`Errore: ${error.message}`);
       throw error;
     } finally {
       setLoading(false);

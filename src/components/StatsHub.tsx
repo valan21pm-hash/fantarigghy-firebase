@@ -640,7 +640,7 @@ export default function StatsHub({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      alert("Copia non riuscita, per favore copia manualmente la casella di testo.");
+      console.error("Copia non riuscita, per favore copia manualmente la casella di testo.");
     }
   };
 
@@ -668,7 +668,7 @@ export default function StatsHub({
       setCopiedIzycoin(true);
       setTimeout(() => setCopiedIzycoin(false), 2000);
     } catch (err) {
-      alert("Copia non riuscita, per favore copia manualmente la casella di testo.");
+      console.error("Copia non riuscita, per favore copia manualmente la casella di testo.");
     }
   };
 
@@ -704,7 +704,7 @@ export default function StatsHub({
       setCopiedPunteggi(true);
       setTimeout(() => setCopiedPunteggi(false), 2000);
     } catch (err) {
-      alert("Copia non riuscita, per favore copia manualmente la casella di testo.");
+      console.error("Copia non riuscita, per favore copia manualmente la casella di testo.");
     }
   };
 
@@ -721,7 +721,7 @@ export default function StatsHub({
       setCopiedClassifica(true);
       setTimeout(() => setCopiedClassifica(false), 2500);
     } catch (err) {
-      alert("Copia non riuscita, impossibile copiare negli appunti.");
+      console.error("Copia non riuscita, impossibile copiare negli appunti.");
     }
   };
 

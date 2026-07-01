@@ -1,0 +1,15 @@
+11-  User,
+12:  Shield,
+13-  Search,
+--
+39-  Clock,
+40:  BarChart3, Newspaper, ShoppingCart, Shield, ShoppingCart,
+41-} from "lucide-react";
+--
+3602-                   <div className="absolute -right-4 -bottom-4 opacity-5">
+3603:                     <Shield className="w-32 h-32 text-white" />
+3604-                   </div>
+--
+3897-      <div className="absolute -right-4 -top-4 opacity-10">
+3898:        <ShoppingCart className="w-24 h-24 text-emerald-500" />
+3899-      </div>
