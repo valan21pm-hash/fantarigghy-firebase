@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { CheckCircle2, Trophy, AlertTriangle } from "lucide-react";
-import { Giocatore, Partita, RefertoGiocatore, getPlayerBonusKey, CustomBonusDef, DEFAULT_BONUSES, GOAL_POINTS, ASSIST_POINTS, AMMO_POINTS, ESPU_POINTS, isBonusManuale, sortMatchesRecentFirst } from "../types";
+import { Giocatore, Partita, RefertoGiocatore, getPlayerBonusKey, CustomBonusDef, DEFAULT_BONUSES, GOAL_POINTS, ASSIST_POINTS, AMMO_POINTS, ESPU_POINTS, isBonusManuale, sortMatchesRecentFirst, getLastName } from "../types";
 
 interface MatchReportProps {
   giocatori: Giocatore[];
@@ -28,6 +28,8 @@ interface MatchReportProps {
     note?: string
   ) => Promise<void>;
   onAggiungiConvocato?: (idPartita: string, nomeGiocatore: string) => Promise<void>;
+  onAggiornaConvocati?: (idPartita: string, convocati: string[]) => Promise<void>;
+  onRefreshData?: () => Promise<void>;
   onCreaBackupBozza?: (backup: any) => Promise<void>;
   onEliminaBackupBozza?: (backupId: string) => Promise<void>;
   savedBackups?: any[];
@@ -44,6 +46,8 @@ export default function MatchReport({
   onChiudiPartita,
   onSalvaBozza,
   onAggiungiConvocato,
+  onAggiornaConvocati,
+  onRefreshData,
   onCreaBackupBozza,
   onEliminaBackupBozza,
   savedBackups = [],
@@ -121,6 +125,11 @@ export default function MatchReport({
   const [noEventsPlayers, setNoEventsPlayers] = useState<Record<string, boolean>>({});
   const [extraConvocato, setExtraConvocato] = useState<string>("");
   const [isAddingExtra, setIsAddingExtra] = useState(false);
+  const [showModificaConvocatiModal, setShowModificaConvocatiModal] = useState(false);
+  const [tempConvocati, setTempConvocati] = useState<string[]>([]);
+  const [searchPlayerFilter, setSearchPlayerFilter] = useState("");
+  const [newExtName, setNewExtName] = useState("");
+  const [isSavingConvocati, setIsSavingConvocati] = useState(false);
 
   const [hasBackedUpDraft, setHasBackedUpDraft] = useState(false);
   const [showBackupsModal, setShowBackupsModal] = useState(false);
@@ -869,58 +878,24 @@ export default function MatchReport({
                           <div className="flex items-center gap-1.5">
                             <span className="text-[11px] font-black text-slate-800 uppercase tracking-wider">👕 Giocatori Convocati ({activeMatch.convocati.length})</span>
                           </div>
-                          {onAggiungiConvocato && !isAddingExtra && (
-                            <button
-                              type="button"
-                              onClick={() => setIsAddingExtra(true)}
-                              className="text-[10px] font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 px-2 py-1 rounded border border-orange-200 transition-colors"
-                            >
-                              + Aggiungi
-                            </button>
-                          )}
-                        </div>
-                        {isAddingExtra && (
-                          <div className="mb-4 bg-orange-50/50 p-3 rounded-lg border border-orange-100 flex items-center gap-2">
-                            <select
-                              value={extraConvocato}
-                              onChange={(e) => setExtraConvocato(e.target.value)}
-                              className="flex-1 text-xs p-2 bg-white border border-gray-200 rounded focus:ring-2 focus:ring-orange-500 font-bold outline-none"
-                            >
-                              <option value="">-- Seleziona Giocatore Extra --</option>
-                              {giocatori
-                                .filter(gj => gj.attivo && !activeMatch.convocati.includes(gj.nome))
-                                .map(nc => (
-                                  <option key={nc.nome} value={nc.nome}>{nc.nome}</option>
-                                ))}
-                            </select>
-                            <button
-                              type="button"
-                              onClick={async () => {
-                                if (!extraConvocato) return;
-                                try {
-                                  await onAggiungiConvocato?.(activeMatch.id, extraConvocato);
-                                  setIsAddingExtra(false);
-                                  setExtraConvocato("");
-                                  // The match array updates automatically as the component rerenders or data refetches 
-                                  // through App.tsx -> useApp(). In case it needs specific sync, onAggiungiConvocato should trigger it.
-                                } catch (e) {
-                                  alert("Errore");
-                                }
-                              }}
-                              className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs px-3 py-2 rounded transition-colors"
-                            >
-                              Conferma
-                            </button>
+                          {(onAggiornaConvocati || onAggiungiConvocato) && (
                             <button
                               type="button"
                               onClick={() => {
-                                setIsAddingExtra(false);
-                                setExtraConvocato("");
+                                setTempConvocati([...(activeMatch.convocati || [])]);
+                                setSearchPlayerFilter("");
+                                setNewExtName("");
+                                setShowModificaConvocatiModal(true);
                               }}
-                              className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-xs px-3 py-2 rounded transition-colors"
+                              className="text-[10px] font-extrabold uppercase tracking-wider text-orange-600 bg-orange-50 hover:bg-orange-100 px-2.5 py-1.5 rounded-lg border border-orange-200 transition-all cursor-pointer flex items-center gap-1 shadow-sm"
                             >
-                              Annulla
+                              ✏️ Modifica Convocati
                             </button>
+                          )}
+                        </div>
+                        {false && (
+                          <div className="mb-4 bg-orange-50/50 p-3 rounded-lg border border-orange-100 flex items-center gap-2">
+                            {/* Kept hidden or removed to make room for Modifica Convocati */}
                           </div>
                         )}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -2024,6 +1999,378 @@ export default function MatchReport({
           </div>
         </div>
       )}
+
+      {showModificaConvocatiModal && (() => {
+        const modalActiveMatch = activeMatch;
+        if (!modalActiveMatch) return null;
+
+        const activeRoster = giocatori.filter((g) => g.attivo);
+        const filteredRoster = activeRoster.filter(g => 
+          g.nome.toLowerCase().includes(searchPlayerFilter.toLowerCase())
+        );
+
+        const leftPlayers = tempConvocati.filter(name => 
+          name.toLowerCase().includes(searchPlayerFilter.toLowerCase())
+        );
+
+        const rightPlayers = filteredRoster.filter(g => 
+          !tempConvocati.some(name => name.toLowerCase().trim() === g.nome.toLowerCase().trim())
+        );
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <div className="bg-white border border-gray-100 rounded-3xl p-6 w-full max-w-3xl shadow-2xl relative flex flex-col max-h-[90vh] font-sans">
+              <div className="border-b border-gray-100 pb-4 mb-4 flex justify-between items-center text-left">
+                <div className="text-left">
+                  <h3 className="text-base font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <span>📋</span> Modifica Convocati Gara Attiva
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1 font-medium">
+                    Gestisci la lista dei convocati per l'evento: <strong className="text-orange-600">{modalActiveMatch.dettagli.split(" - ")[0] || modalActiveMatch.dettagli}</strong>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowModificaConvocatiModal(false)}
+                  className="text-slate-400 hover:text-slate-600 text-xl font-bold cursor-pointer transition-colors"
+                >
+                  &times;
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 shrink-0">
+                <div className="text-left">
+                  <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Cerca Giocatore</label>
+                  <input
+                    type="text"
+                    placeholder="Cerca giocatore..."
+                    value={searchPlayerFilter}
+                    onChange={(e) => setSearchPlayerFilter(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-slate-800 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-slate-400"
+                  />
+                </div>
+                <div className="text-left">
+                  <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Aggiungi Esterno</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="es. Cristiano..."
+                      value={newExtName}
+                      onChange={(e) => setNewExtName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          const cleanName = newExtName.trim();
+                          if (!cleanName) return;
+                          const suffixName = cleanName.endsWith(" (Esterno)") ? cleanName : `${cleanName} (Esterno)`;
+                          if (!tempConvocati.includes(suffixName)) {
+                            setTempConvocati([...tempConvocati, suffixName]);
+                          }
+                          setNewExtName("");
+                        }
+                      }}
+                      className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-slate-800 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 placeholder-slate-400"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const cleanName = newExtName.trim();
+                        if (!cleanName) return;
+                        const suffixName = cleanName.endsWith(" (Esterno)") ? cleanName : `${cleanName} (Esterno)`;
+                        if (!tempConvocati.includes(suffixName)) {
+                          setTempConvocati([...tempConvocati, suffixName]);
+                        }
+                        setNewExtName("");
+                      }}
+                      className="bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-sm"
+                    >
+                      + Aggiungi
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 overflow-hidden min-h-[300px]">
+                {/* LEFT: CONVOCATI */}
+                <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 flex flex-col h-full overflow-hidden">
+                  <div className="flex justify-between items-center mb-2.5 shrink-0 text-left">
+                    <h4 className="text-[11px] font-black text-emerald-600 uppercase tracking-wider flex items-center gap-1.5">
+                      <span>🟢</span> CONVOCATI ({tempConvocati.length})
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => setTempConvocati([])}
+                      className="text-[10px] text-red-600 hover:text-red-500 font-extrabold transition-colors cursor-pointer"
+                    >
+                      Deseleziona Tutti ×
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 min-h-0 text-left">
+                    {leftPlayers.length === 0 && tempConvocati.length === 0 ? (
+                      <div className="text-center py-12 text-slate-400 text-xs italic font-medium">
+                        Nessun convocato. Selezionali dalla lista a destra.
+                      </div>
+                    ) : leftPlayers.length === 0 ? (
+                      <div className="text-center py-12 text-slate-400 text-xs italic font-medium">
+                        Nessun risultato corrisponde alla ricerca.
+                      </div>
+                    ) : (
+                      leftPlayers.map((name) => {
+                        const isExt = !giocatori.some(g => g.nome.toLowerCase().trim() === name.toLowerCase().trim());
+                        const playerObj = giocatori.find(g => g.nome.toLowerCase().trim() === name.toLowerCase().trim());
+                        return (
+                          <div
+                            key={name}
+                            onClick={() => setTempConvocati(tempConvocati.filter(n => n !== name))}
+                            className="flex items-center justify-between bg-white border border-gray-150 hover:border-red-400 p-2.5 rounded-xl cursor-pointer transition-all select-none text-left shadow-xs"
+                          >
+                            <div className="flex items-center gap-2.5 truncate text-left">
+                              <input
+                                type="checkbox"
+                                checked={true}
+                                onChange={() => {}}
+                                className="w-3.5 h-3.5 rounded text-emerald-600 focus:ring-0 cursor-pointer pointer-events-none shrink-0"
+                              />
+                              <div className="truncate text-left">
+                                <p className="font-bold text-xs text-slate-800 truncate text-left">{getLastName(name)}</p>
+                                <p className="text-[9px] text-slate-500 font-extrabold uppercase mt-0.5 text-left">
+                                  {isExt ? "👤 Esterno" : `🛡️ ${playerObj?.ultimoRuolo || "Calciatore"}`}
+                                </p>
+                              </div>
+                            </div>
+                            {isExt && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setTempConvocati(tempConvocati.filter(n => n !== name));
+                                }}
+                                className="text-red-500 hover:text-red-600 font-black text-sm px-1.5"
+                              >
+                                &times;
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+
+                {/* RIGHT: DISPONIBILI */}
+                <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 flex flex-col h-full overflow-hidden">
+                  <div className="flex justify-between items-center mb-2.5 shrink-0 text-left">
+                    <h4 className="text-[11px] font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <span>⚪</span> DISPONIBILI ({rightPlayers.length})
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const activeRosterNames = giocatori.filter(g => g.attivo).map(g => g.nome);
+                        const unique = Array.from(new Set([...tempConvocati, ...activeRosterNames]));
+                        setTempConvocati(unique);
+                      }}
+                      className="text-[10px] text-orange-600 hover:text-orange-500 font-extrabold transition-colors cursor-pointer"
+                    >
+                      Seleziona Tutti ✓
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 min-h-0 text-left">
+                    {rightPlayers.length === 0 ? (
+                      <div className="text-center py-12 text-slate-400 text-xs italic font-medium">
+                        Tutti i tesserati attivi sono già convocati.
+                      </div>
+                    ) : (
+                      rightPlayers.map((g) => (
+                        <div
+                          key={g.nome}
+                          onClick={() => {
+                            if (!tempConvocati.includes(g.nome)) {
+                              setTempConvocati([...tempConvocati, g.nome]);
+                            }
+                          }}
+                          className="flex items-center gap-2.5 bg-white border border-gray-150 hover:border-emerald-400 p-2.5 rounded-xl cursor-pointer transition-all select-none text-left shadow-xs"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={false}
+                            onChange={() => {}}
+                            className="w-3.5 h-3.5 rounded text-orange-600 focus:ring-0 cursor-pointer pointer-events-none shrink-0"
+                          />
+                          <div className="truncate text-left">
+                            <p className="font-bold text-xs text-slate-800 truncate text-left">{getLastName(g.nome)}</p>
+                            <p className="text-[9px] text-slate-500 font-extrabold uppercase mt-0.5 text-left">
+                              🛡️ {g.ultimoRuolo || "Calciatore"}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-2.5 pt-4 mt-4 border-t border-gray-100 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowModificaConvocatiModal(false)}
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-bold uppercase text-xs transition-all cursor-pointer"
+                  disabled={isSavingConvocati}
+                >
+                  Annulla
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setIsSavingConvocati(true);
+                    try {
+                      if (onAggiornaConvocati) {
+                        await onAggiornaConvocati(modalActiveMatch.id, tempConvocati);
+                      } else {
+                        const res = await fetch("/api/partite/aggiorna-convocati", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ idPartita: modalActiveMatch.id, convocati: tempConvocati }),
+                        });
+                        if (!res.ok) {
+                          const errData = await res.json();
+                          throw new Error(errData.err || errData.erroreCritico || "Impossibile aggiornare i convocati");
+                        }
+                      }
+
+                      // TARGETED LOCAL STATE SYNCHRONIZATION:
+                      // Identify removed players
+                      const removedPlayers = (modalActiveMatch.convocati || []).filter(name => !tempConvocati.includes(name));
+                      if (removedPlayers.length > 0) {
+                        setPresents(prev => prev.filter(p => !removedPlayers.includes(p)));
+                        setPayers(prev => prev.filter(p => !removedPlayers.includes(p)));
+                        setGoals(prev => {
+                          const next = { ...prev };
+                          removedPlayers.forEach(p => delete next[p]);
+                          return next;
+                        });
+                        setAssists(prev => {
+                          const next = { ...prev };
+                          removedPlayers.forEach(p => delete next[p]);
+                          return next;
+                        });
+                        setYellows(prev => {
+                          const next = { ...prev };
+                          removedPlayers.forEach(p => delete next[p]);
+                          return next;
+                        });
+                        setReds(prev => {
+                          const next = { ...prev };
+                          removedPlayers.forEach(p => delete next[p]);
+                          return next;
+                        });
+                        setSubAzione(prev => {
+                          const next = { ...prev };
+                          removedPlayers.forEach(p => delete next[p]);
+                          return next;
+                        });
+                        setSubRigore(prev => {
+                          const next = { ...prev };
+                          removedPlayers.forEach(p => delete next[p]);
+                          return next;
+                        });
+                        setSubPiazzato(prev => {
+                          const next = { ...prev };
+                          removedPlayers.forEach(p => delete next[p]);
+                          return next;
+                        });
+                        setSelectedBonuses(prev => {
+                          const next = { ...prev };
+                          removedPlayers.forEach(p => delete next[p]);
+                          return next;
+                        });
+                        setBonusGolAccreditati(prev => {
+                          const next = { ...prev };
+                          removedPlayers.forEach(p => delete next[p]);
+                          return next;
+                        });
+                        setMalusBrtPlayers(prev => {
+                          const next = { ...prev };
+                          removedPlayers.forEach(p => delete next[p]);
+                          return next;
+                        });
+                        setStatoPresenza(prev => {
+                          const next = { ...prev };
+                          removedPlayers.forEach(p => delete next[p]);
+                          return next;
+                        });
+                        setSostitutoDa(prev => {
+                          const next = { ...prev };
+                          removedPlayers.forEach(p => delete next[p]);
+                          return next;
+                        });
+                        setNoEventsPlayers(prev => {
+                          const next = { ...prev };
+                          removedPlayers.forEach(p => delete next[p]);
+                          return next;
+                        });
+                        setVerifiedGeneric(prev => {
+                          const next = { ...prev };
+                          removedPlayers.forEach(p => delete next[p]);
+                          return next;
+                        });
+                        setVerifiedPersonal(prev => {
+                          const next = { ...prev };
+                          removedPlayers.forEach(p => delete next[p]);
+                          return next;
+                        });
+                      }
+
+                      // Identify added players
+                      const addedPlayers = tempConvocati.filter(name => !(modalActiveMatch.convocati || []).includes(name));
+                      if (addedPlayers.length > 0) {
+                        setPresents(prev => {
+                          const unique = Array.from(new Set([...prev, ...addedPlayers]));
+                          return unique;
+                        });
+                        setPayers(prev => {
+                          const unique = Array.from(new Set([...prev, ...addedPlayers]));
+                          return unique;
+                        });
+                        setStatoPresenza(prev => {
+                          const next = { ...prev };
+                          addedPlayers.forEach(p => {
+                            next[p] = "giocato";
+                          });
+                          return next;
+                        });
+                        setSostitutoDa(prev => {
+                          const next = { ...prev };
+                          addedPlayers.forEach(p => {
+                            next[p] = "";
+                          });
+                          return next;
+                        });
+                      }
+
+                      if (onRefreshData) {
+                        await onRefreshData();
+                      } else {
+                        window.location.reload();
+                      }
+                      
+                      setShowModificaConvocatiModal(false);
+                    } catch (e: any) {
+                      alert(e.message || "Errore durante il salvataggio dei convocati");
+                    } finally {
+                      setIsSavingConvocati(false);
+                    }
+                  }}
+                  disabled={isSavingConvocati}
+                  className="flex-1 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white py-3 rounded-xl font-extrabold uppercase text-xs transition-all cursor-pointer shadow-md"
+                >
+                  {isSavingConvocati ? "Salvataggio..." : "Salva Convocati"}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

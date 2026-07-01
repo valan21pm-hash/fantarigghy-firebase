@@ -314,6 +314,13 @@ export default function App() {
     });
   };
 
+  const handleAggiornaConvocati = async (idPartita: string, convocati: string[]) => {
+    await executePostAction("/api/partite/aggiorna-convocati", {
+      idPartita,
+      convocati,
+    });
+  };
+
   const handleCreaBackupBozza = async (backup: any) => {
     await executePostAction("/api/partite/backup-bozza", { backup });
   };
@@ -511,6 +518,9 @@ export default function App() {
         onUpdateBonuses={handleUpdateBonuses}
         onToggleMercatoLibero={handleToggleMercatoLibero}
         consigli={data?.consigli || []}
+        isEditor={isEditor}
+        onRefreshData={() => fetchDatabase(undefined, true)}
+        onAggiornaConvocati={handleAggiornaConvocati}
       />
     );
   }
@@ -917,6 +927,8 @@ export default function App() {
               onChiudiPartita={handleChiudiPartita}
               onSalvaBozza={handleSalvaBozza}
               onAggiungiConvocato={handleAggiungiConvocato}
+              onAggiornaConvocati={handleAggiornaConvocati}
+              onRefreshData={() => fetchDatabase(undefined, true)}
               onCreaBackupBozza={handleCreaBackupBozza}
               onEliminaBackupBozza={handleEliminaBackupBozza}
               savedBackups={data?.backupsBozze || []}

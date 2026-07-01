@@ -2416,6 +2416,26 @@ async function startServer() {
     }
   });
 
+  // 11a-ter. AGGIORNA TUTTI I CONVOCATI DI UNA PARTITA
+  app.post("/api/partite/aggiorna-convocati", async (req, res) => {
+    try {
+      const { idPartita, convocati } = req.body;
+      const token = getAuthToken(req);
+      const db = await getDb(token);
+
+      const p = db.partite.find((x) => x.id === idPartita);
+      if (!p) return res.status(404).json({ err: "Partita non trovata" });
+      if (p.stato !== "Aperta") return res.status(400).json({ err: "Solo partite aperte" });
+
+      p.convocati = convocati || [];
+      await saveDb(db, token);
+      
+      sendDbResponse(res, db);
+    } catch (error: any) {
+      res.status(500).json({ erroreCritico: error.message });
+    }
+  });
+
   // 11b. SALVA BOZZA REFERTO PARTITA APERTA
   app.post("/api/partite/salva-bozza", async (req, res) => {
     try {

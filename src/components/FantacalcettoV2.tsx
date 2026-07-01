@@ -138,6 +138,7 @@ interface FantacalcettoProps {
   isEditor?: boolean;
   isAdminMode?: boolean; // false if viewing as a public portal page
   onRefreshData?: () => Promise<void>;
+  onAggiornaConvocati?: (idPartita: string, convocati: string[]) => Promise<any>;
 }
 
 // Fantasy Point Formula constants
@@ -250,6 +251,7 @@ export default function FantacalcettoV2({
   isEditor = false,
   isAdminMode = false,
   onRefreshData,
+  onAggiornaConvocati,
 }: FantacalcettoProps) {
   // Public Portal state loaders
   const isMercatoLiberoValido = React.useMemo(() => {
@@ -285,6 +287,10 @@ export default function FantacalcettoV2({
   const [filterConvocati, setFilterConvocati] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showModificaConvocatiModal, setShowModificaConvocatiModal] = useState(false);
+  const [tempConvocati, setTempConvocati] = useState<string[]>([]);
+  const [searchPlayerFilter, setSearchPlayerFilter] = useState("");
+  const [newExtName, setNewExtName] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showInstagramPopup, setShowInstagramPopup] = useState(() => {
     return localStorage.getItem("fantaInstagramFollowed_v1") !== "true";
@@ -3801,6 +3807,24 @@ export default function FantacalcettoV2({
                                     : "🔓 Formazioni Aperte"}
                                 </span>
                               </div>
+
+                              {isEditor && (
+                                <div className="mt-3.5 flex justify-start">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setTempConvocati([...(activeMatch.convocati || [])]);
+                                      setSearchPlayerFilter("");
+                                      setNewExtName("");
+                                      setShowModificaConvocatiModal(true);
+                                    }}
+                                    className="bg-yellow-400 hover:bg-yellow-350 active:bg-yellow-450 text-slate-950 text-xs font-black uppercase tracking-wider py-2 px-4 rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-1.5"
+                                  >
+                                    ✏️ Modifica Convocati
+                                  </button>
+                                </div>
+                              )}
                             </>
                           ) : (
                             <>
@@ -6105,6 +6129,264 @@ export default function FantacalcettoV2({
           </div>
         </div>
       )}
+
+      {showModificaConvocatiModal && (() => {
+        const modalActiveMatch = lockStatus.match || (partiteAperte && partiteAperte[0]) || null;
+        if (!modalActiveMatch) return null;
+
+        const activeRoster = giocatori.filter((g) => g.attivo);
+        const filteredRoster = activeRoster.filter(g => 
+          g.nome.toLowerCase().includes(searchPlayerFilter.toLowerCase())
+        );
+
+        const leftPlayers = tempConvocati.filter(name => 
+          name.toLowerCase().includes(searchPlayerFilter.toLowerCase())
+        );
+
+        const rightPlayers = filteredRoster.filter(g => 
+          !tempConvocati.some(name => name.toLowerCase().trim() === g.nome.toLowerCase().trim())
+        );
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+            <div className="bg-indigo-950 border border-indigo-800 rounded-3xl p-6 w-full max-w-3xl shadow-2xl relative flex flex-col max-h-[90vh] font-sans">
+              <div className="border-b border-indigo-900 pb-4 mb-4 flex justify-between items-center text-left">
+                <div className="text-left">
+                  <h3 className="text-lg font-black text-white uppercase tracking-wider flex items-center gap-2">
+                    <span>📋</span> Modifica Convocati Gara Attiva
+                  </h3>
+                  <p className="text-xs text-indigo-300 mt-1">
+                    Gestisci la lista dei convocati per l'evento: <strong className="text-yellow-400">{modalActiveMatch.dettagli.split(" - ")[0] || modalActiveMatch.dettagli}</strong>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowModificaConvocatiModal(false)}
+                  className="text-indigo-400 hover:text-white text-xl font-bold cursor-pointer"
+                >
+                  &times;
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 shrink-0">
+                <div className="text-left">
+                  <label className="block text-[10px] uppercase font-bold text-indigo-300 mb-1">Cerca Giocatore</label>
+                  <input
+                    type="text"
+                    placeholder="Cerca giocatore..."
+                    value={searchPlayerFilter}
+                    onChange={(e) => setSearchPlayerFilter(e.target.value)}
+                    className="w-full bg-indigo-900/60 border border-indigo-800/80 rounded-xl px-3 py-2 text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-indigo-405"
+                  />
+                </div>
+                <div className="text-left">
+                  <label className="block text-[10px] uppercase font-bold text-indigo-300 mb-1">Aggiungi Esterno</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="es. Cristiano..."
+                      value={newExtName}
+                      onChange={(e) => setNewExtName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          const cleanName = newExtName.trim();
+                          if (!cleanName) return;
+                          const suffixName = cleanName.endsWith(" (Esterno)") ? cleanName : `${cleanName} (Esterno)`;
+                          if (!tempConvocati.includes(suffixName)) {
+                            setTempConvocati([...tempConvocati, suffixName]);
+                          }
+                          setNewExtName("");
+                        }
+                      }}
+                      className="flex-1 bg-indigo-900/60 border border-indigo-800/80 rounded-xl px-3 py-2 text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-yellow-400 placeholder-indigo-405"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const cleanName = newExtName.trim();
+                        if (!cleanName) return;
+                        const suffixName = cleanName.endsWith(" (Esterno)") ? cleanName : `${cleanName} (Esterno)`;
+                        if (!tempConvocati.includes(suffixName)) {
+                          setTempConvocati([...tempConvocati, suffixName]);
+                        }
+                        setNewExtName("");
+                      }}
+                      className="bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition-colors cursor-pointer"
+                    >
+                      + Aggiungi
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 overflow-hidden min-h-[300px]">
+                <div className="bg-indigo-900/20 border border-indigo-900/40 rounded-2xl p-4 flex flex-col h-full overflow-hidden">
+                  <div className="flex justify-between items-center mb-2.5 shrink-0 text-left">
+                    <h4 className="text-xs font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <span>🟢</span> CONVOCATI ({tempConvocati.length})
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => setTempConvocati([])}
+                      className="text-[10px] text-red-400 hover:text-red-350 font-black transition-colors cursor-pointer"
+                    >
+                      Deseleziona Tutti ×
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-0 text-left">
+                    {leftPlayers.length === 0 && tempConvocati.length === 0 ? (
+                      <div className="text-center py-12 text-indigo-400 text-xs italic font-medium">
+                        Nessun convocato. Selezionali dalla lista a destra.
+                      </div>
+                    ) : leftPlayers.length === 0 ? (
+                      <div className="text-center py-12 text-indigo-400 text-xs italic font-medium">
+                        Nessun risultato corrisponde alla ricerca.
+                      </div>
+                    ) : (
+                      leftPlayers.map((name) => {
+                        const isExt = !giocatori.some(g => g.nome.toLowerCase().trim() === name.toLowerCase().trim());
+                        const playerObj = giocatori.find(g => g.nome.toLowerCase().trim() === name.toLowerCase().trim());
+                        return (
+                          <div
+                            key={name}
+                            onClick={() => setTempConvocati(tempConvocati.filter(n => n !== name))}
+                            className="flex items-center justify-between bg-indigo-900/40 border border-indigo-850 hover:border-red-500/30 p-2.5 rounded-xl cursor-pointer transition-all select-none text-left"
+                          >
+                            <div className="flex items-center gap-2.5 truncate text-left">
+                              <input
+                                type="checkbox"
+                                checked={true}
+                                onChange={() => {}}
+                                className="w-3.5 h-3.5 rounded text-emerald-500 focus:ring-0 cursor-pointer pointer-events-none shrink-0"
+                              />
+                              <div className="truncate text-left">
+                                <p className="font-black text-xs text-white truncate text-left">{getLastName(name)}</p>
+                                <p className="text-[9px] text-indigo-400 font-extrabold uppercase mt-0.5 text-left">
+                                  {isExt ? "👤 Esterno" : `🛡️ ${playerObj?.ultimoRuolo || "Calciatore"}`}
+                                </p>
+                              </div>
+                            </div>
+                            {isExt && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setTempConvocati(tempConvocati.filter(n => n !== name));
+                                }}
+                                className="text-red-400 hover:text-red-350 font-black text-sm px-1.5"
+                              >
+                                &times;
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-indigo-900/20 border border-indigo-900/40 rounded-2xl p-4 flex flex-col h-full overflow-hidden">
+                  <div className="flex justify-between items-center mb-2.5 shrink-0 text-left">
+                    <h4 className="text-xs font-black text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <span>⚪</span> DISPONIBILI IN ROSA ({rightPlayers.length})
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const activeRosterNames = giocatori.filter(g => g.attivo).map(g => g.nome);
+                        const unique = Array.from(new Set([...tempConvocati, ...activeRosterNames]));
+                        setTempConvocati(unique);
+                      }}
+                      className="text-[10px] text-emerald-400 hover:text-emerald-350 font-black transition-colors cursor-pointer"
+                    >
+                      Seleziona Tutti ✓
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-0 text-left">
+                    {rightPlayers.length === 0 ? (
+                      <div className="text-center py-12 text-indigo-400 text-xs italic font-medium">
+                        Tutti i tesserati attivi sono già convocati.
+                      </div>
+                    ) : (
+                      rightPlayers.map((g) => (
+                        <div
+                          key={g.nome}
+                          onClick={() => {
+                            if (!tempConvocati.includes(g.nome)) {
+                              setTempConvocati([...tempConvocati, g.nome]);
+                            }
+                          }}
+                          className="flex items-center gap-2.5 bg-indigo-950/45 border border-indigo-900/60 hover:border-emerald-500/30 p-2.5 rounded-xl cursor-pointer transition-all select-none text-left"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={false}
+                            onChange={() => {}}
+                            className="w-3.5 h-3.5 rounded text-indigo-600 focus:ring-0 cursor-pointer pointer-events-none shrink-0"
+                          />
+                          <div className="truncate text-left">
+                            <p className="font-black text-xs text-indigo-200 truncate text-left">{getLastName(g.nome)}</p>
+                            <p className="text-[9px] text-indigo-400 font-extrabold uppercase mt-0.5 text-left">
+                              🛡️ {g.ultimoRuolo || "Calciatore"}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-2.5 pt-4 mt-4 border-t border-indigo-900 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowModificaConvocatiModal(false)}
+                  className="flex-1 bg-indigo-900/60 hover:bg-indigo-800/80 text-indigo-200 py-3 rounded-xl font-bold uppercase text-xs transition-all cursor-pointer"
+                  disabled={submitting}
+                >
+                  Annulla
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setSubmitting(true);
+                    try {
+                      if (onAggiornaConvocati) {
+                        await onAggiornaConvocati(modalActiveMatch.id, tempConvocati);
+                      } else {
+                        const res = await fetch("/api/partite/aggiorna-convocati", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ idPartita: modalActiveMatch.id, convocati: tempConvocati }),
+                        });
+                        if (!res.ok) {
+                          const errData = await res.json();
+                          throw new Error(errData.err || errData.erroreCritico || "Impossibile aggiornare i convocati");
+                        }
+                      }
+                      if (onRefreshData) {
+                        await onRefreshData();
+                      } else {
+                        window.location.reload();
+                      }
+                      setShowModificaConvocatiModal(false);
+                    } catch (e: any) {
+                      alert(e.message || "Errore durante il salvataggio dei convocati");
+                    } finally {
+                      setSubmitting(false);
+                    }
+                  }}
+                  disabled={submitting}
+                  className="flex-1 bg-yellow-400 hover:bg-yellow-350 disabled:opacity-50 text-slate-950 py-3 rounded-xl font-black uppercase text-xs transition-all cursor-pointer"
+                >
+                  {submitting ? "Salvataggio..." : "Salva Convocati"}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
