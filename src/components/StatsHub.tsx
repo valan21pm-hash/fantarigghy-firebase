@@ -64,9 +64,11 @@ export default function StatsHub({
   const [selectedTeamFilter, setSelectedTeamFilter] = useState<string>("Tutte");
   const [selectedPlayerFilter, setSelectedPlayerFilter] = useState<string>("Tutti");
   const [selectedBonusFilter, setSelectedBonusFilter] = useState<string>("Tutti");
-  const [exportType, setExportType] = useState<"standard" | "izycoin" | "punteggi">("standard");
+  const [exportType, setExportType] = useState<"standard" | "izycoin" | "punteggi" | "squadre_totali" | "giocatori_totali">("standard");
   const [copiedIzycoin, setCopiedIzycoin] = useState(false);
   const [copiedPunteggi, setCopiedPunteggi] = useState(false);
+  const [copiedSquadreTotali, setCopiedSquadreTotali] = useState(false);
+  const [copiedGiocatoriTotali, setCopiedGiocatoriTotali] = useState(false);
 
   // Available valid Closed Matches for calculations (non-friendly)
   const validMatches = useMemo(() => {
@@ -708,6 +710,54 @@ export default function StatsHub({
     }
   };
 
+  const squadreTotaliExportText = useMemo(() => {
+    let textForCopy = `🏆 *PUNTEGGI FANTASQUADRE (Solo Totali)* 🏆\n`;
+    textForCopy += `📅 _Periodo: ${currentPeriodLabel}_\n`;
+    textForCopy += `📈 _Ordinamento: ${sortOrder === "crescente" ? "Crescente 📈" : "Decrescente 📉"}_\n\n`;
+
+    sortedTeamStats.forEach((t, idx) => {
+      const rankNum = idx + 1;
+      textForCopy += `${rankNum}. *${t.nomeFantasquadra}* - *${t.score} pts*\n`;
+    });
+
+    textForCopy += `\n⚽ #FantaEasyRigging #Fantacalcetto #SquadreTotali`;
+    return textForCopy;
+  }, [currentPeriodLabel, sortOrder, sortedTeamStats]);
+
+  const handleCopySquadreTotali = async () => {
+    try {
+      await navigator.clipboard.writeText(squadreTotaliExportText);
+      setCopiedSquadreTotali(true);
+      setTimeout(() => setCopiedSquadreTotali(false), 2000);
+    } catch (err) {
+      console.error("Copia non riuscita");
+    }
+  };
+
+  const giocatoriTotaliExportText = useMemo(() => {
+    let textForCopy = `👤 *PUNTEGGI GIOCATORI (Solo Totali)* 👤\n`;
+    textForCopy += `📅 _Periodo: ${currentPeriodLabel}_\n`;
+    textForCopy += `📈 _Ordinamento: ${sortOrder === "crescente" ? "Crescente 📈" : "Decrescente 📉"}_\n\n`;
+
+    filteredPlayerStats.forEach((p, idx) => {
+      const rankNum = idx + 1;
+      textForCopy += `${rankNum}. *${p.nome}* (${p.ruolo.toUpperCase()}) - *${p.score} pts*\n`;
+    });
+
+    textForCopy += `\n⚽ #FantaEasyRigging #Fantacalcetto #GiocatoriTotali`;
+    return textForCopy;
+  }, [currentPeriodLabel, sortOrder, filteredPlayerStats]);
+
+  const handleCopyGiocatoriTotali = async () => {
+    try {
+      await navigator.clipboard.writeText(giocatoriTotaliExportText);
+      setCopiedGiocatoriTotali(true);
+      setTimeout(() => setCopiedGiocatoriTotali(false), 2000);
+    } catch (err) {
+      console.error("Copia non riuscita");
+    }
+  };
+
   const handleExportClassifica = async () => {
     let text = `🏆 *CLASSIFICA FANTASQUADRE* 🏆\n\n`;
     sortedTeamStats.forEach((t, idx) => {
@@ -966,7 +1016,7 @@ export default function StatsHub({
           </div>
 
           {/* Tab Selector for Export Type */}
-          <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-855 self-start xl:self-auto gap-1">
+          <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-855 self-start xl:self-auto gap-1 flex-wrap">
             <button
               onClick={() => setExportType("standard")}
               className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all uppercase flex items-center gap-1.5 cursor-pointer ${
@@ -975,7 +1025,7 @@ export default function StatsHub({
                   : "text-slate-400 hover:text-white"
               }`}
             >
-              <Share2 className="h-3 w-3" /> Fanta-Stats & Bonus
+              <Share2 className="h-3 w-3" /> Fanta-Stats
             </button>
             <button
               onClick={() => setExportType("izycoin")}
@@ -985,7 +1035,7 @@ export default function StatsHub({
                   : "text-slate-400 hover:text-white"
               }`}
             >
-              <Coins className="h-3 w-3 text-amber-500" /> Variazioni Izycoin 🪙
+              <Coins className="h-3 w-3 text-amber-500" /> Izycoin
             </button>
             <button
               onClick={() => setExportType("punteggi")}
@@ -995,7 +1045,27 @@ export default function StatsHub({
                   : "text-slate-400 hover:text-white"
               }`}
             >
-              <Award className="h-3 w-3 text-emerald-300" /> Sintesi Punti & Bonus 🎁
+              <Award className="h-3 w-3 text-emerald-300" /> Bonus
+            </button>
+            <button
+              onClick={() => setExportType("squadre_totali")}
+              className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all uppercase flex items-center gap-1.5 cursor-pointer ${
+                exportType === "squadre_totali"
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <Trophy className="h-3 w-3 text-blue-300" /> Punti Squadre
+            </button>
+            <button
+              onClick={() => setExportType("giocatori_totali")}
+              className={`px-3 py-1.5 text-[10px] font-black rounded-lg transition-all uppercase flex items-center gap-1.5 cursor-pointer ${
+                exportType === "giocatori_totali"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <User className="h-3 w-3 text-purple-300" /> Punti Giocatori
             </button>
           </div>
 
@@ -1030,7 +1100,7 @@ export default function StatsHub({
                 </>
               )}
             </button>
-          ) : (
+          ) : exportType === "punteggi" ? (
             <button
               onClick={handleCopyPunteggi}
               className="bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-white font-black text-xs uppercase px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md w-full xl:w-auto"
@@ -1045,12 +1115,42 @@ export default function StatsHub({
                 </>
               )}
             </button>
+          ) : exportType === "squadre_totali" ? (
+            <button
+              onClick={handleCopySquadreTotali}
+              className="bg-blue-500 hover:bg-blue-400 active:bg-blue-600 text-white font-black text-xs uppercase px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md w-full xl:w-auto"
+            >
+              {copiedSquadreTotali ? (
+                <>
+                  <Check className="h-4 w-4" /> Squadre Copiate! 🚀
+                </>
+              ) : (
+                <>
+                  <Trophy className="h-4 w-4" /> Copia Punti Squadre 📋
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={handleCopyGiocatoriTotali}
+              className="bg-purple-500 hover:bg-purple-400 active:bg-purple-600 text-white font-black text-xs uppercase px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md w-full xl:w-auto"
+            >
+              {copiedGiocatoriTotali ? (
+                <>
+                  <Check className="h-4 w-4" /> Giocatori Copiati! 🚀
+                </>
+              ) : (
+                <>
+                  <User className="h-4 w-4" /> Copia Punti Giocatori 📋
+                </>
+              )}
+            </button>
           )}
         </div>
 
         {/* Plain-text display area using elegant monospace alignment */}
         <pre className="bg-slate-900 border border-slate-850 rounded-xl p-4 text-[11px] leading-relaxed text-indigo-200 overflow-x-auto font-mono max-h-72 overflow-y-auto whitespace-pre-wrap select-all">
-          {exportType === "standard" ? socialExportText : exportType === "izycoin" ? izycoinExportText : punteggiExportText}
+          {exportType === "standard" ? socialExportText : exportType === "izycoin" ? izycoinExportText : exportType === "punteggi" ? punteggiExportText : exportType === "squadre_totali" ? squadreTotaliExportText : giocatoriTotaliExportText}
         </pre>
       </div>
 
